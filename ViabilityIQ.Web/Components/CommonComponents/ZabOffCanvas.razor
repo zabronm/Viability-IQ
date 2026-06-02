@@ -1,0 +1,25 @@
+﻿@if (IsOpen)
+{
+    @* <div class="offcanvas-backdrop fade show" @onclick="CloseAsync"></div> === THIS CLOSES FORM WHEN USER CLICKS OUTSIDE *@
+    <div class="offcanvas-backdrop fade show"></div>
+}
+
+<div class="offcanvas offcanvas-end @(IsOpen ? "show" : "")  data-bs-scroll="false" data-bs-backdrop="static"
+     tabindex="-1"
+     style="visibility: @(IsOpen ? "visible" : "hidden"); width:@dWidth;"
+     role="dialog">
+
+    <div class="offcanvas-header header-show zab-offcanvas-header">
+        <h5 class="offcanvas-title font-weight-bold text-dark">@HeaderTitle</h5>
+        <button type="button" class="btn-close text-reset" aria-label="Close" @onclick="CloseAsync"></button>
+    </div>
+
+    <div class="offcanvas-body mb-3">
+        <div class="p-1 shadow-sm p-3 soft-card" style="border-radius:14px; border: solid 0.5px #EBF4FA">
+        @if (IsOpen && ChildContent != null)
+        {
+            @ChildContent
+        }
+        </div>
+    </div>
+</div>

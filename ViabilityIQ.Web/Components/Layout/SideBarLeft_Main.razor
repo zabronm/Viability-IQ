@@ -1,0 +1,160 @@
+﻿@inject NavigationManager Navigation
+
+<div class="sidebar @(isCollapsed ? "collapsed" : "")" id="mainSidebar">
+    <div class="sidebar-header">
+        <div class="logo-area">
+            <i class="fas fa-chart-line logo-icon"></i>
+            <span class="logo-text">CPE<br><span style="font-size: 0.7rem; font-weight: 300;">Critical Planning</span></span>
+        </div>
+    </div>
+    <ul class="nav-menu">
+        @foreach (var item in GetMenuItems())
+        {
+            if (item.IsComposite)
+            {
+                <li class="nav-item">
+                    <div class="nav-link" @onclick="() => ToggleComposite(item.Id)">
+                        <i class="@item.Icon"></i>
+                        <span class="nav-label">@item.Label</span>
+                        <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.7rem; transform: @(IsCompositeOpen(item.Id) ? "rotate(180deg)" : "rotate(0deg)")"></i>
+                    </div>
+                    <div class="composite-item" style="display: @(IsCompositeOpen(item.Id) ? "flex" : "none")">
+                        @foreach (var child in item.Children)
+                        {
+                            <a class="sub-nav-link @(GetActiveClass(child.Id))"
+                               @onclick="() => NavigateTo(child.Id, child.Label)"
+                               @onclick:preventDefault="true">
+                                <i class="@child.Icon"></i>
+                                <span class="nav-label">@child.Label</span>
+                            </a>
+                        }
+                    </div>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item @(GetActiveClass(item.Id))">
+                    <a class="nav-link"
+                       @onclick="() => NavigateTo(item.Id, item.Label)"
+                       @onclick:preventDefault="true">
+                        <i class="@item.Icon"></i>
+                        <span class="nav-label">@item.Label</span>
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+    <div style="padding: 20px 16px 30px;">
+        <div class="nav-link" style="cursor: default; opacity: 0.7;">
+            <i class="fas fa-shield-alt"></i> <span class="nav-label">v2.0 · Secure</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isCollapsed = false;
+    private HashSet<string> openComposites = new() { "setup-global", "setup-assessment" };
+    private string currentLayout = "global";
+    private string activePageId = "dashboard";
+
+    [Parameter]
+    public EventCallback<string> OnNavigate { get; set; }
+
+    public void ToggleSidebar()
+    {
+        isCollapsed = !isCollapsed;
+    }
+
+    public void SetLayout(string layout)
+    {
+        currentLayout = layout;
+        // Reset active page when switching layouts
+        activePageId = currentLayout == "global" ? "dashboard" : "assess-dashboard";
+        StateHasChanged();
+    }
+
+    private List<NavMenuItem> GetMenuItems()
+    {
+        if (currentLayout == "global")
+        {
+            return new List<NavMenuItem>
+            {
+                new() { Id = "dashboard", Label = "Dashboards", Icon = "fas fa-tachometer-alt" },
+                new() { Id = "assessments", Label = "My Assessments", Icon = "fas fa-clipboard-list" },
+                new() { Id = "businesses", Label = "Businesses", Icon = "fas fa-building" },
+                new() { Id = "contacts", Label = "Client Contacts", Icon = "fas fa-user-friends" },
+                new() { Id = "notes", Label = "Notes", Icon = "fas fa-sticky-note" },
+                new()
+                {
+                    Id = "setup-global", Label = "Setup", Icon = "fas fa-cogs", IsComposite = true,
+                    Children = new List<NavMenuItem>
+                    {
+                        new() { Id = "setup-item1", Label = "Item 1", Icon = "fas fa-arrow-right" },
+                        new() { Id = "setup-item2", Label = "Item 2", Icon = "fas fa-arrow-right" },
+                        new() { Id = "setup-item3", Label = "Item 3", Icon = "fas fa-arrow-right" },
+                        new() { Id = "setup-item4", Label = "Item 4", Icon = "fas fa-arrow-right" },
+                        new() { Id = "setup-item5", Label = "Item 5", Icon = "fas fa-arrow-right" }
+                    }
+                }
+            };
+        }
+        else // assessment layout
+        {
+            return new List<NavMenuItem>
+            {
+                new() { Id = "assess-dashboard", Label = "Dashboards", Icon = "fas fa-chart-pie" },
+                new() { Id = "sales", Label = "Sales", Icon = "fas fa-chart-line" },
+                new() { Id = "assets-stock", Label = "Assets / Stock", Icon = "fas fa-boxes" },
+                new() { Id = "expenses", Label = "Expenses", Icon = "fas fa-receipt" },
+                new() { Id = "vat", Label = "VAT", Icon = "fas fa-percent" },
+                new()
+                {
+                    Id = "setup-assessment", Label = "Setup", Icon = "fas fa-sliders-h", IsComposite = true,
+                    Children = new List<NavMenuItem>
+                    {
+                        new() { Id = "assess-settings", Label = "Assessment Settings", Icon = "fas fa-gear" },
+                        new() { Id = "sales-cats", Label = "Sales Categories", Icon = "fas fa-tags" },
+                        new() { Id = "rates", Label = "Applicable Rates", Icon = "fas fa-charging-station" },
+                        new() { Id = "banks", Label = "Banks", Icon = "fas fa-university" },
+                        new() { Id = "loans", Label = "Loans", Icon = "fas fa-hand-holding-usd" },
+                        new() { Id = "assess-item1", Label = "Item 1", Icon = "fas fa-ellipsis-h" },
+                        new() { Id = "assess-item2", Label = "Item 2", Icon = "fas fa-ellipsis-h" },
+                        new() { Id = "assess-item3", Label = "Item 3", Icon = "fas fa-ellipsis-h" }
+                    }
+                }
+            };
+        }
+    }
+
+    private string GetActiveClass(string pageId)
+    {
+        return activePageId == pageId ? "active" : "";
+    }
+
+    private void ToggleComposite(string compositeId)
+    {
+        if (openComposites.Contains(compositeId))
+            openComposites.Remove(compositeId);
+        else
+            openComposites.Add(compositeId);
+    }
+
+    private bool IsCompositeOpen(string compositeId) => openComposites.Contains(compositeId);
+
+    private async Task NavigateTo(string pageId, string title)
+    {
+        activePageId = pageId;
+        await OnNavigate.InvokeAsync(pageId);
+        // Optional: Navigate to actual Blazor page if you have routes set up
+        // Navigation.NavigateTo($"/{pageId}");
+    }
+
+    public class NavMenuItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public bool IsComposite { get; set; }
+        public List<NavMenuItem> Children { get; set; } = new();
+    }
+}

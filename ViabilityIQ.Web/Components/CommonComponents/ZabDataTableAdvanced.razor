@@ -1,0 +1,247 @@
+﻿@typeparam TItem
+
+<div class="datatable-modern-shell">
+
+    @if (IsLoading)
+    {
+        <div class="datatable-loading-overlay">
+            <div class="spinner-container">
+                <div class="sleek-spinner"></div>
+                <p class="loading-text">Processing Workspace Dataset...</p>
+            </div>
+        </div>
+    }
+
+    <div class="table-toolbar-matrix">
+        @if (ShowAdd)
+        {
+            <button class="btn btn-primary" @onclick="OnAddClick">
+                <i class="bi bi-plus-lg me-2"></i>Add @ItemName
+            </button>
+        }
+        else
+        {
+            <div></div>
+        }
+
+        <div class="toolbar-right-engine">
+            @* <div class="print-addon-wrapper">
+                <button class="btn-toolbar-utility" @onclick="OnAddClick">
+                    <i class="bi bi-printer-fill"></i>
+                </button>
+            </div> *@
+            <div class="toolbar-right-engine">
+                <div class="print-addon-wrapper dropdown">
+                    <button class="btn-toolbar-utility dropdown-toggle" type="button" id="gridUtilityMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Export / Output Operations">
+                        <i class="bi bi-printer-fill"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-custom shadow-sm" aria-labelledby="gridUtilityMenu" style="font-size: 0.85rem;">
+                        <li>
+                            <button class="dropdown-item py-2" type="button" @onclick="HandlePrintTriggerAsync" disabled="@(!Items.Any())">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Export to PDF
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item py-2" type="button" @onclick="HandleExcelExportTriggerAsync" disabled="@(!Items.Any())">
+                                <i class="bi bi-file-earmark-excel-fill text-success me-2"></i>Export to MS Excel
+                            </button>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <button class="dropdown-item py-2" type="button" @onclick="HandleEmailTriggerAsync" disabled="@(!Items.Any())">
+                                <i class="bi bi-envelope-fill text-primary me-2"></i>Send on Email
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                @* <div class="search-input-wrapper"> ... </div> *@
+                <div class="search-input-wrapper">
+                    <input type="text"
+                           class="form-control-search"
+                           placeholder="Search entries..."
+                           @bind="searchText"
+                           @bind:event="oninput" />
+                    <i class="bi bi-search search-inside-icon"></i>
+                </div>
+            </div>
+            
+        </div>
+    </div> @* FIX: Changed from accidental } to closing div tag *@
+
+    <div class="table-scroll-container">
+        <table class="table-modern-core table-sm">
+            <thead>
+                <tr>
+                    @foreach (var c in Columns)
+                    {
+                        <th class="@(GetSortClass(c)) table-header-interactive" @onclick="() => Sort(c)">
+                            <div class="header-cell-content">
+                                @c.Title
+                                <span class="sort-indicator-slot"></span>
+                            </div>
+                        </th>
+                    }
+                    <th class="text-center action-header-cell">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!PagedItems.Any())
+                {
+                    <tr class="py-1">
+                        <td colspan="@(Columns.Count + 1)" class="table-empty-state-row">
+                            <i class="bi bi-file-earmark-spreadsheet d-block mb-2 empty-icon"></i>
+                            No records matched your search filters.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var row in PagedItems)
+                    {
+                        <tr class="table-body-row py-1 @(IsRowClickable ? "row-interactive" : "")"
+                            @onclick="async () => { if (IsRowClickable) await HandleRowClick(row); }">
+
+                            @foreach (var c in Columns)
+                            {
+                                <td class="@(ResolveCssClass(c, row)) table-cell-data @(c.IsClickable ? "cell-interactive" : "")"
+                                    @onclick="async (e) => { if (c.IsClickable && c.OnClick != null) { await HandleLinkClick(c, row); } }"
+                                    @onclick:stopPropagation="c.IsClickable">
+
+                                    @if (c.IsLink)
+                                    {
+                                        <a href=""
+                                           @onclick:preventDefault="true"
+                                           @onclick:stopPropagation="true"
+                                           @onclick="async () => await HandleLinkClick(c, row)"
+                                           class="cell-anchor-link">
+                                            @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                            {
+                                                <i class="@c.IconCss me-1.5"></i>
+                                            }
+                                            @if (!c.IconOnly)
+                                            {
+                                                @FormatCellValue(c, row)
+                                            }
+                                        </a>
+                                    }
+                                    else if (c.UseBadge)
+                                    {
+                                        <span class="status-badge-token @(c.BadgeClass?.Invoke(row))">
+                                            @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                            {
+                                                <i class="@c.IconCss me-1"></i>
+                                            }
+                                            @if (!c.IconOnly)
+                                            {
+                                                @FormatCellValue(c, row)
+                                            }
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                        {
+                                            <i class="@c.IconCss me-1.5 structural-cell-icon"></i>
+                                        }
+                                        @if (!c.IconOnly)
+                                        {
+                                            @FormatCellValue(c, row)
+                                        }
+                                    }
+                                </td>
+                            }
+
+                            <td class="text-center action-button-cell-matrix" @onclick:stopPropagation="true">
+
+                                @if (ShowSecondaryAction && GetRowId != null)
+                                {
+                                    <button class="btn-action-operation btn-secondary-accent"
+                                            @onclick="() => OnSecondaryActionClick(GetRowId(row))"
+                                            title="@SecondaryActionTitle">
+                                        <i class="@SecondaryActionIcon"></i>
+                                    </button>
+                                }
+
+                                <button class="btn-action-operation btn-edit-accent"
+                                        disabled="@(GetRowId?.Invoke(row) == null)"
+                                        @onclick="() => OnEditClick(GetRowId!(row))"
+                                        title="Modify Record">
+                                    <i class="bi bi-pen-fill text-black"></i>
+                                </button>
+
+                                @if (ShowDelete)
+                                {
+                                    <button class="btn-action-operation btn-delete-accent"
+                                            @onclick="() => ConfirmDelete(row)"
+                                            title="Remove Record">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-pagination-footer">
+        <div class="pagination-summary-text">
+            @if (FilteredItems.Any())
+            {
+                <span>Showing </span>
+                <span class="accent-bold">@StartRecordIndex - @EndRecordIndex</span>
+                <span> of </span>
+                <span class="accent-bold">@FilteredItems.Count()</span>
+                <span> entries</span>
+            }
+            else
+            {
+                <span>Showing <span class="accent-bold">0</span> entries</span>
+            }
+        </div>
+
+        <div class="pagination-control-buttons">
+            <button class="btn-pagination-nav"
+                    @onclick="PrevPage"
+                    @onclick:stopPropagation="true"
+                    disabled="@(currentPage == 1)">
+                <i class="bi bi-chevron-left"></i> Previous
+            </button>
+
+            <button class="btn-pagination-nav"
+                    @onclick="NextPage"
+                    @onclick:stopPropagation="true"
+                    disabled="@(currentPage == totalPages)">
+                Next <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    @* <div class="table-pagination-footer">
+        <div class="pagination-summary-text">
+            Showing Page <span class="accent-bold">@currentPage</span> of <span class="accent-bold">@totalPages</span> entries
+        </div>
+
+        <div class="pagination-control-buttons">
+            <button class="btn-pagination-nav"
+                    @onclick="PrevPage"
+                    @onclick:stopPropagation="true"
+                    disabled="@(currentPage == 1)">
+                <i class="bi bi-chevron-left"></i> Previous
+            </button>
+
+            <button class="btn-pagination-nav"
+                    @onclick="NextPage"
+                    @onclick:stopPropagation="true"
+                    disabled="@(currentPage == totalPages)">
+                Next <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div> *@
+
+</div>

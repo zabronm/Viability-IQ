@@ -1,0 +1,254 @@
+﻿@page "/farmers"
+@using BrucolWeb.Application.Services
+@using BrucolWeb.Web.Components.Common
+@using BrucolWeb.Application.DTOs.Farmers
+@using BrucolWeb.Domain.Enums
+
+@inject NavigationManager Nav0
+@inject IToastService _Toast
+
+@if (isLoading)
+{
+    <LoadingComponent />
+}
+else
+{
+<PageHeading _pageTitle="Farmers" _pageHeading="Farmers" />
+<main class="mt-3 shadow-sm p-3 soft-card rounded-5 mb-2" style="border-radius: 30px;">
+    <div>
+        <ZabDataTable TItem="FarmerListDTO"
+                      Items="farmers"
+                      Columns="columns"
+                      OnEdit="@(farmer => EditFarmer(farmer))"
+                      OnAdd="CreateFarmer"
+                      OnDelete="DeleteFarmer"
+                      ShowDelete="false" />
+    </div>
+</main>
+
+<div class="mt-10" style="margin-top:50px;">
+    <BFooter />
+</div>
+
+}
+
+
+<!-- 🔹 Offcanvas goes HERE (bottom of page) -->
+<ZabOffCanvas @ref="offcanvas"
+              dWidth="760px"
+              Id="farmerPanel"
+              Title="@offcanvasTitle">
+
+    @* <CompanyDetails Model="_model" OnSave="SaveCompany" /> *@
+    @if (isLoading)
+    { }
+    else
+    {
+    <div style="position: relative;">
+
+        @if (isSaving)
+        {
+            <div class="loading-overlay">
+                <div class="spinner-border text-primary"></div>
+            </div>
+        }
+        @if (_model != null)
+        {
+            <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+
+                <div class="row">
+
+                    <!-- ========================================= -->
+                    <!-- LEFT COLUMN -->
+                    <!-- ========================================= -->
+
+                    <div class="col-md-6 pe-md-3">
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Name/s</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.FullName" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Category</label>
+                            <div class="col-8">
+                                <ZabDropDownFilter TValue="long"
+                                                   LookupType="FarmerTypes"
+                                                   @bind-Value="_model.FarmerTypeId" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Gender</label>
+                            <div class="col-8">
+                                <ZabDropDownFilter TValue="long"
+                                                   LookupType="Genders"
+                                                   @bind-Value="_model.GenderId" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Race</label>
+                            <div class="col-8">
+                                <ZabDropDownFilter TValue="long"
+                                                   LookupType="Races"
+                                                   @bind-Value="_model.RaceId" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">ID NO.</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.IDNumber" />
+                            </div>
+                        </div>
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Telephone</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Telephone" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Mobile</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Mobile" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Email</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Email" />
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ========================================= -->
+                    <!-- RIGHT COLUMN -->
+                    <!-- ========================================= -->
+
+                    <div class="col-md-6 ps-md-3">
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Street/No</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Address_Street" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Suburb</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Address_Surburb" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Town</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Address_CityTown" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">PO Add.</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Address_Postal" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">PO Town</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Address_PostalLocation" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">PO Code</label>
+                            <div class="col-8">
+                                <InputText class="form-control"
+                                           @bind-Value="_model.Address_PostalCode" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Province</label>
+                            <div class="col-8">
+                                <ZabDropDownFilter TValue="long"
+                                                   LookupType="Provinces"
+                                                   @bind-Value="_model.ProvinceId" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-4 col-form-label">Active ?</label>
+                            <div class="col-8 form-switch pt-2 ps-5">
+                                &nbsp;<InputCheckbox class="form-check-input"
+                                               @bind-Value="_model.Active" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REMARKS -->
+                <!-- ========================================= -->
+                <div class="row mb-2 align-items-center">
+                    <label class="col-2 col-form-label">Remarks</label>
+                    <div class="col-10 mt-2">
+                        <InputTextArea class="form-control"
+                                       @bind-Value="_model.Remarks"
+                                       rows="3" />
+                    </div>
+                </div>
+
+
+                <!-- BUTTON -->
+                <!-- ========================================= -->
+
+                <div class="d-flex justify-content-end mt-2 py-2">
+
+                    <button class="btn btn-primary w-50 py-2"
+                            disabled="@isSaving">
+
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2">
+                            </span>
+
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check-circle me-1"></i>
+
+                            <span>@ButtonMessage</span>
+                        }
+
+                    </button>
+
+                </div>
+
+            </EditForm>
+        }
+    </div>
+
+    }
+
+</ZabOffCanvas>

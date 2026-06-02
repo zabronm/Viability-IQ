@@ -1,0 +1,34 @@
+﻿
+<div class="offcanvas offcanvas-end" data-bs-scroll="false" data-bs-backdrop="static" style="width: @dWidth;"
+     tabindex="-1"
+     id="@Id">
+
+    <!-- HEADER />
+        <div class="offcanvas-header header-shadow zab-offcanvas-header">
+            <h5 class="offcanvas-title text-truncate">
+                @Title
+            </h5>
+            <button type="button" class="btn-close"
+                @onclick="Close">
+            </button>
+        </div>
+
+        <!-- BODY-- />
+        <div class="offcanvas-body zab-off-canvas-body">
+             <div class="p-1 shadow-sm p-3 soft-card" style="border-radius:25px; border: solid 0.5px #EBF4FA" >
+                @if (ChildContent != null)
+                {
+                   @ChildContent
+                }
+            </div>
+        </div>
+
+        <!-- FOOTER />
+        <div class="zab-canvas-footer">
+            @if (FooterContent != null)
+            {
+              @FooterContent
+            }
+        </div>
+    </div>
+

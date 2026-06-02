@@ -1,0 +1,134 @@
+﻿
+<div class="upload-container mt-1 pt-1">
+
+    <!-- HEADER -->
+    <div class="upload-header fs-5 mt-0 text-secondary">
+        <i class="bi bi-cloud-arrow-up-fill"></i>
+        <span>
+            Upload Application Document
+        </span>
+    </div>
+
+    <!-- DOCUMENT NAME -->
+    <div class="mb-2 py-0">
+        <label class="form-label py-0 my-0">
+            Document Title
+        </label>
+        <input class="form-control" value="@SelectedDocument?.DocumentName" disabled />
+    </div>
+
+    <!-- UPLOAD AREA -->
+    <div class="row align-items-center g-1 my-1">
+
+        <!-- LEFT -->
+        <!-- UPLOAD BUTTON -->
+
+        <div class="col-md-3 d-flex justify-content-center">
+            <label class="btn btn-primary upload-btn-large" style="cursor: pointer;">
+                <InputFile id="fileDropInput" OnChange="LoadFiles" multiple="false" class="d-none" />
+                <i class="bi bi-upload fs-2"></i>
+                <div class="mt-2">Upload File</div>
+            </label>
+        </div>
+
+        <div class="col-md-9">
+            <div id="dropZone"
+                 class="drop-zone @(isDragActive ? "drag-active" : "")"
+                 @ondragenter="HandleDragEnter"
+                 @ondragleave="HandleDragLeave"
+                 @ondragover:preventDefault
+                 @ondragover="HandleDragOver"
+                 @ondrop:preventDefault
+                 @ondrop="HandleDrop">
+
+                <div class="drop-content">
+                    <i class="bi bi-cloud-upload display-5 text-info"></i>
+                    <div class="mt-3 fw-bold">Select or drag file here to upload</div>
+                    <div class="small text-muted">Supported: PDF, Word, Excel, Images</div>
+                    <div class="small text-muted">Maximum file size: 20MB</div>
+
+                    @if (selectedFile != null)
+                    {
+                        <div class="selected-file mt-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="@FileIcon fs-2"></i>
+                                    <div class="ms-3 text-start">
+                                        <div class="fw-semibold">@selectedFile.Name</div>
+                                        <small class="text-muted">@FileSizeDisplay</small>
+                                    </div>
+                                </div>
+                                <span class="file-badge">@FileBadge</span>
+                            </div>
+
+                            @if (duplicateDetected)
+                            {
+                                <div class="alert alert-warning mt-3 py-2">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <span class="ms-2">Existing document will be replaced.</span>
+                                </div>
+                            }
+
+                            @if (isProcessing)
+                            {
+                                <div class="progress mt-3" style="height:10px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                    role="progressbar" 
+                                    style="width:@($"{uploadProgress}%")"></div>
+                                </div>
+                            }
+
+                            @if (uploadCompleted)
+                            {
+                                <div class="upload-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Upload Complete</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- REMARKS -->
+
+    <div class="mt-3 py-0">
+        <label class="form-label py-0 my-0">
+            Remarks
+        </label>
+        <InputTextArea class="form-control" @bind-Value="comments" rows="3" />
+    </div>
+
+
+    <!-- BUTTONS -->
+
+    <div class="d-flex  justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-light" @onclick="ClosePanel">
+            Cancel
+        </button>
+
+        <button type="button" class="btn btn-primary px-4" @onclick="SaveDocument" disabled="@(selectedFile == null || isProcessing)">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+                <span class="ms-2">
+                    Saving...
+                </span>
+            }
+            else
+            {
+                <i class="bi bi-save"></i>
+                <span class="ms-2">
+                    Save Document
+                </span>
+            }
+        </button>
+
+    </div>
+
+
+</div>

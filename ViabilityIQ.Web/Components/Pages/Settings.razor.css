@@ -1,0 +1,205 @@
+﻿body {
+    /* ==========================================================================
+       Settings Component Theme Extensions
+       ========================================================================== */
+}
+
+.settings-section-card {
+    background-color: #f8fafc; /* Theme off-blue/whitish background color matching main layout container */
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    height: 100%;
+}
+
+.security-card-wrapper {
+    background-color: #ffffff; /* Contrast layout shift for panel column separation */
+    border-left: 4px solid #E5E4E2; /* Highlight accent strip on column edge */
+}
+
+.settings-section-title {
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+}
+
+.title-icon {
+    color: #000099; /* Layout corporate signature deep blue */
+}
+
+    .title-icon.security-icon {
+        color: #344054; /* Polished dark marble secondary focus */
+    }
+
+/* System Layout Configuration Grid (3 Columns) */
+.settings-grid-3x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* Security Layout Configuration Grid (1 Column Stacked) */
+.settings-grid-1x1 {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Main Settings Interactive Card Elements */
+.settings-icon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    text-decoration: none;
+    color: inherit;
+    box-sizing: border-box;
+    /* Smooth multi-variable transitions matching your layout properties */
+    transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+}
+
+    /* Row Layout modifier specifically tuned for Single Column Stacked Security list items */
+    .settings-icon-card.row-layout {
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 14px;
+        background-color: #f8fafc;
+    }
+
+    /* Link Hover & Focus State Engine Transitions */
+    .settings-icon-card:hover {
+        background-color: #f2f4f7; /* Soft light marble background hover */
+        border-color: #151B54;
+        transform: translateY(-2px); /* Sleek micro lift effect */
+        /* Core deep layout blue shadow style signature glow token */
+        box-shadow: 0 8px 24px rgba(0, 0, 153, 0.08);
+    }
+
+/* Faint Avatar Circle Background System for Icons */
+.settings-icon-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 153, 0.06); /* Very faint layout theme blue background */
+    color: #000099;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+    /* Color Modifier variation for Security items layout icon avatars */
+    .settings-icon-avatar.alt-avatar {
+        background-color: rgba(52, 64, 84, 0.06); /* Faint slate/marble circle */
+        color: #344054;
+        margin-bottom: 0; /* Align perfectly inline inside horizontal rows */
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 1.05rem;
+    }
+
+/* Interactive Icon response animations inside cards */
+.settings-icon-card:hover .settings-icon-avatar {
+    background-color: #000099;
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+    .settings-icon-card:hover .settings-icon-avatar.alt-avatar {
+        background-color: #344054;
+        color: #ffffff;
+    }
+
+/* Narration Text Content Structures */
+.settings-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.settings-card-label {
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+    transition: color 0.2s ease;
+}
+
+.settings-icon-card:hover .settings-card-label {
+    color: #000099; /* Text shifts nicely on hover */
+}
+
+.settings-icon-card.row-layout:hover .settings-card-label {
+    color: #344054; /* Security shifts into custom dark marble color on focus */
+}
+
+.settings-card-narration-prv {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Responsive fallbacks for lower desktop layouts */
+@media (max-width: 1199px) {
+    .settings-grid-3x3 {
+        grid-template-columns: repeat(2, 1fr); /* Drop to 2 per row smoothly if space restricts */
+    }
+}
+
+
+/* ==========================================================================
+   HIGH-DENSITY WORKSPACE GRID OPTIMIZATIONS
+   ========================================================================== */
+
+/* 1. Implements 4-column tracks for the System Settings container layout */
+.settings-grid-4x4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+/* 2. Forces descriptions to clean, uniform 2-line clamping bounds */
+.settings-card-narration {
+    font-size: 0.78rem;
+    color: #6c757d;
+    margin: 4px 0 0 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT RESPONSES
+   ========================================================================== */
+
+@media (max-width: 1400px) {
+    .settings-grid-4x4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-grid-4x4 {
+        grid-template-columns: 1fr;
+    }
+}

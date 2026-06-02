@@ -1,0 +1,20 @@
+﻿@typeparam TValue
+
+<InputSelect class="form-select" @bind-Value="value">
+    <option value="" selected hidden disabled>@Placeholder</option>
+
+    @if (Items != null)
+    {
+        @foreach (var item in Items)
+        {
+              <option value="@item.ItemId">@item.Description</option>                
+        }
+    }
+</InputSelect>
+
+@if (isLoading)
+{
+    <small class="text-muted">Loading ...</small>    
+}
+
+    

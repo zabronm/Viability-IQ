@@ -1,0 +1,155 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="clientModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
+        
+        <div class="mb-3">
+            <label for="clientName" class="form-label-custom">Client Name<span class="text-danger">*</span></label>
+            <InputText id="clientName" class="form-control-compact" @bind-Value="clientModel.ClientName" />
+            <ValidationMessage For="@(() => clientModel.ClientName)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3">
+            <label for="idNumber" class="form-label-custom">ID Nummber<span class="text-danger">*</span></label>
+            <InputText id="idNumber" class="form-control-compact" @bind-Value="clientModel.IDNumber" />
+            <ValidationMessage For="@(() => clientModel.IDNumber)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3">
+            <label for="gender" class="form-label-custom">Gender<span class="text-danger">*</span></label>
+            <DDLookupComponent id="gender" SourceKey="DDLookupEnums.ProductServiceCategories"                                   
+                                   @bind-Value="clientModel.Gender" />
+                <ValidationMessage For="() => clientModel.Gender" class="text-danger small" />
+           
+        </div>
+
+        <div class="mb-3">
+            <label for="race" class="form-label-custom">Race<span class="text-danger">*</span></label>
+            <DDLookupComponent id="race" SourceKey="DDLookupEnums.ProductServiceCategories"
+                               @bind-Value="clientModel.Race" />
+            <ValidationMessage For="() => clientModel.Gender" class="text-danger small" />
+        </div>
+
+
+        <div class="mb-3">
+            <label for="street" class="form-label-custom">Street Address <span class="text-danger">*</span></label>
+            <InputNumber id="street" class="form-control-compact" @bind-Value="clientModel.Street_Address" />
+            <ValidationMessage For="@(() => clientModel.Street_Address)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3">
+            <label for="area" class="form-label-custom">Suburb <span class="text-danger">*</span></label>
+            <InputNumber id="area" class="form-control-compact" @bind-Value="clientModel.Suburb" />
+            <ValidationMessage For="@(() => clientModel.Suburb)" class="text-danger small mt-1" />
+        </div>
+
+
+        <div class="mb-3">
+            <label for="city" class="form-label-custom">City/Town<span class="text-danger">*</span></label>
+            <InputNumber id="city" class="form-control-compact" @bind-Value="clientModel.CityTown" />
+            <ValidationMessage For="@(() => clientModel.CityTown)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3">
+            <label for="province" class="form-label-custom">Province<span class="text-danger">*</span></label>
+            <DDLookupComponent id="province" SourceKey="DDLookupEnums.Provinces"
+                               @bind-Value="clientModel.ProvinceId" />
+            <ValidationMessage For="() => clientModel.ProvinceId" class="text-danger small" />
+        </div>
+
+
+        <div class="mb-3">
+            <label for="postAddr" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
+            <InputNumber id="postAddr" class="form-control-compact" @bind-Value="clientModel.Postal_Address" />
+            <ValidationMessage For="@(() => clientModel.Postal_Address)" class="text-danger small mt-1" />
+        </div>
+
+
+           <div class="mb-3">
+            <label for="postLoc" class="form-label-custom">Post Location <span class="text-danger">*</span></label>
+            <InputNumber id="postLoc" class="form-control-compact" @bind-Value="clientModel.Postal_City" />
+            <ValidationMessage For="@(() => clientModel.Postal_City)" class="text-danger small mt-1" />
+        </div>
+
+
+        <div class="mb-3">
+            <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
+            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.PostalCode" />
+            <ValidationMessage For="@(() => clientModel.PostalCode)" class="text-danger small mt-1" />
+        </div>
+
+        
+        <div class="mb-3">
+            <label for="postCode" class="form-label-custom">Telephone <span class="text-danger">*</span></label>
+            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.Telephone" />
+            <ValidationMessage For="@(() => clientModel.Telephone)" class="text-danger small mt-1" />
+        </div>
+
+
+        <div class="mb-3">
+            <label for="postCode" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
+            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.Mobile" />
+            <ValidationMessage For="@(() => clientModel.Mobile)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3">
+            <label for="postCode" class="form-label-custom">Email<span class="text-danger">*</span></label>
+            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.Email" />
+            <ValidationMessage For="@(() => clientModel.Email)" class="text-danger small mt-1" />
+        </div>
+
+
+
+        <div class="mb-3">
+            <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
+            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.PostalCode" />
+            <ValidationMessage For="@(() => clientModel.PostalCode)" class="text-danger small mt-1" />
+        </div>
+
+
+        <div class="mb-4">
+            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="clientModel.Remarks" />
+            <ValidationMessage For="@(() => clientModel.Remarks)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3 d-flex align-items-center justify-content-start ">
+            <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
+                @(isRowActive ? "Product Active" : "Product Not-Active")
+            </label>
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center col-2">
+                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(ProductServiceId == 0 ? "Add Product/Service" : "Update Product/Service")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

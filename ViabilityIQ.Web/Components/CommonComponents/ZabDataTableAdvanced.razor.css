@@ -1,0 +1,411 @@
+﻿
+/* ==========================================================================
+               ZabDataTableAdvanced - Modernized Architecture Scoped Stylesheet
+               ========================================================================== */
+/* --- Main Layout Frame Wrapper Shell --- */
+.datatable-modern-shell {
+    width: 100%;
+    background-color: transparent;
+    font-family: "arial", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* --- Dynamic Upper Toolbar Engine Matrix --- */
+.table-toolbar-matrix {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 16px;
+}
+
+.dropdown-custom {
+    background-color: #99A3A3  !important;
+    color: #000000 !important;
+    border-radius: 8px !important;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+    .dropdown-custom:hover {
+        background-color: #C0C0C0 !important;
+        color: #ffffff;
+    }
+
+
+    .toolbar-right-engine {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+/* --- Fluent Design Control Buttons --- */
+.btn-action-add {
+    background-color: #0d6efd;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, transform 0.1s ease;
+}
+
+    .btn-action-add:hover {
+        background-color: #0b5ed7;
+    }
+
+    .btn-action-add:active {
+        transform: scale(0.98);
+    }
+
+.btn-toolbar-utility {
+    background-color: #ffffff;
+    color: #495057;
+    border: 1px solid #ffffff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+    .btn-toolbar-utility:hover {
+        border: 1px solid #dee2e6;
+        background-color: #e9ecef;
+        color: #212529;
+        border-color: #ced4da;
+    }
+
+/* --- Embedded Vector Search Box Field Layout --- */
+.search-input-wrapper {
+    position: relative;
+    width: 260px;
+}
+
+.form-control-search {
+    width: 100%;
+    padding: 8px 38px 8px 14px;
+    font-size: 0.88rem;
+    color: #212529;
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+    .form-control-search:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+.search-inside-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+/* --- High Performance Data Scroll Grid View Container --- */
+.table-scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.table-modern-core {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+    /* --- Clean Professional Matrix Column Headers --- */
+    .table-modern-core thead th {
+        background-color: #E0E5E5;
+        color: #495057;
+        font-weight: 600;
+        padding: 6px 16px;
+        border-bottom: 2px solid #dee2e6;
+        user-select: none;
+    }
+
+.table-header-interactive {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+    .table-header-interactive:hover {
+        background-color: #e9ecef;
+        color: #212529;
+    }
+
+.header-cell-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-header-cell {
+    width: 110px;
+    background-color: #E0E5E5 !important;
+    cursor: default !important;
+}
+
+/* --- Core Row Nodes & Grid Data Columns --- */
+.table-body-row {
+    background-color: #ffffff;
+    transition: background-color 0.1s ease;
+}
+
+.row-interactive {
+    cursor: pointer;
+}
+
+.table-body-row:hover {
+    background-color: #f8f9fa;
+}
+
+.table-modern-core tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-cell-data {
+    padding: 4px 12px !important; /* Tightened top/bottom vertical footprint */
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+    color: #212529;
+    font-size: 0.9rem; /* Marginally downscaled for high-density symmetry */
+    line-height: 1.25; /* Shorter text bounding box */
+}
+
+/* --- Specialized Component Subtypes --- */
+.cell-interactive {
+    font-weight: 500;
+}
+
+.cell-anchor-link {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+    .cell-anchor-link:hover {
+        text-decoration: underline;
+        color: #0a58ca;
+    }
+
+.structural-cell-icon {
+    color: #6c757d;
+}
+
+/* --- Unified Master Data Status Badges Token System --- */
+.status-badge-token {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: normal;
+    display: inline-inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+/* Dynamic runtime lookup configuration targets */
+.badge-approved {
+    background-color: #2E8B57;
+    color: #ffffff;
+}
+
+.badge-pending {
+    background-color: #7C9D8E;
+    color: #ffffff;
+}
+
+.badge-rejected {
+    background-color: #FFFF33;
+    color: #000000;
+}
+
+/* --- Inline CRUD Actions Structural Alignment Matrix --- */
+.action-button-cell-matrix {
+    padding: 4px 16px !important; /* Synchronized padding match */
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.btn-action-operation {
+    width: 26px; /* Down from 32px */
+    height: 24px; /* Down from 32px to clear the cell height restriction */
+    padding: 0;
+    font-size: 0.82rem; /* Crisp, readable scale for the vector glyph icons */
+    border: 1px solid transparent;
+    border-radius: 4px; /* Proportionally tighter corner radiuses */
+    display: inline-inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: transparent;
+    transition: all 0.15s ease;
+    margin: 0 2px;
+}
+
+.btn-edit-accent {
+    color: #0d6efd;
+}
+
+    .btn-edit-accent:hover:not(:disabled) {
+        background-color: #eaf2ff;
+        border-color: #b6d4fe;
+    }
+
+.btn-delete-accent {
+    color: #dc3545;
+}
+
+    .btn-delete-accent:hover:not(:disabled) {
+        background-color: #fdf2f4;
+        border-color: #f8d7da;
+    }
+
+.btn-action-operation:disabled {
+    color: #adb5bd;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* --- Empty Grid Query State Layout --- */
+.table-empty-state-row {
+    padding: 48px 16px !important;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.95rem;
+    background-color: #fafafa;
+}
+
+.empty-icon {
+    font-size: 2.2rem;
+    color: #ced4da;
+}
+
+/* --- Structural Fluid Layout Grid Pagination Footer --- */
+.table-pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding: 4px 0;
+}
+
+.pagination-summary-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.accent-bold {
+    font-weight: 600;
+    color: #212529;
+}
+
+.pagination-control-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-pagination-nav {
+    background-color: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+    .btn-pagination-nav:hover:not(:disabled) {
+        background-color: #f8f9fa;
+        border-color: #c1c9d0;
+    }
+
+    .btn-pagination-nav:disabled {
+        background-color: #f8f9fa;
+        color: #adb5bd;
+        border-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+/* --- Loading Animation Overlay Container --- */
+.datatable-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+.spinner-container {
+    text-align: center;
+}
+
+.sleek-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0d6efd;
+    border-radius: 50%;
+    animation: spin-matrix 0.85s linear infinite;
+    margin: 0 auto 12px auto;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.btn-secondary-accent {
+    color: #198754; /* Forest green theme accent for workflow processing nodes */
+}
+
+    .btn-secondary-accent:hover:not(:disabled) {
+        background-color: #e8f5e9;
+        border-color: #a3cfbb;
+    }
+
+@keyframes spin-matrix {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+

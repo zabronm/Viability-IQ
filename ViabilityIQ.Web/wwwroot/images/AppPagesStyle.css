@@ -1,0 +1,392 @@
+﻿body {
+}
+
+/* Fill available workspace fully */
+.app-workspace-shell {
+    padding: 0;
+    width: 100%;
+    max-width: none;
+}
+
+/* Wider left pane, narrower right pane */
+.workspace-grid {
+    display: grid;
+    grid-template-columns: 10fr 2fr; /* reduced right by ~2 grid points */
+    gap: 18px;
+    align-items: start;
+    width: 100%;
+}
+
+/* Left section with soft border shadow */
+.left-pane-shadow {
+    padding-right: 18px;
+    border-right: 1px solid #e8edf5;
+    box-shadow: 12px 0 18px -16px rgba(0,0,0,.18);
+}
+
+.work-center,
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Slightly narrower right */
+.right-panel {
+    min-width: 260px;
+    max-width: 280px;
+}
+
+.work-card,
+.side-card {
+    background: white;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+/* Right panel cards slightly tighter */
+.right-panel .side-card {
+    padding: 16px 18px; /* reduced from 22px */
+}
+
+
+/* Right card headings */
+.right-panel .card-title {
+    font-size: .98rem; /* reduced */
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+
+.hero-card {
+    min-height: 240px;
+}
+
+/* Brighter, bolder headers */
+.card-title {
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: .2px;
+    margin-bottom: 14px;
+}
+
+.placeholder-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+    .placeholder-tabs button {
+        border: none;
+        border-radius: 14px;
+        padding: 10px 14px;
+        background: #eef4ff;
+        font-weight: 700;
+    }
+
+.doc-placeholder {
+    border: 2px dashed #cbd5e1;
+    padding: 30px;
+    border-radius: 16px;
+    color: #64748b;
+}
+
+
+
+/* Applicant snapshot + checklist rows */
+.snapshot-list li,
+.check-list li {
+    padding: 7px 0; /* reduced from 10px */
+    font-size: .88rem; /* smaller */
+    line-height: 1.25; /* tighter */
+    color: #334155;
+}
+
+/* Field labels like Name, Farm, Province */
+.snapshot-list span {
+    font-size: .84rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #64748b;
+    margin-right: 8px;
+}
+
+
+.snapshot-list,
+.check-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .snapshot-list li,
+    .check-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid #eef2f7;
+        color: #334155;
+    }
+
+    .snapshot-list span {
+        font-weight: 700;
+        color: #64748b;
+        margin-right: 8px;
+    }
+
+
+/* Quick metric boxes */
+.metric-box {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 9px 11px; /* reduced */
+    margin-top: 8px;
+    font-size: .86rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #334155;
+}
+
+
+/* only stack on true small screens */
+@media(max-width:700px) {
+    .workspace-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .right-panel {
+        max-width: none;
+    }
+
+    .left-pane-shadow {
+        border-right: none;
+        box-shadow: none;
+        padding-right: 0;
+    }
+}
+
+.file-no {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.file-no-courier {
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: #eef4ff;
+    color: #0020C2;
+    font-weight: 700;
+}
+
+.file-no-mono {
+    font-size: 1.1rem;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: #eef4ff;
+    color: #0000A0;
+    font-weight: 700;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: .5px;
+}
+
+
+.dossier-panel {
+    background: white;
+    border-radius: 22px;
+    padding: 18px 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+
+
+
+/* section separators */
+.dossier-section {
+    padding: 14px 0;
+    border-bottom: none;
+}
+
+    .dossier-section:last-child {
+        border-bottom: none;
+    }
+
+
+
+/* section title */
+.dossier-header {
+    width: 100%;
+    /* display: inline-block;*/
+    /*padding: 1px 14px;*/
+    /* border-radius: 14px;*/
+    padding-bottom: 4px;
+    color: #616D7E; /* off-white */
+    font-size: .90rem;
+    font-weight: 800;
+    letter-spacing: .3px;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #003366;
+    /*box-shadow: 0 2px 8px rgba(0,0,0,.08);*/
+}
+
+
+/* data rows */
+.dossier-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: .86rem;
+    line-height: 1.2;
+}
+
+    .dossier-row span {
+        color: #64748b;
+        font-weight: 400;
+    }
+
+    .dossier-row strong {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+
+/* metric pills */
+.metric-pill {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: .84rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+/* status chip container */
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+
+/* tiny dot */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+/* DONE (green) */
+.status-chip.done {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+    .status-chip.done .status-dot {
+        background: #10b981;
+    }
+
+
+/* PENDING (amber) */
+.status-chip.pending {
+    background: #fff7ed;
+    color: #b45309;
+}
+
+    .status-chip.pending .status-dot {
+        background: #f59e0b;
+    }
+
+
+/* MISSING / problem (red) */
+.status-chip.missing {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+    .status-chip.missing .status-dot {
+        background: #ef4444;
+    }
+
+/* =========================================
+   COMPLIANCE WORKSPACE TABS
+========================================= */
+
+.compliance-tabs {
+    border-bottom: none;
+    gap: 6px;
+    padding-bottom: 3px;
+    margin-bottom: 0px;
+    position: relative;
+}
+
+
+    /* continuous line below all tabs */
+    .compliance-tabs::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 1px;
+        background: #d7dde6;
+        box-shadow: 0 2px 5px rgba(0,0,0,.06);
+    }
+
+
+    /* INACTIVE TABS */
+    .compliance-tabs .nav-link {
+        border: 1px solid #d6dde6;
+        /*border: none;*/
+        border-radius: 8px 8px 0 0;
+        padding: 8px 14px;
+        font-size: .90rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: #64748b;
+        /* transparent inactive tabs */
+        /*background: transparent;*/
+        background: #BCC6CC;
+        transition: box-shadow .18s ease, transform .12s ease, color .18s ease, background .18s ease;
+    }
+
+
+
+        /* HOVER */
+        .compliance-tabs .nav-link:hover {
+            color: #1e40af;
+            background: #f8fafc;
+            box-shadow: 0 2px 6px rgba(0,0,0,.06);
+            transform: translateY(-1px);
+            /* optional subtle underline */
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+
+
+        /* ACTIVE TAB */
+        .compliance-tabs .nav-link.active {
+            background: white;
+            color: #1d4ed8;
+            font-weight: 700;
+            box-shadow: 0 -2px 6px rgba(0,0,0,.05), 0 2px 6px rgba(0,0,0,.04);
+            position: relative;
+            z-index: 2;
+        }
+
+
+
+/* TAB CONTENT WORK AREA */
+.compliance-tab-body {
+    background: white;
+    border-radius: 0 14px 14px 14px;
+    padding: 15px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+    min-height: 360px;
+}

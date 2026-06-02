@@ -1,0 +1,91 @@
+﻿@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Services
+
+
+@inject ToastService ToastService
+
+<div class="toast-container-custom">
+
+    @foreach (var toast in Toasts)
+    {
+
+        <div class="toast-custom @toast.CssClass"
+             @onmouseenter="() => toast.IsHovered = true"
+             @onmouseleave="() => toast.IsHovered = false">
+
+            <!-- ICON -->
+
+            <div class="toast-icon">
+                <i class="bi @toast.Icon"></i>
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="toast-body-custom">
+                <div class="toast-header-custom">
+
+                    <div class="toast-title">
+                        @toast.Title
+                    </div>
+
+
+                    <!-- CLOSE BUTTON -->
+
+                    <button class="toast-close" @onclick="(() => RemoveToast(toast))">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+
+                </div>
+
+
+                <div class="toast-message">
+                    @toast.Message
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+
+    private List<ToastMessage> Toasts = new();
+
+    protected override void OnInitialized()
+    => ToastService.OnShow += ShowToast;
+
+
+    private async void ShowToast(ToastMessage message)
+    {
+        Toasts.Add(message);
+        StateHasChanged();        
+        var remaining = message.Duration;
+
+        while (remaining > 0)
+        {
+            await Task.Delay(100);
+            if (!message.IsHovered)
+            {
+                remaining -= 100;
+            }
+        }
+
+        if (Toasts.Contains(message))
+        {
+            Toasts.Remove(message);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void RemoveToast(ToastMessage toast)
+    {
+        Toasts.Remove(toast);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    =>
+        ToastService.OnShow -= ShowToast;
+
+}

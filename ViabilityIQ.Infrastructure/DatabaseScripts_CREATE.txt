@@ -1,0 +1,365 @@
+﻿USE ViabilityIQ
+GO
+/****** Object:  Table [dbo].[tblAssessmentDocument]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblAssessmentDocument](
+	[AssessmentDocumentId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[AssessmentId] [numeric](18, 0) NULL,
+	[PhaseId] [numeric](18, 0) NULL,
+	[DocumentId] [numeric](18, 0) NULL,
+	[IsMandatory] [bit] NULL,
+	[IsSpecialRequest] [bit] NULL,
+	[IsSubmitted] [bit] NULL,
+	[SubmittedDate] [datetime] NULL,
+	[Verified] [bit] NULL,
+	[VerifiedBy] [numeric](18, 0) NULL,
+	[VerifiedDate] [datetime] NULL,
+	[DocumentNumber] [nvarchar](100) NULL,
+	[FileName] [nvarchar](max) NULL,
+	[FileExtension] [nvarchar](50) NULL,
+	[MimeType] [nvarchar](500) NULL,
+	[FileSize] [bigint] NULL,
+	[LocalPath] [nvarchar](max) NULL,
+	[UrlPath] [nvarchar](max) NULL,
+	[UploadedDate] [datetime] NULL,
+	[UploadedBy] [numeric](18, 0) NULL,
+	[Remarks] [nvarchar](max) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblDocumentChecklist] PRIMARY KEY CLUSTERED 
+(
+	[AssessmentDocumentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblAssessment]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblAssessment](
+	[AssessmentId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[FileNumber]  AS ('BRC-'+right('00000'+CONVERT([varchar](10),[AssessmentId]),(5))) PERSISTED,
+	[LoanTypeId] [numeric](18, 0) NULL,
+	[ClientId] [numeric](18, 0) NULL,
+	[BusinessId] [numeric](18, 0) NULL,
+	[AssessmentDate] [date] NULL,
+	[SeasonId] [numeric](18, 0) NULL,
+	[BankId] [numeric](18, 0) NULL,
+	[AmountRequested] [money] NULL,
+	[AmountApproved] [money] NULL,
+	[StatusId] [numeric](18, 0) NULL,
+	[ProgressPercentage] [decimal](18, 0) NULL,
+	[blDiligence] [bit] NULL,
+	[blContracting] [bit] NULL,
+	[blMarketing] [bit] NULL,
+	[blFinancing] [bit] NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblAssessment] PRIMARY KEY CLUSTERED 
+(
+	[AssessmentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblAssessmentStatus]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblAssessmentStatus](
+	[StatusId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[StatusName] [nchar](50) NULL,
+	[Remarks] [nvarchar](200) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_tblAssessmentStatus] PRIMARY KEY CLUSTERED 
+(
+	[StatusId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblBank]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblBank](
+	[BankId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[ShortName] [nvarchar](50) NULL,
+	[BankName] [nvarchar](50) NULL,
+	[Active] [numeric](18, 0) NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[UpdatedDate] [datetime] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[UpdatedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblBanks] PRIMARY KEY CLUSTERED 
+(
+	[BankId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblCompany]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblCompany](
+	[iCompanyId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[CompanyName] [nchar](50) NULL,
+	[CKNumber] [nchar](10) NULL,
+	[ContactPerson] [nchar](50) NULL,
+	[Telephone] [nchar](30) NULL,
+	[mobile] [nchar](30) NULL,
+	[Email] [nchar](50) NULL,
+	[Website] [nvarchar](100) NULL,
+	[Street_Address] [nvarchar](100) NULL,
+	[Surbub] [nchar](50) NULL,
+	[CityTown] [nvarchar](50) NULL,
+	[iProvinceId] [numeric](18, 0) NULL,
+	[Postal_Address] [nvarchar](50) NULL,
+	[Postal_City] [nvarchar](50) NULL,
+	[PostalCode] [numeric](18, 0) NULL,
+	[Active] [bit] NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblCompany] PRIMARY KEY CLUSTERED 
+(
+	[iCompanyId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblProductService]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblProductService](
+	[ProductServiceId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[ProductServiceName] [nvarchar](50) NULL,	
+	[ProductServiceCategoryId] [numeric](18, 0) NULL,
+	[UoM] [nvarchar](10) NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblCrops] PRIMARY KEY CLUSTERED 
+(
+	[ProductServiceId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblProductCategory]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblProductCategory](
+	[ProductCategoryId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[ProductCategory] [nvarchar](50) NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblProductCategory] PRIMARY KEY CLUSTERED 
+(
+	[ProductCategoryId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblBusiness]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblBusiness](
+	[BusinessId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[BusinessName] [nchar](100) NULL,
+	[CKNumber] [nvarchar](50) NULL,
+	[ProvinceId] [numeric](18, 0) NULL,
+	[Size] [numeric](18, 0) NULL,
+	[ClientId] [numeric](18, 0) NULL,
+	[AreaLocation] [nvarchar](50) NULL,
+	[ContactPerson] [nchar](50) NULL,	
+	[Mobile] [nvarchar](50) NULL,	
+	[Website] [nvarchar](50) NULL,
+	[Telephone] [nchar](30) NULL,	
+	[Email] [nchar](50) NULL,	
+	[Street_Address] [nvarchar](100) NULL,
+	[Surbub] [nchar](50) NULL,
+	[CityTown] [nvarchar](50) NULL,
+	[iProvinceId] [numeric](18, 0) NULL,
+	[Postal_Address] [nvarchar](50) NULL,
+	[Postal_City] [nvarchar](50) NULL,
+	[PostalCode] [numeric](18, 0) NULL,
+	[Remarks] [nvarchar](200) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblBusinesss] PRIMARY KEY CLUSTERED 
+(
+	[BusinessId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblBusinessActivity]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblBusinessActivity](
+	[BusinessActivityId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[Activity] [nvarchar](100) NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_tblBusinessActivity] PRIMARY KEY CLUSTERED 
+(
+	[BusinessActivityId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblClient]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblClient](
+	[ClientId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[FullName] [nvarchar](100) NULL,
+	[ClientTypeId] [numeric](18, 0) NULL,
+	[GenderId] [numeric](18, 0) NULL,
+	[RaceId] [numeric](18, 0) NULL,
+	[SA_ID] [bit] NULL,
+	[Nationality] [nvarchar](50) NULL,
+	[IDNumber] [nvarchar](50) NULL,
+	[Email] [nvarchar](50) NULL,
+	[Telephone] [nvarchar](50) NULL,
+	[Mobile] [nvarchar](50) NULL,
+	[Address_Street] [nvarchar](250) NULL,
+	[Address_Surburb] [nvarchar](150) NULL,
+	[Address_CityTown] [nvarchar](50) NULL,
+	[Address_Postal] [nvarchar](100) NULL,
+	[Address_PostalLocation] [nvarchar](50) NULL,
+	[Address_PostalCode] [numeric](18, 0) NULL,
+	[ProvinceId] [numeric](18, 0) NULL,
+	[CountryId] [numeric](18, 0) NULL,
+	[Remarks] [nvarchar](150) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblClients] PRIMARY KEY CLUSTERED 
+(
+	[ClientId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblClientType]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblClientType](
+	[ClientTypeId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[ClientType] [nvarchar](50) NULL,
+	[Remarks] [nvarchar](150) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblClientcategory] PRIMARY KEY CLUSTERED 
+(
+	[ClientTypeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblGender]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblGender](
+	[GenderId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[Gender] [nchar](10) NULL,
+	[Remarks] [nchar](100) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblGender] PRIMARY KEY CLUSTERED 
+(
+	[GenderId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblProvince]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblProvince](
+	[ProvinceId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[Shortname] [nchar](10) NULL,
+	[ProvinceName] [nvarchar](50) NULL,
+	[Remarks] [nvarchar](250) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_tblProvinces] PRIMARY KEY CLUSTERED 
+(
+	[ProvinceId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblRace]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblRace](
+	[RaceId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[RaceName] [nchar](10) NULL,
+	[Remarks] [nchar](100) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_tblRace] PRIMARY KEY CLUSTERED 
+(
+	[RaceId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblSysDocument]    Script Date: 2026/05/29 14:06:56 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblSysDocument](
+	[DocumentId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[DocumentName] [nvarchar](50) NULL,
+	[Remarks] [nvarchar](150) NULL,
+	[Active] [bit] NULL,
+	[CreatedDate] [datetime] NULL,
+	[CreatedBy] [numeric](18, 0) NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ModifiedBy] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_tblSysDocument] PRIMARY KEY CLUSTERED 
+(
+	[DocumentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO

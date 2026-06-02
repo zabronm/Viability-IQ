@@ -1,0 +1,25 @@
+﻿@* <div class="layout-switcher">
+    <button class="btn @(currentLayout == "global" ? "btn-primary" : "btn-outline-secondary")"
+            @onclick="() => SetLayout("global")">
+        <i class="fas fa-globe"></i> Global
+    </button>
+    <button class="btn @(currentLayout == "assessment" ? "btn-primary" : "btn-outline-secondary")"
+            @onclick="() => SetLayout(" assessment")">
+        <i class="fas fa-clipboard-check"></i> Assessment
+    </button>
+</div>
+
+ *@
+@code 
+{
+    private string currentLayout = "global";
+
+    [Parameter]
+    public EventCallback<string> LayoutChanged { get; set; }
+
+    private async Task SetLayout(string layout)
+    {
+        currentLayout = layout;
+        await LayoutChanged.InvokeAsync(layout);
+    }
+}

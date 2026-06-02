@@ -1,0 +1,91 @@
+﻿@page "/home"
+
+@using ViabilityIQ.Web.Components.CommonComponents
+@inject NavigationManager Nav0
+
+
+<div class="p-0">
+    <PageHeading _pageTitle="Home" CurrentPage="PageHeading.PageType.Dashboards" _pageHeading="Dashboards" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="app-workspace-shell">
+
+            <!-- TOP SUMMARY STRIP -->
+            <section class="summary-strip">
+
+                <div class="summary-card">
+                    <div class="summary-label">Assessments ToDate</div>
+                    <div class="summary-value">000035</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Totals at Center</div>
+                    <div class="summary-value">1,500</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Total Worth</div>
+                    <div class="summary-value money">R 1,225,000.00</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Average Vialbility Index</div>
+                    <div class="summary-value phase compliance">60%</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Under Review</div>
+                    <div class="summary-value status">000015</div>
+                </div>
+
+            </section>
+
+            <!-- MAIN WORKSPACE -->
+            <section class="workspace-grid">
+
+                <!-- CENTER MAIN WORK -->
+                <main class="work-center">
+
+                    <div class="work-card hero-card">
+                        <div class="card-title blue">
+                            Compliance Workspace
+                        </div>
+
+                        <p class="card-text">
+                            Placeholder for diligence, contracting,
+                            marketing and financing tabs.
+                        </p>
+
+                        <div class="placeholder-tabs">
+                            <button>Diligence</button>
+                            <button>Contracting</button>
+                            <button>Marketing</button>
+                            <button>Financing</button>
+                        </div>
+                    </div>
+
+                    <div class="work-card">
+                        <div class="card-title amber">
+                            Workflow Notes
+                        </div>
+
+                        <p class="card-text">
+                            Notes / adjudication comments area.
+                        </p>
+                    </div>
+
+                </main>
+
+                <!-- RIGHT SNAPSHOT -->
+                <aside class="right-panel">
+                    &nbsp;             
+                </aside>
+
+            </section>
+
+        </div>
+    </main>
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

@@ -1,0 +1,161 @@
+﻿@typeparam TItem
+
+<div class="datatable-container">
+
+    <!--Add + Search -->
+    <div class="table-toolbar">
+        <button class="btn btn-primary"
+                @onclick="OnAddClick" style="width:100px;">
+            <i class="bi bi-plus-lg"></i> Add
+        </button>
+
+        <div class="position-relative">
+            <div class="row py-0 d-flex">
+                <div class="col pe-0 me-2">
+                    <ZabToolTip Text="Print current list" Type="ZabToolTip.TooltipType.Normal" Placement="ZabToolTip.TooltipPlacement.Left">
+                        <button class="btn border-light bg-light " @onclick="OnAddClick">
+                            <i class="bi bi-printer text-secondary"></i>
+                        </button>
+                    </ZabToolTip>
+                </div>
+                <div class="col ps-0 ms-0">
+                    <input type="text"
+                           class="form-control table-search pe-5"
+                           placeholder="Search..."
+                           @bind="searchText"
+                           @bind:event="oninput" />
+                    <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mt-1 pb-1">
+        <table class="table-custom " style="border-radius:11px;">
+            <thead>
+                <tr>
+
+                    @foreach (var c in Columns)
+                    {
+                        <th class="@GetSortClass(c)"
+                            @onclick="() => Sort(c)">
+                            @c.Title
+                        </th>
+                    }
+
+                    <th>Actions</th>
+
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+                @foreach (var row in PagedItems)
+                {
+
+                    <tr class="py-0 my-0">
+
+                        @foreach (var c in Columns)
+                        {
+                            <td class="@ResolveCssClass(c, row) py-1 my-1">
+
+                                @if (c.IsLink)
+                                {
+                                    <a href=""
+                                       @onclick:preventDefault="true"
+                                       @onclick:stopPropagation="true"
+                                       @onclick="async () => await HandleLinkClick(c, row)" class="text-decoration-none">
+
+                                        @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                        {
+                                            <i class="@c.IconCss"></i>
+                                        }
+
+                                        @if (!c.IconOnly)
+                                        {
+                                            @FormatCellValue(c, row)
+                                        }
+
+                                    </a>
+                                }
+
+                                else if (c.UseBadge)
+                                {
+                                    <span class="status-badge      @(c.BadgeClass?.Invoke(row))">
+
+                                        @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                        {
+                                            <i class="@c.IconCss"></i>
+                                        }
+
+                                        @if (!c.IconOnly)
+                                        {
+                                            @FormatCellValue(c, row)
+                                        }
+
+                                    </span>
+                                }
+
+                                else
+                                {
+                                    @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                    {
+                                        <i class="@c.IconCss"></i>
+                                    }
+
+                                    @if (!c.IconOnly)
+                                    {
+                                        @FormatCellValue(c, row)
+                                    }
+                                }
+
+                            </td>
+                        }
+
+                        <td class="text-center py-1 my-1">
+                            <button @onclick:stopPropagation="true" class="btn text-center border-info bg-info py-0"
+                                    disabled="@(GetRowId?.Invoke(row) == null)"
+                                    @onclick="() => HandleEditButtonClick(row)">
+                                <i class="bi bi-pin-angle-fill text-white "></i>
+                            </button>
+                            @if (ShowDelete)
+                            {
+                                <button class="btn btn-danger text-center py-0" @onclick:stopPropagation="true"
+                                        @onclick="() => ConfirmDelete(row)">
+                                    <i class="bi bi-scissors text-danger"></i>
+                                </button>
+                            }
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    </div>
+    <!-- Pagination -->
+    <div class="table-pagination mt-0 pt-2 px-3">
+        <div class="paging-font">
+            Page @currentPage of @totalPages
+        </div>
+
+        <div>
+            <button class="btn btn-rec-nav"
+                    @onclick="PrevPage"
+                    disabled="@(currentPage == 1)">
+                <i class="bi bi-caret-left-fill"></i>
+            </button>
+
+            <button class="btn btn-rec-nav"
+                    @onclick="NextPage"
+                    disabled="@(currentPage == totalPages)">
+                <i class="bi bi-caret-right-fill"></i>
+            </button>
+        </div>
+    </div>
+
+</div>

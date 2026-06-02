@@ -1,0 +1,43 @@
+﻿@typeparam TItem
+
+<div class="table-container">
+    <table class="table-custom">
+        <thead>
+            <tr>
+                @foreach (var prop in Properties)
+                {
+                    <th>@prop.Name</th>
+                }
+
+                @if (OnEdit.HasDelegate)
+                {
+                    <th>Actions</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Items != null)
+            {
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        @foreach (var prop in Properties)
+                        {
+                            <td>@prop.GetValue(item)</td>
+                        }
+
+                        @if (OnEdit.HasDelegate)
+                        {
+                            <td>
+                                <button @onclick="() => OnEdit.InvokeAsync(item)">
+                                    Edit
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

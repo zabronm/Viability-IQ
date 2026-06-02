@@ -1,0 +1,59 @@
+﻿@typeparam TEnum
+
+<div class="row mb-2 align-items-center">
+
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label class="col-4 col-form-label">
+            @Label
+        </label>
+    }
+
+    <div class="col-8">
+
+        <div class="dropdown-container"
+             @ref="dropdownRef">
+
+            <input type="text"
+                   class="form-control"
+                   placeholder="@Placeholder"
+                   @bind="SearchText"
+                   @bind:event="oninput"
+                   @onfocus="ShowDropdown"
+                   @onkeydown="HandleKeyDown" />
+
+            @if (IsOpen)
+            {
+                <div class="dropdown-list">
+
+                    @if (FilteredItems.Any())
+                    {
+                        @for (int i = 0; i < FilteredItems.Count; i++)
+                        {
+                            var item = FilteredItems[i];
+
+                            <div class="dropdown-item
+                                            @(i == SelectedIndex ? "active" : null)"
+                                 @onclick="async () =>
+                                 await SelectItem(item)">
+
+                    @item.Text
+
+                            </div>
+                                }
+                    }
+                    else
+                    {
+                        <div class="p-2 text-muted">
+                            No results
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

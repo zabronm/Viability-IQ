@@ -1,0 +1,132 @@
+﻿@* namespace BrucolWeb.Web.Components.Common *@
+@typeparam TItem
+
+<div class="datatable-container">
+    <!--Add + Search -->
+
+    <div class="table-toolbar mb-0 py-0 d-flex justify-content-between align-items-center">
+        @* <div class="table-toolbar mb-0 py-0">   *@  
+        <div>
+            @if (@blShowButton)
+            {
+                <button class="btn btn-primary"
+                        @onclick="OnAddClick" style="width:100px;">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            }
+        </div>
+
+        <div class="position-relative py-0">
+            <div class="row py-0 d-flex">
+                <div class="col pe-0 me-2">
+                    <ZabToolTip Text="Print current list" Type="ZabToolTip.TooltipType.Normal" Placement="ZabToolTip.TooltipPlacement.Left">
+                        <button class="btn border-light bg-light " @onclick="OnPrintClick">
+                            <i class="bi bi-printer text-secondary"></i>
+                        </button>
+                    </ZabToolTip>
+                </div>
+                <div class="col ps-0 ms-0">
+                    <input type="text"
+                           class="form-control table-search pe-5"
+                           placeholder="Search..."
+                           @bind="searchText"
+                           @bind:event="oninput" />
+                    <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted"></i>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    <div class="mt-1 pb-1" style="border-bottom: 0px solid #99A3A3;">
+        <table class="table-custom table-hover" style="border-radius: 11px;">
+            <thead>
+                <tr>
+                    @foreach (var col in Columns)
+                    {
+                        <th @onclick="() => Sort(col)"
+                            class="@(GetSortClass(col))">
+                            @col.Title
+                        </th>
+                    }
+                    <!-- Action column -->
+                    <th class="text-center">Action</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!PagedItems.Any())
+                {
+                    <tr>
+                        <td colspan="@(Columns.Count + 1)">
+                            No records found
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in PagedItems)
+                    {
+                        @* <tr class="py-0 clickable-row" @onclick="() => OnEditClick(item)"> *@
+                        @* <tr class="py-0 my-0" @onclick="() => OnEditClick(item)"> *@
+                        <tr class="py-0 my-0">
+                            @foreach (var col in Columns)
+                            {
+                                <td class="py-0">@col.Value(item)</td>
+                            }
+
+                            <td class="text-center py-1 my-1">
+
+                                <ZabToolTip Text="Document checklist" Type="ZabToolTip.TooltipType.Info" Placement="ZabToolTip.TooltipPlacement.Left">
+                                    <button class="btn py-0 border-info bg-info"
+                                            @onclick="() => OnEditDocs.InvokeAsync(item)">
+                                        @*  @onclick="() => HandleEditDocsClick(item)"> *@
+                                        <i class="bi bi-file-earmark-check text-white"></i>
+                                    </button>
+                                </ZabToolTip>
+                            </td>
+                            <!-- Edit button -->
+                            <td class="text-center py-1 my-1">
+
+                                <ZabToolTip Text="View/enter details" Type="ZabToolTip.TooltipType.Normal" Placement="ZabToolTip.TooltipPlacement.Left">
+                                    <button class="btn py-0 border-secondary bg-secondary"
+                                            @onclick="() => OnEdit.InvokeAsync(item)">
+                                        <i class="bi bi-pen-fill text-white"></i>
+                                    </button>
+                                </ZabToolTip>
+                                @if (ShowDelete)
+                                {
+                                    <button class="btn btn-danger"
+                                            @onclick="() => ConfirmDelete(item)">
+                                        <i class="bi bi-scissors"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <!-- Pagination -->
+    <div class="table-pagination">
+        <div class="paging-font">
+            Page @currentPage of @totalPages
+        </div>
+
+        <div>
+            <button class="btn btn-rec-nav"
+                    @onclick="PrevPage"
+                    disabled="@(currentPage == 1)">
+                <i class="bi bi-caret-left-fill"></i>
+            </button>
+
+            <button class="btn btn-rec-nav"
+                    @onclick="NextPage"
+                    disabled="@(currentPage == totalPages)">
+                <i class="bi bi-caret-right-fill"></i>
+            </button>
+        </div>
+    </div>
+
+</div>

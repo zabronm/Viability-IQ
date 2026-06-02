@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Components\CommonComponents\NewFolder\**" />
+    <Compile Remove="Components\Pages\NewFolder\**" />
+    <Content Remove="Components\CommonComponents\NewFolder\**" />
+    <Content Remove="Components\Pages\NewFolder\**" />
+    <EmbeddedResource Remove="Components\CommonComponents\NewFolder\**" />
+    <EmbeddedResource Remove="Components\Pages\NewFolder\**" />
+    <None Remove="Components\CommonComponents\NewFolder\**" />
+    <None Remove="Components\Pages\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Components\Pages\AppInitializer.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Components\Pages\AppInitializer.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\scripts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ViabilityIQ.Database\ViabilityIQ.Application.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Infrastructure\ViabilityIQ.Infrastructure.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Modules\ViabilityIQ.Modules.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Shared\ViabilityIQ.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,87 @@
+﻿@using System.Linq.Expressions
+@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Shared.SharedModels
+
+@inject IDDLookupService LookupService
+
+
+<div class="form-group lookup-dropdown-group">
+    @* @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="form-label small fw-bold text-muted mb-1">@Label</label>
+    }
+ *@
+    <select class="form-select form-select-sm @FieldClass"
+            value="@Value"
+            @onchange="HandleChange"
+            disabled="@(IsDisabled || _isLoading)">
+
+        @if (_isLoading)
+        {
+            <option>Loading data...</option>
+        }
+        else
+        {
+            <option value="0">-- @Placeholder --</option>
+            @foreach (var opt in _options)
+            {
+                <option value="@opt.Id">@opt.Description</option>
+            }
+        }
+    </select>
+</div>
+
+@code {
+    private IEnumerable<LookupItem> _options = Array.Empty<LookupItem>();
+    private bool _isLoading = true;
+    private FieldIdentifier _fieldIdentifier;
+
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+
+    [Parameter] public long Value { get; set; }
+    [Parameter] public EventCallback<long> ValueChanged { get; set; }
+
+    // Changing this to a standard naming convention lets the compiler handle the binding
+    [Parameter] public Expression<Func<long>>? ValueExpression { get; set; }
+
+    [Parameter] public DDLookupEnums SourceKey { get; set; }
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Placeholder { get; set; } = "Select Option";
+    [Parameter] public bool IsDisabled { get; set; } = false;
+
+    // Checks the EditContext to see if this specific bound property has any active validation warnings
+    private string FieldClass => EditContext != null && ValueExpression != null &&
+                                 EditContext.GetValidationMessages(_fieldIdentifier).Any()
+                                 ? "is-invalid" : "";
+
+    protected override void OnParametersSet()
+    {
+        // Extract validation fields safely when the parent form variables map over
+        if (EditContext != null && ValueExpression != null)
+        {
+            _fieldIdentifier = FieldIdentifier.Create(ValueExpression);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        _options = await LookupService.GetLookupOptionsAsync(SourceKey);
+        _isLoading = false;
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (long.TryParse(e.Value?.ToString(), out long result))
+        {
+            // Update the layout value
+            await ValueChanged.InvokeAsync(result);
+
+            // Notify the form execution context that this value changed (clears red borders instantly)
+            if (EditContext != null && ValueExpression != null)
+            {
+                EditContext.NotifyFieldChanged(_fieldIdentifier);
+            }
+        }
+    }
+}

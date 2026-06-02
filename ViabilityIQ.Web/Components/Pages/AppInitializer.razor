@@ -1,0 +1,105 @@
+﻿@page "/"
+@using BrucolWeb.Application.Services
+@using BrucolWeb.Application.Services.CommonServices
+@using BrucolWeb.Web.Services
+
+@inject IAppInitializerService InitService
+@inject NavigationManager NavManager
+
+@layout MainLayout_Blank
+
+<div class="init-container rounded-5 footer-shadow-fade">
+    <div class="init-card rounded-5">
+        <h3 class="init-title text-primary">Initializing Brucolizer</h3>
+        <p class="init-status">@_currentStatus</p>
+
+        <div class="custom-progress-bg">
+            <!-- The width is bound to our C# variable -->
+            <div class="custom-progress-bar" style="width: @(_progress)%"></div>
+        </div>
+
+        @if (_hasError)
+        {
+            <div class="alert alert-danger mt-3 rounded-4" role="alert">
+                @_errorMessage
+                <button class="btn btn-outline-danger btn-sm ms-3" @onclick="Retry">Retry</button>
+            </div>
+        }
+    </div>
+</div>
+
+
+<style type="text/css">
+    .init-container {        
+        background-image: url('css/neumorphic.jpg');
+        background-repeat: repeat; /* or no-repeat */
+        background-size: cover; /* or cover, contain */
+        background-position: center;    
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+
+@code {
+    [Inject] IToastService? _Toast { get; set; }
+    [Inject] ZabSessionService? ZabSession { get; set; }
+    private int _progress = 0;
+    private string _currentStatus = "Connecting to system...";
+    private bool _hasError = false;
+    private string _errorMessage = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RunInitialization();
+        }
+    }
+
+    private async Task RunInitialization()
+    {
+        try
+        {
+            // Step 1: Check Database Connectivity
+            _currentStatus = "Verifying SQL connection...";
+            _progress = 25;
+            StateHasChanged();
+            await InitService.CheckConnectionAsync();
+
+            // Step 2: Warm up Lookups
+            _currentStatus = "Pre-loading Bank and Farmer reference data...";
+            _progress = 70;
+            StateHasChanged();
+            await InitService.WarmUpLookupsAsync();
+
+            // Step 3: Success
+            _currentStatus = "System Ready.";
+            _progress = 100;
+            StateHasChanged();
+
+            await Task.Delay(400); // Visual pause so the user sees 100%
+            NavManager.NavigateTo("/home");
+        }
+        catch (Exception ex)
+        {
+            _hasError = true;
+            _errorMessage = "Database connection failed. Please check your SQL configuration.";
+            _currentStatus = "Error encountered.";
+
+            _Toast!.ShowError("Error/s encountered while initializing application. Please contact administrator.", "Initialization Error");
+
+            StateHasChanged();
+
+
+        }
+    }
+
+    private async Task Retry()
+    {
+        _hasError = false;
+        _progress = 0;
+        NavManager.NavigateTo("/home");
+
+        //await RunInitialization();
+    }
+}

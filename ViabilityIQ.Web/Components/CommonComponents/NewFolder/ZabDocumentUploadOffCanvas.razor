@@ -1,0 +1,150 @@
+﻿@using BrucolWeb.Application.DTOs.ApplicationDocuments
+@using BrucolWeb.Application.DTOs.Common
+
+
+<div class="offcanvas-backdrop show"></div>
+
+<div class="offcanvas offcanvas-end show d-block upload-canvas">
+
+    <div class="offcanvas-header header-shadow">
+        <h4 class="offcanvas-title">@Title</h4>
+        <button type="button" class="btn-close" @onclick="ClosePanel"></button>
+    </div>
+
+    <div class="card-body">
+        <div class="mb-3">
+            <label>
+                Document Type
+            </label>
+
+            <input class="form-control" value="@SelectedDocument?.DocumentName" disabled />
+        </div>
+
+        <div class="mb-3">
+            <label>
+                Choose File
+            </label>
+            <InputFile OnChange="LoadFiles" />
+        </div>
+
+        <div class="mb-3">
+            <label>
+                Comments
+            </label>
+            <textarea class="form-control">
+            </textarea>
+        </div>
+
+        <div class="d-flex justify-content-end mt-2 py-2">
+            <button class="btn btn-success" disabled="@isSaving" style="width: 75%;" @onclick="SaveDocument">
+                @if (isSaving)
+                {
+                    <span class="spinner-border spinner-border-sm me-2">@ButtonMessage</span>
+                }
+                else
+                {
+                    <i class="bi bi-check-circle me-1"></i>
+
+                    <span>@ButtonMessage</span>
+                }
+            </button>
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter] public long ApplicationId { get; set; }    
+    [Parameter] public ApplicationDocumentDetailsDto?    SelectedDocument    { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }
+       
+    private string? Title = "Upload Document..";
+    private bool isSaving = false;                      //default to false, idle
+    private string? ButtonMessage = "Upload Document..";        
+
+    private IBrowserFile? selectedFile;
+    private bool isUploading = false;
+    private long maxFileSize = 1024 * 1024 * 15; // 15MB Limit
+
+
+    // private void FileSelected(InputFileChangeEventArgs e)
+    // {
+    //     uploadedFile = e.File;
+    // }
+
+    private void LoadFiles(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task SaveDocument()
+    {
+        ButtonMessage = "Uploading Document";
+        isSaving = true;
+        if (selectedFile == null) return;
+
+        try
+        {
+            isUploading = true;
+
+            // Open the stream from the browser
+            using var stream = selectedFile.OpenReadStream(maxFileSize);
+
+            // We need to copy to a memory stream because Graph API
+            // works better with seekable streams for uploads
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+
+            var uploadDto = new DocumentUploadDto
+            {
+                ApplicationId = ApplicationId,
+                FileName = selectedFile.Name,
+                FileStream = ms,
+                ContentType = selectedFile.ContentType,
+                UserId = 123 // Replace with your actual logged-in User ID
+            };
+                      
+        }
+        catch (Exception ex)
+        {
+            //Snackbar.Add($"Upload failed: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+
+
+
+
+
+
+   
+
+    // private async Task SaveDocument()
+    // {
+    //     ButtonMessage = "Uploading Document";
+    //     isSaving = true;        
+    //     // later:
+    //     // upload file
+    //     // save ApplicationDocument record
+
+    //     await OnSaved.InvokeAsync();
+
+    //     ButtonMessage = "Upload Document";
+    //     isSaving = false;
+
+    // }
+
+
+    private async Task ClosePanel()
+    {
+        await OnClose.InvokeAsync();
+    }
+}
+
+

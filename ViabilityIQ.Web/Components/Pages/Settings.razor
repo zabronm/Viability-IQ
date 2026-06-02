@@ -1,0 +1,175 @@
+﻿@page "/settings"
+
+@using ViabilityIQ.Web.Components.CommonComponents
+@inject NavigationManager Nav0
+
+<div class="p-0">
+    <PageHeading _pageTitle="Assessments" CurrentPage="PageHeading.PageType.Settings" _pageHeading="Settings" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="app-workspace-shell">
+
+            <div class="row g-4">
+
+                <div class="col-lg-9">
+                    <div class="settings-section-card">
+                        <h4 class="settings-section-title">
+                            <i class="bi bi-sliders2-vertical me-2 title-icon"></i> System Settings
+                        </h4>
+
+                        @* ===============/settings/business-categories ====================== *@
+                        <div class="settings-grid-4x4">
+                            <a href="/settings/business-categories" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-tags-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Business Categories</span>
+                                    <p class="settings-card-narration">Configure core industry sectors, operational classifications, and corporate business types.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/businesses ====================== *@
+                            <a href="/settings/businesses" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-briefcase-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Businesses</span>
+                                    <p class="settings-card-narration">Manage registered enterprise profiles, operational entities, and trading operations.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/client-categories ====================== *@
+                            <a href="settings/client-categories" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-people-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Client Categories</span>
+                                    <p class="settings-card-narration">Manage client grouping structures, relationship tiers, and assessment profiles.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/client-contacts ====================== *@
+                            <a href="settings/client-contacts" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-person-lines-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Client Contacts</span>
+                                    <p class="settings-card-narration">Maintain communication directories, corporate key stakeholders, and phone listings.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/banks ====================== *@
+                            <a href="/settings/banks" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-bank2"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Banks</span>
+                                    <p class="settings-card-narration">Maintain institutional banks records, routing codes, and regional clearing houses.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/product-category ====================== *@
+                            <a href="/settings/product-category" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-diagram-3-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Product/Service Categories</span>
+                                    <p class="settings-card-narration">Organize products and auxiliary services into functional accounting groups.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/products ====================== *@
+                            <a href="/settings/products" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-box-seam-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Products/Services</span>
+                                    <p class="settings-card-narration">Configure unified professional service items, core systems offerings, and custom tasks.</p>
+                                </div>
+                            </a>
+
+                           @*  <a href="settings/products" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-box-seam-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Products</span>
+                                    <p class="settings-card-narration">Define primary system products, processing matrices, and specific service rates.</p>
+                                </div>
+                            </a> *@
+
+                            @* ===============/settings/expense-items ====================== *@
+                            <a href="/settings/expense-items" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-receipt-cutoff"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Expense Items</span>
+                                    <p class="settings-card-narration">Track standardization types, allowable operational operational costs, and ledgers.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/assest-types ====================== *@
+                            <a href="settings/asset-types" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi-calculator-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Asset Types</span>
+                                    <p class="settings-card-narration">Classify system capital assets, security collateral fields, and depreciation metrics.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3">
+                    <div class="settings-section-card security-card-wrapper">
+                        <h4 class="settings-section-title">
+                            <i class="bi bi-shield-lock-fill me-2 title-icon security-icon"></i> Security Settings
+                        </h4>
+
+                        @* ===============/settings/company ====================== *@
+                        <div class="settings-grid-1x1">
+                            <a href="settings/company" class="settings-icon-card row-layout">
+                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-building-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Company</span>
+                                    <p class="settings-card-narration">Global corporate identity profiles.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/users ====================== *@
+                            <a href="settings/users" class="settings-icon-card row-layout">
+                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-person-badge-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Users</span>
+                                    <p class="settings-card-narration">System operator access accounts.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/roles ====================== *@
+                            <a href="settings/roles" class="settings-icon-card row-layout">
+                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-key-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">User Groups / Roles</span>
+                                    <p class="settings-card-narration">Permission sets and access profiles.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/provinces ====================== *@
+                            <a href="settings/provinces" class="settings-icon-card row-layout">
+                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-geo-alt-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Provinces</span>
+                                    <p class="settings-card-narration">Regional territories boundary routing.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/service-centres ====================== *@
+                            <a href="settings/service-centres" class="settings-icon-card row-layout">
+                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-geo-fill"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Service Centres</span>
+                                    <p class="settings-card-narration">Branch locations and office hubs.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>
