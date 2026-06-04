@@ -1,54 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ViabilityIQ.Application.Interfaces
+﻿namespace ViabilityIQ.Application.Interfaces
 {
     public interface ISessionService
     {
         event Action? OnSessionChanged;
 
-        // User Context
+        // ====================================================
+        // APPLICATION
+        // ====================================================
+
         string AppTitle { get; set; }
+
+        // ====================================================
+        // USER CONTEXT
+        // ====================================================
+
         long UserId { get; }
         string UserName { get; }
         string UserEmail { get; }
         bool IsAuthenticated { get; }
 
-        // Business Context
+        long CompanyId { get; }
+        long BranchId { get; }
+        long ProvinceId { get; }
+
+        // ====================================================
+        // ASSESSMENT CONTEXT
+        // ====================================================
+
+        long? AssessmentId { get; }
+        string CaseNumber { get; }
+
         long? BusinessId { get; }
         string BusinessName { get; }
 
-        // Assessment Context
-        long? AssessmentId { get; }
-        string? AssessmentNumber { get; }
-        long? PhaseId { get; }
-        string PhaseName { get; }
-
-        // Client Context
         long? ClientId { get; }
         string ClientName { get; }
+        string AssessmentType { get; }
 
-        // Navigation
+        // ====================================================
+        // NAVIGATION
+        // ====================================================
+
         string CurrentPage { get; }
 
-        void EstablishUserSession(long userId, string userName, string? userEmail = null);
+        // ====================================================
+        // LOGIN
+        // ====================================================
 
-        void SetActiveBusiness(long businessId, string businessName);
+        void EstablishUserSession(
+            long userId,
+            string userName,
+            string userEmail,
+            long companyId,
+            long branchId,
+            long provinceId);
 
-        void SetActiveAssessment(long assessmentId, string? assessmentNumber = null, long? phaseId = null, string phaseName = "");
+        // ====================================================
+        // ASSESSMENT
+        // ====================================================
 
-        void SetActiveClient(long clientId, string clientName);
-
-        void UpdateCurrentPage(string pageRoute);
+        void SetActiveAssessment(
+            long assessmentId,
+            string caseNumber,
+            long? businessId,
+            string businessName,
+            long? clientId,
+            string clientName,
+            string assessmentType);
 
         void ClearAssessment();
 
-        void ClearBusiness();
+        // ====================================================
+        // NAVIGATION
+        // ====================================================
 
-        void ClearClient();
+        void UpdateCurrentPage(
+            string pageRoute);
+
+        // ====================================================
+        // GENERAL
+        // ====================================================
 
         void ClearWorkflow();
 

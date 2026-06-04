@@ -1,26 +1,25 @@
-﻿@page "/settings/assessments"
+﻿@page "/settings/expense-items"
 
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Shared.DataModels
-@using ViabilityIQ.Application.Dtos
 @using ViabilityIQ.Web.Components.Pages.PageFormComponents
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 <div class="p-0 position-relative">
-    <PageHeading _pageTitle="Assessments" CurrentPage="PageHeading.PageType.Assessments" _pageHeading="Assessments" />
+    <PageHeading _pageTitle="Expense Items" CurrentPage="PageHeading.PageType.Expenses" _pageHeading="Expense Items" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
         <div class="app-workspace-shell">
            
-            <ZabDataTableAdvanced TItem="AssessmentDto"
-                                  Items="@assessmentsList"
-                                  ItemName="Assessment Case"
+            <ZabDataTableAdvanced TItem="ExpenseItems"
+                                  Items="@expenseItemsList"
+                                  ItemName="Expense Item"
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"
                                   ShowAdd="true"
                                   ShowDelete="true"
-                                  OnDelete="DeleteSelectedAssessment"
-                                  GetRowId="@(x => x.AssessmentId)"
+                                  OnDelete="DeleteSelectedExpenseItem"
+                                  GetRowId="@(x => x.ExpenseItemId)"
                                   OnAddRecordId="HandleFormExecution"
                                   OnEditRecordId="HandleFormExecution"
                                   OnPrintList="ExecutePrintFormatProcess"
@@ -33,7 +32,7 @@
     <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
         @if (canvasOpenStatus)
         {
-            <AssessmentsFormComponent AssessmentId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
+            <ExpenseItemsFormComponent ExpenseItemId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
         }
     </ZabOffCanvas>
 

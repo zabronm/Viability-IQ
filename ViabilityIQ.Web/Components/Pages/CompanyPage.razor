@@ -1,41 +1,51 @@
-﻿@page "/settings/assessments"
+﻿@page "/settings/company"
 
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Shared.DataModels
-@using ViabilityIQ.Application.Dtos
 @using ViabilityIQ.Web.Components.Pages.PageFormComponents
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 <div class="p-0 position-relative">
-    <PageHeading _pageTitle="Assessments" CurrentPage="PageHeading.PageType.Assessments" _pageHeading="Assessments" />
+    <PageHeading _pageTitle="Companies" CurrentPage="PageHeading.PageType.Company" _pageHeading="Company Customers" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
         <div class="app-workspace-shell">
            
-            <ZabDataTableAdvanced TItem="AssessmentDto"
-                                  Items="@assessmentsList"
-                                  ItemName="Assessment Case"
+
+            <ZabDataTableAdvanced TItem=" Company"
+                                  Items="@companyList"
+                                  ItemName="Company"
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"
                                   ShowAdd="true"
                                   ShowDelete="true"
-                                  OnDelete="DeleteSelectedAssessment"
-                                  GetRowId="@(x => x.AssessmentId)"
+                                  OnDelete="DeleteSelectedBank"
+                                  GetRowId="@(x => x.CompanyId)"
                                   OnAddRecordId="HandleFormExecution"
                                   OnEditRecordId="HandleFormExecution"
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
 
+
         </div>
     </main>
 
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500" >
         @if (canvasOpenStatus)
-        {
-            <AssessmentsFormComponent AssessmentId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
-        }
+    {
+        <CompanyFormComponent  CompanyId="@activeRecordId" OnSavedSuccess="RefreshWorkspaceGridData" />
+    }
     </ZabOffCanvas>
+
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500">
+    @if (canvasOpenStatus)
+    {
+            <CompanyFormComponent CompanyId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
+    }
+</ZabOffCanvas>
+
+
 
     <footer class="py-4 bg-light mt-auto">
         <BFooter />

@@ -2,7 +2,6 @@
 @using System.ComponentModel.DataAnnotations
 @using ViabilityIQ.Web.Components.Layout
 
-
 @layout MainLayout_Blank
 
 <div class="m-0 font-def">
@@ -11,7 +10,6 @@
             <div class="auth-brand fs-2">
                 <span class="brand-main">Viability</span><span class="brand-iq fst-italic">.IQ</span>
             </div>
-            @* <h3 class="auth-title">Welcome Back</h3> *@
             <p class="auth-subtitle">Please enter your system credentials to proceed</p>
         </div>
 
@@ -64,26 +62,24 @@
         </EditForm>
 
         <div class="auth-card-footer">
-            Need an account recovery option? <button type="button" class="link-btn-inline font-weight-bold" @onclick="NavigateToResetPassword">Reset Password</button><br/>
-            Need a new account? <button type="button" class="link-btn-inline font-weight-bold" @onclick="NavigateToSignUp">Sign Up Here</button>
-        </div>  
-        @* <div class="auth-card-footer">            
-            Support <button type="button" class="link-btn-inline" @onclick="NavigateToProduct">ND Solutions CC, South Africa</button>
-        </div> *@
+            Need an account recovery option?
+            <button type="button" class="link-btn-inline font-weight-bold" @onclick="NavigateToResetPassword">Reset Password</button><br />
+            Need a new account?
+            <button type="button" class="link-btn-inline font-weight-bold" @onclick="NavigateToSignUp">Sign Up Here</button>
+        </div>
     </div>
 </div>
 
 <style>
-    * ==========================================================================
-    Enterprise Auth Theme System Architecture
-    ========================================================================== */
+    /* FIX: Corrected broken multi-line comment notation wrapper */
+    /* ==========================================================================
+        Enterprise Auth Theme System Architecture
+        ========================================================================== */
     .auth-surface-wrapper {
         display: flex;
         align-items: center;
         justify-content: center;
-        /*min-height: 100vh;
-        width: 100vw;*/
-        background-color: #f8fafc; /* Synchronized off-blue/whitish layout background */
+        background-color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont,"arial", "Segoe UI", Roboto, sans-serif;
         padding: 20px;
         box-sizing: border-box;
@@ -91,13 +87,11 @@
 
     .auth-container {
         display: flex;
-       
         padding: 20px;
         box-sizing: border-box;
         font-family: -apple-system, BlinkMacSystemFont,"arial", "Segoe UI", Roboto, sans-serif;
-        /* background-image: url('images/neumorphic.jpg'); */
-        background-repeat: repeat; /* or no-repeat */
-        background-size: cover; /* or cover, contain */
+        background-repeat: repeat;
+        background-size: cover;
         background-position: center;
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     }
@@ -107,9 +101,9 @@
         width: 100%;
         max-width: 420px;
         border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        /* Custom layout design blue shadow signature token */
-        box-shadow: 0 10px 30px rgba(0, 0, 153, 0.06), 0 4px 20px rgba(0, 0, 153, 0.04);
+        border: 1px solid #d1dbe8;
+        /* UPDATED: Nice corporate navy-blue layout layer shadow signature tokens */
+        box-shadow: 0 15px 35px rgba(0, 0, 102, 0.08), 0 5px 15px rgba(0, 0, 102, 0.05), 0 0 1px rgba(0, 0, 102, 0.1);
         padding: 40px 32px;
         box-sizing: border-box;
         transition: transform 0.3s ease;
@@ -129,9 +123,9 @@
         margin-bottom: 12px;
     }
 
-        .auth-brand {
-            color: #000099; /* Layout signature royal corporate blue */
-        }
+    .auth-brand {
+        color: #000099;
+    }
 
     .auth-title {
         font-size: 1.35rem;
@@ -188,7 +182,6 @@
         transition: all 0.2s ease-in-out;
     }
 
-        /* Form Interactive Input focus parameters mapping layout theme colors */
         .form-control-custom:focus {
             outline: none;
             border-color: #000099;
@@ -214,7 +207,7 @@
     }
 
         .password-toggle-btn:hover {
-            background-color: #f2f4f7; /* Layout Custom Marble Gray hover action */
+            background-color: #f2f4f7;
             color: #344054;
         }
 
@@ -239,7 +232,7 @@
     }
 
         .link-btn-inline:hover {
-            color: #344054; /* Marble dark shift interaction */
+            color: #344054;
             text-decoration: underline;
         }
 
@@ -306,7 +299,7 @@
     .auth-submit-btn {
         width: 100%;
         height: 46px;
-        background-color: #000099; /* Deep Primary System Layout Theme color */
+        background-color: #000099;
         color: #ffffff;
         border: none;
         border-radius: 8px;

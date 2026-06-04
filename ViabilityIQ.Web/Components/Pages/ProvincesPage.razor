@@ -1,4 +1,4 @@
-﻿@page "/settings/assessments"
+﻿@page "/settings/provinces"
 
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Shared.DataModels
@@ -7,33 +7,33 @@
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 <div class="p-0 position-relative">
-    <PageHeading _pageTitle="Assessments" CurrentPage="PageHeading.PageType.Assessments" _pageHeading="Assessments" />
+    <PageHeading _pageTitle="Provinces" CurrentPage="PageHeading.PageType.Province" _pageHeading="Provinces" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
         <div class="app-workspace-shell">
-           
-            <ZabDataTableAdvanced TItem="AssessmentDto"
-                                  Items="@assessmentsList"
-                                  ItemName="Assessment Case"
+
+            <ZabDataTableAdvanced TItem="ProvinceDto"
+                                  Items="@provincesList"
+                                  ItemName="Province"
                                   Columns="@tableColumns"
-                                  IsLoading="@loadingStateActive"
+                                  IsLoading="@loadingStateActive"                                  
                                   ShowAdd="true"
                                   ShowDelete="true"
-                                  OnDelete="DeleteSelectedAssessment"
-                                  GetRowId="@(x => x.AssessmentId)"
+                                  OnDelete="DeleteSelectedProvince"
+                                  GetRowId="@(x => x.ProvinceId)"
                                   OnAddRecordId="HandleFormExecution"
                                   OnEditRecordId="HandleFormExecution"
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
-
         </div>
     </main>
 
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
+    @* ALIGNED: Merged duplicate canvas segments into a single entry block *@
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500">
         @if (canvasOpenStatus)
         {
-            <AssessmentsFormComponent AssessmentId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
+            <ProvinceFormComponent ProvinceId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
         }
     </ZabOffCanvas>
 

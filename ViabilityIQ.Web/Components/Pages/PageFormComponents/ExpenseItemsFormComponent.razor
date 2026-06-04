@@ -1,0 +1,57 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Expense Matrix Ledger Data...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="@expenseModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
+
+        <div class="mb-3">
+            <label for="expenseItemName" class="form-label-custom">Expense Item Name <span class="text-danger">*</span></label>
+            <InputText id="expenseItemName" class="form-control-compact" @bind-Value="expenseModel.ExpenseItemName" placeholder="e.g. Fuel, Salaries, Logistics" />
+            <ValidationMessage For="@(() => expenseModel.ExpenseItemName)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="col-12 mb-4">
+            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="expenseModel.Remarks" placeholder="Provide context parameters for this cost line..." />
+            <ValidationMessage For="@(() => expenseModel.Remarks)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="col-12 mb-4 d-flex align-items-center justify-content-start">
+            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
+                @(isRowActive ? "Item Line Active" : "Item Line Suspended")
+            </label>
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
+                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving Context Details...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(ExpenseItemId == 0 ? "Commit New Expense Item" : "Save Structural Updates")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

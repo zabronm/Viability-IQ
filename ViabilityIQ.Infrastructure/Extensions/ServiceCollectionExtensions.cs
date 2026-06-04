@@ -23,7 +23,8 @@ namespace ViabilityIQ.Infrastructure.Extensions
             services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));      //Handles All CRUD using Dapper.Includ
             services.AddMemoryCache();
             services.AddScoped<IDDLookupService, DDLookupService>();                                    //Generic DropDown lookup service
-
+            services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));          //Generic Read only
+            
 
 
 

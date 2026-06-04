@@ -1,0 +1,170 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="businessModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-2 small mb-1 list-unstyled" />
+
+        <!-- TWO COLUMN CONTAINER HOOK -->
+        <div class="row">
+            <div class="col-12 mb-1">
+                <span class="text-uppercase tracking-wider fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <i class="bi bi-person-badge me-1"></i> Personal Information
+                </span>
+                <hr class="mt-1 mb-1" style="opacity: 0.1;" />
+            </div>
+            <!-- LEFT COLUMN -->
+            <div class="col-md-6">
+                <div class="mb-1">
+                    <label for="clientName" class="form-label-custom">Business Name<span class="text-danger">*</span></label>
+                    <InputText id="clientName" class="form-control-compact" @bind-Value="businessModel.BusinessName" />
+                    <ValidationMessage For="@(() => businessModel.BusinessName)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label class="form-label-custom">Business Sector<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Sectors"
+                                       @bind-Value="businessModel.BusinessSectorId" />
+                    <ValidationMessage For="() => businessModel.BusinessSectorId" class="text-danger small" />
+                </div>
+
+                <div class="mb-1">
+                    <label class="form-label-custom">Business Owner<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Clients"
+                                       @bind-Value="businessModel.ClientId" />
+                    <ValidationMessage For="() => businessModel.ClientId" class="text-danger small" />
+                </div>
+
+                <div class="mb-3 mt-4">
+                    <label class="form-label-custom m-0 clickable-label me-3"  style="min-width: 140px;">
+                        Is Business Registered?
+                    </label>
+                    <InputCheckbox class="form-check-input style-toggle-switch-left" @bind-Value="businessModel.Registered" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="idNumber" class="form-label-custom">Registration Number<span class="text-danger">*</span></label>
+                    <InputText id="idNumber" class="form-control-compact" @bind-Value="businessModel.CKNumber" />
+                    <ValidationMessage For="@(() => businessModel.CKNumber)" class="text-danger small mt-1" />
+                </div>
+                                               
+                <div class="mb-1">
+                    <label for="street" class="form-label-custom">Street Address <span class="text-danger">*</span></label>
+                    <InputText id="street" class="form-control-compact" @bind-Value="businessModel.Street_Address" />
+                    <ValidationMessage For="@(() => businessModel.Street_Address)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="area" class="form-label-custom">Suburb <span class="text-danger">*</span></label>
+                    <InputText id="area" class="form-control-compact" @bind-Value="businessModel.Suburb" />
+                    <ValidationMessage For="@(() => businessModel.Suburb)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="city" class="form-label-custom">City/Town<span class="text-danger">*</span></label>
+                    <InputText id="city" class="form-control-compact" @bind-Value="businessModel.CityTown" />
+                    <ValidationMessage For="@(() => businessModel.CityTown)" class="text-danger small mt-1" />
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="col-md-6">
+
+               
+
+                <div class="mb-1">
+                    <label for="province" class="form-label-custom">Province<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Provinces"
+                                       @bind-Value="businessModel.ProvinceId" />
+                    <ValidationMessage For="() => businessModel.ProvinceId" class="text-danger small" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="postAddr" class="form-label-custom">Postal Address <span class="text-danger">*</span></label>
+                    <InputText id="postAddr" class="form-control-compact" @bind-Value="businessModel.Postal_Address" />
+                    <ValidationMessage For="@(() => businessModel.Postal_Address)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="postLoc" class="form-label-custom">Post Location <span class="text-danger">*</span></label>
+                    <InputText id="postLoc" class="form-control-compact" @bind-Value="businessModel.Postal_CityTown" />
+                    <ValidationMessage For="@(() => businessModel.Postal_CityTown)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
+                    <InputText id="postCode" class="form-control-compact" @bind-Value="businessModel.PostalCode" />
+                    <ValidationMessage For="@(() => businessModel.PostalCode)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="telephone" class="form-label-custom">Telephone <span class="text-danger">*</span></label>
+                    <InputText id="telephone" class="form-control-compact" @bind-Value="businessModel.Telephone" />
+                    <ValidationMessage For="@(() => businessModel.Telephone)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="mobile" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
+                    <InputText id="mobile" class="form-control-compact" @bind-Value="businessModel.Mobile" />
+                    <ValidationMessage For="@(() => businessModel.Mobile)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-1">
+                    <label for="email" class="form-label-custom">Email<span class="text-danger">*</span></label>
+                    <InputText id="email" class="form-control-compact" @bind-Value="businessModel.Email" />
+                    <ValidationMessage For="@(() => businessModel.Email)" class="text-danger small mt-1" />
+                </div>
+            </div>
+
+        </div> <!-- END OF ROW SPLIT CONTAINER -->
+        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" /> *@
+
+        <!-- FULL WIDTH: Remarks notes field structure layout -->
+        <div class="col-12 mb-4">
+            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="businessModel.Remarks" />
+            <ValidationMessage For="@(() => businessModel.Remarks)" class="text-danger small mt-1" />
+        </div>
+
+
+        <!-- FULL WIDTH: Active toggle switch layout -->
+        <div class="mb-1 d-flex align-items-center justify-content-start">
+            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
+                @(isRowActive ? "Business Active" : "Business Not-Active")
+            </label>
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
+                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-left" @bind-Value="isRowActive" />
+            </div>
+        </div>
+
+        <!-- Submissions Engine Buttons Triggers -->
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(BusinessId == 0 ? "Add Business Details" : "Update Business Details")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

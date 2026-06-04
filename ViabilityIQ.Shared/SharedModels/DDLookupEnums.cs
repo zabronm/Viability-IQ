@@ -19,6 +19,8 @@ namespace ViabilityIQ.Shared.SharedModels
         Assessments,
         Company,
         Provinces,
+        Users,
+        Sectors,
 
     }
 }

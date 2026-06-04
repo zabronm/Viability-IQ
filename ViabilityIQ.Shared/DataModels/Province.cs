@@ -19,7 +19,7 @@ namespace ViabilityIQ.Shared.DataModels
 	    public string? Address_Location {get; set;}
 	    public string? Address_Suburb {get; set;}
 	    public string? Address_City {get; set;} 
-	    public string? Manager_UserId {get; set;}
+	    public long Manager_UserId {get; set;}
 	    public string? Telephone {get; set;}
 	    public string? Mobile {get; set;} 
 	    public string? Email {get; set;}

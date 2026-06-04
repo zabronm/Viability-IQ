@@ -16,127 +16,133 @@
 
     <EditForm Model="clientModel" OnValidSubmit="HandleFormSubmissionAsync">
         <DataAnnotationsValidator />
-        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
-        
-        <div class="mb-3">
-            <label for="clientName" class="form-label-custom">Client Name<span class="text-danger">*</span></label>
-            <InputText id="clientName" class="form-control-compact" @bind-Value="clientModel.ClientName" />
-            <ValidationMessage For="@(() => clientModel.ClientName)" class="text-danger small mt-1" />
-        </div>
+        <ValidationSummary class="alert alert-danger p-2 small mb-2 list-unstyled" />
 
-        <div class="mb-3">
-            <label for="idNumber" class="form-label-custom">ID Nummber<span class="text-danger">*</span></label>
-            <InputText id="idNumber" class="form-control-compact" @bind-Value="clientModel.IDNumber" />
-            <ValidationMessage For="@(() => clientModel.IDNumber)" class="text-danger small mt-1" />
-        </div>
+        <!-- TWO COLUMN CONTAINER HOOK -->
+        <div class="row">
+            <div class="col-12 mb-2">
+                <span class="text-uppercase tracking-wider fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <i class="bi bi-person-badge me-1"></i> Personal Information
+                </span>
+                <hr class="mt-1 mb-2" style="opacity: 0.1;" />
+            </div>
+            <!-- LEFT COLUMN -->
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="clientName" class="form-label-custom">Client Name<span class="text-danger">*</span></label>
+                    <InputText id="clientName" class="form-control-compact" @bind-Value="clientModel.ClientName" />
+                    <ValidationMessage For="@(() => clientModel.ClientName)" class="text-danger small mt-1" />
+                </div>
 
-        <div class="mb-3">
-            <label for="gender" class="form-label-custom">Gender<span class="text-danger">*</span></label>
-            <DDLookupComponent id="gender" SourceKey="DDLookupEnums.ProductServiceCategories"                                   
-                                   @bind-Value="clientModel.Gender" />
-                <ValidationMessage For="() => clientModel.Gender" class="text-danger small" />
-           
-        </div>
+                <div class="mb-2">
+                    <label for="idNumber" class="form-label-custom">ID Number<span class="text-danger">*</span></label>
+                    <InputText id="idNumber" class="form-control-compact" @bind-Value="clientModel.IDNumber" />
+                    <ValidationMessage For="@(() => clientModel.IDNumber)" class="text-danger small mt-1" />
+                </div>
 
-        <div class="mb-3">
-            <label for="race" class="form-label-custom">Race<span class="text-danger">*</span></label>
-            <DDLookupComponent id="race" SourceKey="DDLookupEnums.ProductServiceCategories"
-                               @bind-Value="clientModel.Race" />
-            <ValidationMessage For="() => clientModel.Gender" class="text-danger small" />
-        </div>
+                <div class="mb-2">
+                    <label for="gender" class="form-label-custom">Gender<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.ProductServiceCategories"
+                                       @bind-Value="clientModel.Gender" />
+                    <ValidationMessage For="() => clientModel.Gender" class="text-danger small" />
+                </div>
 
+                <div class="mb-2">
+                    <label for="race" class="form-label-custom">Race<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.ProductServiceCategories"
+                                       @bind-Value="clientModel.Race" />
+                    <!-- ALIGNED FIX: Changed from Gender validation expression target to Race -->
+                    <ValidationMessage For="() => clientModel.Race" class="text-danger small" />
+                </div>
 
-        <div class="mb-3">
-            <label for="street" class="form-label-custom">Street Address <span class="text-danger">*</span></label>
-            <InputNumber id="street" class="form-control-compact" @bind-Value="clientModel.Street_Address" />
-            <ValidationMessage For="@(() => clientModel.Street_Address)" class="text-danger small mt-1" />
-        </div>
+                <div class="mb-2">
+                    <label for="street" class="form-label-custom">Street Address <span class="text-danger">*</span></label>
+                    <InputText id="street" class="form-control-compact" @bind-Value="clientModel.Street_Address" />
+                    <ValidationMessage For="@(() => clientModel.Street_Address)" class="text-danger small mt-1" />
+                </div>
 
-        <div class="mb-3">
-            <label for="area" class="form-label-custom">Suburb <span class="text-danger">*</span></label>
-            <InputNumber id="area" class="form-control-compact" @bind-Value="clientModel.Suburb" />
-            <ValidationMessage For="@(() => clientModel.Suburb)" class="text-danger small mt-1" />
-        </div>
+                <div class="mb-2">
+                    <label for="area" class="form-label-custom">Suburb <span class="text-danger">*</span></label>
+                    <InputText id="area" class="form-control-compact" @bind-Value="clientModel.Suburb" />
+                    <ValidationMessage For="@(() => clientModel.Suburb)" class="text-danger small mt-1" />
+                </div>
 
+                <div class="mb-2">
+                    <label for="city" class="form-label-custom">City/Town<span class="text-danger">*</span></label>
+                    <InputText id="city" class="form-control-compact" @bind-Value="clientModel.CityTown" />
+                    <ValidationMessage For="@(() => clientModel.CityTown)" class="text-danger small mt-1" />
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label for="city" class="form-label-custom">City/Town<span class="text-danger">*</span></label>
-            <InputNumber id="city" class="form-control-compact" @bind-Value="clientModel.CityTown" />
-            <ValidationMessage For="@(() => clientModel.CityTown)" class="text-danger small mt-1" />
-        </div>
+            <!-- RIGHT COLUMN -->
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="province" class="form-label-custom">Province<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Provinces"
+                                       @bind-Value="clientModel.ProvinceId" />
+                    <ValidationMessage For="() => clientModel.ProvinceId" class="text-danger small" />
+                </div>
 
-        <div class="mb-3">
-            <label for="province" class="form-label-custom">Province<span class="text-danger">*</span></label>
-            <DDLookupComponent id="province" SourceKey="DDLookupEnums.Provinces"
-                               @bind-Value="clientModel.ProvinceId" />
-            <ValidationMessage For="() => clientModel.ProvinceId" class="text-danger small" />
-        </div>
+                <div class="mb-2">
+                    <label for="postAddr" class="form-label-custom">Postal Address <span class="text-danger">*</span></label>
+                    <InputText id="postAddr" class="form-control-compact" @bind-Value="clientModel.Postal_Address" />
+                    <ValidationMessage For="@(() => clientModel.Postal_Address)" class="text-danger small mt-1" />
+                </div>
 
+                <div class="mb-2">
+                    <label for="postLoc" class="form-label-custom">Post Location <span class="text-danger">*</span></label>
+                    <InputText id="postLoc" class="form-control-compact" @bind-Value="clientModel.Postal_City" />
+                    <ValidationMessage For="@(() => clientModel.Postal_City)" class="text-danger small mt-1" />
+                </div>
 
-        <div class="mb-3">
-            <label for="postAddr" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
-            <InputNumber id="postAddr" class="form-control-compact" @bind-Value="clientModel.Postal_Address" />
-            <ValidationMessage For="@(() => clientModel.Postal_Address)" class="text-danger small mt-1" />
-        </div>
+                <div class="mb-2">
+                    <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
+                    <InputText id="postCode" class="form-control-compact" @bind-Value="clientModel.PostalCode" />
+                    <ValidationMessage For="@(() => clientModel.PostalCode)" class="text-danger small mt-1" />
+                </div>
 
+                <div class="mb-2">
+                    <label for="telephone" class="form-label-custom">Telephone <span class="text-danger">*</span></label>
+                    <InputText id="telephone" class="form-control-compact" @bind-Value="clientModel.Telephone" />
+                    <ValidationMessage For="@(() => clientModel.Telephone)" class="text-danger small mt-1" />
+                </div>
 
-           <div class="mb-3">
-            <label for="postLoc" class="form-label-custom">Post Location <span class="text-danger">*</span></label>
-            <InputNumber id="postLoc" class="form-control-compact" @bind-Value="clientModel.Postal_City" />
-            <ValidationMessage For="@(() => clientModel.Postal_City)" class="text-danger small mt-1" />
-        </div>
+                <div class="mb-2">
+                    <label for="mobile" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
+                    <InputText id="mobile" class="form-control-compact" @bind-Value="clientModel.Mobile" />
+                    <ValidationMessage For="@(() => clientModel.Mobile)" class="text-danger small mt-1" />
+                </div>
 
+                <div class="mb-2">
+                    <label for="email" class="form-label-custom">Email<span class="text-danger">*</span></label>
+                    <InputText id="email" class="form-control-compact" @bind-Value="clientModel.Email" />
+                    <ValidationMessage For="@(() => clientModel.Email)" class="text-danger small mt-1" />
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
-            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.PostalCode" />
-            <ValidationMessage For="@(() => clientModel.PostalCode)" class="text-danger small mt-1" />
-        </div>
+        </div> <!-- END OF ROW SPLIT CONTAINER -->
 
-        
-        <div class="mb-3">
-            <label for="postCode" class="form-label-custom">Telephone <span class="text-danger">*</span></label>
-            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.Telephone" />
-            <ValidationMessage For="@(() => clientModel.Telephone)" class="text-danger small mt-1" />
-        </div>
+        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" /> *@
 
-
-        <div class="mb-3">
-            <label for="postCode" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
-            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.Mobile" />
-            <ValidationMessage For="@(() => clientModel.Mobile)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-3">
-            <label for="postCode" class="form-label-custom">Email<span class="text-danger">*</span></label>
-            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.Email" />
-            <ValidationMessage For="@(() => clientModel.Email)" class="text-danger small mt-1" />
-        </div>
-
-
-
-        <div class="mb-3">
-            <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
-            <InputNumber id="postCode" class="form-control-compact" @bind-Value="clientModel.PostalCode" />
-            <ValidationMessage For="@(() => clientModel.PostalCode)" class="text-danger small mt-1" />
-        </div>
-
-
-        <div class="mb-4">
+        <!-- FULL WIDTH: Remarks notes field structure layout -->
+        <div class="col-12 mb-4">
             <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
             <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="clientModel.Remarks" />
             <ValidationMessage For="@(() => clientModel.Remarks)" class="text-danger small mt-1" />
-        </div>
+         </div>
 
-        <div class="mb-3 d-flex align-items-center justify-content-start ">
-            <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
-                @(isRowActive ? "Product Active" : "Product Not-Active")
+
+        <!-- FULL WIDTH: Active toggle switch layout -->
+        <div class="mb-2 d-flex align-items-center justify-content-start">
+            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
+                @(isRowActive ? "Client Active" : "Client Not-Active")
             </label>
-            <div class="form-check form-switch p-0 m-0 d-flex align-items-center col-2">
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
                 <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
             </div>
         </div>
 
+        <!-- Submissions Engine Buttons Triggers -->
         <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
             <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
                 @if (isProcessingData)
@@ -147,7 +153,7 @@
                 else
                 {
                     <i class="bi bi-check2-square me-1.5"></i>
-                    <span>@(ProductServiceId == 0 ? "Add Product/Service" : "Update Product/Service")</span>
+                    <span>@(ClientId == 0 ? "Add Client Details" : "Update Client Details")</span>
                 }
             </button>
         </div>

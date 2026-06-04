@@ -5,7 +5,7 @@ namespace ViabilityIQ.Web.Components.CommonComponents
     public partial class ZabOffCanvas
     {
         [Parameter] public bool IsOpen { get; set; } = false;
-        [Parameter] public int dWidth { get; set; } = 458;
+        [Parameter] public int dWidth { get; set; } = 380;
         [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
         [Parameter] public string HeaderTitle { get; set; } = "Workspace Form Operations";
         [Parameter] public RenderFragment? ChildContent { get; set; }

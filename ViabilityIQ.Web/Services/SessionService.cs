@@ -4,51 +4,76 @@ namespace ViabilityIQ.Web.Services
 {
     public class SessionService : ISessionService
     {
-
         // ====================================================
-        // USER CONTEXT
-        // ====================================================  
+        // APPLICATION
+        // ====================================================
+
         private string _appTitle = "Viability.IQ";
 
+        public string AppTitle
+        {
+            get => _appTitle;
+            set
+            {
+                _appTitle = value;
+                NotifyStateChanged();
+            }
+        }
 
         // ====================================================
         // USER CONTEXT
-        // ====================================================       
+        // ====================================================
 
         private long _userId = -99;
         private string _userName = string.Empty;
         private string _userEmail = string.Empty;
         private bool _isAuthenticated;
 
-        // ====================================================
-        // BUSINESS CONTEXT
-        // ====================================================
+        private long _companyId;
+        private long _branchId;
+        private long _provinceId;
 
-        private long? _businessId;
-        private string _businessName = string.Empty;
+        public long UserId => _userId;
+        public string UserName => _userName;
+        public string UserEmail => _userEmail;
+        public bool IsAuthenticated => _isAuthenticated;
+
+        public long CompanyId => _companyId;
+        public long BranchId => _branchId;
+        public long ProvinceId => _provinceId;
 
         // ====================================================
         // ASSESSMENT CONTEXT
         // ====================================================
 
         private long? _assessmentId;
-        private string? _assessmentNumber;
+        private string _caseNumber = string.Empty;
 
-        private long? _phaseId;
-        private string _phaseName = string.Empty;
-
-        // ====================================================
-        // CLIENT CONTEXT
-        // ====================================================
+        private long? _businessId;
+        private string _businessName = string.Empty;
 
         private long? _clientId;
         private string _clientName = string.Empty;
+        private string _assessmentType = string.Empty;
+
+
+        public long? AssessmentId => _assessmentId;
+        public string CaseNumber => _caseNumber;
+
+        public long? BusinessId => _businessId;
+        public string BusinessName => _businessName;
+
+        public long? ClientId => _clientId;
+        public string ClientName => _clientName;
+        public string AssessmentType => _assessmentType;
 
         // ====================================================
         // NAVIGATION
         // ====================================================
 
         private string _currentPage = string.Empty;
+
+        public string CurrentPage => _currentPage;
 
         // ====================================================
         // EVENTS
@@ -57,144 +82,88 @@ namespace ViabilityIQ.Web.Services
         public event Action? OnSessionChanged;
 
         // ====================================================
-        // PUBLIC READ-ONLY PROPERTIES
+        // LOGIN
         // ====================================================
 
-        public string AppTitle => _appTitle;
-        public long UserId => _userId;
-        public string UserName => _userName;
-        public string UserEmail => _userEmail;
-        public bool IsAuthenticated => _isAuthenticated;
-        public long? BusinessId => _businessId;
-        public string BusinessName => _businessName;
-        public long? AssessmentId => _assessmentId;
-        public string? AssessmentNumber => _assessmentNumber;
-        public long? PhaseId => _phaseId;
-        public string PhaseName => _phaseName;
-        public long? ClientId => _clientId;
-        public string ClientName => _clientName;
-        public string CurrentPage => _currentPage;
-
-        string ISessionService.AppTitle { get => AppTitle; set => throw new NotImplementedException(); }
-
-        // ====================================================
-        // USER
-        // ====================================================
-
-        public void EstablishUserSession(long userId, string userName, string? userEmail = null)
+        public void EstablishUserSession(
+            long userId,
+            string userName,
+            string userEmail,
+            long companyId,
+            long branchId,
+            long provinceId)
         {
             _userId = userId;
             _userName = userName;
-            _userEmail = userEmail ?? userName;
+            _userEmail = userEmail;
+
+            _companyId = companyId;
+            _branchId = branchId;
+            _provinceId = provinceId;
+
             _isAuthenticated = true;
-            _appTitle = AppTitle;
 
             NotifyStateChanged();
-        }
-
-        // ====================================================
-        // BUSINESS
-        // ====================================================
-
-        public void SetActiveBusiness(long businessId, string businessName)
-        {
-            if (businessId <= 0)
-                throw new ArgumentException("BusinessId must be greater than zero.");
-
-            if (_businessId != businessId)
-            {
-                _businessId = businessId;
-                _businessName = businessName ?? string.Empty;
-
-                NotifyStateChanged();
-            }
         }
 
         // ====================================================
         // ASSESSMENT
         // ====================================================
 
-        public void SetActiveAssessment(long assessmentId, string? assessmentNumber = null, long? phaseId = null, string phaseName = "")
+        public void SetActiveAssessment(
+            long assessmentId,
+            string caseNumber,
+            long? businessId,
+            string businessName,
+            long? clientId,
+            string clientName,
+            string assessmentType)
         {
-            if (assessmentId <= 0)
-                throw new ArgumentException("AssessmentId must be greater than zero.");
+            _assessmentId = assessmentId;
+            _caseNumber = caseNumber ?? string.Empty;
 
-            if (_assessmentId != assessmentId || _phaseId != phaseId)
-            {
-                _assessmentId = assessmentId;
-                _assessmentNumber = assessmentNumber;
-                _phaseId = phaseId;
-                _phaseName = phaseName;
+            _businessId = businessId;
+            _businessName = businessName ?? string.Empty;
 
-                NotifyStateChanged();
-            }
+            _clientId = clientId;
+            _clientName = clientName ?? string.Empty;
+            _assessmentType = assessmentType ?? string.Empty;
+
+            NotifyStateChanged();
         }
 
-        // ====================================================
-        // CLIENT
-        // ====================================================
-
-        public void SetActiveClient(long clientId, string clientName)
+        public void ClearAssessment()
         {
-            if (clientId <= 0)
-                throw new ArgumentException("ClientId must be greater than zero.");
+            _assessmentId = null;
+            _caseNumber = string.Empty;
 
-            if (_clientId != clientId)
-            {
-                _clientId = clientId;
-                _clientName = clientName ?? string.Empty;
-                NotifyStateChanged();
-            }
+            _businessId = null;
+            _businessName = string.Empty;
+
+            _clientId = null;
+            _clientName = string.Empty;
+
+            NotifyStateChanged();
         }
 
         // ====================================================
         // NAVIGATION
         // ====================================================
 
-        public void UpdateCurrentPage(
-            string pageRoute)
+        public void UpdateCurrentPage(string pageRoute)
         {
-            if (_currentPage != pageRoute)
-            {
-                _currentPage = pageRoute ?? string.Empty;
-                NotifyStateChanged();
-            }
+            _currentPage = pageRoute ?? string.Empty;
+
+            NotifyStateChanged();
         }
 
         // ====================================================
-        // CLEAR METHODS
+        // GENERAL
         // ====================================================
-
-        public void ClearAssessment()
-        {
-            _assessmentId = null;
-            _assessmentNumber = null;
-
-            _phaseId = null;
-            _phaseName = string.Empty;
-            NotifyStateChanged();
-        }
-
-        public void ClearBusiness()
-        {
-            _businessId = null;
-            _businessName = string.Empty;
-            ClearAssessment();
-            NotifyStateChanged();
-        }
-
-        public void ClearClient()
-        {
-            _clientId = null;
-            _clientName = string.Empty;
-            NotifyStateChanged();
-        }
 
         public void ClearWorkflow()
         {
-            ClearBusiness();
-            ClearClient();
-            NotifyStateChanged();
+            ClearAssessment();
         }
 
         // ====================================================
@@ -203,12 +172,20 @@ namespace ViabilityIQ.Web.Services
 
         public void TerminateSession()
         {
-            ClearWorkflow();
-            _userId = 0;
+            _userId = -99;
             _userName = string.Empty;
             _userEmail = string.Empty;
+
+            _companyId = 0;
+            _branchId = 0;
+            _provinceId = 0;
+
             _isAuthenticated = false;
+
             _currentPage = string.Empty;
+
+            ClearAssessment();
+
             NotifyStateChanged();
         }
 
@@ -220,9 +197,5 @@ namespace ViabilityIQ.Web.Services
         {
             OnSessionChanged?.Invoke();
         }
-
-
-
-
     }
 }

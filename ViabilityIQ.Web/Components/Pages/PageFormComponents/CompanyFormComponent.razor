@@ -1,0 +1,121 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="@companyModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+
+        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
+
+        <!-- TWO COLUMN ROW CONTAINER -->
+        <div class="row">
+
+            <!-- LEFT COLUMN -->
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="categoryName" class="form-label-custom">Product Category Name <span class="text-danger">*</span></label>
+                    <InputText id="categoryName" class="form-control-compact" @bind-Value="companyModel.CompanyName" />
+                    <ValidationMessage For="@(() => companyModel.CompanyName)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="customerCode" class="form-label-custom">Customer Code<span class="text-danger">*</span></label>
+                    <InputText id="customerCode" class="form-control-compact" @bind-Value="companyModel.CompanyCustomerCode" />
+                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="contactPerson" class="form-label-custom">Contact Person<span class="text-danger">*</span></label>
+                    <InputText id="contactPerson" class="form-control-compact" @bind-Value="companyModel.ContactPerson" />
+                    <ValidationMessage For="@(() => companyModel.ContactPerson)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="telephone" class="form-label-custom">Telephone<span class="text-danger">*</span></label>
+                    <InputText id="telephone" class="form-control-compact" @bind-Value="companyModel.Telephone" />
+                    <ValidationMessage For="@(() => companyModel.Telephone)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="mobile" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
+                    <InputText id="mobile" class="form-control-compact" @bind-Value="companyModel.Mobile" />
+                    <ValidationMessage For="@(() => companyModel.Mobile)" class="text-danger small mt-1" />
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="email" class="form-label-custom">Email<span class="text-danger">*</span></label>
+                    <InputText id="email" class="form-control-compact" @bind-Value="companyModel.Email" />
+                    <ValidationMessage For="@(() => companyModel.Email)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="website" class="form-label-custom">Website<span class="text-danger">*</span></label>
+                    <InputText id="website" class="form-control-compact" @bind-Value="companyModel.Website" />
+                    <ValidationMessage For="@(() => companyModel.Website)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="customerCodeDup1" class="form-label-custom">Customer Code <span class="text-danger">*</span></label>
+                    <InputText id="customerCodeDup1" class="form-control-compact" @bind-Value="companyModel.CompanyCustomerCode" />
+                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="customerCodeDup2" class="form-label-custom">Customer Code <span class="text-danger">*</span></label>
+                    <InputText id="customerCodeDup2" class="form-control-compact" @bind-Value="companyModel.CompanyCustomerCode" />
+                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="text-danger small mt-1" />
+                </div>
+            </div>
+
+        </div> <!-- END OF GRID SPLIT -->
+
+        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" /> *@
+
+        <!-- FULL ROW BREAKOUT: Remarks field -->
+        <div class="col-12 mb-2">
+            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="companyModel.Remarks" />
+            <ValidationMessage For="@(() => companyModel.Remarks)" class="text-danger small mt-1" />
+        </div>
+
+        <!-- FULL ROW BREAKOUT: Active status switch toggle layout -->
+        <div class="col-12 mb-2 d-flex align-items-center justify-content-start">
+            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
+                @(isRowActive ? "Company Active" : "Company Not-Active")
+            </label>
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
+                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+            </div>
+        </div>
+
+        <!-- Form Submission Button Action Drawer -->
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(CompanyId == 0 ? "Add Company Details" : "Update Company Details")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

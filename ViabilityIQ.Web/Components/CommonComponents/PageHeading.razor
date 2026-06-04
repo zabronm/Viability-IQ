@@ -1,7 +1,7 @@
 ﻿<PageTitle>Viability.IQ::@_pageTitle</PageTitle>
 <div class="d-flex align-items-center gap-2 ps-1 text-header">
     <i class="@GetIconClass()" style="font-size: 1.0rem;"></i>
-<div class="h4 fw-bold mb-0">@_pageHeading ..</div>
+<div class="h5 fw-bold mb-0">@_pageHeading ..</div>
 </div>
 
 <style type="text/css">
@@ -40,6 +40,11 @@
             PageType.Banks => "bi bi-bank",
             PageType.Product => "bi bi-box-seam-fill",
             PageType.ProductCategory => "bi bi-diagram-3-fill",
+            PageType.Company =>"bi bi-building-gear",
+            PageType.Province => "fa fa-location-arrow",
+            PageType.Sectors => "bi bi-inboxes-fill",
+            PageType.Expenses => "bi bi-basket-fill",
+
         };
     }
 
@@ -64,7 +69,11 @@
             Creditors,
             Reports,    
             ProductCategory,
-            Product
+            Product,
+            Province,
+            Company,
+            Sectors,
+            Expenses,
     }
 
 }

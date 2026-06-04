@@ -1,0 +1,131 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Assessment Case Context...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="@assessmentModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-0 small mb-1 list-unstyled" />
+
+        <div class="p-0 mt-0">
+            <!-- Left Side Grid Structural Form Controls -->
+            @* <div class="col-md-6"> *@
+            <div class="mb-3 mt-0">
+                <label for="caseNumber" class="form-label-custom">Case Number</label>
+                <InputText id="caseNumber" class="form-control-compact bg-light" @bind-Value="assessmentModel.CaseNumber" placeholder="SYSTEM GENERATED" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label for="businessId" class="form-label-custom">Business Name <span class="text-danger">*</span></label>
+                <InputSelect id="businessId" class="form-control-compact form-select" @bind-Value="assessmentModel.BusinessId">
+                    <option value="0">-- Select Business Context --</option>
+                    @foreach (var biz in activeBusinessLookup)
+                    {
+                        <option value="@biz.Key">@biz.Value</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => assessmentModel.BusinessId)" class="text-danger small mt-1" />
+            </div>
+
+            <div class="mb-3">
+                <label for="assessmentType" class="form-label-custom">Assessment Type <span class="text-danger">*</span></label>
+                <InputSelect id="assessmentType" class="form-control-compact form-select" @bind-Value="assessmentModel.AssessmentType">
+                    @foreach (var enumVal in Enum.GetValues<AssessmentType_Enums>())
+                    {
+                        <option value="@enumVal">@enumVal.ToString()</option>
+                    }
+                </InputSelect>
+            </div>
+
+            @* <div class="mb-3">
+                    <label for="statusId" class="form-label-custom">System Status Node <span class="text-danger">*</span></label>
+                    <InputSelect id="statusId" class="form-control-compact form-select" @bind-Value="assessmentModel.StatusId">
+                        <option value="1">Draft / Setup</option>
+                        <option value="2">In Progress</option>
+                        <option value="3">Under Review</option>
+                        <option value="4">Approved State</option>
+                        <option value="5">Closed / Archived</option>
+                    </InputSelect>
+                </div> *@
+
+            <div class="mb-3">
+                <label for="startDate" class="form-label-custom">Assessment Start Date</label>
+                <input type="date" id="startDate" class="form-control-compact" value="@formattedStartDate" @onchange="OnStartDateChanged" />
+            </div>
+            <div class="mb-3">
+                <label for="endDate" class="form-label-custom">Assessment Finish Date</label>
+                <input type="date" id="endDate" class="form-control-compact" value="@formattedEndDate" @onchange="OnEndDateChanged" />
+            </div>
+
+        </div>
+
+        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" />
+        <p class="form-label-custom fw-bold mb-2 text-dark text-uppercase small" style="letter-spacing: 0.5px;">Workspace Module Scope Switch Controls</p>
+ *@
+        <!-- Dynamic Module Switch Workspace Grid -->
+        @* <div class="row mb-2 bg-light p-2 mx-0 rounded border">
+            <div class="col-md-4 mb-2">
+                <div class="form-check form-switch d-flex align-items-center">
+                    <InputCheckbox id="blStock" class="form-check-input me-2" @bind-Value="boolStock" />
+                    <label class="form-label-custom m-0 clickable-label" for="blStock">Stock Ledger Module</label>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="form-check form-switch d-flex align-items-center">
+                    <InputCheckbox id="blDebtors" class="form-check-input me-2" @bind-Value="boolDebtors" />
+                    <label class="form-label-custom m-0 clickable-label" for="blDebtors">Debtors/Creditors</label>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="form-check form-switch d-flex align-items-center">
+                    <InputCheckbox id="blExpenses" class="form-check-input me-2" @bind-Value="boolExpenses" />
+                    <label class="form-label-custom m-0 clickable-label" for="blExpenses">Expense Framework</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check form-switch d-flex align-items-center">
+                    <InputCheckbox id="blSales" class="form-check-input me-2" @bind-Value="boolSales" />
+                    <label class="form-label-custom m-0 clickable-label" for="blSales">Sales & Revenue</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check form-switch d-flex align-items-center">
+                    <InputCheckbox id="blVat" class="form-check-input me-2" @bind-Value="boolVat" />
+                    <label class="form-label-custom m-0 clickable-label" for="blVat">VAT Tax Configurations</label>
+                </div>
+            </div>
+        </div> *@
+
+        <!-- Remarks/Internal Description Field -->
+        <div class="col-12 mb-2">
+            <label for="remarks" class="form-label-custom">Remarks & Internal Notes</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="assessmentModel.Remarks" placeholder="Enter diagnostic assignment metadata background statements..." />
+        </div>
+
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving Record Context...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(AssessmentId == 0 ? "Commit New Case File" : "Apply Modifications")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

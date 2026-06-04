@@ -186,7 +186,7 @@
     vertical-align: middle;
     border-bottom: 1px solid #dee2e6;
     color: #212529;
-    font-size: 0.9rem; /* Marginally downscaled for high-density symmetry */
+    font-size: 0.86rem; /* Marginally downscaled for high-density symmetry */
     line-height: 1.25; /* Shorter text bounding box */
 }
 

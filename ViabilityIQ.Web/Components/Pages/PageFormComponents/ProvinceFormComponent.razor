@@ -1,0 +1,160 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="provinceModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-2 small mb-2 list-unstyled" />
+
+        <!-- TWO COLUMN CONTAINER HOOK -->
+        <div class="row">
+            <div class="col-12 mb-2">
+                <span class="text-uppercase tracking-wider fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <i class="bi bi-person-badge me-1"></i> Provincial Information
+                </span>
+                <hr class="mt-1 mb-2" style="opacity: 0.1;" />
+            </div>
+            <!-- LEFT COLUMN -->
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="clientName" class="form-label-custom">Province Name<span class="text-danger">*</span></label>
+                    <InputText id="clientName" class="form-control-compact" @bind-Value="provinceModel.ProvinceName" />
+                    <ValidationMessage For="@(() => provinceModel.ProvinceName)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="shortname" class="form-label-custom">Short Name<span class="text-danger">*</span></label>
+                    <InputText id="shortname" class="form-control-compact" @bind-Value="provinceModel.ShortName" />
+                    <ValidationMessage For="@(() => provinceModel.ShortName)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="manager" class="form-label-custom">Manager<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Users"  @bind-Value="provinceModel.Manager_UserId" />
+                    <ValidationMessage For="() => provinceModel.Manager_UserId" class="text-danger small" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="street" class="form-label-custom">Street Address <span class="text-danger">*</span></label>
+                    <InputText id="street" class="form-control-compact" @bind-Value="provinceModel.Address_Street" />
+                    <ValidationMessage For="@(() => provinceModel.Address_Street)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="area" class="form-label-custom">Suburb <span class="text-danger">*</span></label>
+                    <InputText id="area" class="form-control-compact" @bind-Value="provinceModel.Address_Suburb" />
+                    <ValidationMessage For="@(() => provinceModel.Address_Suburb)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="city" class="form-label-custom">City/Town<span class="text-danger">*</span></label>
+                    <InputText id="city" class="form-control-compact" @bind-Value="provinceModel.Address_City" />
+                    <ValidationMessage For="@(() => provinceModel.Address_City)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="telephone" class="form-label-custom">Telephone <span class="text-danger">*</span></label>
+                    <InputText id="telephone" class="form-control-compact" @bind-Value="provinceModel.Telephone" />
+                    <ValidationMessage For="@(() => provinceModel.Telephone)" class="text-danger small mt-1" />
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="col-md-6">
+
+                <div class="mb-2">
+                    <label for="mobile" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
+                    <InputText id="mobile" class="form-control-compact" @bind-Value="provinceModel.Mobile" />
+                    <ValidationMessage For="@(() => provinceModel.Mobile)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="email" class="form-label-custom">Email<span class="text-danger">*</span></label>
+                    <InputText id="email" class="form-control-compact" @bind-Value="provinceModel.Email" />
+                    <ValidationMessage For="@(() => provinceModel.Email)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="province" class="form-label-custom">Province<span class="text-danger">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Provinces"
+                                       @bind-Value="provinceModel.ProvinceId" />
+                    <ValidationMessage For="() => provinceModel.ProvinceId" class="text-danger small" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="postAddr" class="form-label-custom">Postal Address <span class="text-danger">*</span></label>
+                    <InputText id="postAddr" class="form-control-compact" @bind-Value="provinceModel.Address_Postal" />
+                    <ValidationMessage For="@(() => provinceModel.Address_Postal)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="postLoc" class="form-label-custom">Post Area/Location <span class="text-danger">*</span></label>
+                    <InputText id="postLoc" class="form-control-compact" @bind-Value="provinceModel.Address_PostalLocation" />
+                    <ValidationMessage For="@(() => provinceModel.Address_PostalLocation)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="postCode" class="form-label-custom">Postal City <span class="text-danger">*</span></label>
+                    <InputText id="postCode" class="form-control-compact" @bind-Value="provinceModel.Address_PostalCity" />
+                    <ValidationMessage For="@(() => provinceModel.Address_PostalCity)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-2">
+                    <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
+                    <InputText id="postCode" class="form-control-compact" @bind-Value="provinceModel.Address_PostalCode" />
+                    <ValidationMessage For="@(() => provinceModel.Address_PostalCode)" class="text-danger small mt-1" />
+                </div>
+
+                
+            </div>
+
+        </div> <!-- END OF ROW SPLIT CONTAINER -->
+        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" /> *@
+
+        <!-- FULL WIDTH: Remarks notes field structure layout -->
+        <div class="col-12 mb-4">
+            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="provinceModel.Remarks" />
+            <ValidationMessage For="@(() => provinceModel.Remarks)" class="text-danger small mt-1" />
+        </div>
+
+
+        <!-- FULL WIDTH: Active toggle switch layout -->
+        <div class="mb-2 d-flex align-items-center justify-content-start">
+            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
+                @(isRowActive ? "Province Active" : "Province Not-Active")
+            </label>
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
+                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+            </div>
+        </div>
+
+        <!-- Submissions Engine Buttons Triggers -->
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(ProvinceId == 0 ? "Add Province Details" : "Update Province Details")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

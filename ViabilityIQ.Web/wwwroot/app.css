@@ -1588,3 +1588,87 @@
     }
 
 
+
+
+    /* =======================================================================================*/
+    /* THE STYLES BELOW ARE FOR DATA INPUT FORMS CONTROL SETTINGS*/
+    /* =======================================================================================*/
+
+/* 1. Target your custom textbox elements (Slightly reduced) */
+.form-control-compact {
+    height: 31px !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    margin-top: 0px !important;
+}
+
+/* 2. Target the select tags nested inside your DDLookupComponent wrapper (Slightly increased) */
+.lookup-dropdown-group .form-select-sm {
+    height: 31px !important;
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+    padding-left: 0.75rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    margin-top: 0px !important;
+}
+
+.form-control-compact-textarea {
+    height: auto !important; /* Prevents 36px restriction from truncating rows */
+    min-height: 50px; /* Gives a comfortable default 3-row depth feel */
+    width: 100% !important; /* Forces full container width starting from the left edge */
+    display: block;
+    margin-top: 0px !important;
+}
+
+/* 1. Fainter, professional slate-gray for labels */
+.form-label-custom {
+    color: #64748b !important; /* Fainter muted gray-blue */
+    font-weight: 500 !important; /* Medium weight so it's readable but not aggressive */
+    font-size: 0.825rem !important; /* Slightly smaller footprint */
+    letter-spacing: 0.01em; /* Clean letter tracking */
+    margin-bottom: 5px;
+    display: inline-block;
+    margin-bottom: 0px !important;
+}
+
+/* 2. Pronounced high-contrast text color for input fields */
+.form-control-compact {
+    color: #0f172a !important; /* Near-black deep navy/slate for maximum readability */
+    font-weight: 600 !important; /* Bold/Semi-bold data entry look */
+    background-color: #ffffff !important;
+}
+
+/* 3. Match the same pronounced text color for dropdown options */
+.lookup-dropdown-group .form-select-sm {
+    color: #0f172a !important; /* Matches textboxes exactly */
+    font-weight: 600 !important;
+}
+
+/* 4. Ensure textarea inherits the same high-contrast data styling */
+.form-control-compact-textarea {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+/* Make input placeholders look like actual hints */
+.form-control-compact::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+/* De-emphasize the unselected first option in your DDLookup dropdown */
+.lookup-dropdown-group select[value="0"],
+.lookup-dropdown-group select option:first-child {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+form-control-compact:focus,
+.lookup-dropdown-group .form-select-sm:focus {
+    outline: none !important;
+    border-color: #000099 !important;
+    box-shadow: 0 0 0 3px rgba(0, 0, 153, 0.1) !important;
+    background-color: #ffffff !important;
+}

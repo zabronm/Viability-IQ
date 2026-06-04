@@ -12,7 +12,7 @@ namespace ViabilityIQ.Shared.SharedModels
         public bool CreateSave { get; set; }
         public bool ClosePanel { get; set; }
 
-        public bool RefreshGrid { get; set; }
+        public bool RefreshGrid { get; set; }       
 
         public bool ClearForm { get; set; }
 
