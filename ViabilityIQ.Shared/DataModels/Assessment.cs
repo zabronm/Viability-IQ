@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+
 using System.Data;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
@@ -12,7 +13,7 @@ using ViabilityIQ.Shared.SharedModels;
 namespace ViabilityIQ.Shared.DataModels
 {
 
-    [TableName("tblAssessments")]
+    [Table("tblAssessments")]
     public class Assessment : IEntity, IAuditableEntity, ISortableEntity
     {
         [Key] public long AssessmentId { get; set; }
@@ -20,8 +21,8 @@ namespace ViabilityIQ.Shared.DataModels
         public long AssessmentTypeId { get; set; }      //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors
         public string? AssessmentType { get; set; }    //If to use direct string values from the Enum class
         public long BusinessId { get; set; }
-        public long AssessmentStartDate { get; set; }
-        public long AssessmentFinishDate { get; set; }
+        public DateTime? AssessmentStartDate { get; set; } = null;
+        public DateTime? AssessmentFinishDate { get; set; } = null;
         public long StatusId { get; set; }
         public long ProgressPercentage { get; set; }
         public long blStock { get; set; }

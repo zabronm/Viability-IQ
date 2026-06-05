@@ -1,0 +1,153 @@
+﻿/* Container Shell Blueprint */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Quick Access Interface Launch Button */
+.btn-quick-access {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #6D7B8D;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-quick-access:hover,
+    .btn-quick-access.active {
+        color: #1a2b4c;
+        background-color: rgba(26, 43, 76, 0.06);
+        border-color: rgba(26, 43, 76, 0.1);
+    }
+
+/* Core Dropdown Matrix Board Shell (REDUCED WIDTH & OVERFLOW FIXED) */
+.dropdown-card-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 360px; /* Reduced width from 440px to 360px */
+    background-color: #ffffff;
+    border: 1px solid rgba(26, 43, 76, 0.12);
+    border-radius: 8px;
+    overflow: hidden; /* Ensures the bottom row clips cleanly to the rounded borders */
+    box-shadow: 0 10px 25px rgba(26, 43, 76, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-in-out, visibility 0.2s;
+}
+
+    .dropdown-card-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+/* Minimalist Light Grey Header Block (REDUCED PADDING) */
+.dropdown-card-header {
+    padding: 8px 12px; /* Reduced padding for tighter vertical height */
+    background-color: #ababab;
+    border-bottom: 1px solid rgba(26, 43, 76, 0.08);
+}
+
+    .dropdown-card-header .header-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #efefef !important;
+        margin-bottom: 0px;
+    }
+
+    .dropdown-card-header .header-subtitle {
+        font-size: 0.72rem;
+        font-weight: 400;
+        color: #6D7B8D;
+    }
+
+/* Matrix Layout Framework (REDUCED INNER GAP AND PADDING FOR LESS HEIGHT) */
+.quick-access-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px; /* Reduced gap from 8px to 6px */
+    padding: 8px; /* Reduced outer padding from 12px to 8px */
+    background-color: #ffffff;
+}
+
+/* Interactive Grid Items (REDUCED VERTICAL PADDING TO COMPRESS HEIGHT) */
+.quick-grid-item {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Snug text-to-icon distance alignment */
+    padding: 8px 10px; /* Reduced padding from 10px 12px to compress layout height */
+    background-color: #f8f9fa;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    text-decoration: none !important;
+    color: #333333;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Wide bottom span layout item context row mapping rules */
+.wide-grid-span {
+    grid-column: span 2;
+    background-color: #f4f6f9;
+}
+
+/* Icon Resizing Engines (UNTOUCHED STABLE SCALING) */
+.grid-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; /* Kept exact same icon wrapper size */
+    height: 28px; /* Kept exact same icon wrapper size */
+    background-color: #ffffff;
+    border-radius: 6px;
+    font-size: 0.95rem; /* Kept exact same internal font size scaling */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    flex-shrink: 0;
+}
+
+/* Item Content Typography Blocks (UNTOUCHED STABLE SCALING) */
+.grid-item-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    align-items:center;
+}
+
+    .grid-item-text .strong {
+        font-size: 0.82rem; /* Kept exact same structural font size */
+        font-weight: 600;
+        color: #1a2b4c;
+    }
+
+    .grid-item-text .sub-text {
+        font-size: 0.7rem; /* Kept exact same structural font size */
+        color: #6D7B8D;
+    }
+
+/* Smooth Lift Interactivity Transitions on Hover Actions */
+.quick-grid-item:hover {
+    background-color: #ffffff;
+    border-color: rgba(26, 43, 76, 0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(26, 43, 76, 0.08);
+}
+
+    .quick-grid-item:hover .grid-item-text .strong {
+        color: #0d6efd;
+    }
+
+/* Unified Theme Token Map Configurations */
+.text-navy {
+    color: #1a2b4c !important;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -9,10 +10,10 @@ using ViabilityIQ.Shared.SharedModels;
 namespace ViabilityIQ.Application.Dtos
 {
 
-    [Table("dbo.vw_provinces_list")]
+    [TableName("dbo.vw_provinces_list")]
     public class ProvinceDto
     {
-        public long ProvinceId { get; set; }
+        [Key] public long ProvinceId { get; set; }
         public string? ShortName { get; set; }
         public string? ProvinceName { get; set; }
         public string? Address_Street { get; set; }

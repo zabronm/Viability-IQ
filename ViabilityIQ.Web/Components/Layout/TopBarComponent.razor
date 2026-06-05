@@ -1,0 +1,113 @@
+﻿<header class="fa-top-bar">
+    <div class="fa-brand-zone">
+        <span class="brand-main fs-2">Viability</span><span class="brand-iq  fs-2 fst-italic">.IQ</span>
+    </div>
+
+    <div class="ms-5 me-0">
+        <button class="fa-toggle-sidebar-btn pe-0" @onclick="ToggleSidebar">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+    <div class="ms-0 dropdown-container">
+        <button class="btn-quick-access" @onclick="ToggleQuickAccess" @onfocusout="CloseQuickAccess">
+            <i class="bi bi-ui-radios-grid p-0"></i>
+        </button>
+        @if (isAssessmentPage)
+        {
+            <div class="dropdown-card-menu g-2 @(isQuickAccessOpen ? "show" : "")">
+                <div class="dropdown-card-header">Navigation Shortcuts</div>
+            <div class="quick-access-grid">
+                <a class="quick-grid-item" style="border-radius: 14px;" href="global/quick1">
+                    <div class="grid-icon-wrapper"><i class="bi bi-speedometer2"></i></div>
+                    <span class="strong">Loans</span>
+                </a>
+                <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick2">
+                    <div class="grid-icon-wrapper"><i class="bi bi-file-earmark-text text-secondary"></i></div>
+                    <span class="strong">Debtors</span>
+                </a>
+                <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick3">
+                    <div class="grid-icon-wrapper"><i class="bi bi-graph-up-arrow"></i></div>
+                    <span class="strong">CapEx</span>
+                </a>
+                <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick4">
+                    <div class="grid-icon-wrapper"><i class="bi bi-database-check"></i></div>
+                    <span class="strong">Creditors</span>
+                </a>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="fa-top-bar-right">
+        <span class="marble-date-badge">
+            <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+        </span>
+
+        <button class="action-icon-btn">
+            <i class="bi bi-bell"></i>
+            <span class="notification-indicator"></span>
+        </button>
+
+        <div class="dropdown-container">
+            <button class="avatar-trigger-btn" @onclick="ToggleProfileMenu" @onfocusout="CloseProfileMenu">
+                <div class="avatar-circle">ZM</div>
+            </button>
+            <div class="profile-card-dropdown @(isProfileOpen ? "show" : "")">
+                <div class="profile-card-header">
+                    <div class="profile-avatar-large">ZM</div>
+                    <div class="profile-info">
+                        <h4 class="profile-name">Zabron Muyambo</h4>
+                        <span class="profile-role">Lead Systems Developer</span>
+                    </div>
+                </div>
+                <div class="profile-card-body">
+                    <div class="profile-section-title">Account Management</div>
+                    <a class="profile-menu-item" href="profile/details">
+                        <i class="bi bi-person-bounding-box"></i> My Profile
+                    </a>
+                    <a class="profile-menu-item" href="profile/settings">
+                        <i class="bi bi-sliders"></i> Preferences
+                    </a>
+
+                    <div class="profile-section-title">Systems & Auditing</div>
+                    <a class="profile-menu-item" href="global/audit-logs">
+                        <i class="bi bi-shield-check"></i> Project Audit Status
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+                    <a class="profile-menu-item logout-item" href="logout">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+@code {
+    [Parameter] public bool isAssessmentPage { get; set; } = true ? false : true;
+
+    private bool isSidebarCollapsed = false;
+    private bool isSetupOpen = false;
+    private bool isQuickAccessOpen = false;
+    private bool isProfileOpen = false;
+
+    private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
+    private void ToggleSetupMenu() => isSetupOpen = !isSetupOpen;
+
+    private void ToggleQuickAccess() => isQuickAccessOpen = !isQuickAccessOpen;
+    private void ToggleProfileMenu() => isProfileOpen = !isProfileOpen;
+
+
+    private async Task CloseQuickAccess()
+    {
+        await Task.Delay(150);
+        isQuickAccessOpen = false;
+    }
+
+    private async Task CloseProfileMenu()
+    {
+        await Task.Delay(150);
+        isProfileOpen = false;
+    }
+}

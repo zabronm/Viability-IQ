@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
@@ -57,8 +58,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                         assessmentModel = record;
 
                         // Parse unix tracking logs back to layout strings
-                        formattedStartDate = DateTimeOffset.FromUnixTimeSeconds(assessmentModel.AssessmentStartDate).DateTime.ToString("yyyy-MM-dd");
-                        formattedEndDate = DateTimeOffset.FromUnixTimeSeconds(assessmentModel.AssessmentFinishDate).DateTime.ToString("yyyy-MM-dd");
+                        formattedStartDate = assessmentModel!.AssessmentStartDate?.ToString("yyyy-MM-dd");
+                        formattedEndDate = assessmentModel.AssessmentFinishDate?.ToString("yyyy-MM-dd");
 
                         // Extract switch configuration logic states
                         boolStock = assessmentModel.blStock == 1;
@@ -67,6 +68,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                         boolSales = assessmentModel.blSales == 1;
                         boolVat = assessmentModel.blVat == 1;
                     }
+                }
+                catch (Exception ex)
+                {
+                    // Handle exception
                 }
                 finally
                 {
@@ -93,8 +98,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         {
             if (DateTime.TryParse(e.Value?.ToString(), out var dt))
             {
-                formattedStartDate = dt.ToString("yyyy-MM-dd");
-                assessmentModel.AssessmentStartDate = ((DateTimeOffset)dt).ToUnixTimeSeconds();
+                formattedStartDate = dt.ToString("yyyy-MM-dd");                
+                assessmentModel.AssessmentStartDate = dt;
             }
         }
 
@@ -102,8 +107,9 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         {
             if (DateTime.TryParse(e.Value?.ToString(), out var dt))
             {
-                formattedEndDate = dt.ToString("yyyy-MM-dd");
-                assessmentModel.AssessmentFinishDate = ((DateTimeOffset)dt).ToUnixTimeSeconds();
+                formattedEndDate = dt.ToString("yyyy-MM-dd");                
+                assessmentModel.AssessmentFinishDate = dt;
+
             }
         }
 

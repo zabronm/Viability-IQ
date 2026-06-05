@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Pages_Assessments\PageFormComponents\" />
     <Folder Include="wwwroot\scripts\" />
   </ItemGroup>
 

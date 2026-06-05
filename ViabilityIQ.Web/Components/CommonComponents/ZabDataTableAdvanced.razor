@@ -25,11 +25,6 @@
         }
 
         <div class="toolbar-right-engine">
-            @* <div class="print-addon-wrapper">
-                <button class="btn-toolbar-utility" @onclick="OnAddClick">
-                    <i class="bi bi-printer-fill"></i>
-                </button>
-            </div> *@
             <div class="toolbar-right-engine">
                 <div class="print-addon-wrapper dropdown">
                     <button class="btn-toolbar-utility dropdown-toggle" type="button" id="gridUtilityMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Export / Output Operations">
@@ -57,7 +52,6 @@
                     </ul>
                 </div>
 
-                @* <div class="search-input-wrapper"> ... </div> *@
                 <div class="search-input-wrapper">
                     <input type="text"
                            class="form-control-search"
@@ -67,9 +61,9 @@
                     <i class="bi bi-search search-inside-icon"></i>
                 </div>
             </div>
-            
+
         </div>
-    </div> @* FIX: Changed from accidental } to closing div tag *@
+    </div>
 
     <div class="table-scroll-container">
         <table class="table-modern-core table-sm">
@@ -107,11 +101,21 @@
 
                             @foreach (var c in Columns)
                             {
-                                <td class="@(ResolveCssClass(c, row)) table-cell-data @(c.IsClickable ? "cell-interactive" : "")"
+                                @* FIX 2 IMPLEMENTATION PLACE:
+                                   We updated the class string and the stopPropagation attribute below. 
+                                   If 'c.CellTemplate != null' is true, it marks the cell interactive 
+                                   and stops the click from bubble-bleeding upward into the row grid.
+                                *@
+                                <td class="@(ResolveCssClass(c, row)) table-cell-data @(c.IsClickable || c.CellTemplate != null ? "cell-interactive" : "")"
                                     @onclick="async (e) => { if (c.IsClickable && c.OnClick != null) { await HandleLinkClick(c, row); } }"
-                                    @onclick:stopPropagation="c.IsClickable">
+                                    @onclick:stopPropagation="c.IsClickable || c.CellTemplate != null">
 
-                                    @if (c.IsLink)
+                                    @if (c.CellTemplate != null)
+                                    {
+                                        @* Renders our actual interactive C# Button objects directly into the DOM tree *@
+                                        @c.CellTemplate(row)
+                                    }
+                                    else if (c.IsLink)
                                     {
                                         <a href=""
                                            @onclick:preventDefault="true"
@@ -170,7 +174,7 @@
                                         disabled="@(GetRowId?.Invoke(row) == null)"
                                         @onclick="() => OnEditClick(GetRowId!(row))"
                                         title="Modify Record">
-                                    <i class="bi bi-pen-fill text-black"></i>
+                                    <i class="bi bi-vector-pen text-navy"></i>
                                 </button>
 
                                 @if (ShowDelete)
@@ -221,27 +225,5 @@
             </button>
         </div>
     </div>
-
-    @* <div class="table-pagination-footer">
-        <div class="pagination-summary-text">
-            Showing Page <span class="accent-bold">@currentPage</span> of <span class="accent-bold">@totalPages</span> entries
-        </div>
-
-        <div class="pagination-control-buttons">
-            <button class="btn-pagination-nav"
-                    @onclick="PrevPage"
-                    @onclick:stopPropagation="true"
-                    disabled="@(currentPage == 1)">
-                <i class="bi bi-chevron-left"></i> Previous
-            </button>
-
-            <button class="btn-pagination-nav"
-                    @onclick="NextPage"
-                    @onclick:stopPropagation="true"
-                    disabled="@(currentPage == totalPages)">
-                Next <i class="bi bi-chevron-right"></i>
-            </button>
-        </div>
-    </div> *@
 
 </div>

@@ -47,6 +47,8 @@ namespace ViabilityIQ.Web.Components.CommonComponents
         [Parameter] public EventCallback<List<TItem>> OnEmailList { get; set; }
 
 
+
+
         // Core Internal State Parameters
         private string _searchText = string.Empty;
         private string searchText
@@ -229,6 +231,7 @@ namespace ViabilityIQ.Web.Components.CommonComponents
         // ==========================================================================
         public class ColumnDefinition<T>
         {
+            public RenderFragment<TItem>? CellTemplate { get; set; }
             public string Title { get; set; } = string.Empty;
             public Func<T, object?>? Value { get; set; }
 

@@ -28,25 +28,72 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<AssessmentDto> assessmentsList = new();
         private List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>> tableColumns = new();
 
+        // Canvas Drawer State Parameters
         private ZabOffCanvas? canvasShell;
         private bool canvasOpenStatus = false;
         private string formTitle = "Assessment";
         private long activeRecordId = 0;
+
+        private ZabOffCanvas? businessCanvasShell;
+        private bool businessCanvasOpen = false;
+        private long activeBusinessId = 0;
+
+        private ZabOffCanvas? clientCanvasShell;
+        private bool clientCanvasOpen = false;
+        private long activeClientId = 0;
+
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
             _ = LoadGridDatasetAsync();
 
-            // FIXED: Removed the non-existent 'CellTemplate' property assignment to resolve compiler error.
             tableColumns = new List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>>
             {
-                new() { Title = "Case Number", Value = x => x.CaseNumber ?? "" },
-                new() { Title = "Case Type", Value = x => x.AssessmentType },
-                new() { Title = "Business Name", Value = x => x.BusinessName ?? "" },
-                new() { Title = "Business Owner", Value = x => x.BusinessOwner ?? "" },
-                new() { Title = "Start Date", Value = x => x.AssessmentStartDate.ToString("yyyy-MM-dd") ?? "" },
-                new() { Title = "End Date", Value = x => x.AssessmentFinishDate.ToString("yyyy-MM-dd") ?? "" },
+                // COLUMN 1: Case Number Link-Button
+                new() {
+                    Title = "Case Number",
+                    CellTemplate = context => builder => {
+                        var scopedAssessmentId = context.AssessmentId;
+                        builder.OpenElement(0, "button");
+                        builder.AddAttribute(1, "class", "btn btn-link p-0 fw-bold text-primary text-decoration-none link-underline-hover border-0 bg-transparent text-start");
+                        builder.AddAttribute(2, "style", "font-size: inherit;");
+                        builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => InitializeAndRedirectToSessionAsync(scopedAssessmentId)));
+                        builder.AddContent(4, context.CaseNumber);
+                        builder.CloseElement();
+                    }
+                },
+                new() { Title = "Case Type", Value = x => x.AssessmentType ?? "" },
+                
+                // COLUMN 2: Business Name Link-Button
+                new() {
+                    Title = "Business Name",
+                    CellTemplate = context => builder => {
+                        var scopedBusinessId = context.BusinessId;
+                        builder.OpenElement(0, "button");
+                        builder.AddAttribute(1, "class", "btn btn-link p-0 text-primary text-decoration-none link-underline-hover border-0 bg-transparent text-start");
+                        builder.AddAttribute(2, "style", "font-size: inherit;");
+                        builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => OpenBusinessDrawerForm(scopedBusinessId)));
+                        builder.AddContent(4, context.BusinessName);
+                        builder.CloseElement();
+                    }
+                },
+                
+                // COLUMN 3: Business Owner Link-Button
+                new() {
+                    Title = "Business Owner",
+                    CellTemplate = context => builder => {
+                        var scopedClientId = context.ClientId;
+                        builder.OpenElement(0, "button");
+                        builder.AddAttribute(1, "class", "btn btn-link p-0 text-primary text-decoration-none link-underline-hover border-0 bg-transparent text-start");
+                        builder.AddAttribute(2, "style", "font-size: inherit;");
+                        builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => OpenClientDrawerForm(scopedClientId)));
+                        builder.AddContent(4, context.BusinessOwner);
+                        builder.CloseElement();
+                    }
+                },
+                new() { Title = "Start Date", Value = x => x.AssessmentStartDate.ToString("yyyy-MM-dd") },
+                new() { Title = "End Date", Value = x => x.AssessmentFinishDate.ToString("yyyy-MM-dd") },
                 new() {
                     Title = "Status",
                     Value = x => GetStatusText(x.StatusId),
@@ -73,9 +120,6 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        /// <summary>
-        /// This intercepts the record activation event, sets session variables, and moves to the workspace cockpit.
-        /// </summary>
         private async Task InitializeAndRedirectToSessionAsync(long assessmentId)
         {
             var selectedRecord = assessmentsList.FirstOrDefault(x => x.AssessmentId == assessmentId);
@@ -83,9 +127,8 @@ namespace ViabilityIQ.Web.Components.Pages
 
             try
             {
-                _Toast!.ShowInfo($"Initializing session for case {selectedRecord.CaseNumber}...", sessionService!.AppTitle);
+                _Toast!.ShowInfo($"Configuring workspace environment for case {selectedRecord.CaseNumber}...", sessionService!.AppTitle);
 
-                // i) Initialize session state values
                 if (sessionService != null)
                 {
                     sessionService.SetActiveAssessment(
@@ -96,16 +139,46 @@ namespace ViabilityIQ.Web.Components.Pages
                          clientId: selectedRecord.ClientId,
                          clientName: selectedRecord.BusinessOwner,
                          assessmentType: selectedRecord.AssessmentType
-                         );                                         
-                                        
+                    );
                 }
 
-                // ii) Redirect down to the diagnostic execution assessment page
-                Navigation.NavigateTo($"/assessments/{selectedRecord.AssessmentId}");
+                Navigation.NavigateTo($"/assessment/{selectedRecord.AssessmentId}");
             }
             catch (Exception ex)
             {
-                _Toast!.ShowError($"Session initialization failed: {ex.Message}", "Routing Error");
+                _Toast!.ShowError($"Workspace redirection failed: {ex.Message}", "Routing Error");
+            }
+        }
+
+        private async Task OpenBusinessDrawerForm(long businessId)
+        {
+            if (businessId == 0) return;
+
+            // Assign identity context before modifying visibility parameters
+            activeBusinessId = businessId;
+            businessCanvasOpen = true;
+            StateHasChanged();
+
+            if (businessCanvasShell != null)
+            {
+                await businessCanvasShell.OpenAsync("Business Registry Summary View");
+                StateHasChanged();
+            }
+        }
+
+        private async Task OpenClientDrawerForm(long clientId)
+        {
+            if (clientId == 0) return;
+
+            // Assign identity context before modifying visibility parameters
+            activeClientId = clientId;
+            clientCanvasOpen = true;
+            StateHasChanged();
+
+            if (clientCanvasShell != null)
+            {
+                await clientCanvasShell.OpenAsync("Client Profile Detail File");
+                StateHasChanged();
             }
         }
 
@@ -113,6 +186,8 @@ namespace ViabilityIQ.Web.Components.Pages
         {
             activeRecordId = extractedRecordId;
             formTitle = extractedRecordId == 0 ? "Initiate New Assessment Case" : "Modify Assessment Settings";
+            canvasOpenStatus = true;
+            StateHasChanged();
 
             if (canvasShell != null)
             {
@@ -131,20 +206,18 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ProcessExecutionFeedback(SaveResult _result)
+        private async Task ProcessExecutionFeedback(SaveResult _result, int panelIndex = 1)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
             }
-            else
-            {
-                _Toast!.ShowError(_result.Message, "Operational Fault");
-            }
 
-            if (_result.ClosePanel && canvasShell != null)
+            if (_result.ClosePanel)
             {
-                await canvasShell.CloseAsync();
+                if (panelIndex == 1 && canvasShell != null) await canvasShell.CloseAsync();
+                if (panelIndex == 2 && businessCanvasShell != null) await businessCanvasShell.CloseAsync();
+                if (panelIndex == 3 && clientCanvasShell != null) await clientCanvasShell.CloseAsync();
             }
 
             await LoadGridDatasetAsync();

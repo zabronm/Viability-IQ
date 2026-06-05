@@ -1,7 +1,6 @@
 ﻿
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Dapper.Contrib.Extensions;
 using ViabilityIQ.Shared.DataModelsInterfaces;
 
 namespace ViabilityIQ.Shared.DataModels

@@ -31,7 +31,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             { DDLookupEnums.Provinces, ("tblProvince", "ProvinceId", "ProvinceName") },
             { DDLookupEnums.Users, ("tblUsers", "UserId", "FullName") },
             { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSector") },
-            { DDLookupEnums.Clients, ("tblClients", "ClientId", "FullName") },
+            { DDLookupEnums.Clients, ("tblClient", "ClientId", "FullName") },
         };
 
         public DDLookupService(IDbConnectionFactory dbConnectionFactory, IMemoryCache cache)

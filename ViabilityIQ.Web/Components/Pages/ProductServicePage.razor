@@ -1,12 +1,13 @@
 ﻿@page "/settings/products"
 
+@using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Web.Components.Pages.PageFormComponents
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 <div class="p-0 position-relative">
-    <PageHeading _pageTitle="Product/Service Categories" CurrentPage="PageHeading.PageType.ProductCategory" _pageHeading="Product/Service Categories" />
+    <PageHeading _pageTitle="Product/Service Categories" CurrentPage="PageType.ProductCategory" _pageHeading="Product/Service Categories" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
         <div class="app-workspace-shell">

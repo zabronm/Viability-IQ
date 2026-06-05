@@ -1,24 +1,27 @@
 ﻿@page "/settings/assessments"
 
+@using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Application.Dtos
 @using ViabilityIQ.Web.Components.Pages.PageFormComponents
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
+
 <div class="p-0 position-relative">
-    <PageHeading _pageTitle="Assessments" CurrentPage="PageHeading.PageType.Assessments" _pageHeading="Assessments" />
+    <PageHeading _pageTitle="Assessments" CurrentPage="PageType.Assessments" _pageHeading="My Assessments" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
         <div class="app-workspace-shell">
-           
+
             <ZabDataTableAdvanced TItem="AssessmentDto"
                                   Items="@assessmentsList"
                                   ItemName="Assessment Case"
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"
                                   ShowAdd="true"
-                                  ShowDelete="true"
+                                  ShowDelete="false"
+                                  SecondaryActionIcon="true"
                                   OnDelete="DeleteSelectedAssessment"
                                   GetRowId="@(x => x.AssessmentId)"
                                   OnAddRecordId="HandleFormExecution"
@@ -33,8 +36,16 @@
     <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
         @if (canvasOpenStatus)
         {
-            <AssessmentsFormComponent AssessmentId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
+            <AssessmentsFormComponent AssessmentId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res, 1))" />
         }
+    </ZabOffCanvas>
+
+    <ZabOffCanvas @ref="businessCanvasShell" @bind-IsOpen="businessCanvasOpen" HeaderTitle="Business Profile Overview" dWidth="500">
+        <BusinessFormComponent BusinessId="@activeBusinessId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res, 2))" />
+    </ZabOffCanvas>
+
+    <ZabOffCanvas @ref="clientCanvasShell" @bind-IsOpen="clientCanvasOpen" HeaderTitle="Client Representative Profile File" dWidth="500">
+        <ClientFormComponent ClientId="@activeClientId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res, 3))" />
     </ZabOffCanvas>
 
     <footer class="py-4 bg-light mt-auto">
