@@ -1,0 +1,206 @@
+﻿@page "/assessment/reports"
+
+@layout MainLayout_Assessment
+
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Layout
+
+<div class="p-0 position-relative dashboard-workspace container-fluid">
+    <PageHeading_Assessment _pageTitle="Reports" PageTitle="Assessment Reports" CurrentPage="PageType.Reports" />
+
+    <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">
+        <div class="col-xl-10 col-lg-9 col-12">
+
+            <div class="cardstandard-shadow mb-3 p-1 bg-white" >
+                <div class="card-header zab-report-header py-1 px-1" style="border-top-left-radius: 8px; border-top-right-radius: 8px; ">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-binoculars-fill text-white me-2"></i>
+                        <h5 class="m-0 text-white font-monospace text-xs text-uppercase tracking-wider">Report Configuration Engine</h5>
+                    </div>
+                </div>
+                <div class="card-body p-3 bg-white mb-2" style="border: solid 0.6px #cdcdcd; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                    <div class="row align-items-end g-2 mb-2" >
+                        <div class="col-md-6 col-12 mb-1" >
+                            <label class="form-label text-muted text-xxs text-uppercase fw-bold mb-1">Select Statement / Report Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-file-earmark-bar-graph text-secondary"></i></span>
+                                <select class="form-select border-start-0 text-sm" @onchange="OnReportSelected">
+                                    <option value="">-- Choose a report to run --</option>
+                                    @foreach (var category in GroupedReports)
+                                    {
+                                        <optgroup label="@category.Key">
+                                            @foreach (var report in category.Value)
+                                            {
+                                                <option value="@report.Id">@report.Name</option>
+                                            }
+                                        </optgroup>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12 text-md-end">
+                            @if (SelectedReport != null)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary me-2 px-3" @onclick="ClearFilters">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                                </button>
+
+                                @if (IsConfigurationValid())
+                                {
+                                    <button class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm" @onclick="GenerateReport">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i> Compile Matrix
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-secondary px-4 fw-semibold shadow-sm opacity-65" disabled>
+                                        <i class="bi bi-exclamation-triangle me-1"></i> Awaiting Parameters
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (SelectedReport != null)
+                {
+                    <div class="card border-0 standard-shadow mb-3 rounded-3 animate-fade-in p-1">
+                        <div class="card-body p-2 bg-white border-start border-4 border-navy-brand">
+                            <div class="mb-2">
+                                <h6 class="text-dark fw-bold mb-0 text-sm">@SelectedReport.Name Parameters</h6>
+                                <p class="text-muted text-xs mb-0">@SelectedReport.Description</p>
+                            </div>
+                            <hr class="my-2 text-muted opacity-25" />
+
+                            <div class="row g-3 align-items-end">
+                                @foreach (var param in SelectedReport.Parameters)
+                                {
+                                    <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                                        <label class="form-label text-muted text-xxs text-uppercase fw-semibold mb-1">
+                                            @param.Label @(param.IsRequired ? "*" : "")
+                                        </label>
+
+                                        @if (param.Type == ReportParameterType.Date)
+                                        {
+                                            <input type="date" class="form-control form-control-sm"
+                                                   value="@GetParamValue(param.Key)"
+                                                   @onchange="(e) => SetParamValue(param.Key, e.Value?.ToString())" />
+                                        }
+                                        else if (param.Type == ReportParameterType.Number)
+                                        {
+                                            <input type="number" class="form-control form-control-sm" placeholder="0"
+                                                   value="@GetParamValue(param.Key)"
+                                                   @onchange="(e) => SetParamValue(param.Key, e.Value?.ToString())" />
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control form-control-sm" placeholder="Enter criteria..."
+                                                   value="@GetParamValue(param.Key)"
+                                                   @onchange="(e) => SetParamValue(param.Key, e.Value?.ToString())" />
+                                        }
+                                    </div>
+                                }
+
+                                @if (SelectedReport.Parameters.Any(p => p.Type == ReportParameterType.Date && p.Key.Contains("Start")))
+                                {
+                                    <div class="col-lg-4 col-12 ms-auto text-lg-end">
+                                        <div class="btn-group btn-group-xs me-1 shadow-xs" role="group">
+                                            <button type="button" class="btn btn-outline-secondary text-xxs" @onclick="ApplyCurrentMonthRange">This Month</button>
+                                            <button type="button" class="btn btn-outline-secondary text-xxs" @onclick="ApplyCurrentQuarterRange">This Quarter</button>
+                                            <button type="button" class="btn btn-outline-secondary text-xxs" @onclick="ApplyFullFinancialYear">FY2026</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+
+            
+
+            <div class="card border-0 standard-shadow rounded-3">
+                @if (IsLoading)
+                {
+                    <div class="card-body p-5 bg-white min-vh-50 d-flex flex-column justify-content-center align-items-center text-center">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="text-muted text-sm font-monospace">Querying database engine buffers...</p>
+                    </div>
+                }
+                else if (HasGenerated && SelectedReport != null)
+                {
+                    <div class="card-header zab-report-detail-header py-2 px-1 d-flex justify-content-between align-items-center rounded-top-4">
+                        <div>
+                            <h5 class="text-navy-brand fw-bold mb-0 text-sm">@SelectedReport.Name Preview</h5>
+                            <small class="text-muted text-xxs font-monospace">Generated: @DateTime.Now.ToString("dd MMM yyyy HH:mm")</small>
+                        </div>
+                        <ReportOptionsComponent Items="MockReportItems" />
+                    </div>
+
+                    <div class="card-body p-1 bg-white animate-fade-in mt-3">
+                        <div class="p-1 mb-4 rounded border-start border-4 border-secondary d-flex justify-content-between align-items-center tracking-tight" style="background-color: #f8fafc;">
+                            <div>
+                                <div class="text-xxs text-uppercase text-muted fw-bold tracking-wider mb-05">Assessed Entity Profile</div>
+                                <div class="text-xs fw-bold text-dark">GreenHorizon Agri-Biz</div>
+                            </div>
+                            <div>
+                                <div class="text-xxs text-uppercase text-muted fw-bold tracking-wider mb-05">Audited Core Case Key</div>
+                                <div class="text-xs font-monospace text-primary fw-bold">#CAS-2026-0892</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-xxs text-uppercase text-muted fw-bold tracking-wider mb-05">Operational Scope Timeline</div>
+                                <div class="text-xs text-dark fw-semibold">01 Jan - 31 Dec 2026</div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped border-top text-xs">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Reference Ledger</th>
+                                        <th>Description Metric</th>
+                                        <th class="text-end">Base Allocation (R)</th>
+                                        <th class="text-end">Target Variance (R)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var row in MockReportItems)
+                                    {
+                                        <tr>
+                                            <td class="font-monospace fw-semibold">@row.LedgerCode</td>
+                                            <td>@row.Description</td>
+                                            <td class="text-end">@row.BaseAmount.ToString("N2")</td>
+                                            <td class="text-end @(row.Variance >= 0 ? "text-success" : "text-danger")">
+                                                @(row.Variance >= 0 ? "+" : "")@row.Variance.ToString("N2")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-body p-5 bg-white min-vh-50 d-flex flex-column justify-content-center align-items-center text-center">
+                        <div class="p-5 animate-fade-in">
+                            <div class="display-5 text-muted opacity-25 mb-3"><i class="bi bi-database-exclamation"></i></div>
+                            <h6 class="text-secondary fw-semibold mb-1">No Report Selected/Actived</h6>
+                            <p class="text-muted text-xs mx-auto" style="max-width: 380px;">
+                                Select required operational report from the dropdown above, and then enter report parameters.
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+        <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
+            <RightSummary01 />
+        </div>
+    </div>
+</div>
+<BFooter />

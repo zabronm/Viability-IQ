@@ -1,0 +1,62 @@
+﻿@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="p-3 bg-white">
+    @if (IsLoading)
+    {
+        <div class="p-5 d-flex flex-column align-items-center justify-content-center text-center">
+            <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+            <div>Synchronizing sales category configuration matrix...</div>
+        </div>
+    }
+    else if (Model != null)
+    {
+        <EditForm Model="@Model" OnValidSubmit="ExecuteSaveWorkflow">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+
+            <div class="row g-2">
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Sales Category Name</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="e.g. Retail Goods, Services" @bind-value="Model.SalesCategoryName" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Markup Percentage (%)</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00" @bind-value="Model.MarkupPercentage" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Audit Trail Remarks</label>
+                    <textarea class="form-control form-control-sm" rows="3" placeholder="Enter configuration remarks or optional justifications..." @bind="Model.Remarks"></textarea>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <div class="form-check form-switch p-2 bg-light border rounded ps-5 ms-0 d-flex align-items-center">
+                        <input class="form-check-input ms-3" type="checkbox" id="salesCategoryActiveSwitch" @bind="Model.Active" />
+                        <label class="form-check-label fw-semibold ps-2 mb-0" for="salesCategoryActiveSwitch">
+                            Include in Viability Analysis
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4 pt-2 border-top d-flex justify-content-end align-items-center">
+                @if (IsSubmitting)
+                {
+                    <button type="button" class="btn btn-sm btn-secondary px-4 style-opacity-75" disabled>
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Storing Buffers...
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-save me-1"></i> Save Changes
+                    </button>
+                }
+            </div>
+        </EditForm>
+    }
+</div>

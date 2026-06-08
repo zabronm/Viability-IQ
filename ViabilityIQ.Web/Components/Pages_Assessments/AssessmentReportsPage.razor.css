@@ -32,6 +32,16 @@
     }
 }
 
+
+.zab-report-header {
+    background-color: #95B9C7 !important;
+}
+
+.zab-report-detail-header {
+    background-color: #ededed !important;
+}
+
+
 /* White background retained for KPI cards */
 .kpi-card {
     background-color: #ffffff;

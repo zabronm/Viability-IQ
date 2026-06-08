@@ -1,0 +1,78 @@
+﻿@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="p-3 bg-white">
+    @if (IsLoading)
+    {
+        <div class="p-5 d-flex flex-column align-items-center justify-content-center text-center">
+            <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+            <div>Synchronizing ledger operational state...</div>
+        </div>
+    }
+    else if (Model != null)
+    {
+        <EditForm Model="@Model" OnValidSubmit="HandleFormSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label text-muted mb-1">Number of Directors</label>
+                    <input type="number" class="form-control form-control-sm" min="1" max="50"
+                           @bind-value="Model.NumberOfDirectors"
+                           @bind-value:event="oninput"
+                           @onchange="CalculateWagesImpact" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-1">Monthly Wage per Director (R)</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light fw-semibold">R</span>
+                        <input type="number" step="0.01" class="form-control text-end fw-semibold"
+                               @bind-value="Model.MonthlyDirectorWagesAmount"
+                               @bind-value:event="oninput"
+                               @onchange="CalculateWagesImpact" />
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-1">Combined Monthly Impact (R)</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light">R</span>
+                        <input type="text" class="form-control text-end fw-bold bg-light"
+                               value="@Model.MonthlyDirectorWagesAmountTotal.ToString("N2")" readonly disabled />
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-1">Internal Remarks</label>
+                    <textarea class="form-control form-control-sm" rows="3" placeholder="Enter ledger justifications or optional annotations..." @bind="Model.Remarks"></textarea>
+                </div>
+@* 
+                <div class="col-12 mt-3">
+                    <div class="form-check form-switch p-2 bg-light border rounded ps-5 ms-0 d-flex align-items-center">
+                        <input class="form-check-input ms-3" type="checkbox" id="directorWagesSwitchState" @bind="Model.Active" />
+                        <label class="form-check-label fw-semibold ps-2 mb-0" for="directorWagesSwitchState">
+                            Include in Viability Analysis
+                        </label>
+                    </div>
+                </div> *@
+            </div>
+
+            <div class="mt-4 pt-2 border-top d-flex justify-content-end align-items-center">
+                @if (IsSubmitting)
+                {
+                    <button type="button" class="btn btn-sm btn-secondary px-4 style-opacity-75" disabled>
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Storing Buffers...
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm">
+                        Save Changes
+                    </button>
+                }
+            </div>
+        </EditForm>
+    }
+</div>

@@ -1,0 +1,46 @@
+﻿<div class="print-addon-wrapper dropdown">
+    <button class="border-0 dropdown-toggle rounded-3" type="button" id="gridUtilityMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Export / Output Operations">
+        <i class="bi bi-printer-fill"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end dropdown-custom shadow-sm" aria-labelledby="gridUtilityMenu" style="font-size: 0.85rem;">
+        <li>
+            <button class="dropdown-item py-2 " type="button" @onclick="HandlePrintTriggerAsync" disabled="@(!Items.Any())">
+                <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Export to PDF
+            </button>
+        </li>
+        <li>
+            <button class="dropdown-item py-2" type="button" @onclick="HandleExcelExportTriggerAsync" disabled="@(!Items.Any())">
+                <i class="bi bi-file-earmark-excel-fill text-success me-2"></i>Export to MS Excel
+            </button>
+        </li>
+        <li>
+            <hr class="dropdown-divider">
+        </li>
+        <li>
+            <button class="dropdown-item py-2" type="button" @onclick="HandleEmailTriggerAsync" disabled="@(!Items.Any())">
+                <i class="bi bi-envelope-fill text-primary me-2"></i>Send on Email
+            </button>
+        </li>
+    </ul>
+</div>
+
+@code {
+
+    [Parameter] public IEnumerable<object> Items { get; set; } = Enumerable.Empty<object>();
+
+    async Task HandleEmailTriggerAsync()
+    {
+        // Implement email sending logic here
+    }
+
+    async Task HandleExcelExportTriggerAsync()
+    {
+        // Implement Excel export logic here
+    }
+
+    async Task HandlePrintTriggerAsync()
+    {
+        // Implement PDF export logic here
+    }
+
+}

@@ -18,6 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Pages\ReportsPage.razor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Components\CommonComponents\BFooter.razor" />
     <Content Remove="Components\Pages\AppInitializer.razor" />
   </ItemGroup>
 
@@ -26,7 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Pages_Assessments\PageFormComponents\" />
+    <Content Include="Components\Pages\ReportsPage.razor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\scripts\" />
   </ItemGroup>
 

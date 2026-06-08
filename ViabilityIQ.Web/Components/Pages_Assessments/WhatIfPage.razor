@@ -1,189 +1,191 @@
-﻿@layout MainLayout_Assessment
+﻿@page "/assessment/dashboards/{AssessmentId:long}"
+@page "/assessment/dashboards/"
 
-@page "/assessment/{AssessmentId:long}" /* Route from Main AssessmentsPage; ID of selected assessment if imported */
-@page "/assessment/"                    /* Route used by internal pages, no Assessment ID, it will be picked from Session variable  */
+@layout MainLayout_Assessment
 
-@using ViabilityIQ.Shared.SharedModels
+@inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
-@inject NavigationManager Navigation
 
-@page "/assessments/{AssessmentId:long}/what-if"
-@using ViabilityIQ.Web.Components.CommonComponents
-@inherits Microsoft.AspNetCore.Components.ComponentBase
+<div class="p-0 position-relative dashboard-workspace container-fluid">
+    <PageHeading_Assessment _pageTitle="What-If Analysis" PageTitle="Dashboards & Scenarios" CurrentPage="PageType.Dashboards" />
 
-<div class="p-0 position-relative dashboard-workspace">
-    <PageHeading _pageTitle="What-If Analysis" 
-                 _pageHeading="Financial Visualizations &amp; Scenarios" 
-                 CurrentPage="PageType.Dashboards" />
+    <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">    
+        <div class="col-xl-10 col-lg-9 col-12">
 
-    <section class="metrics-ribbon-grid mt-3">
-        <div class="kpi-card border-left-primary">
-            <div class="kpi-card-body">
-                <div class="kpi-meta"><span class="kpi-title">Total Sales</span><i class="bi bi-graph-up text-primary fs-5"></i></div>
-                <h3 class="kpi-value">R 2,450,000</h3>
-                <div class="kpi-footer text-success"><i class="bi bi-arrow-up-short"></i> <span>+12.4% vs target</span></div>
-            </div>
-        </div>
-        <div class="kpi-card border-left-secondary">
-            <div class="kpi-card-body">
-                <div class="kpi-meta"><span class="kpi-title">Opening Stock</span><i class="bi bi-box-seam text-secondary fs-5"></i></div>
-                <h3 class="kpi-value">R 420,000</h3>
-                <div class="kpi-footer text-muted"><span>Base inventory position</span></div>
-            </div>
-        </div>
-        <div class="kpi-card border-left-info">
-            <div class="kpi-card-body">
-                <div class="kpi-meta"><span class="kpi-title">Closing Stock</span><i class="bi bi-database-check text-info fs-5"></i></div>
-                <h3 class="kpi-value">R 385,000</h3>
-                <div class="kpi-footer text-danger"><i class="bi bi-arrow-down-short"></i> <span>-8.3% variance</span></div>
-            </div>
-        </div>
-        <div class="kpi-card border-left-danger">
-            <div class="kpi-card-body">
-                <div class="kpi-meta"><span class="kpi-title">Expenses</span><i class="bi bi-wallet2 text-danger fs-5"></i></div>
-                <h3 class="kpi-value">R 1,120,000</h3>
-                <div class="kpi-footer text-warning"><i class="bi bi-exclamation-triangle-fill me-1" style="font-size:0.75rem;"></i> <span>Within budget cap</span></div>
-            </div>
-        </div>
-        <div class="kpi-card border-left-warning">
-            <div class="kpi-card-body">
-                <div class="kpi-meta"><span class="kpi-title">VAT (Net Payable)</span><i class="bi bi-receipt text-warning fs-5"></i></div>
-                <h3 class="kpi-value">R 184,500</h3>
-                <div class="kpi-footer text-muted"><span>15% statutory liability</span></div>
-            </div>
-        </div>
-        <div class="kpi-card @(IsProfitable ? "border-left-approved" : "border-left-rejected")">
-            <div class="kpi-card-body">
-                <div class="kpi-meta"><span class="kpi-title">Net Profit / Loss</span><i class="bi bi-cash-coin @(IsProfitable ? "text-success" : "text-danger") fs-5"></i></div>
-                <h3 class="kpi-value @(IsProfitable ? "text-success-heavy" : "text-danger-heavy")">R 1,130,500</h3>
-                <div class="kpi-footer @(IsProfitable ? "text-success" : "text-danger")"><span class="fw-semibold">46.1% Net Margin</span></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="dashboard-charts-matrix-grid mt-4 mb-5">
-        
-        <div class="dashboard-chart-card">
-            <div class="chart-card-header">
-                <div class="chart-title-block">
-                    <i class="bi bi-activity text-primary me-2"></i>
-                    <h5>Business Health Index</h5>
+            <section class="metrics-ribbon-grid">
+                <div class="kpi-card border-left-standard standard-shadow">
+                    <div class="kpi-card-body">
+                        <div class="kpi-meta"><span class="kpi-title">Total Sales</span><i class="bi bi-graph-up text-secondary fs-6"></i></div>
+                        <h4 class="kpi-value">R 2,450,000</h4>
+                        <div class="kpi-footer text-success"><i class="bi bi-arrow-up-short"></i> <span>+12.4%</span></div>
+                    </div>
                 </div>
-                <span class="badge badge-info text-xs">Radar Stress Matrix</span>
-            </div>
-            <div class="chart-card-viewport flex-center">
+                <div class="kpi-card border-left-standard standard-shadow">
+                    <div class="kpi-card-body">
+                        <div class="kpi-meta"><span class="kpi-title">Opening Stock</span><i class="bi bi-box-seam text-secondary fs-6"></i></div>
+                        <h4 class="kpi-value">R 420,000</h4>
+                        <div class="kpi-footer text-muted"><span>Base position</span></div>
+                    </div>
+                </div>
+                <div class="kpi-card border-left-standard standard-shadow">
+                    <div class="kpi-card-body">
+                        <div class="kpi-meta"><span class="kpi-title">Closing Stock</span><i class="bi bi-database-check text-secondary fs-6"></i></div>
+                        <h4 class="kpi-value">R 385,000</h4>
+                        <div class="kpi-footer text-danger"><i class="bi bi-arrow-down-short"></i> <span>-8.3%</span></div>
+                    </div>
+                </div>
+                <div class="kpi-card border-left-standard standard-shadow">
+                    <div class="kpi-card-body">
+                        <div class="kpi-meta"><span class="kpi-title">Expenses</span><i class="bi bi-wallet2 text-secondary fs-6"></i></div>
+                        <h4 class="kpi-value">R 1,120,000</h4>
+                        <div class="kpi-footer text-warning"><span>In budget</span></div>
+                    </div>
+                </div>
+                <div class="kpi-card border-left-standard standard-shadow">
+                    <div class="kpi-card-body">
+                        <div class="kpi-meta"><span class="kpi-title">VAT (Net)</span><i class="bi bi-receipt text-secondary fs-6"></i></div>
+                        <h4 class="kpi-value">R 184,500</h4>
+                        <div class="kpi-footer text-muted"><span>15% Statutory</span></div>
+                    </div>
+                </div>
+                <div class="kpi-card @ProfitStyleClass heavy-shadow">
+                    <div class="kpi-card-body">
+                        <div class="kpi-meta">
+                            <span class="kpi-title">Net Profit</span>
+                            <i class="bi bi-cash-coin @(IsProfitable ? "text-success" : "text-danger") fs-6"></i>
+                        </div>
+                        <h4 class="kpi-value @(IsProfitable ? "text-success" : "text-danger")">R 1,130,500</h4>
+                        <div class="kpi-footer @(IsProfitable ? "text-success" : "text-danger")">
+                            <span>46.1% Margin</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                <div class="radar-chart-container">
-                    <svg viewBox="0 0 220 220" class="radar-svg-canvas">
-                        <polygon points="110,20 188,155 32,155" class="radar-grid-web" />
-                        <polygon points="110,50 162,140 58,140" class="radar-grid-web" />
-                        <polygon points="110,80 136,125 84,125" class="radar-grid-web" />
+            <section class="dashboard-charts-matrix-grid mt-3 mb-5">
 
-                        <line x1="110" y1="110" x2="110" y2="20" class="radar-axis-line" />
-                        <line x1="110" y1="110" x2="188" y2="155" class="radar-axis-line" />
-                        <line x1="110" y1="110" x2="32" y2="155" class="radar-axis-line" />
-
-                        <polygon points="110,110 110,40 160,139" class="radar-shade-zone zone-blue" />
-
-                        <polygon points="110,110 160,139 43,148" class="radar-shade-zone zone-green" />
-
-                        <polygon points="110,110 43,148 110,40" class="radar-shade-zone zone-purple" />
-
-                        <polygon points="110,40 160,139 43,148" class="radar-perimeter-outline" />
-
-                        <circle cx="110" cy="40" r="3.5" class="radar-dot dot-interest" />
-                        <circle cx="160" cy="139" r="3.5" class="radar-dot dot-margin" />
-                        <circle cx="43" cy="148" r="3.5" class="radar-dot dot-efficiency" />
-                    </svg>
-
-                    <div class="radar-label lbl-top"><span class="fw-bold">Interest Cover</span><br><small class="text-primary">7.8x (78%)</small></div>
-                    <div class="radar-label lbl-right text-end"><span class="fw-bold">Margin of Safety</span><br><small class="text-success">35% (64%)</small></div>
-                    <div class="radar-label lbl-left"><span class="fw-bold">Efficiency Ratio</span><br><small class="text-purple">85% (85%)</small></div>
+                <div class="dashboard-chart-card pronounced-shadow">
+                    <div class="chart-card-header dark-header">
+                        <div class="chart-title-block">
+                            <i class="bi bi-activity text-info me-2"></i>
+                            <h5 class="text-white">Business Health Index</h5>
+                        </div>
+                        <span class="badge bg-info text-xs">Radar Stress Matrix</span>
+                    </div>
+                    <div class="chart-card-viewport flex-center">
+                        <div class="radar-chart-container">
+                            <svg viewBox="0 0 220 220" class="radar-svg-canvas">
+                                <polygon points="110,20 188,155 32,155" class="radar-grid-web" />
+                                <polygon points="110,50 162,140 58,140" class="radar-grid-web" />
+                                <polygon points="110,80 136,125 84,125" class="radar-grid-web" />
+                                <line x1="110" y1="110" x2="110" y2="20" class="radar-axis-line" />
+                                <line x1="110" y1="110" x2="188" y2="155" class="radar-axis-line" />
+                                <line x1="110" y1="110" x2="32" y2="155" class="radar-axis-line" />
+                                <polygon points="110,110 110,40 160,139" class="radar-shade-zone zone-blue" />
+                                <polygon points="110,110 160,139 43,148" class="radar-shade-zone zone-green" />
+                                <polygon points="110,110 43,148 110,40" class="radar-shade-zone zone-purple" />
+                                <polygon points="110,40 160,139 43,148" class="radar-perimeter-outline" />
+                                <circle cx="110" cy="40" r="3.5" class="radar-dot dot-interest" />
+                                <circle cx="160" cy="139" r="3.5" class="radar-dot dot-margin" />
+                                <circle cx="43" cy="148" r="3.5" class="radar-dot dot-efficiency" />
+                            </svg>
+                            <div class="radar-label lbl-top"><span class="fw-bold">Interest Cover</span><br><small class="text-muted">7.8x (78%)</small></div>
+                            <div class="radar-label lbl-right text-end"><span class="fw-bold">Margin of Safety</span><br><small class="text-success">35% (64%)</small></div>
+                            <div class="radar-label lbl-left"><span class="fw-bold">Efficiency Ratio</span><br><small class="text-purple">85% (85%)</small></div>
+                        </div>
+                    </div>
                 </div>
 
-            </div>
-        </div>
-
-        <div class="dashboard-chart-card">
-            <div class="chart-card-header">
-                <div class="chart-title-block">
-                    <i class="bi bi-calendar3 text-navy me-2"></i>
-                    <h5>Profit &amp; Loss Performance Timeline</h5>
-                </div>
-                <span class="text-muted text-xs">12-Month Continuous Trajectory</span>
-            </div>
-            <div class="chart-card-viewport">
-                <div class="trend-mockup-chart">
-                    <div class="trend-bar-axis-y"><span>R150k</span><span>R100k</span><span>R50k</span><span>R0k</span></div>
-                    <div class="trend-grid-bars">
-                        @foreach(var month in MonthlyPerformanceMockData)
-                        {
-                            <div class="trend-column-bar" style="--bar-height: @(month.Value)%;">
-                                <div class="bar-fill-pnl @(month.IsProfit ? "bg-primary-tint" : "bg-danger-tint")" title="@month.Month: R@month.Value K"></div>
-                                <span class="bar-axis-x-label">@month.Month</span>
+                <div class="dashboard-chart-card pronounced-shadow">
+                    <div class="chart-card-header dark-header">
+                        <div class="chart-title-block">
+                            <i class="bi bi-calendar3 text-info me-2"></i>
+                            <h5 class="text-white">Profit &amp; Loss Performance Timeline</h5>
+                        </div>
+                        <span class="badge bg-secondary text-xs text-white">12-Month Trajectory</span>
+                    </div>
+                    <div class="chart-card-viewport">
+                        <div class="trend-mockup-chart">
+                            <div class="trend-bar-axis-y"><span>R150k</span><span>R100k</span><span>R50k</span><span>R0k</span></div>
+                            <div class="trend-grid-bars">
+                                @foreach (var month in MonthlyPerformanceMockData)
+                                {
+                                    <div class="trend-column-bar" style="--bar-height: @(month.Value)%;">
+                                        <div class="bar-fill-pnl @(month.IsProfit ? "bg-sky-blue" : "bg-danger")" title="@month.Month: R@month.Value K"></div>
+                                        <span class="bar-axis-x-label">@month.Month</span>
+                                    </div>
+                                }
                             </div>
-                        }
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="dashboard-chart-card pronounced-shadow">
+                    <div class="chart-card-header dark-header">
+                        <div class="chart-title-block">
+                            <i class="bi bi-cash-stack text-info me-2"></i>
+                            <h5 class="text-white">Cashflow Run-Rate Lifecycle</h5>
+                        </div>
+                        <span class="badge badge-approved text-xs">Net Positive Position</span>
+                    </div>
+                    <div class="chart-card-viewport">
+                        <div class="cashflow-mockup-viz">
+                            <div class="cash-line-stream"><div class="cash-wave-fill"></div></div>
+                            <div class="cashflow-legend">
+                                <span class="legend-dot bg-success"></span> <span class="me-3">Inflow</span>
+                                <span class="legend-dot bg-danger"></span> <span>Outflow</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-chart-card pronounced-shadow">
+                    <div class="chart-card-header dark-header">
+                        <div class="chart-title-block">
+                            <i class="bi bi-shield-check text-info me-2"></i>
+                            <h5 class="text-white">Breakeven Runway &amp; Thresholds</h5>
+                        </div>
+                        <span class="badge badge-warning text-xs text-dark">Risk: Low</span>
+                    </div>
+                    <div class="chart-card-viewport">
+                        <div class="runway-progress-wrapper mb-3">
+                            <div class="d-flex justify-content-between text-xs mb-1">
+                                <span class="fw-semibold text-dark">Current Target Volume</span>
+                                <span class="text-muted">74% Capacity</span>
+                            </div>
+                            <div class="progress" style="height: 8px; background-color: #f1f5f9; border-radius: 4px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 74%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div class="runway-progress-wrapper">
+                            <div class="d-flex justify-content-between text-xs mb-1">
+                                <span class="fw-semibold text-dark">Critical Breakeven Point</span>
+                                <span class="text-danger fw-bold">R 1,220,000</span>
+                            </div>
+                            <div class="progress" style="height: 8px; background-color: #f1f5f9; border-radius: 4px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 50%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div class="summary-callout-box mt-3 p-2 bg-light rounded text-center">
+                            <p class="text-xs mb-0 text-muted">
+                                The enterprise resides <span class="text-success fw-bold">R 1,230,000 safely above</span> baseline.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
         </div>
 
-        <div class="dashboard-chart-card">
-            <div class="chart-card-header">
-                <div class="chart-title-block">
-                    <i class="bi bi-cash-stack text-navy me-2"></i>
-                    <h5>Cashflow Run-Rate Lifecycle Cycle</h5>
-                </div>
-                <span class="badge badge-approved text-xs">Net Positive Position</span>
-            </div>
-            <div class="chart-card-viewport">
-                <div class="cashflow-mockup-viz">
-                    <div class="cash-line-stream"><div class="cash-wave-fill"></div></div>
-                    <div class="cashflow-legend">
-                        <span class="legend-dot bg-success"></span> <span class="me-3">Inflow (Collections)</span>
-                        <span class="legend-dot bg-danger"></span> <span>Outflow (Operations)</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
 
-        <div class="dashboard-chart-card">
-            <div class="chart-card-header">
-                <div class="chart-title-block">
-                    <i class="bi bi-shield-check text-navy me-2"></i>
-                    <h5>Breakeven Runway &amp; Safety Point Thresholds</h5>
-                </div>
-                <span class="badge badge-warning text-xs">Viability risk profile: Low</span>
-            </div>
-            <div class="chart-card-viewport">
-                <div class="breakeven-runway-engine">
-                    <div class="runway-progress-wrapper mb-3">
-                        <div class="d-flex justify-content-between text-xs mb-1">
-                            <span class="fw-semibold text-dark">Current Run-Rate Target Volume</span>
-                            <span class="text-muted">74% Capacity Achieved</span>
-                        </div>
-                        <div class="progress" style="height: 8px; background-color: #e9ecef; border-radius: 4px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 74%; border-radius: 4px;"></div>
-                        </div>
-                    </div>
-                    <div class="runway-progress-wrapper">
-                        <div class="d-flex justify-content-between text-xs mb-1">
-                            <span class="fw-semibold text-dark">Critical Breakeven Point Limit Line</span>
-                            <span class="text-danger fw-bold">R 1,220,000 (Required Base)</span>
-                        </div>
-                        <div class="progress" style="height: 8px; background-color: #e9ecef; border-radius: 4px;">
-                            <div class="progress-bar bg-danger" role="progressbar" style="width: 50%; border-radius: 4px;"></div>
-                        </div>
-                    </div>
-                    <div class="summary-callout-box mt-3 p-2 bg-light rounded text-center">
-                        <p class="text-xs mb-0 text-secondary">
-                            The enterprise resides <span class="text-success fw-bold">R 1,230,000 safely above</span> its baseline breakeven operating thresholds under the current simulation model.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <RightSummary01 />
 
-    </section>
+        </div>
+    </div>
 </div>
+
+    <footer class="py-2 bg-light mt-3">
+        <BFooter />
+    </footer>

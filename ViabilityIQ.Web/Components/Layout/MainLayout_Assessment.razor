@@ -10,43 +10,13 @@
             <span class="brand-main fs-2">Viability</span><span class="brand-iq  fs-2 fst-italic">.IQ</span>
         </div>
 
-        <div class="ms-5 me-0">
+        <div class="ms-2 me-0">
             <button class="fa-toggle-sidebar-btn pe-0" @onclick="ToggleSidebar">
                 <i class="bi bi-list"></i>
-            </button>
-        </div>
-
-        @if (@isAssessmentPage)
-        {
-            @* <div class="ms-0 dropdown-container">
-                <button class="btn-quick-access" @onclick="ToggleQuickAccess" @onfocusout="CloseQuickAccess">
-                    <i class="bi bi-ui-radios-grid p-0"></i>
-                </button>
-
-                <div class="dropdown-card-menu g-2 @(isQuickAccessOpen ? "show" : "")">
-                    <div class="dropdown-card-header">Navigation Shortcuts</div>
-                    <div class="quick-access-grid">
-                        <a class="quick-grid-item" style="border-radius: 14px;" href="global/quick1">
-                            <div class="grid-icon-wrapper"><i class="bi bi-speedometer2"></i></div>
-                            <span class="strong">Loans</span>
-                        </a>
-                        <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick2">
-                            <div class="grid-icon-wrapper"><i class="bi bi-file-earmark-text text-secondary"></i></div>
-                            <span class="strong">Debtors</span>
-                        </a>
-                        <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick3">
-                            <div class="grid-icon-wrapper"><i class="bi bi-graph-up-arrow"></i></div>
-                            <span class="strong">CapEx</span>
-                        </a>
-                        <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick4">
-                            <div class="grid-icon-wrapper"><i class="bi bi-database-check"></i></div>
-                            <span class="strong">Creditors</span>
-                        </a>
-                    </div>
-                </div>
-            </div> *@
+            </button>            
             <QuickAccessComponent />
-        }
+        </div> 
+        
 
         <div class="fa-top-bar-right">
             <span class="marble-date-badge">
@@ -104,57 +74,39 @@
                 </NavLink>
 
                 <div class="fa-nav-heading">Main Operations</div>
+                <NavLink class="fa-nav-item" href="/assessment/dashboards" Match="NavLinkMatch.All">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-speedometer2"></i></div>
+                    <span class="strong">Dashboards</span>
+                </NavLink>
 
-                <NavLink class="fa-nav-item" href="/Sales" Match="NavLinkMatch.All">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-grid"></i></div>
+                <NavLink class="fa-nav-item" href="/assessment/sales">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
                     <span class="strong">Sales</span>
                 </NavLink>
 
-
-                <NavLink class="fa-nav-item" href="/settings/assessments">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
-                    <span class="strong">Stock</span>
-                </NavLink>
-
-                <NavLink class="fa-nav-item" href="/settings/assessments">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
-                    <span class="strong">Debtors/Creditors</span>
-                </NavLink>
-
-                <NavLink class="fa-nav-item" href="/settings/assessments">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
+                <NavLink class="fa-nav-item" href="/assessment/expenses">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-wallet2"></i></div>
                     <span class="strong">Expenses</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/settings/assessments">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
-                    <span class="strong">Loans</span>
+                <NavLink class="fa-nav-item" href="/assessment/VAT">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-receipt"></i></div>
+                    <span class="strong">Value Added Tax(VAT)</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/settings/businesses">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-buildings"></i></div>
-                    <span class="strong">VAT</span>
+                <NavLink class="fa-nav-item" href="/assessment/stock">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-box-seam"></i></div>
+                    <span class="strong">Stock</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/settings/client-contacts">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-people"></i></div>
-                    <span class="strong">Assets</span>
-                </NavLink>
-
-                <NavLink class="fa-nav-item" href="/reports">
+                <NavLink class="fa-nav-item" href="/assessment/reports">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
                     <span class="strong">Reports</span>
                 </NavLink>
+                                
+                <div class="fa-nav-heading">Assessment Config</div>
 
-
-                <NavLink class="fa-nav-item" href="/settings/assessments">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
-                    <span class="strong">Admin</span>
-                </NavLink>
-
-                <div class="fa-nav-heading">System Config</div>
-
-                <NavLink class="fa-nav-item " href="/settings">
+                <NavLink class="fa-nav-item " href="/assessment/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
                     <span class="strong">Settings</span>&nbsp;<i class="bi bi-caret-right-fill"></i>
                 </NavLink>

@@ -1,0 +1,28 @@
+﻿
+@page "/assessment/vat/"
+
+@layout MainLayout_Assessment
+
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Layout
+
+<div class="p-0 position-relative dashboard-workspace container-fluid">
+    <PageHeading_Assessment _pageTitle="VAT" PageTitle="Value Added Tax(VAT)" CurrentPage="PageType.VAT" />
+
+    <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">    
+        <div class="col-xl-10 col-lg-9 col-12">
+            <!-- place VAT components here-->
+            
+        </div>
+        <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
+
+            <RightSummary01 />
+
+        </div>
+    </div>
+</div>
+
+    <footer class="py-2 bg-light mt-3">
+        <BFooter />
+    </footer>

@@ -127,7 +127,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
             try
             {
-                _Toast!.ShowInfo($"Configuring workspace environment for case {selectedRecord.CaseNumber}...", sessionService!.AppTitle);
+                //_Toast!.ShowInfo($"Configuring workspace environment for case {selectedRecord.CaseNumber}...", sessionService!.AppTitle);
 
                 if (sessionService != null)
                 {
@@ -142,7 +142,7 @@ namespace ViabilityIQ.Web.Components.Pages
                     );
                 }
 
-                Navigation.NavigateTo($"/assessment/{selectedRecord.AssessmentId}");
+                Navigation.NavigateTo($"/assessment/dashboards/{selectedRecord.AssessmentId}");
             }
             catch (Exception ex)
             {

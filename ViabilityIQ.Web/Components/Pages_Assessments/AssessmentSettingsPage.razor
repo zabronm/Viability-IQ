@@ -1,0 +1,194 @@
+﻿@page "/assessment/settings/"
+
+@layout MainLayout_Assessment
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+<div class="p-0 position-relative dashboard-workspace container-fluid">
+    <PageHeading_Assessment _pageTitle="Settings" PageTitle="Assessment Settings" CurrentPage="PageType.Settings" />
+
+    <div class="row g-3 mt-1">
+        
+        <div class="col-lg-9 col-12 order-lg-1 order-2">
+            <div class="row g-3">
+                
+                <div class="col-md-6 col-12">
+                    <div class="card border-0 standard-shadow h-100 overflow-hidden bg-white" style="border-radius:12px;">
+                        <div class="card-header zab-custom-header py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-building text-navy-brand me-2"></i>
+                                <h6 class="m-0 text-navy-brand fw-bold text-white text-xs text-uppercase">Assessment Parameters</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <AssessmentSettingsList AssessmentId="ActiveAssessmentId" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-12">
+                    <div class="card border-0 standard-shadow h-100 overflow-hidden bg-white" style="border-radius:12px;">
+                        <div class="card-header zab-custom-header py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-wallet text-navy-brand me-2"></i>
+                                <h6 class="m-0 text-navy-brand fw-bold text-xs text-uppercase">Assessment Expense Items</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <ExpenseItemsList AssessmentId="ActiveAssessmentId" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-12">
+                    <div class="card border-0 standard-shadow h-100 overflow-hidden bg-white" style="border-radius:12px;">
+                        <div class="card-header zab-custom-header py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-coins text-navy-brand me-2"></i>
+                                <h6 class="m-0 text-navy-brand fw-bold text-xs text-uppercase">Mandatory Wage Frameworks</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <DirectorWagesList AssessmentId="ActiveAssessmentId" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-12">
+                    <div class="card border-0 standard-shadow h-100 overflow-hidden bg-white" style="border-radius:12px;">
+                        <div class="card-header zab-custom-header py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-chart-line text-navy-brand me-2"></i>
+                                <h6 class="m-0 text-navy-brand fw-bold text-xs text-uppercase">Sales Stream Classifications</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <SalesCategoriesList AssessmentId="ActiveAssessmentId" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-12">
+                    <div class="card border-0 standard-shadow h-100 overflow-hidden bg-white" style="border-radius:12px;">
+                        <div class="card-header zab-custom-header py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-arrow-down-right-square-fill me-2"></i>
+                                <h6 class="m-0 text-navy-brand fw-bold text-xs text-uppercase">Mandatory Wage Frameworks</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <OpeningBalancesList AssessmentId="ActiveAssessmentId" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-12">
+                    <div class="card border-0 standard-shadow h-100 overflow-hidden bg-white" style="border-radius:12px;">
+                        <div class="card-header zab-custom-header py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-chart-line text-navy-brand me-2"></i>
+                                <h6 class="m-0 text-navy-brand fw-bold text-xs text-uppercase">Sales Stream Classifications</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <DebtorsCreditorsList AssessmentId="ActiveAssessmentId" />
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-12 order-lg-2 order-1">
+            <div class="settings-section-card security-card-wrapper h-100 p-3">
+                <h4 class="settings-section-title px-1">
+                    <i class="fas fa-sliders-h me-2 title-icon security-icon"></i> Setup Matrix Panel
+                </h4>
+                
+                <div class="settings-grid-2x2">
+                    
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded-3" 
+                            @onclick='() => OpenConfigurationPanel("ASSESSMENT")'>
+                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
+                            <i class="fas fa-building text-primary"></i>
+                        </div>
+                        <div class="tile-meta-block">
+                            <span class="tile-label d-block text-dark fw-bold text-xs">Assessment Parameters</span>
+                            <p class="tile-narration text-muted text-xxs mb-0">Modify Assessment parameters</p>
+                        </div>
+                    </button>
+
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded-3"
+                            @onclick='() => OpenConfigurationPanel("SALES")'>
+                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
+                            <i class="fas fa-chart-line text-info"></i>
+                        </div>
+                        <div class="tile-meta-block">
+                            <span class="tile-label d-block text-dark fw-bold text-xs">Sales Categories</span>
+                            <p class="tile-narration text-muted text-xxs mb-0">Map Revenue Categories</p>
+                        </div>
+                    </button>
+
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded-3"
+                            @onclick='() => OpenConfigurationPanel("BALANCES")'>
+                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
+                            <i class="bi bi-arrow-down-right-square-fill text-danger mb-1"></i>
+                        </div>
+                        <div class="tile-meta-block">
+                            <span class="tile-label d-block text-dark fw-bold text-xs">Opening Balances</span>
+                            <p class="tile-narration text-muted text-xxs mb-0">Configure Opening Balances</p>
+                        </div>
+                    </button>
+
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded-3" 
+                            @onclick='() => OpenConfigurationPanel("EXPENSES")'>
+                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
+                            <i class="fas fa-wallet text-warning"></i>
+                        </div>
+                        <div class="tile-meta-block">
+                            <span class="tile-label d-block text-dark fw-bold text-xs">Expense Items</span>
+                            <p class="tile-narration text-muted text-xxs mb-0">Select Assessment Expense Items</p>
+                        </div>
+                    </button>
+
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded-3" 
+                            @onclick='() => OpenConfigurationPanel("WAGES")'>
+                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
+                            <i class="bi bi-wallet text-success"></i>
+                        </div>
+                        <div class="tile-meta-block">
+                            <span class="tile-label d-block text-dark fw-bold text-xs">Director Wages</span>
+                            <p class="tile-narration text-muted text-xxs mb-0">Specify Director Wages</p>
+                        </div>
+                    </button>                    
+
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded-2"
+                            @onclick='() => OpenConfigurationPanel("DEBTORS-CREDITORS")'>
+                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
+                            <i class="bi bi-incognito text-navy"></i>
+                        </div>
+                        <div class="tile-meta-block">
+                            <span class="tile-label d-block text-dark fw-bold text-xs">Debtors/Creditors</span>
+                            <p class="tile-narration text-muted text-xxs mb-0">Map Debtors/Creditors Profiles</p>
+                        </div>
+                    </button>
+
+                    
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<ZabOffCanvas @ref="OffCanvasControlRef" HeaderTitle="@ActivePanelTitle" dWidth="350">
+    @if (ActiveFormType != null)
+    {
+        <DynamicComponent Type="@ActiveFormType" Parameters="@ActiveFormParameters" />
+    }
+</ZabOffCanvas>
+
+<footer class="py-2 bg-light mt-3">
+    <BFooter />
+</footer>

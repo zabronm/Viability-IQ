@@ -1,8 +1,8 @@
-﻿<div class="ms-0 dropdown-container" @onfocusout="HandleBlur">
+﻿<div class="ms-0 ps-0 dropdown-container" @onfocusout="HandleBlur">
     <button class="btn-quick-access @(isQuickAccessOpen ? "active" : "")"
             @onclick="ToggleQuickAccess"
             title="Workspace Shortcuts System">
-        <i class="bi bi-ui-radios-grid"></i>
+        <i class="bi bi-menu-up"></i>
     </button>
 
     <div class="dropdown-card-menu @(isQuickAccessOpen ? "show" : "")">

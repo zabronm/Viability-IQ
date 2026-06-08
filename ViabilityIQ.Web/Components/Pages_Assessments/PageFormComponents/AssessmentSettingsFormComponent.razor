@@ -1,0 +1,88 @@
+﻿@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="p-3 bg-white">
+    @if (IsLoading)
+    {
+        <div class="p-5 d-flex flex-column align-items-center justify-content-center text-center">
+            <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+            <div>Synchronizing assessment matrix parameters...</div>
+        </div>
+    }
+    else if (Model != null)
+    {
+        <EditForm Model="@Model" OnValidSubmit="ExecuteSaveWorkflow">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+
+            <div class="row g-2">
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Case Number</label>
+                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.CaseNumber" readonly disabled />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Assessment Start Date</label>
+                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Created Date</label>
+                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")" readonly disabled />
+                </div>
+
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">VAT Rate (%)</label>
+                    <input type="number" class="form-control form-control-sm" @bind-value="Model.VATRate" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Opening Balance: Assets (R)</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light">R</span>
+                        <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.OpeningBalance_Assets" />
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Opening Balance: Bank (R)</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light">R</span>
+                        <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.OpeningBalance_Bank" />
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Interest On Overdraft (%)</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" @bind-value="Model.InterestOnOverDraft" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-muted mb-0">Depreciation Projected Amount (R)</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light">R</span>
+                        <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.DepreciationProjectedAmount" />
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4 pt-2 d-flex justify-content-end align-items-center">
+                @if (IsSubmitting)
+                {
+                    <button type="button" class="btn btn-sm btn-secondary px-4 style-opacity-75" disabled>
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Storing Buffers...
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-save me-1"></i> Save Changes
+                    </button>
+                }
+            </div>
+        </EditForm>
+    }
+</div>
