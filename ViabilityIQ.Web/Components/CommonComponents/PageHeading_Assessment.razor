@@ -30,7 +30,49 @@
         FileNumber = viabilitySession!.CaseNumber ?? "??????";
         await Task.CompletedTask;
     }
-
-
-
 }
+
+    <style type="text/css">
+    .file-no-courier
+    {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background-color: #f0f4f1;
+        color: #2e3b2f;
+        /* Base State variables to transition from */
+        border: 1px solid #d1ded3;
+        font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        cursor: default;
+        /* Hardware accelerated layout transition smoothing */
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: border-width, box-shadow, font-weight;
+    }
+
+    /* Interactive Micro-Hover Layout State Trigger */
+    .file-no-courier:hover {
+        background-color: #e6ede8; /* Slightly deeper greenish-grey background tint */
+        border-width: 1.5px; /* Widen layout border frame line thickness */
+        border-color: #b3c7b6; /* Crisper target border accent definition */
+        font-weight: 800; /* Make data string font bolder */
+        color: #1c261d; /* Enforce darker typographic high contrast balance */
+        /* Intensified layout elevation depth drop shadow layer */
+        box-shadow: 0 4px 8px rgba(46, 59, 47, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+        transform: translateY(-0.5px); /* Micro-lift effect */
+    }
+
+    /* Optional: Animate the inner folder icon slightly on hover context */
+        .file-no-courier .icon-transition {
+        transition: transform 0.2s ease;
+    }
+
+    ..file-no-courier:hover .icon-transition {
+        transform: scale(1.08);
+        color: #445445;
+    }
+    </style>

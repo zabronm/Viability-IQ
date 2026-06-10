@@ -5,7 +5,7 @@ using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
-    public partial class AssessmentSalesCategoryFormComponent : ComponentBase
+    public partial class SalesCategoryFormComponent 
     {
         [Parameter] public long AssessmentId { get; set; }
 

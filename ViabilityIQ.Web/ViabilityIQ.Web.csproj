@@ -24,6 +24,7 @@
   <ItemGroup>
     <Content Remove="Components\CommonComponents\BFooter.razor" />
     <Content Remove="Components\Pages\AppInitializer.razor" />
+    <Content Remove="wwwroot\css\AssessmentSettings.css" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +37,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\scripts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\AssessmentSettings.css" />
   </ItemGroup>
 
   <ItemGroup>

@@ -46,18 +46,7 @@
                         <option value="@enumVal">@enumVal.ToString()</option>
                     }
                 </InputSelect>
-            </div>
-
-            @* <div class="mb-3">
-                    <label for="statusId" class="form-label-custom">System Status Node <span class="text-danger">*</span></label>
-                    <InputSelect id="statusId" class="form-control-compact form-select" @bind-Value="assessmentModel.StatusId">
-                        <option value="1">Draft / Setup</option>
-                        <option value="2">In Progress</option>
-                        <option value="3">Under Review</option>
-                        <option value="4">Approved State</option>
-                        <option value="5">Closed / Archived</option>
-                    </InputSelect>
-                </div> *@
+            </div>          
 
             <div class="mb-3">
                 <label for="startDate" class="form-label-custom">Assessment Start Date</label>
@@ -67,45 +56,7 @@
                 <label for="endDate" class="form-label-custom">Assessment Finish Date</label>
                 <input type="date" id="endDate" class="form-control-compact" value="@formattedEndDate" @onchange="OnEndDateChanged" />
             </div>
-
-        </div>
-
-        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" />
-        <p class="form-label-custom fw-bold mb-2 text-dark text-uppercase small" style="letter-spacing: 0.5px;">Workspace Module Scope Switch Controls</p>
- *@
-        <!-- Dynamic Module Switch Workspace Grid -->
-        @* <div class="row mb-2 bg-light p-2 mx-0 rounded border">
-            <div class="col-md-4 mb-2">
-                <div class="form-check form-switch d-flex align-items-center">
-                    <InputCheckbox id="blStock" class="form-check-input me-2" @bind-Value="boolStock" />
-                    <label class="form-label-custom m-0 clickable-label" for="blStock">Stock Ledger Module</label>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="form-check form-switch d-flex align-items-center">
-                    <InputCheckbox id="blDebtors" class="form-check-input me-2" @bind-Value="boolDebtors" />
-                    <label class="form-label-custom m-0 clickable-label" for="blDebtors">Debtors/Creditors</label>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="form-check form-switch d-flex align-items-center">
-                    <InputCheckbox id="blExpenses" class="form-check-input me-2" @bind-Value="boolExpenses" />
-                    <label class="form-label-custom m-0 clickable-label" for="blExpenses">Expense Framework</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-check form-switch d-flex align-items-center">
-                    <InputCheckbox id="blSales" class="form-check-input me-2" @bind-Value="boolSales" />
-                    <label class="form-label-custom m-0 clickable-label" for="blSales">Sales & Revenue</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-check form-switch d-flex align-items-center">
-                    <InputCheckbox id="blVat" class="form-check-input me-2" @bind-Value="boolVat" />
-                    <label class="form-label-custom m-0 clickable-label" for="blVat">VAT Tax Configurations</label>
-                </div>
-            </div>
-        </div> *@
+        </div>        
 
         <!-- Remarks/Internal Description Field -->
         <div class="col-12 mb-2">

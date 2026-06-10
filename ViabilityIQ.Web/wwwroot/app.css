@@ -1377,7 +1377,7 @@
     border-radius: 12px;
     background: #728FCE; /*marble*/
     color: #fefefe; /*smoke white*/
-    / font-weight: 700;
+    font-weight: 700;
 }
 
 /*This is the border used in the Appplication's pages Main work area*/
@@ -1616,7 +1616,7 @@
 
 .form-control-compact-textarea {
     height: auto !important; /* Prevents 36px restriction from truncating rows */
-    min-height: 50px; /* Gives a comfortable default 3-row depth feel */
+    min-height: 40px; /* Gives a comfortable default 3-row depth feel */
     width: 100% !important; /* Forces full container width starting from the left edge */
     display: block;
     margin-top: 0px !important;
@@ -1626,7 +1626,7 @@
 .form-label-custom {
     color: #64748b !important; /* Fainter muted gray-blue */
     font-weight: 500 !important; /* Medium weight so it's readable but not aggressive */
-    font-size: 0.825rem !important; /* Slightly smaller footprint */
+    font-size: 0.84rem !important; /* Slightly smaller footprint */
     letter-spacing: 0.01em; /* Clean letter tracking */
     margin-bottom: 5px;
     display: inline-block;
@@ -1654,8 +1654,9 @@
 
 /* Make input placeholders look like actual hints */
 .form-control-compact::placeholder {
-    color: #94a3b8 !important;
+    color: #bbbbbb !important;
     font-weight: 400 !important;
+    font-size: 0.85rem !important;
 }
 
 /* De-emphasize the unselected first option in your DDLookup dropdown */

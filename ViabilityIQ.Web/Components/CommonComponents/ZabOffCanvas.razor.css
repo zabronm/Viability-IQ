@@ -57,8 +57,10 @@
     overflow: hidden;
     border-bottom: 1px solid #edf2f7;
     background: white;
-    min-height: 75px;
+    min-height: 60px;
     backdrop-filter: blur(20px);
+    padding-top: 5px !important;
+    padding-bottom: 2px !important;
 }
 
     /* Modern Emerald Glow */
@@ -67,8 +69,16 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient( 180deg, rgba(16,185,129,.35) 0%, rgba(16,185,129,.20) 20%, rgba(16,185,129,.10) 35%, rgba(16,185,129,.03) 50%, rgba(16,185,129,0) 65%);
+        /*background: linear-gradient( 180deg, rgba(14, 165, 233, 0.35) 0%, rgba(14, 165, 233, 0.20) 20%, rgba(14, 165, 233, 0.10) 35%, rgba(14, 165, 233, 0.03) 50%, rgba(14, 165, 233, 0) 65% ) !important;*/
+        /*background: linear-gradient( 180deg, rgba(16,185,129,.35) 0%, rgba(16,185,129,.20) 20%, rgba(16,185,129,.10) 35%, rgba(16,185,129,.03) 50%, rgba(16,185,129,0) 65%);*/
         z-index: 0;
+        background: linear-gradient( 180deg, rgba(101, 158, 199, 0.35) 0%, /* Anchor blue top anchor */
+        rgba(135, 175, 199, 0.35) 0%, /* New anchor blue top anchor */
+        rgba(135, 175, 199, 0.15) 20%, /* Smooth decay padding */
+        rgba(135, 175, 199, 0.03) 40%, /* Micro-ambient trace */
+        rgba(255, 255, 255, 1) 70%, /* Becomes solid pure white at 50% */
+        rgba(255, 255, 255, 1) 100% /* Holds solid white baseline to the bottom */
+        );
     }
 
     /* Soft glow */
@@ -81,7 +91,8 @@
         transform: translateX(-50%);
         width: 300px;
         height: 100px;
-        background: radial-gradient( ellipse at center, rgba(16,185,129,.30) 0%, rgba(16,185,129,.10) 40%, rgba(16,185,129,0) 70%);
+        /*background: radial-gradient( ellipse at center, rgba(16,185,129,.30) 0%, rgba(16,185,129,.10) 40%, rgba(16,185,129,0) 70%);*/
+        
         z-index: 0;
     }
 

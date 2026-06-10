@@ -24,7 +24,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         {
             { DDLookupEnums.Banks, ("tblBank", "BankId", "BankName") },
             { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName") },
-            { DDLookupEnums.Businesses, ("tblBusinesses", "BusinessId", "BusinessName") },
+            { DDLookupEnums.Businesses, ("tblBusiness", "BusinessId", "BusinessName") },
             { DDLookupEnums.ClientCategories, ("tblClientCategories", "ClientCategoryId", "ClientCategoryName") },
             { DDLookupEnums.ProductServiceCategories, ("tblProductCategory", "ProductCategoryId", "ProductCategoryName") },
             { DDLookupEnums.Products, ("tblProduct", "ProductServiceId", "ProductServiceName") },

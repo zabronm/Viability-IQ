@@ -21,6 +21,35 @@ namespace ViabilityIQ.Application.Dtos
         public string? BusinessOwner { get; set; }
         public DateTime AssessmentStartDate { get; set; }
         public DateTime AssessmentFinishDate { get; set; }
+
+        //VAT SECTION
+        public long VATRate { get; set; }        //Universal VAT rate for the assessment
+
+        //OPENING BALANCES SECTION
+        public decimal OpeningBalance_Assets { get; set; }
+        public decimal OpeningBalance_Bank { get; set; }
+        public decimal InterestOnOverDraft { get; set; } = 0;
+        public decimal DepreciationProjectedAmount { get; set; } = 0;        
+
+        //DIRECTORS WAGES SECTION
+        public decimal MonthlyDirectorWagesAmountTotal { get; set; }
+        public decimal MonthlyDirectorWagesAmount { get; set; }
+        public int NumberOfDirectors { get; set; }
+
+        //DEBTORS & CREDITORS SECTION - Creditors
+        public decimal Creditors_30 { get; set; }
+        public decimal Creditors_60 { get; set; }
+        public decimal Creditors_90 { get; set; }
+        public decimal Creditors_120 { get; set; }
+        public decimal Creditors_120Plus { get; set; }
+
+        //DEBTORS & CREDITORS SECTION - Debtors
+        public decimal Debtors_30 { get; set; }
+        public decimal Debtors_60 { get; set; }
+        public decimal Debtors_90 { get; set; }
+        public decimal Debtors_120 { get; set; }
+        public decimal Debtors_120Plus { get; set; }
+
         public long StatusId { get; set; }
         public long ProgressPercentage { get; set; }
         public bool blStock { get; set; }

@@ -6,12 +6,24 @@
     border-bottom: 1px solid #cbdde0;
 }
 
+/* 4. Text Contrast Adjustments for Typography inside dark banners */
 .text-navy-brand {
-    color: #1a365d !important; /* Premium corporate dark blue typography contrast */
+    color: #1a365d !important;
+}
+
+/* 5. Custom Dense Row Spacing helper for side-by-side forms */
+.form-inline-align-row {
+    display: flex;
+    align-items: center;
 }
 
 .standard-shadow {
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+}
+
+/*=====font size of update buttons on this page only*/
+.btn-update-font {
+    font-size:0.65rem;
 }
 
 /* ==========================================================================
@@ -114,3 +126,35 @@
 .text-xxs {
     font-size: 0.64rem !important;
 }
+
+
+/* ==========================================================================
+   ViabilityIQ Modern UI Framework - Reusable Component Layouts
+   ========================================================================== */
+
+/* 1. Premium Elevated Cards with 12px Corners & Pronounced Bottom Shadows */
+.viq-elevated-card {
+    background-color: #ffffff;
+    border: 1px solid #E0E5E5;
+    border-radius: 12px;
+    /* Multilayer shadow designed to become more pronounced near the bottom edge */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Enforces children elements to respect the 12px corner clip */
+    margin-bottom: 1rem;
+}
+
+/* 2. Deepened Dark Ice-Blue Header Banners */
+.viq-card-header-dark-ice {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.2rem 0.75rem;
+    background-color: #778899 !important;
+    border-bottom: 1px solid #a4bed5 !important;
+}
+
+/* 3. High-Density Layout Settings Sidebar Wrapper */
+.viq-security-sidebar-card {
+    border-left: 3px solid #79BAEC; /* Left accents striping indicator line */
+}
+

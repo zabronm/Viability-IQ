@@ -16,22 +16,21 @@
             <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
 
             <div class="row g-2">
+                <div class="col-12 mb-2">
+                    <label class="form-label-custom mb-0">Sales Category Name</label>
+                    <input type="text" class="form-control-compact " placeholder="e.g. Retail Goods, Services" @bind-value="Model.SalesCategoryName" />
+                </div>
 
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Sales Category Name</label>
-                    <input type="text" class="form-control form-control-sm" placeholder="e.g. Retail Goods, Services" @bind-value="Model.SalesCategoryName" />
+                <div class="col-12 mb-2">
+                    <label class="form-label-custom mb-0">Markup Percentage (%)</label>
+                    <input type="number" step="0.01" class="form-control-compact" placeholder="0.00" @bind-value="Model.MarkupPercentage" />
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label text-muted mb-0">Markup Percentage (%)</label>
-                    <input type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00" @bind-value="Model.MarkupPercentage" />
+                    <label class="form-label-custom mb-0">Audit Trail Remarks</label>
+                    <textarea class="form-control-compact-textarea" rows="3" placeholder="Enter configuration remarks or optional justifications..." @bind="Model.Remarks"></textarea>
                 </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Audit Trail Remarks</label>
-                    <textarea class="form-control form-control-sm" rows="3" placeholder="Enter configuration remarks or optional justifications..." @bind="Model.Remarks"></textarea>
-                </div>
-
+ 
                 <div class="col-12 mt-3">
                     <div class="form-check form-switch p-2 bg-light border rounded ps-5 ms-0 d-flex align-items-center">
                         <input class="form-check-input ms-3" type="checkbox" id="salesCategoryActiveSwitch" @bind="Model.Active" />
@@ -39,11 +38,11 @@
                             Include in Viability Analysis
                         </label>
                     </div>
-                </div>
+                </div> 
 
             </div>
 
-            <div class="mt-4 pt-2 border-top d-flex justify-content-end align-items-center">
+            <div class="mt-4 pt-2 d-flex justify-content-end align-items-center">
                 @if (IsSubmitting)
                 {
                     <button type="button" class="btn btn-sm btn-secondary px-4 style-opacity-75" disabled>

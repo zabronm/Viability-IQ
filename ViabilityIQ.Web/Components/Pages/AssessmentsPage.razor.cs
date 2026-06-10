@@ -226,22 +226,29 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private string GetStatusText(long statusId) => statusId switch
         {
-            1 => "Draft / Setup",
+            1 => "Draft/Setup",
             2 => "In Progress",
             3 => "Under Review",
             4 => "Approved",
-            5 => "Closed / Archived",
+            5 => "Closed/Archived",
             _ => "Unknown State"
         };
 
         private string GetStatusBadgeClass(long statusId) => statusId switch
         {
-            1 => "badge-secondary",
-            2 => "badge-info",
-            3 => "badge-warning",
-            4 => "badge-approved",
-            5 => "badge-rejected",
-            _ => "badge-light"
+            //1 => "badge-secondary",
+            //2 => "badge-info",
+            //3 => "badge-warning",
+            //4 => "badge-approved",
+            //5 => "badge-rejected",
+            //_ => "badge-light"
+            1 => "bg-secondary text-white small",
+            2 => "bg-info text-black small",
+            3 => "bg-warning text-black small",
+            4 => "bg-success text-black small",
+            5 => "bg-danger text-black small",
+            _ => "bg-light text-black small",
+
         };
 
         private async Task ExecutePrintFormatProcess(List<AssessmentDto> targetedDataset)
