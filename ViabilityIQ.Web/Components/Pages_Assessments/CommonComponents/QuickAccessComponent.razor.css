@@ -76,6 +76,9 @@
     gap: 6px; /* Reduced gap from 8px to 6px */
     padding: 8px; /* Reduced outer padding from 12px to 8px */
     background-color: #ffffff;
+    border: solid 1px #f5f5f5;
+    border-radius: 12px;
+    /*background-color: #778899;*/
 }
 
 /* Interactive Grid Items (REDUCED VERTICAL PADDING TO COMPRESS HEIGHT) */
@@ -84,8 +87,9 @@
     align-items: center;
     gap: 10px; /* Snug text-to-icon distance alignment */
     padding: 8px 10px; /* Reduced padding from 10px 12px to compress layout height */
-    background-color: #f8f9fa;
-    border: 1px solid rgba(0, 0, 0, 0.03);
+    background-color: #f4f6f9;
+    /*border: 1px solid rgba(0, 0, 0, 0.03);*/
+    border: 1px solid #f5f5f5;
     border-radius: 8px;
     text-decoration: none !important;
     color: #333333;
@@ -121,7 +125,7 @@
 }
 
     .grid-item-text .strong {
-        font-size: 0.82rem; /* Kept exact same structural font size */
+        font-size: 0.79rem; /* Kept exact same structural font size */
         font-weight: 600;
         color: #1a2b4c;
     }
@@ -133,14 +137,15 @@
 
 /* Smooth Lift Interactivity Transitions on Hover Actions */
 .quick-grid-item:hover {
-    background-color: #ffffff;
-    border-color: rgba(26, 43, 76, 0.18);
+    background-color: #778899;
+    color: #ffffff;
+    border-color: #ffffff;   /*rgba(26, 43, 76, 0.18);*/
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(26, 43, 76, 0.08);
 }
 
     .quick-grid-item:hover .grid-item-text .strong {
-        color: #0d6efd;
+        color: #f5f5f5;
     }
 
 /* Unified Theme Token Map Configurations */

@@ -1,0 +1,59 @@
+﻿@namespace ViabilityIQ.Web.Components.CommonComponents
+
+@if (IsVisible)
+{
+    <div class="alert @GetAlertClass() alert-dismissible fade show text-xs py-2 px-3 mb-2 mt-2 shadow-sm d-flex align-items-center animate-fade" role="alert" style="border-radius:8px;">
+        <i class="bi @GetIconClass() me-2 fs-6"></i>
+        <div>
+            @if (!string.IsNullOrEmpty(Heading))
+            {
+                <strong class="me-1">@Heading</strong>
+            }
+            @Message
+        </div>
+        @if (AllowDismiss)
+        {
+            <button type="button" class="btn-close py-2.5" @onclick="DismissAlert" aria-label="Close"></button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public string Heading { get; set; } = string.Empty;
+    [Parameter] public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
+    [Parameter] public bool AllowDismiss { get; set; } = true;
+
+    private bool IsVisible { get; set; } = true;
+
+    public enum AlertSeverity
+    {
+        Info,
+        Warning,
+        Danger,
+        Success
+    }
+
+    private string GetAlertClass() => Severity switch
+    {
+        AlertSeverity.Info => "alert-info text-info-emphasis",
+        AlertSeverity.Warning => "alert-warning text-warning-emphasis",
+        AlertSeverity.Danger => "alert-danger text-danger-emphasis",
+        AlertSeverity.Success => "alert-success text-success-emphasis",
+        _ => "alert-warning"
+    };
+
+    private string GetIconClass() => Severity switch
+    {
+        AlertSeverity.Info => "bi-info-circle-fill text-info",
+        AlertSeverity.Warning => "bi-exclamation-triangle-fill text-warning",
+        AlertSeverity.Danger => "bi-x-circle-fill text-danger",
+        AlertSeverity.Success => "bi-check-circle-fill text-success",
+        _ => "bi-exclamation-triangle-fill"
+    };
+
+    private void DismissAlert()
+    {
+        IsVisible = false;
+    }
+}

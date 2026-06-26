@@ -372,6 +372,11 @@ body .sb-sidenav,.nav-link {
     color: var(--accent-gold);
 }
 
+.text-marble-light {
+    color: #566D7E;
+}
+
+
 .bg-navy {
     background-color: var(--navy-deep);
 }
@@ -406,25 +411,44 @@ body .sb-sidenav,.nav-link {
 }
 
 /* 1. Premium Elevated Cards with 12px Corners & Pronounced Bottom Shadows */
-.viq-elevated-card {
+/*.viq-elevated-card {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 12px;*/
     /* Multilayer shadow designed to become more pronounced near the bottom edge */
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
-    overflow: hidden; /* Enforces children elements to respect the 12px corner clip */
-    margin-bottom: 1rem;
-}
+    /*box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;*/ /* Enforces children elements to respect the 12px corner clip */
+    /*margin-bottom: 1rem;
+}*/
 
 /* 2. Deepened Dark Ice-Blue Header Banners */
-.viq-card-header-dark-ice {
+/*.viq-card-header-dark-ice {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.2rem 0.75rem;
     background-color: #bcd2e6;
     border-bottom: 1px solid #a4bed5 !important;
+}*/
+
+.viq-elevated-card {
+    background-color: #ffffff;
+    border: 1px solid #E0E5E5;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-bottom: 1rem;
 }
+
+.viq-card-header-dark-ice {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.2rem 0.75rem;
+    background-color: #778899 !important;
+    border-bottom: 1px solid #a4bed5 !important;
+}
+
 
 
 /* Clear, crisp layout labeling standard */

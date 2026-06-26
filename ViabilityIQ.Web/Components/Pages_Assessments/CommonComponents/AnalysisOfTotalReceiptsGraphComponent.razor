@@ -1,0 +1,63 @@
+﻿<div class="card h-100 bg-white shadow border-0" style="border-radius: 6px;">
+    <div class="py-2 px-3 border-bottom bg-light shadow d-flex align-items-center justify-content-between">
+        <div>
+            <span class="h6 text-marble-light mb-0 small fw-bold">Analysis of Total Receipts</span>
+            <div class="text-muted text-xxs uppercase small tracking-wider">Receipts Component Volatility Chart</div>
+        </div>
+        <i class="bi bi-graph-up text-muted fs-5"></i>
+    </div>
+    <div class="card-body p-3 d-flex flex-column justify-content-between text-center" style="background-color: #e8dcd8; min-height: 240px; border-radius:10px; border-color: #cdcdcd;">
+        <div class="fw-bold text-dark text-xs mb-2 tracking-wide">Analysis of total receipts</div>
+        <div class="position-relative my-auto px-1 py-3 bg-secondary-subtle border border-dark border-1 shadow-xs" style="background-color: #c0c0c0 !important; height: 110px;">
+
+            <div class="position-absolute h-100 border-start border-dark" style="left: 25%; top: 0; opacity: 0.75;"></div>
+            <div class="position-absolute h-100 border-start border-dark" style="left: 45%; top: 0; opacity: 1; border-width: 1.5px !important;"></div>
+            <div class="position-absolute h-100 border-start border-dark" style="left: 65%; top: 0; opacity: 0.75;"></div>
+            <div class="position-absolute h-100 border-start border-dark" style="left: 90%; top: 0; opacity: 0.75;"></div>
+
+            <div class="position-relative w-100 d-flex align-items-center justify-content-start" style="top: 12px; height: 42px;">
+                <div class="d-flex border border-dark border-2 font-monospace text-xxs fw-bold shadow-sm overflow-hidden"
+                     style="width: 75%; height: 38px; margin-left: 20%;">
+
+                    <div class="bg-plum-chart text-white d-flex align-items-center justify-content-center border-end border-dark"
+                         style="width: @(ExpenseChartPercentage)%; background-color: #802040;">
+                        1
+                    </div>
+
+                    <div class="bg-periwinkle-chart text-dark d-flex align-items-center justify-content-center border-end border-dark"
+                         style="width: @(CosChartPercentage)%; background-color: #a0b0ff;">
+                    </div>
+
+                    <div class="bg-softcream-chart text-dark d-flex align-items-center justify-content-center"
+                         style="width: @(NetProfitChartPercentage)%; background-color: #ffffcc; flex-grow: 1;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-100 d-flex justify-content-between position-absolute font-monospace text-dark text-xxs px-1" style="bottom: 2px; left:0; font-size:0.62rem;">
+                <span style="margin-left: 17%;">-50%</span>
+                <span style="margin-left: 10%;">0%</span>
+                <span style="margin-left: 12%;">50%</span>
+                <span style="margin-right: 5%;">100%</span>
+            </div>
+        </div>
+
+        <div class="bg-white border border-secondary p-1.5 mt-2 shadow-xs d-flex justify-content-center align-items-center gap-3 text-xxs fw-semibold text-dark">
+            <div class="d-flex align-items-center gap-1">
+                <span class="d-inline-block border border-dark" style="width: 12px; height: 12px; background-color: #a0b0ff;"></span> Cost of sales
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="d-inline-block border border-dark" style="width: 12px; height: 12px; background-color: #802040;"></span> Expenses
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="d-inline-block border border-dark" style="width: 12px; height: 12px; background-color: #ffffcc;"></span> Net profit
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int ExpenseChartPercentage { get; set; } = 25;
+    [Parameter] public int CosChartPercentage { get; set; } = 12;
+    [Parameter] public int NetProfitChartPercentage { get; set; } = 63;
+}

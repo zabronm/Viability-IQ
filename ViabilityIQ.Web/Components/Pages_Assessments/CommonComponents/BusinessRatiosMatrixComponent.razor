@@ -1,0 +1,65 @@
+﻿<div class="card h-100 bg-white shadow-sm border-0" style="border-radius: 6px;">
+    <div class="py-2 px-3 border-bottom shadow bg-light d-flex align-items-center justify-content-between">
+        <div>
+            <span class="h6 text-marble-light mb-0 small fw-bold">Business Ratios Matrix</span>
+            <div class="text-muted text-xxs uppercase tracking-wider small">Operational Health Assessment Indicators</div>
+        </div>
+        <i class="bi bi-calculator text-muted fs-5"></i>
+    </div>
+    <div class="card-body p-2 shadow" style="border-radius:10px;">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0 text-xs text-nowrap">
+                <thead>
+                    <tr class="bg-light text-muted fw-bold">
+                        <th class="ps-2 py-2">Metric Classification</th>
+                        <th class="text-end pe-2 py-2">Evaluated Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-2 fw-medium text-dark">
+                            <i class="bi bi-flag-fill text-warning me-1.5"></i>&nbsp;Break-Even Sales Amount
+                        </td>
+                        <td class="text-end font-monospace fw-bold pe-2 text-dark">
+                            R @BreakEvenSales.ToString("N0")
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-2 fw-medium text-dark">
+                            <i class="bi bi-shield-check text-success me-1.5"></i>&nbsp;Margin of Safety (%)
+                        </td>
+                        <td class="text-end font-monospace fw-bold pe-2 text-success">
+                            @MarginOfSafetyPercent.ToString("F1")%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-2 fw-medium text-dark">
+                            <i class="bi bi-pie-chart-fill text-primary me-1.5"></i>&nbsp;Gross Profit Margin
+                        </td>
+                        <td class="text-end font-monospace fw-bold pe-2 text-primary">
+                            @GrossProfitMarginPercent.ToString("F1")%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-2 fw-medium text-dark">
+                            <i class="bi bi-activity text-info me-1.5"></i>&nbsp;Operating Leverage Factor
+                        </td>
+                        <td class="text-end font-monospace fw-bold pe-2 text-info">
+                            @OperatingLeverage.ToString("F2")x
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-light border-0 text-xxs text-muted mt-2 mb-0 p-2">
+            <i class="bi bi-info-circle me-1"></i> Break-even baseline assumes fixed operational expenses divided by overall contribution margin profile ratio metrics.
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public decimal BreakEvenSales { get; set; }
+    [Parameter, EditorRequired] public decimal MarginOfSafetyPercent { get; set; }
+    [Parameter, EditorRequired] public decimal GrossProfitMarginPercent { get; set; }
+    [Parameter, EditorRequired] public decimal OperatingLeverage { get; set; }
+}

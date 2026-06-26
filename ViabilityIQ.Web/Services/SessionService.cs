@@ -1,4 +1,5 @@
-﻿using ViabilityIQ.Application.Interfaces;
+﻿using System;
+using ViabilityIQ.Application.Interfaces;
 
 namespace ViabilityIQ.Web.Services
 {
@@ -49,6 +50,19 @@ namespace ViabilityIQ.Web.Services
         private long? _assessmentId;
         private string _caseNumber = string.Empty;
 
+        private bool _hasSalesData;
+        private bool _hasStockData;
+        private bool _hasExpensesData;
+        private bool _hasReportsData;
+        private bool _hasReviewsData;
+        private bool _hasReviews;
+        private bool _hasSalesEntries;
+        private bool _hasStockEntries;
+        private bool _hasExpensesEntries;
+        private bool _hasReportsEntries;
+        private bool _hasReviewsEntries;
+        private bool _hasReportsGenerated;
+
         private long? _businessId;
         private string _businessName = string.Empty;
 
@@ -56,9 +70,24 @@ namespace ViabilityIQ.Web.Services
         private string _clientName = string.Empty;
         private string _assessmentType = string.Empty;
 
-
         public long? AssessmentId => _assessmentId;
         public string CaseNumber => _caseNumber;
+
+        public bool HasSalesData => _hasSalesData;
+        public bool HasStockData => _hasStockData;
+        public bool HasExpensesData => _hasExpensesData;
+        public bool HasReportsData => _hasReportsData;
+        public bool HasReviewsData => _hasReviewsData;
+        public bool HasReviews => _hasReviews;
+        public bool HasSalesEntries => _hasSalesEntries;
+        public bool HasStockEntries => _hasStockEntries;
+        public bool HasExpensesEntries => _hasExpensesEntries;
+        public bool HasReportsEntries => _hasReportsEntries;
+        public bool HasReviewsEntries => _hasReviewsEntries;
+        public bool HasReportsGenerated => _hasReportsGenerated;
+
+        // Computed logic check matching the contract spec rules
+        public bool HasAnyEntries => _hasSalesEntries || _hasStockEntries || _hasExpensesEntries || _hasReportsEntries || _hasReviewsEntries;
 
         public long? BusinessId => _businessId;
         public string BusinessName => _businessName;
@@ -117,6 +146,12 @@ namespace ViabilityIQ.Web.Services
             string businessName,
             long? clientId,
             string clientName,
+            bool hasSalesData,
+            bool hasStockData,
+            bool hasExpensesData,
+            bool hasReportsData,
+            bool hasReviewsData,
+            bool hasReviews,
             string assessmentType)
         {
             _assessmentId = assessmentId;
@@ -128,6 +163,22 @@ namespace ViabilityIQ.Web.Services
             _clientId = clientId;
             _clientName = clientName ?? string.Empty;
             _assessmentType = assessmentType ?? string.Empty;
+
+            // Map data contextual indicator inputs cleanly
+            _hasSalesData = hasSalesData;
+            _hasStockData = hasStockData;
+            _hasExpensesData = hasExpensesData;
+            _hasReportsData = hasReportsData;
+            _hasReviewsData = hasReviewsData;
+            _hasReviews = hasReviews;
+
+            // Deriving entries or evaluations relative to active indicators
+            _hasSalesEntries = hasSalesData;
+            _hasStockEntries = hasStockData;
+            _hasExpensesEntries = hasExpensesData;
+            _hasReportsEntries = hasReportsData;
+            _hasReviewsEntries = hasReviewsData;
+            _hasReportsGenerated = hasReportsData;
 
             NotifyStateChanged();
         }
@@ -142,6 +193,21 @@ namespace ViabilityIQ.Web.Services
 
             _clientId = null;
             _clientName = string.Empty;
+            _assessmentType = string.Empty;
+
+            // Reset indicators safely
+            _hasSalesData = false;
+            _hasStockData = false;
+            _hasExpensesData = false;
+            _hasReportsData = false;
+            _hasReviewsData = false;
+            _hasReviews = false;
+            _hasSalesEntries = false;
+            _hasStockEntries = false;
+            _hasExpensesEntries = false;
+            _hasReportsEntries = false;
+            _hasReviewsEntries = false;
+            _hasReportsGenerated = false;
 
             NotifyStateChanged();
         }

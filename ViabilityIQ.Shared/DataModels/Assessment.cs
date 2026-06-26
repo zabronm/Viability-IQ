@@ -39,19 +39,34 @@ namespace ViabilityIQ.Shared.DataModels
         public decimal MonthlyDirectorWagesAmount { get; set; }
         public int NumberOfDirectors { get; set; }
 
-        //DEBTORS & CREDITORS SECTION - Creditors
+        //CREDITORS SECTION - Creditors - Percentages
         public decimal Creditors_30 { get; set; }
         public decimal Creditors_60 { get; set; }
         public decimal Creditors_90 { get; set; }
         public decimal Creditors_120 { get; set; }
         public decimal Creditors_120Plus { get; set; }
 
-        //DEBTORS & CREDITORS SECTION - Debtors
+        //CREDITORS SECTION - Creditors - Vaues
+        public decimal CreditorsValue_30 { get; set; }
+        public decimal CreditorsValue_60 { get; set; }
+        public decimal CreditorsValue_90 { get; set; }
+        public decimal CreditorsValue_120 { get; set; }
+        public decimal CreditorsValue_120Plus { get; set; }
+
+
+        //DEBTORS SECTION - Debtors => Percentages
         public decimal Debtors_30 { get; set; }
         public decimal Debtors_60 { get; set; }
         public decimal Debtors_90 { get; set; }
         public decimal Debtors_120 { get; set; }
         public decimal Debtors_120Plus { get; set; }
+
+        //DEBTORS SECTION - Debtors => Values
+        public decimal DebtorsValue_30 { get; set; }
+        public decimal DebtorsValue_60 { get; set; }
+        public decimal DebtorsValue_90 { get; set; }
+        public decimal DebtorsValue_120 { get; set; }
+        public decimal DebtorsValue_120Plus { get; set; }
 
 
         public long StatusId { get; set; }

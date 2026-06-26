@@ -1,0 +1,66 @@
+﻿/* ==========================================================================
+   STOCK MODULE CLEAN DESIGN SPECIFICATIONS (EXTRACTED MATRIX RULES)
+   ========================================================================== */
+
+.workspace-card-row {
+    border-radius: 6px;
+}
+
+
+/* ==========================================================================
+   STOCK TRACKING METRIC UNIFORM STYLE RULES 
+   ========================================================================== */
+
+.stock-grid-container {
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+
+.matrix-grid-table {
+    font-size: 0.72rem;
+    --bs-table-padding-y: 0.2rem;
+    --bs-table-padding-x: 0.4rem;
+}
+
+/* Width strictly reduced to cleanly match 'Monthly inventory' narration dimensions */
+.stock-header-title {
+    width: 130px;
+    max-width: 130px;
+}
+
+.stock-body-title {
+    max-width: 130px;
+}
+
+.stock-body-title-label {
+    font-size: 0.85rem;
+}
+
+
+.stock-month-header {
+    width: 60px;
+}
+
+/* Deep Navy visual identity matching image_9f77e0.png definitions */
+.stock-summary-header {
+    width: 105px;
+    background-color: #1a365d !important;
+}
+
+.stock-summary-cell {
+    color: #1a365d;
+    background-color: #f1f5f9;
+}
+
+.stock-action-header {
+    width: 35px;
+}
+
+.stock-row-style {
+    line-height: 1.2;
+}
+
+.stock-input-pane {
+    max-height: 400px;
+    overflow-y: auto;
+}

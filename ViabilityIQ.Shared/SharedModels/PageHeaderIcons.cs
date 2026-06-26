@@ -62,9 +62,9 @@
             PageType.Province => "bi bi-geo-alt-fill",
             PageType.Sectors => "bi bi-inboxes-fill",
             PageType.Sales => "bi bi-graph-up-arrow",
-            PageType.Expenses => "bi bi-basket-fill",
-            PageType.Stock => "bi bi-basket-fill",
-            PageType.VAT => "bi bi-basket-fill",
+            PageType.Expenses => "bi bi-wallet2",
+            PageType.Stock => "bi bi-boxes",
+            PageType.VAT => "bi bi-bug",
 
             _ => "bi bi-circle"
         };

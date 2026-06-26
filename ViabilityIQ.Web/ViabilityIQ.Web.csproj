@@ -36,10 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\scripts\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\css\AssessmentSettings.css" />
   </ItemGroup>
 

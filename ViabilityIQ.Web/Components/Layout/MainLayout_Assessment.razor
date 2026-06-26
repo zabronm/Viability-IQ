@@ -1,22 +1,35 @@
 ﻿@using ViabilityIQ.Web.Components.Shared
+@using ViabilityIQ.Application.Interfaces
 @inherits LayoutComponentBase
+@implements IDisposable
+
+@inject ISessionService SessionService
 
 <div class="fa-layout-wrapper">
 
-    @* <TopBarComponent isAssessmentPage=true /> *@   
-
     <header class="fa-top-bar">
         <div class="fa-brand-zone">
-            <span class="brand-main fs-2">Viability</span><span class="brand-iq  fs-2 fst-italic">.IQ</span>
+            <span class="brand-main fs-2">Viability</span><span class="brand-iq fs-2 fst-italic">.IQ</span>
         </div>
 
-        <div class="ms-2 me-0">
+        <div class="d-flex align-items-center gap-2 ms-2 me-0">
             <button class="fa-toggle-sidebar-btn pe-0" @onclick="ToggleSidebar">
-                <i class="bi bi-list"></i>
-            </button>            
-            <QuickAccessComponent />
-        </div> 
-        
+                <span class="nav-icon-avatar-round"><i class="bi bi-list"></i></span>
+            </button>
+
+            <div class="ms-0 dropdown-container">
+                <button class="avatar-trigger-btn custom-shortcut-trigger" @onclick="ToggleShortcutsMenu" @onfocusout="CloseShortcutsMenu">
+                    <div class="nav-icon-avatar-round">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                </button>
+                <div class="viq-elevated-card profile-card-dropdown shortcut-menu-dropdown @(isShortcutsOpen ? "show" : "")" style="border: solid 0.4px #778899">
+                    <div class="p-0 ">
+                        <QuickAccessComponent />
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="fa-top-bar-right">
             <span class="marble-date-badge">
@@ -37,26 +50,19 @@
                         <div class="profile-avatar-large">ZM</div>
                         <div class="profile-info">
                             <h4 class="profile-name">Zabron Muyambo</h4>
-                            <span class="profile-role">Lead Systems Developer</span>
+                            <span class="profile-role">Lead Developer</span>
                         </div>
                     </div>
                     <div class="profile-card-body">
-                        <div class="profile-section-title">Account Management</div>
-                        <a class="profile-menu-item" href="profile/details">
-                            <i class="bi bi-person-bounding-box"></i> My Profile
+                        <a href="profile" class="profile-dropdown-item">
+                            <i class="bi bi-person me-2"></i> My Profile
                         </a>
-                        <a class="profile-menu-item" href="profile/settings">
-                            <i class="bi bi-sliders"></i> Preferences
+                        <a href="settings" class="profile-dropdown-item">
+                            <i class="bi bi-gear me-2"></i> Account Settings
                         </a>
-
-                        <div class="profile-section-title">Systems & Auditing</div>
-                        <a class="profile-menu-item" href="global/audit-logs">
-                            <i class="bi bi-shield-check"></i> Project Audit Status
-                        </a>
-
                         <div class="dropdown-divider"></div>
-                        <a class="profile-menu-item logout-item" href="logout">
-                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        <a href="logout" class="profile-dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i> Sign Out
                         </a>
                     </div>
                 </div>
@@ -68,58 +74,85 @@
         <aside class="fa-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
             <div class="sidebar-scroller">
 
-                <NavLink class="fa-nav-item" href="/home" Match="NavLinkMatch.All">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-house-fill"></i></div>
-                    <span class="strong">Home</span>
+                <NavLink class="fa-nav-item mt-1 py-1 mb-0 home-nav-link" href="home" Match="NavLinkMatch.All">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-house-door-fill"></i></div>
+                    <span class="nav-text font-weight-bold">Home</span>
                 </NavLink>
+                @* <hr class="border-secondary my-0" /> *@
 
-                <div class="fa-nav-heading">Main Operations</div>
-                <NavLink class="fa-nav-item" href="/assessment/dashboards" Match="NavLinkMatch.All">
+                <NavLink class="fa-nav-item py-1 my-0" href="assessment/dashboards" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-speedometer2"></i></div>
-                    <span class="strong">Dashboards</span>
+                    <span class="nav-text font-weight-bold">Dashboard</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/assessment/sales">
+                <div class="fa-nav-heading" style="border-top: dotted 0.6px #92c7c7; border-bottom: dotted 0.6px #92c7c7;">Main Operations</div>
+
+                <NavLink class="fa-nav-item py-1 my-0" href="assessment/sales">
                     <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
-                    <span class="strong">Sales</span>
+                    <span class="nav-text font-weight-bold">Sales</span>
+                    <span class="ms-1 viq-indicator-dot @(HasSalesData ? "status-success" : "status-warning")"
+                          title="@(HasSalesData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/assessment/expenses">
+                <NavLink class="fa-nav-item py-1 my-0" href="assessment/stock">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-boxes"></i></div>
+                    <span class="nav-text font-weight-bold">Stock</span>
+                    <span class="ms-1 viq-indicator-dot @(HasStockData ? "status-success" : "status-warning")"
+                          title="@(HasStockData ? "Client data entry verified" : "No client records populated yet")"></span>
+                </NavLink>
+
+                <NavLink class="fa-nav-item py-1 my-0" href="assessment/expenses">
                     <div class="nav-icon-avatar-round"><i class="bi bi-wallet2"></i></div>
-                    <span class="strong">Expenses</span>
+                    <span class="nav-text font-weight-bold">Expenses</span>
+                    <span class="ms-1 viq-indicator-dot @(HasExpensesData ? "status-success" : "status-warning")"
+                          title="@(HasExpensesData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/assessment/VAT">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-receipt"></i></div>
-                    <span class="strong">Value Added Tax(VAT)</span>
+                <NavLink class="fa-nav-item py-1" href="assessment/VAT">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-bug"></i></div>
+                    <span class="nav-text font-weight-bold">Value Added Tax(VAT)</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/assessment/stock">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-box-seam"></i></div>
-                    <span class="strong">Stock</span>
-                </NavLink>
-
-                <NavLink class="fa-nav-item" href="/assessment/reports">
+                <NavLink class="fa-nav-item py-1 my-0" href="assessment/reports">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
-                    <span class="strong">Reports</span>
+                    <span class="nav-text font-weight-bold">Reports</span>
+                    @* <span class="ms-1 viq-indicator-dot @(HasReportsData ? "status-success" : "status-warning")"
+                          title="@(HasReportsData ? "Client report generation verified" : "Reports ungenerated")"></span> *@
                 </NavLink>
-                                
-                <div class="fa-nav-heading">Assessment Config</div>
 
-                <NavLink class="fa-nav-item " href="/assessment/settings">
+                @* <div class="fa-nav-heading" style="border-top: solid 0.6px #bcbcbc; border-bottom: solid 0.6px #bcbcbc;">Assessment Config</div> *@
+
+                <NavLink class="fa-nav-item" href="assessment/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
-                    <span class="strong">Settings</span>&nbsp;<i class="bi bi-caret-right-fill"></i>
+                    <span class="nav-text font-weight-bold">Settings</span>&nbsp;<i class="bi bi-caret-right-fill"></i>
                 </NavLink>
             </div>
 
-            <div class="sidebar-footer-static">
-                <NavLink class="fa-nav-item footer-item border-top-thick" href="global/support">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-question-circle-fill"></i></div>
-                    <div class="footer-text-stack">
-                        <span class="footer-main-text">Get Help</span>
-                        <span class="footer-sub-text small">Log support ticket</span>
+            <div class="sidebar-footer-static mb-1">
+                <div class="dropdown-container w-100 ms-1">
+                    <button class="fa-nav-item footer-item border-0 w-100 bg-transparent text-start d-flex align-items-center" @onclick="ToggleSetupMenu" @onfocusout="CloseSetupMenu">
+
+                        <div class="nav-icon-avatar-round me-0 pe-0">
+                            <i class="bi bi-folder-symlink ms-1"></i>
+                        </div>
+
+                        <div class="footer-text-stack ms-0 ps-0">
+                            <span class="footer-main-text">Switch Assessment</span>
+                            <span class="footer-sub-text text-truncate">Case: @(string.IsNullOrEmpty(SessionService.CaseNumber) ? "None Loaded" : SessionService.CaseNumber)</span>
+                        </div>
+
+                        <i class="bi bi-chevron-up ms-2 chevron-rotate @(isSetupOpen ? "rotated" : "")"></i>
+                    </button>
+
+                    <div class="setup-submenu-dropdown @(isSetupOpen ? "show" : "")">
+                        <a href="global/assessments" class="setup-dropdown-item">
+                            <i class="bi bi-list-columns-reverse"></i>&nbsp; All Assessments
+                        </a>
+                        <a href="global/clients" class="setup-dropdown-item">
+                            <i class="bi bi-people"></i>&nbsp; Client Manager
+                        </a>
                     </div>
-                </NavLink>
+                </div>
 
                 <NavLink class="fa-nav-item footer-item border-top-thick" href="global/suggestions">
                     <div class="nav-icon-avatar-round"><i class="bi bi-person-raised-hand"></i></div>
@@ -138,31 +171,49 @@
     </div>
 </div>
 
-
+<ToastComponent />
 
 @code {
-    private bool isAssessmentPage = true;
     private bool isSidebarCollapsed = false;
     private bool isSetupOpen = false;
-    private bool isQuickAccessOpen = false;
     private bool isProfileOpen = false;
+    private bool isShortcutsOpen = false;
+
+    private bool HasSalesData => SessionService!.HasSalesEntries;
+    private bool HasStockData => SessionService!.HasStockEntries;
+    private bool HasExpensesData => SessionService!.HasExpensesEntries;
+    private bool HasReportsData => SessionService!.HasReportsGenerated;
+
+    protected override void OnInitialized()
+    {
+        SessionService!.OnSessionChanged += SynchronizeComponentViewLayout;
+    }
 
     private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
     private void ToggleSetupMenu() => isSetupOpen = !isSetupOpen;
-
-    private void ToggleQuickAccess() => isQuickAccessOpen = !isQuickAccessOpen;
     private void ToggleProfileMenu() => isProfileOpen = !isProfileOpen;
-
-    private async Task CloseQuickAccess()
-    {
-        await Task.Delay(150);
-        isQuickAccessOpen = false;
-    }
+    private void ToggleShortcutsMenu() => isShortcutsOpen = !isShortcutsOpen;
+    private void CloseSetupMenu() => isSetupOpen = false;
 
     private async Task CloseProfileMenu()
     {
         await Task.Delay(150);
         isProfileOpen = false;
     }
+
+    private async Task CloseShortcutsMenu()
+    {
+        await Task.Delay(150);
+        isShortcutsOpen = false;
+    }
+
+    private void SynchronizeComponentViewLayout()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        SessionService.OnSessionChanged -= SynchronizeComponentViewLayout;
+    }
 }
-<ToastComponent />

@@ -1,11 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
+using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
     public partial class WhatIfPage
     {
+        [Inject] ISessionService? sessionService { get; set; }
+        [Inject] ToastService? _Toast { get; set; }
         [Parameter] public long AssessmentId { get; set; }
+
+        private long ActiveAssessmentId { get; set; }
 
         // Dashboard State Controls & Data Properties
         protected bool IsProfitable { get; set; } = true;
@@ -24,7 +30,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         protected override void OnInitialized()
         {
-            InitializeDashboardMockDataset();
+            if (sessionService?.AssessmentId != null)
+            {
+                ActiveAssessmentId = sessionService.AssessmentId.Value;
+                InitializeDashboardMockDataset();
+            }
+            else
+            {
+                _Toast!.ShowError("Case number is unknown, please restart your application.");
+            }
+            
         }
 
         private void InitializeDashboardMockDataset()

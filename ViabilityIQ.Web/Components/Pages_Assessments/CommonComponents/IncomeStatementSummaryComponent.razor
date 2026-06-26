@@ -1,0 +1,59 @@
+﻿<div class="card h-100 bg-white shadow-sm border-0" style="border-radius: 6px;">
+    <div class="py-2 px-3 border-bottom bg-light shadow d-flex align-items-center justify-content-between">
+        <div>
+            <span class="h6 text-marble-light mb-0 small fw-bold">Summary Income Statement</span>
+            <div class="text-muted text-xxs uppercase small tracking-wider">Annualized Performance Projections</div>
+        </div>
+        <i class="bi bi-file-earmark-bar-graph text-muted fs-5"></i>
+    </div>
+    <div class="card-body p-2 shadow" style="border-radius:10px;">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0 text-xs">
+                <tbody>
+                    <tr>
+                        <td class="ps-2 fw-semibold text-dark text-uppercase text-xxs tracking-wider">Gross Revenue Stream / Total Sales</td>
+                        <td class="text-end font-monospace fw-bold pe-2 text-dark">R @GrandTotalSales.ToString("N0")</td>
+                    </tr>
+                    <tr class="text-muted">
+                        <td class="ps-3 italic-cell"><i class="bi bi-dash text-danger me-1"></i> Less: Cost of Sales (COS)</td>
+                        <td class="text-end font-monospace pe-2 text-danger">(R @AnnualCostOfSales.ToString("N0"))</td>
+                    </tr>
+                    <tr class="bg-light fw-bold border-top">
+                        <td class="ps-2 text-dark">Gross Profit Calculation</td>
+                        <td class="text-end font-monospace pe-2 text-dark">R @AnnualGrossProfit.ToString("N0")</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 text-muted italic-cell"><i class="bi bi-plus text-success me-1"></i> Add: Secondary Sundry Revenues</td>
+                        <td class="text-end font-monospace pe-2 text-success">R @AnnualSecondarySundry.ToString("N0")</td>
+                    </tr>
+                    <tr class="fw-bold bg-light border-top" style="border-bottom: 1px solid #cbdde0;">
+                        <td class="ps-2 text-navy">Total Combined Gross Income</td>
+                        <td class="text-end font-monospace pe-2 text-navy">R @AnnualGrossIncome.ToString("N0")</td>
+                    </tr>
+                    <tr class="text-muted">
+                        <td class="ps-3 italic-cell"><i class="bi bi-dash text-danger me-1"></i> Less: Operating Expenses (OPEX)</td>
+                        <td class="text-end font-monospace pe-2 text-danger">(R @AnnualOperatingExpenses.ToString("N0"))</td>
+                    </tr>
+                    <tr class="fw-bold border-top-thick" style="background-color: #f8fafc;">
+                        <td class="ps-2 text-dark" style="font-size: 0.78rem;">
+                            <i class="bi bi-cup-hot-fill text-primary me-1.5"></i>&nbsp;Projected Net Operational Profit
+                        </td>
+                        <td class="text-end font-monospace pe-2 text-success" style="font-size: 0.78rem;">
+                            R @AnnualNetProfit.ToString("N0")
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public decimal GrandTotalSales { get; set; }
+    [Parameter, EditorRequired] public decimal AnnualCostOfSales { get; set; }
+    [Parameter, EditorRequired] public decimal AnnualGrossProfit { get; set; }
+    [Parameter, EditorRequired] public decimal AnnualSecondarySundry { get; set; }
+    [Parameter, EditorRequired] public decimal AnnualGrossIncome { get; set; }
+    [Parameter, EditorRequired] public decimal AnnualOperatingExpenses { get; set; }
+    [Parameter, EditorRequired] public decimal AnnualNetProfit { get; set; }
+}

@@ -34,80 +34,60 @@
 
                     <div class="d-flex flex-column gap-3">
                         <div class="viq-elevated-card">
-                             <div class="viq-card-header-dark-ice">
-                                <span class="fw-bold text-navy-brand" style="font-size: 0.90rem;">Core Parameters</span>
-                                @* <button type="submit" class="btn btn-sm btn-primary  btn-update-font  py-1 px-3 shadow-sm" disabled="@IsSubmitting">
-                                    <i class="bi bi-save me-1"></i> Update Parameters
-                                </button> *@
-                            </div> 
+                            <div class="viq-card-header-dark-ice">
+                                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Core Parameters</span>
+                            </div>
 
                             <div class="p-3" style="background-color: #FEFCFF;">
-                                <div class="row g-3">
-                                    <div class="col-md-3 col-12 py-0">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-2 col-12 py-0">
                                         <label class="form-label-custom mb-0">Case Number</label>
                                         <input type="text" class="form-control-compact bg-light" value="@Model.CaseNumber" readonly disabled />
                                     </div>
-                                    <div class="col-md-3 col-12 py-0">
-                                        <label class="form-label-custom ">Period Start Date</label>
+                                    <div class="col-md-2 col-12 py-0">
+                                        <label class="form-label-custom">Period Start Date</label>
                                         <input type="text" class="form-control-compact bg-light" value="@Model.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
                                     </div>
-                                    <div class="col-md-3 col-12 py-0">
-                                        <label class="form-label-custom ">Period End Date</label>
+                                    <div class="col-md-2 col-12 py-0">
+                                        <label class="form-label-custom">Period End Date</label>
                                         <input type="text" class="form-control-compact bg-light" value="@Model.AssessmentFinishDate?.ToString("yyyy-MM-dd")" readonly disabled />
                                     </div>
-                                    <div class="col-md-3 col-12 py-0">
-                                        <label class="form-label-custom ">Assessment Start Date</label>
+                                   @*  <div class="col-md-2 col-12 py-0">
+                                        <label class="form-label-custom">Assessment Start Date</label>
                                         <input type="text" class="form-control-compact" value="@Model.CreatedDate.ToString("yyyy-MM-dd")" readonly disabled />
-                                    </div>
-
-                                    <div class="col-md-5 col-12">
+                                    </div> *@
+                                    <div class="col-md-3 col-12">
                                         <label for="businessName" class="form-label-custom">Business<span class="text-danger">*</span></label>
-                                        <DDLookupComponent SourceKey="DDLookupEnums.Businesses"
-                                                           Label="Product Category"
-                                                           @bind-Value="Model.BusinessId" IsDisabled=true /> 
+                                        <DDLookupComponent SourceKey="DDLookupEnums.Businesses" Label="Product Category" @bind-Value="Model.BusinessId" IsDisabled=true />
                                         <ValidationMessage For="() => Model.BusinessId" class="text-danger small" />
                                     </div>
 
-                                    <div class="col-md-4 col-12">
-                                        <label class="form-label-custom">Assessor/Business Advisor</label>
-                                        <input type="text" class="form-control-compact" value="Assessor Account (#@Model.CreatedBy)" readonly disabled />
-                                    </div>
-
                                     <div class="col-md-3 col-12">
-                                        <div class="m-0 p-0 border-1" style="background-color: #E0E5E5; border-radius:8px;">
-                                        <label class="form-label-custom fw-bold text-navy">&nbsp;Value Added Tax(VAT) Rate (%)</label>
-                                        <input type="number" class="form-control-compact text-end" @bind-value="Model.VATRate" min="0" max="100" />
+                                        <div class="p-1 border border-light-subtle shadow-sm" style="background-color: #E0E5E5; border-radius:8px;">
+                                            <label class="mb-0 fw-bold text-navy text-nowrap d-block" style="font-size: 0.65rem; letter-spacing: -0.2px;">&nbsp;Value Added Tax(VAT) Rate (%)</label>
+                                            <div class="d-flex align-items-center gap-1 mt-1">
+                                                <input type="number" class="form-control-compact text-end px-1 w-100 fw-bold" @bind-value="Model.VATRate" min="0" max="100" style="height: 24px; font-size: 0.78rem;" />
+                                                <button type="submit" class="btn btn-xs btn-primary shadow-sm py-0 px-2 fw-semibold text-nowrap d-flex align-items-center justify-content-center" style="height: 24px; font-size: 0.62rem;" disabled="@IsSubmitting">
+                                                    <i class="bi bi-save me-1"></i>Update
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-
-@* 
-                                    <div class="col-md-4 col-12 border border-light d-flex align-items-center justify-content-between" >
-                                        <div class="col-8 ms-2">
-                                            <span class="fw-semibold d-block text-black" style="font-size: 0.8rem;">Value Added Tax (VAT)%</span>
-                                        </div>
-                                        <div class="col input-group input-group-sm">
-                                            <input type="number" class="form-control text-end fw-bold text-dark" @bind-value="Model.VATRate" min="0" max="100" />
-                                            <span class="input-group-text bg-light text-dark fw-bold">%</span>
-                                        </div>
-                                    </div> *@
                                 </div>
                             </div>
                         </div>
 
-                        <!--  OPENING BALANCES AND SALES CATGORIES-->
                         <div class="row g-3">
-
                             <div class="col-md-6 col-12">
                                 <div class="viq-elevated-card h-100">
                                     <div class="viq-card-header-dark-ice">
-                                        <span class="fw-bold text-navy-brand" style="font-size: 0.85rem;">Opening Balances</span>
+                                        <span class="fw-bold text-smokewhite-brand" style="font-size: 0.85rem;">Opening Balances</span>
                                         <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
                                             <i class="bi bi-save me-1"></i> Update Opening Balances
                                         </button>
                                     </div>
                                     <div class="p-3">
                                         <div class="d-flex flex-column gap-1">
-
                                             <div class="row align-items-center g-1">
                                                 <div class="col-6">
                                                     <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Opening Balance - Assets:</label>
@@ -119,7 +99,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="row align-items-center g-1">
                                                 <div class="col-6">
                                                     <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Opening Balance - Bank:</label>
@@ -131,7 +110,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="row align-items-center g-1">
                                                 <div class="col-6">
                                                     <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Interest On Overdraft:</label>
@@ -143,7 +121,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="row align-items-center g-1">
                                                 <div class="col-6">
                                                     <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Depreciation Projected Amount:</label>
@@ -155,7 +132,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -164,123 +140,185 @@
                             <div class="col-md-6 col-12">
                                 <div class="viq-elevated-card h-100">
                                     <div class="viq-card-header-dark-ice">
-                                        <span class="fw-bold text-navy-brand" style="font-size: 0.85rem;">Sales Categories</span>    
+                                        <span class="fw-bold text-smokewhite-brand" style="font-size: 0.85rem;">Sales Categories</span>
                                         <button type="button" class="btn btn-primary btn-update-font py-1 px-2 shadow-sm" @onclick='() => OpenConfigurationPanel("SALES-CATEGORY", 0)'>
                                             <i class="bi bi-plus-lg me-1 fw-bold"></i>Add New
                                         </button>
                                     </div>
                                     <div class="p-0">
-                                        <SalesCategoryListComponent @ref="SalesCategoryListRef"
-                                                                    AssessmentId="@ActiveAssessmentId"
-                                                                    OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />
-                                   </div>
+                                        <SalesCategoryListComponent @ref="SalesCategoryListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
 
-
-
-                        <!--  CREDITORS AND DEBTORS -->
                         <div class="viq-elevated-card">
                             <div class="viq-card-header-dark-ice">
-                                <span class="fw-bold text-navy-brand" style="font-size: 0.90rem;">Ledger Age Allocations</span>
+                                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Ledger Age Allocations</span>
                                 <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
                                     <i class="bi bi-save me-1"></i> Update Profiles
                                 </button>
                             </div>
 
                             <div class="p-3">
-                                <div class="row g-2">
+                                <div class="row g-3">
                                     <div class="col-md-6 col-12 border-end pe-md-3">
-                                        <span class="fw-semibold text-dark d-block mb-2 pb-1 border-bottom" style="font-size: 0.78rem;">Creditors Allocation Profile</span>
+                                        <div class="row mb-2 pb-1 border-bottom g-1 text-uppercase fw-bold text-dark" style="font-size: 0.68rem; letter-spacing: 0.3px;">
+                                            <div class="col-6 text-start">Creditors Profile Items</div>
+                                            <div class="col-2 text-end">% Value</div>
+                                            <div class="col-4 text-end">Actual Value</div>
+                                        </div>
 
                                         <div class="d-flex flex-column gap-1">
                                             <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Creditors% 0-30 Days (Auto):</label>
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">0-30 Days (Auto):</label>
                                                 </div>
-                                                <div class="col-5">
-                                                    <input type="text" class="form-control form-control-sm text-end fw-bold bg-light" value="@CalculatedCreditors0To30.ToString("N2")%" readonly disabled />
+                                                <div class="col-2">
+                                                    <input type="text" class="form-control form-control-sm text-end text-success fw-bold bg-light px-1" value="@CalculatedCreditors0To30.ToString("N2")%" readonly disabled />
                                                 </div>
-                                            </div>
-                                            <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Creditors% 31-60 Days:</label>
-                                                </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Creditors_60" @oninput="(e) => InterceptCreditorsInput(e, 60)" />
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.CreditorsValue_30" />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Creditors% 61-90 Days:</label>
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">31-60 Days:</label>
                                                 </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Creditors_90" @oninput="(e) => InterceptCreditorsInput(e, 90)" />
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Creditors_60" @oninput="(e) => InterceptCreditorsInput(e, 60)" />
                                                 </div>
-                                            </div>
-                                            <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Creditors% 91-120 Days:</label>
-                                                </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Creditors_120" @oninput="(e) => InterceptCreditorsInput(e, 120)" />
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.CreditorsValue_60" />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Creditors% 120+ Days:</label>
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">61-90 Days:</label>
                                                 </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Creditors_120Plus" @oninput="(e) => InterceptCreditorsInput(e, 125)" />
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Creditors_90" @oninput="(e) => InterceptCreditorsInput(e, 90)" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.CreditorsValue_90" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-inline-align-row g-1">
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">91-120 Days:</label>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Creditors_120" @oninput="(e) => InterceptCreditorsInput(e, 120)" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.CreditorsValue_120" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-inline-align-row g-1">
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">120+ Days:</label>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Creditors_120Plus" @oninput="(e) => InterceptCreditorsInput(e, 125)" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.CreditorsValue_120Plus" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6 col-12 ps-md-2">
-                                        <span class="fw-semibold text-dark d-block mb-2 pb-1 border-bottom" style="font-size: 0.78rem;">Debtors Allocation Profile</span>
+                                        <div class="row mb-2 pb-1 border-bottom g-1 text-uppercase fw-bold text-dark" style="font-size: 0.68rem; letter-spacing: 0.3px;">
+                                            <div class="col-6 text-start">Debtors Profile Items</div>
+                                            <div class="col-2 text-end">% Value</div>
+                                            <div class="col-4 text-end">Actual Value</div>
+                                        </div>
 
                                         <div class="d-flex flex-column gap-1">
                                             <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Debtors% 0-30 Days (Auto):</label>
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">0-30 Days (Auto):</label>
                                                 </div>
-                                                <div class="col-5">
-                                                    <input type="text" class="form-control form-control-sm text-end fw-bold bg-light" value="@CalculatedDebtors0To30.ToString("N2")%" readonly disabled />
+                                                <div class="col-2">
+                                                    <input type="text" class="form-control form-control-sm text-end text-success fw-bold bg-light px-1" value="@CalculatedDebtors0To30.ToString("N2")%" readonly disabled />
                                                 </div>
-                                            </div>
-                                            <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Debtors% 31-60 Days:</label>
-                                                </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Debtors_60" @oninput="(e) => InterceptDebtorsInput(e, 60)" />
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.DebtorsValue_30" />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Debtors% 61-90 Days:</label>
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">31-60 Days:</label>
                                                 </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Debtors_90" @oninput="(e) => InterceptDebtorsInput(e, 90)" />
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Debtors_60" @oninput="(e) => InterceptDebtorsInput(e, 60)" />
                                                 </div>
-                                            </div>
-                                            <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Debtors% 91-120 Days:</label>
-                                                </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Debtors_120" @oninput="(e) => InterceptDebtorsInput(e, 120)" />
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.DebtorsValue_60" />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row form-inline-align-row g-1">
-                                                <div class="col-7">
-                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">Debtors% 120+ Days:</label>
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">61-90 Days:</label>
                                                 </div>
-                                                <div class="col-5">
-                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end" value="@Model.Debtors_120Plus" @oninput="(e) => InterceptDebtorsInput(e, 125)" />
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Debtors_90" @oninput="(e) => InterceptDebtorsInput(e, 90)" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.DebtorsValue_90" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-inline-align-row g-1">
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">91-120 Days:</label>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Debtors_120" @oninput="(e) => InterceptDebtorsInput(e, 120)" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.DebtorsValue_120" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-inline-align-row g-1">
+                                                <div class="col-6">
+                                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">120+ Days:</label>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" step="0.01" min="0" max="100" class="form-control form-control-sm text-end px-1" value="@Model.Debtors_120Plus" @oninput="(e) => InterceptDebtorsInput(e, 125)" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-end" @bind-value="Model.DebtorsValue_120Plus" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -291,27 +329,27 @@
 
                         <div class="viq-elevated-card">
                             <div class="viq-card-header-dark-ice">
-                                <span class="fw-bold text-navy-brand" style="font-size: 0.90rem;">Director Compensation Summary</span>
-                                <button type="submit" class="btn btn-sm btn-primary  btn-update-font  py-1 px-3 shadow-sm" disabled="@IsSubmitting">
+                                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Director Compensation Summary</span>
+                                <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
                                     <i class="bi bi-save me-1"></i> Update Director Wages
                                 </button>
                             </div>
 
                             <div class="p-3">
-                                <div class="row g-2">
-                                    <div class="col-md-3 col-sm-6 col-12">
-                                        <label class="form-label-custom text-muted mb-0">Number of Directors</label>
-                                        <input type="number" class="form-control form-control-sm text-end" min="1" max="100" @bind-value="Model.NumberOfDirectors" @bind-value:event="oninput" />
+                                <div class="row g-4 justify-content-between">
+                                    <div class="col-md-3 col-12">
+                                        <label class="form-label-custom text-muted mb-1 d-block">Number of Directors</label>
+                                        <input type="number" class="form-control form-control-sm text-end w-100" min="1" max="100" @bind-value="Model.NumberOfDirectors" @bind-value:event="oninput" />
                                     </div>
-                                    <div class="col-md-3 col-sm-6 col-12">
-                                        <label class="form-label-custom text-muted mb-0">Monthly Wage / Director (R)</label>
+                                    <div class="col-md-4 col-12">
+                                        <label class="form-label-custom text-muted mb-1 d-block">Monthly Wage / Director (R)</label>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-light">R</span>
                                             <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.MonthlyDirectorWagesAmount" @bind-value:event="oninput" />
                                         </div>
                                     </div>
-                                    <div class="col-md-3 col-sm-6 col-12">
-                                        <label class="form-label-custom text-muted mb-0">Combined Monthly Impact</label>
+                                    <div class="col-md-4 col-12">
+                                        <label class="form-label-custom text-muted mb-1 d-block">Combined Monthly Impact</label>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-light">R</span>
                                             <input type="text" class="form-control text-end fw-semibold bg-light" value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled />
@@ -333,8 +371,7 @@
                 </span>
 
                 <div class="d-flex flex-column gap-2">
-                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded w-100"
-                            @onclick='() => OpenConfigurationPanel("ASSESSMENT")'>
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded w-100" @onclick='() => OpenConfigurationPanel("ASSESSMENT")'>
                         <div class="tile-icon-wrapper base-avatar text-center mb-1">
                             <i class="fas fa-building text-primary"></i>
                         </div>
@@ -344,8 +381,7 @@
                         </div>
                     </button>
 
-                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded w-100"
-                            @onclick='() => OpenConfigurationPanel("DEBTORS-CREDITORS")'>
+                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded w-100" @onclick='() => OpenConfigurationPanel("DEBTORS-CREDITORS")'>
                         <div class="tile-icon-wrapper base-avatar text-center mb-1">
                             <i class="bi bi-incognito text-navy"></i>
                         </div>

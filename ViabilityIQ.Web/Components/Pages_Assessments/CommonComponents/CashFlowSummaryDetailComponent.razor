@@ -1,0 +1,120 @@
+﻿@using static ViabilityIQ.Web.Components.Pages_Assessments.AssessmentSalesPage
+
+<div class="fs-5 uppercase small " style="border-bottom: solid 0px #cdcdcd;">Cash flow summaries</div>
+<div class="mb-3 mt-2">
+    <div class="d-flex align-items-center justify-content-between py-1 ps-1 my-0">
+        <div>
+            <span class="h6 mb-0 fw-bold text-marble-light small">Consolidated Cash Flow for period 2026/27</span>
+            <span class="small text-xs text-muted">&nbsp;|&nbsp;Real-time operational liquidity statement tracker.</span>
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm mt-0" style="border: solid 1px #98AFC7; border-radius: 6px;">
+        <table class="table table-sm text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table summary-cashflow-table">
+            <thead>
+                <tr class="bg-light header-row font-weight-bold">
+                    <th class="ps-3 sticky-col first-header-period text-secondary text-end uppercase small" style="width: 285px; min-width: 285px; left: 0; background-color: #f1f5f9;">PERIOD/MONTHS&nbsp;<i class="bi bi-caret-right-fill text-secondary"></i></th>
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        <th class="text-end text-xs text-dark font-weight-bold px-2">M@(m)</th>
+                    }
+                    <th class="text-end text-xs font-weight-bold text-navy-brand px-2 bg-navy-light-summary">Cumulative</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="cashflow-inflow-row">
+                    <td class="ps-3 fw-bold text-navy sticky-col category-title-cell-head" style="left: 0;">
+                        <i class="bi bi-arrow-up-right-circle-fill text-success me-2"></i>Sales / Receipts Inflows
+                    </td>
+                    @for (int m = 0; m < 12; m++)
+                    {
+                        var monthIndex = m;
+                        var monthlyInflow = CalculateTotalInflowsForMonth(monthIndex);
+                        <td class="text-end font-monospace text-xs px-2 fw-medium text-dark">
+                            @monthlyInflow.ToString("N0")
+                        </td>
+                    }
+                    <td class="text-end font-monospace text-xs fw-bold text-navy-brand px-2 bg-navy-light-summary">
+                        @GrandTotalGlobalInflows.ToString("N0")
+                    </td>
+                </tr>
+
+                <tr class="cashflow-outflow-row">
+                    <td class="ps-3 fw-medium text-secondary sticky-col category-title-cell-head" style="left: 0;">
+                        <i class="bi bi-arrow-down-left-circle-fill text-danger me-2"></i>Operating Outflow Expenditures
+                    </td>
+                    @for (int m = 0; m < 12; m++)
+                    {
+                        var monthIndex = m;
+                        var monthlyOutflow = ExpenseCategories.Sum(e => e.MonthlyExpenses[monthIndex]);
+                        <td class="text-end font-monospace text-xs px-2 text-muted">
+                            (@monthlyOutflow.ToString("N0"))
+                        </td>
+                    }
+                    <td class="text-end font-monospace text-xs fw-medium text-danger px-2 bg-navy-light-summary">
+                        (@GrandTotalExpenses.ToString("N0"))
+                    </td>
+                </tr>
+
+                <tr class="cashflow-profit-row border-top fw-bold">
+                    <td class="ps-3 fw-bold text-dark sticky-col category-title-cell-head" style="left: 0; border-top: 1.5px solid #1a365d !important;">
+                        <i class="bi bi-cup-hot-fill text-primary me-2"></i>Gross Profit/Loss
+                    </td>
+                    @for (int m = 0; m < 12; m++)
+                    {
+                        var monthIndex = m;
+                        var netProfit = CalculateTotalInflowsForMonth(monthIndex) - ExpenseCategories.Sum(e => e.MonthlyExpenses[monthIndex]);
+                        var marginColorClass = netProfit >= 0 ? "text-success" : "text-danger";
+                        <td class="text-end font-monospace text-xs px-2 @marginColorClass">
+                            @netProfit.ToString("N0")
+                        </td>
+                    }
+                    <td class="text-end font-monospace text-xs fw-bold px-2 bg-navy-light-summary" style="color: #1a365d;">
+                        @((GrandTotalGlobalInflows - GrandTotalExpenses).ToString("N0"))
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style type="text/css">
+    .first-header-period{
+        font-size: 0.67rem;
+        font-weight: bold;
+    }
+
+    .category-title-cell-head{
+        font-size: 0.75rem;
+        font-weight: 400;
+    }
+
+</style>
+
+
+@code {
+    [Parameter, EditorRequired] public List<SalesCategoryViewModel> SalesCategories { get; set; }
+    [Parameter, EditorRequired] public List<ExpenseCategoryViewModel> ExpenseCategories { get; set; }
+    [Parameter, EditorRequired] public SundryIncomeViewModel SundryIncome { get; set; }
+    [Parameter, EditorRequired] public GrantsDonationsViewModel GrantsDonations { get; set; }
+    [Parameter, EditorRequired] public decimal GrandTotalGlobalInflows { get; set; }
+    [Parameter, EditorRequired] public decimal GrandTotalExpenses { get; set; }
+
+    private decimal CalculateMonthlyInterest(int monthIndex)
+    {
+        if (monthIndex == 0 || SundryIncome == null || SundryIncome.AnnualInterestRate <= 0)
+            return 0;
+
+        decimal principal = SundryIncome.MonthlyValues[monthIndex];
+        return Math.Round(principal * (SundryIncome.AnnualInterestRate / 100m / 12m), 0);
+    }
+
+    private decimal CalculateTotalInflowsForMonth(int monthIndex)
+    {
+        decimal sales = SalesCategories.Sum(c => c.MonthlySales[monthIndex]);
+        decimal sundry = SundryIncome?.MonthlyValues[monthIndex] ?? 0;
+        decimal interest = CalculateMonthlyInterest(monthIndex);
+        decimal grants = GrantsDonations?.MonthlyAllocations[monthIndex] ?? 0;
+        return sales + sundry + interest + grants;
+    }
+}

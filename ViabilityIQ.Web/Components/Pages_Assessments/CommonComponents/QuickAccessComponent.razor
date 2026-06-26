@@ -1,82 +1,71 @@
-﻿<div class="ms-0 ps-0 dropdown-container" @onfocusout="HandleBlur">
-    <button class="btn-quick-access @(isQuickAccessOpen ? "active" : "")"
-            @onclick="ToggleQuickAccess"
-            title="Workspace Shortcuts System">
-        <i class="bi bi-menu-up"></i>
-    </button>
-
-    <div class="dropdown-card-menu @(isQuickAccessOpen ? "show" : "")">
-        <div class="dropdown-card-header">
-            <div class="header-title text-white">Quick Access Shortcuts</div>
-            @* <div class="header-subtitle text-white-50">Navigation Shortcuts</div> *@
-        </div>
-
-        <div class="quick-access-grid">
-            
-
-            <a class="quick-grid-item" href="/finance/creditors">
-                <div class="grid-icon-wrapper text-danger"><i class="bi bi-incognito"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Creditors</span>
-                    <span class="sub-text">Payables Ledger</span>
-                </div>
-            </a>
-
-            <a class="quick-grid-item" href="/finance/debtors">
-                <div class="grid-icon-wrapper text-success"><i class="bi bi-briefcase"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Debtors</span>
-                    <span class="sub-text">Receivables Ledger</span>
-                </div>
-            </a>
-
-            <a class="quick-grid-item" href="/reports/balance-sheet">
-                <div class="grid-icon-wrapper text-primary"><i class="bi bi-balance-scale"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Balance Sheet</span>
-                    <span class="sub-text">Statement File</span>
-                </div>
-            </a>
-
-            <a class="quick-grid-item" href="/reports/income-statement">
-                <div class="grid-icon-wrapper text-warning"><i class="bi bi-cash-coin"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Income &amp; Cash</span>
-                    <span class="sub-text">Performance</span>
-                </div>
-            </a>
-
-            <a class="quick-grid-item" href="/settings/assumptions">
-                <div class="grid-icon-wrapper text-info"><i class="bi bi-clipboard2-data"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Assumptions</span>
-                    <span class="sub-text">Model Drivers</span>
-                </div>
-            </a>
-
-            <a class="quick-grid-item" href="/analysis/sensitivity">
-                <div class="grid-icon-wrapper text-navy"><i class="bi bi-graph-up-arrow"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Sensitivity Analysis</span>
-                    <span class="sub-text">Variable Scenario Mapping</span>
-                </div>
-            </a>
-
-            <a class="quick-grid-item wide-grid-span" href="/settings/assessments">
-                <div class="grid-icon-wrapper text-danger"><i class="bi bi-sliders"></i></div>
-                <div class="grid-item-text">
-                    <span class="strong">Setup</span>
-                    <span class="sub-text">Assessment Parameters</span>
-                </div>
-            </a>
+﻿
+    <div class="viq-card-header-dark-ice text-white">Quick Access Shortcuts</div>
 
 
-        </div>
+    <div class="quick-access-grid">
+
+        <a class="quick-grid-item" href="/finance/creditors">
+            <div class="grid-icon-wrapper text-danger"><i class="bi bi-incognito"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Creditors</span>
+                <span class="sub-text">Payables Ledger</span>
+            </div>
+        </a>
+
+        <a class="quick-grid-item" href="/finance/debtors">
+            <div class="grid-icon-wrapper text-success"><i class="bi bi-briefcase"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Debtors</span>
+                <span class="sub-text">Receivables Ledger</span>
+            </div>
+        </a>
+
+        <a class="quick-grid-item" href="/reports/balance-sheet">
+            <div class="grid-icon-wrapper text-primary"><i class="bi bi-balance-scale"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Balance Sheet</span>
+                <span class="sub-text">Statement File</span>
+            </div>
+        </a>
+
+        <a class="quick-grid-item" href="/reports/income-statement">
+            <div class="grid-icon-wrapper text-warning"><i class="bi bi-cash-coin"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Income &amp; Cash</span>
+                <span class="sub-text">Performance</span>
+            </div>
+        </a>
+
+        <a class="quick-grid-item" href="/settings/assumptions">
+            <div class="grid-icon-wrapper text-info"><i class="bi bi-clipboard2-data"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Assumptions</span>
+                <span class="sub-text">Model Drivers</span>
+            </div>
+        </a>
+
+        <a class="quick-grid-item" href="/analysis/sensitivity">
+            <div class="grid-icon-wrapper text-navy"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Sensitivity Analysis</span>
+                <span class="sub-text">Variable Scenario Mapping</span>
+            </div>
+        </a>
+
+        <a class="quick-grid-item wide-grid-span" href="/settings/assessments">
+            <div class="grid-icon-wrapper text-danger"><i class="bi bi-sliders"></i></div>
+            <div class="grid-item-text">
+                <span class="strong">Setup</span>
+                <span class="sub-text">Assessment Parameters</span>
+            </div>
+        </a>
+
     </div>
-</div>
+
+
 
 @code {
-    private bool isQuickAccessOpen = false;
+    private bool isQuickAccessOpen = true;
 
     private void ToggleQuickAccess()
     {
@@ -87,7 +76,7 @@
     {
         // Gives the click navigation sequence time to resolve routing steps before dropping visibility context
         await Task.Delay(180);
-        isQuickAccessOpen = false;
+        isQuickAccessOpen = true;
         StateHasChanged();
     }
 }
