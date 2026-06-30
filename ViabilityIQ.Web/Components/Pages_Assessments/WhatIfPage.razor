@@ -11,6 +11,15 @@
     <PageHeading_Assessment _pageTitle="What-If Analysis" PageTitle="Dashboards & Scenarios" CurrentPage="PageType.Dashboards" />
 
     <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">    
+        @if (blAlert == true)
+        {
+            <div class="my-0">
+                <ViqAlertComponent Severity="AlertSeverity"
+                                   Heading="@AlertHeading"
+                                   Message="@AlertMessage"
+                                   AllowDismiss="true" />
+            </div>
+        }
         <div class="col-xl-10 col-lg-9 col-12">
 
             <section class="metrics-ribbon-grid">

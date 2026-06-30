@@ -28,7 +28,8 @@
         Expenses,
         Stock,
         VAT,
-        Sales
+        Sales,
+        LoanTypes
     }
 
     public static class PageHeaderIcons
@@ -49,7 +50,7 @@
             PageType.Contacts => "bi bi-person-lines-fill",
             PageType.Help => "bi bi-question-circle-fill",
             PageType.Suggestions => "bi bi-person-raised-hand",
-            PageType.Loans => "bi bi-piggy-bank",
+            PageType.Loans => "bi bi-umbrella-fill",
             PageType.Creditors => "bi bi-incognito",
             PageType.Debtors => "bi bi-briefcase",
             PageType.ActivityLog => "bi bi-calendar3",
@@ -65,6 +66,7 @@
             PageType.Expenses => "bi bi-wallet2",
             PageType.Stock => "bi bi-boxes",
             PageType.VAT => "bi bi-bug",
+            PageType.LoanTypes => "bi bi-umbrella-fill",
 
             _ => "bi bi-circle"
         };

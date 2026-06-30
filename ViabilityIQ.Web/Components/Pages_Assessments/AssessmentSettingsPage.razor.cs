@@ -20,6 +20,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         [Parameter] public long ActiveAssessmentId { get; set; }
 
         private SalesCategoryListComponent? SalesCategoryListRef;
+        private AssessmentLoansListComponent? AssessmentLoansListRef;
 
         private Assessment? Model { get; set; }
         private bool IsLoading { get; set; } = true;
@@ -189,6 +190,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     ActivePanelTitle = selectedId > 0 ? "Edit Sales Category" : "Add New Sales Category";
                     ActiveFormType = typeof(SalesCategoryFormComponent);
                     ActiveFormParameters.Add("AssessmentSalesCategoryId", selectedId);
+                    break;
+
+                case "ASSESSMENT-LOANS":
+                    ActivePanelTitle = selectedId > 0 ? "Edit Assessment Loan" : "Add New Assessment Loan";
+                    ActiveFormType = typeof(AssessmentLoanFormComponent);
+                    ActiveFormParameters.Add("AssessmentLoanId", selectedId);
                     break;
             }
 

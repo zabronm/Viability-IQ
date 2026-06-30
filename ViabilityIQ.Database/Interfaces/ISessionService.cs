@@ -31,6 +31,9 @@
         bool HasExpensesData { get; }
         bool HasReportsData { get; }
         bool HasReviewsData { get; }
+        bool HasDebtorsCreditorsData { get; }
+        bool HasLoansData { get; }
+
         bool HasReviews { get; }
         bool HasSalesEntries { get; }
         bool HasStockEntries { get; }
@@ -77,6 +80,8 @@
             bool HasExpensesData,
             bool HasReportsData,
             bool HasReviewsData,
+            bool HasDebtorsCreditorsData,
+            bool HasLoansData,
             bool HasReviews,
             string assessmentType);
 

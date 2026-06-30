@@ -12,6 +12,7 @@ namespace ViabilityIQ.Shared.SharedModels
         BusinessCategories,
         Businesses,
         ClientCategories,
+        LoanTypes,
         Clients,
         ProductServiceCategories,
         Products,

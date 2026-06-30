@@ -1,0 +1,57 @@
+﻿@using Microsoft.AspNetCore.Components
+@using ViabilityIQ.Web.Services
+@inject IJSRuntime JS
+@inject ZabOffCanvasService CanvasService
+
+<div class="offcanvas fade-effect offcanvas-end zab-offcanvas"
+     id="zabCanvasHost"
+     tabindex="-1"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false"
+     style="width:@(_width)px;">
+
+
+    <div class="offcanvas-header zab-offcanvas-header">
+
+        <h5 class="offcanvas-title zab-offcanvas-title fw-bold">
+
+            @_title
+
+        </h5>
+
+       @*  <button class="btn-close"                @onclick="CloseCanvasAsync">
+        <i class="bi bi-x-circle"></i>
+        </button> *@
+
+        <button class="zab-close-button"
+                type="button"
+                title="Close"
+                @onclick="CloseCanvasAsync">
+
+            <i class="bi bi-x-lg"></i>
+
+        </button>
+
+
+
+    </div>
+
+    <div class="offcanvas-body zab-offcanvas-body">
+
+        @if (_componentType != null)
+        {
+            <DynamicComponent Type="_componentType"
+                              Parameters="_parameters" />
+        }
+
+    </div>
+
+</div>
+
+<style type="text/css">
+    .fade-effect{
+        transition: transform .28s ease,
+        visibility .28s ease;
+    }
+        
+</style>

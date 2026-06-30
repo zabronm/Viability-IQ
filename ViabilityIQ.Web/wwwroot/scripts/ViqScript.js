@@ -87,3 +87,5 @@ window.renderViqCashCycleBars = function (canvasId, stockDays, debtorDays, credi
         }
     });
 };
+
+

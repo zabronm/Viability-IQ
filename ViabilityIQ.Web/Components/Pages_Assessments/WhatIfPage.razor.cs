@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Services;
+using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
@@ -13,7 +15,14 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private long ActiveAssessmentId { get; set; }
 
-        // Dashboard State Controls & Data Properties
+        //=======================ALERT VARIABLES 
+        private bool blAlert { get; set; } = true;
+        private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
+        private string AlertHeading { get; set; } = "ALERT:";
+        private string AlertMessage { get; set; } = "Welcome to Viability.IQ; the ultimate business analysis expert!! Let us know what you think !! .";
+
+
+        // ======================Dashboard State Controls & Data Properties
         protected bool IsProfitable { get; set; } = true;
         protected List<MonthPnLSummary> MonthlyPerformanceMockData { get; set; } = new();
 
@@ -41,6 +50,40 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
             
         }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            //Check and display notices ALWAYS
+            await  DisplayNotificationAlerts();
+        }
+
+
+        async Task DisplayNotificationAlerts()
+        {
+
+            if (IsProfitable)
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Success;
+                AlertHeading = "WELLDONE:";
+                AlertMessage = $"Your business is doing well. However, be careful of stock-outs! This exceeds standard cash flow risk thresholds.";
+            }
+            else if (!IsProfitable)
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Danger;
+                AlertHeading = "VERY LOW PROFITS:";
+                AlertMessage = "Your business is performing excessively under the radar! Holding days indicate rapid product movement cycles.";
+            }
+            else
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Info;
+                AlertHeading = "Information Ledger:";
+                AlertMessage = "Inventory configurations are active. Adjust parameters using the edit action button framework at any time.";
+            }
+        }
+
 
         private void InitializeDashboardMockDataset()
         {

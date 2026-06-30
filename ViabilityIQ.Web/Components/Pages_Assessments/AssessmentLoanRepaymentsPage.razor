@@ -1,0 +1,169 @@
+﻿@page "/assessment/loan-repayments/"
+@layout MainLayout_Assessment
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Layout
+
+<style>
+    .zab-offcanvas-pane {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 2050 !important;
+        width: 460px;
+        height: 100vh;
+        background-color: #fff;
+        border-left: 1px solid rgba(0,0,0,.2);
+        box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+        visibility: visible !important;
+    }
+
+    .zab-canvas-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 2040 !important;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+        opacity: 0.15;
+        backdrop-filter: blur(2px);
+    }
+
+    .fa-top-bar {
+        z-index: 1030 !important;
+    }
+</style>
+
+<div class="p-0 position-relative dashboard-workspace container-fluid">
+    <PageHeading_Assessment _pageTitle="Loans" PageTitle="Loan Repayments" CurrentPage="PageType.Loans" />
+
+    <div class="row bg-white g-3 mt-1 p-3 content-rounded-frame">
+        <div class="col-12">
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <button type="button" class="btn btn-primary text-xs shadow-sm" @onclick='() => HandleGridActionBindingAsync(0, WorkflowContextType.AssessmentLoanView)'>
+                        <i class="bi bi-plus-lg me-1.5 fw-bold"></i>Add Loan
+                    </button>
+                </div>
+                <div style="width: 280px;">
+                    <div class="input-group input-group-sm shadow-sm search-input-frame">
+                        <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search loan matrix balances..." @bind="SearchQuery" @bind:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive shadow-sm border border-secondary-subtle rounded mb-2">
+                <table class="table table-sm vertical-align-middle align-middle mb-0 matrix-grid-table">
+                    <thead>
+                        <tr class="bg-light text-muted text-xxs text-uppercase fw-bold border-bottom text-center row-header-height">
+                            <th class="text-start ps-3 py-2 text-dark col-loan-profile">Loan Profile Type</th>
+                            <th class="py-2 text-secondary text-start ps-2 col-metric-breakdown">Metric Breakdown</th>
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <th class="py-2 col-month-width">M@(m)</th>
+                            }
+                            <th class="text-white fw-bold text-center py-2 col-total-cumulative" style="background-color: #1a365d;">Total Outflow</th>
+                            <th class="bg-light border-start text-center py-2 col-actions-box"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (GetFilteredLoanProfiles().Any())
+                        {
+                            @foreach (var loan in GetFilteredLoanProfiles())
+                            {
+                                <tr class="border-top border-secondary-subtle font-row-group">
+                                    <td rowspan="4" class="ps-3 align-top pt-2 text-navy-brand fw-bold clickable-matrix-cell"
+                                        @onclick='() => HandleGridActionBindingAsync(loan.LoanId, WorkflowContextType.AssessmentLoanView)'
+                                        title="Click to view full loan parameters">
+                                        @FormatLoanName(loan.LoanTypeName)
+                                        <small class="d-block text-muted fw-normal font-monospace text-xxs mt-0.5">@loan.BankName</small>
+                                    </td>
+                                    <td class="text-xxs text-muted fw-semibold py-1.5 bg-light-subtle ps-2">Expected Repayment</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        var monthIdx = i + 1;
+                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 bg-light-subtle pe-2 position-relative">
+                                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                                <span>@loan.MonthlyData[i].Expected.ToString("N0").Replace(",", " ")</span>
+                                                @if (loan.StartMonth == monthIdx)
+                                                {
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1 d-inline-flex align-items-center start-indicator-pill" title="Starting Repayment Month">
+                                                        <i class="bi bi-dot m-0 p-0 lh-1"></i>
+                                                    </span>
+                                                }
+                                            </div>
+                                        </td>
+                                    }
+                                    <td class="text-end font-monospace text-dark py-1.5 pe-3 fw-normal bg-total-column cell-val-size">
+                                        @loan.MonthlyData.Sum(x => x.Expected).ToString("N0").Replace(",", " ")
+                                    </td>
+                                    <td rowspan="4" class="text-center border-start align-middle bg-white">
+                                        <button type="button" class="btn btn-outline-primary-action p-1 shadow-sm d-inline-flex align-items-center justify-content-center"
+                                                @onclick='() => HandleGridActionBindingAsync(loan.LoanId, WorkflowContextType.RepaymentsEdit)' title="Edit Repayments">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr class="font-row-group">
+                                    <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Calculated Interest</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2">
+                                            @loan.MonthlyData[i].Interest.ToString("N0").Replace(",", " ")
+                                        </td>
+                                    }
+                                    <td class="text-end font-monospace text-secondary py-1.5 pe-3 fw-normal bg-total-column cell-val-size">
+                                        @loan.MonthlyData.Sum(x => x.Interest).ToString("N0").Replace(",", " ")
+                                    </td>
+                                </tr>
+
+                                <tr class="font-row-group">
+                                    <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Extra Repayment</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end font-monospace text-xs text-success py-1.5 pe-2">
+                                            @loan.MonthlyData[i].Extra.ToString("N0").Replace(",", " ")
+                                        </td>
+                                    }
+                                    <td class="text-end font-monospace text-success py-1.5 pe-3 fw-normal bg-total-column cell-val-size">
+                                        @loan.MonthlyData.Sum(x => x.Extra).ToString("N0").Replace(",", " ")
+                                    </td>
+                                </tr>
+
+                                <tr class="bg-light-totals-cell border-bottom border-secondary-subtle font-row-group">
+                                    <td class="text-xxs text-dark fw-bold py-1.5 ps-2">Total Repaid</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end font-monospace text-xs fw-bold text-navy-brand py-1.5 pe-2">
+                                            @loan.MonthlyData[i].Total.ToString("N0").Replace(",", " ")
+                                        </td>
+                                    }
+                                    <td class="text-end font-monospace text-navy-brand py-1.5 pe-3 fw-bold bg-total-column cell-val-size">
+                                        @loan.MonthlyData.Sum(x => x.Total).ToString("N0").Replace(",", " ")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="16" class="text-center p-5 text-muted text-xs bg-white">
+                                    <i class="bi bi-clipboard-x fs-4 d-block mb-2 opacity-40"></i>No matching loan segments identified in this view slice.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-2 bg-light mt-3">
+    <BFooter />
+</footer>

@@ -62,6 +62,8 @@ namespace ViabilityIQ.Web.Services
         private bool _hasReportsEntries;
         private bool _hasReviewsEntries;
         private bool _hasReportsGenerated;
+        private bool _hasDebtorsCreditorsData;
+        private bool _hasLoansData;
 
         private long? _businessId;
         private string _businessName = string.Empty;
@@ -85,6 +87,8 @@ namespace ViabilityIQ.Web.Services
         public bool HasReportsEntries => _hasReportsEntries;
         public bool HasReviewsEntries => _hasReviewsEntries;
         public bool HasReportsGenerated => _hasReportsGenerated;
+        public bool HasDebtorsCreditorsData => _hasDebtorsCreditorsData;
+        public bool HasLoansData => _hasLoansData;
 
         // Computed logic check matching the contract spec rules
         public bool HasAnyEntries => _hasSalesEntries || _hasStockEntries || _hasExpensesEntries || _hasReportsEntries || _hasReviewsEntries;
@@ -152,6 +156,9 @@ namespace ViabilityIQ.Web.Services
             bool hasReportsData,
             bool hasReviewsData,
             bool hasReviews,
+            bool hasDebtorsCreditorsData,
+            bool hasLoansData,
+
             string assessmentType)
         {
             _assessmentId = assessmentId;
@@ -171,6 +178,8 @@ namespace ViabilityIQ.Web.Services
             _hasReportsData = hasReportsData;
             _hasReviewsData = hasReviewsData;
             _hasReviews = hasReviews;
+            _hasDebtorsCreditorsData = hasDebtorsCreditorsData;
+            _hasLoansData = hasLoansData;
 
             // Deriving entries or evaluations relative to active indicators
             _hasSalesEntries = hasSalesData;
@@ -201,6 +210,9 @@ namespace ViabilityIQ.Web.Services
             _hasExpensesData = false;
             _hasReportsData = false;
             _hasReviewsData = false;
+            _hasDebtorsCreditorsData = false;
+            _hasLoansData = false;
+
             _hasReviews = false;
             _hasSalesEntries = false;
             _hasStockEntries = false;

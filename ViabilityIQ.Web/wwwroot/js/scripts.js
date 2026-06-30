@@ -242,3 +242,6 @@ window.blazorDropZone = {
         dropZone.addEventListener('drop', handler, { once: true });
     }
 };
+
+
+

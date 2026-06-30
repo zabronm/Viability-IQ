@@ -52,7 +52,7 @@
                                         <label class="form-label-custom">Period End Date</label>
                                         <input type="text" class="form-control-compact bg-light" value="@Model.AssessmentFinishDate?.ToString("yyyy-MM-dd")" readonly disabled />
                                     </div>
-                                   @*  <div class="col-md-2 col-12 py-0">
+                                    @*  <div class="col-md-2 col-12 py-0">
                                         <label class="form-label-custom">Assessment Start Date</label>
                                         <input type="text" class="form-control-compact" value="@Model.CreatedDate.ToString("yyyy-MM-dd")" readonly disabled />
                                     </div> *@
@@ -327,33 +327,55 @@
                             </div>
                         </div>
 
-                        <div class="viq-elevated-card">
-                            <div class="viq-card-header-dark-ice">
-                                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Director Compensation Summary</span>
-                                <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
-                                    <i class="bi bi-save me-1"></i> Update Director Wages
-                                </button>
+                        <!-- DIRECTOR WAGES -->
+                        <div class="row g-3">
+                            <div class="col-md-6 col-12">
+                                <div class="viq-elevated-card h-100">
+
+                                    @* <div class="viq-elevated-card"> *@
+                                    <div class="viq-card-header-dark-ice">
+                                        <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Director Compensation Summary</span>
+                                        <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
+                                            <i class="bi bi-save me-1"></i> Update Director Wages
+                                        </button>
+                                    </div>
+
+                                    <div class="p-3">
+                                        <div class="row g-4 justify-content-between">
+                                            <div class="col-md-3 col-12">
+                                                <label class="form-label-custom text-muted mb-1 d-block">Number of Directors</label>
+                                                <input type="number" class="form-control form-control-sm text-end w-100" min="1" max="100" @bind-value="Model.NumberOfDirectors" @bind-value:event="oninput" />
+                                            </div>
+                                            <div class="col-md-4 col-12">
+                                                <label class="form-label-custom text-muted mb-1 d-block">Monthly Wage / Director (R)</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light">R</span>
+                                                    <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.MonthlyDirectorWagesAmount" @bind-value:event="oninput" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-12">
+                                                <label class="form-label-custom text-muted mb-1 d-block">Combined Monthly Impact</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light">R</span>
+                                                    <input type="text" class="form-control text-end fw-semibold bg-light" value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="p-3">
-                                <div class="row g-4 justify-content-between">
-                                    <div class="col-md-3 col-12">
-                                        <label class="form-label-custom text-muted mb-1 d-block">Number of Directors</label>
-                                        <input type="number" class="form-control form-control-sm text-end w-100" min="1" max="100" @bind-value="Model.NumberOfDirectors" @bind-value:event="oninput" />
+                            <div class="col-md-6 col-12">
+                                <!-- PUT ASSESSMENT LOANS HERE -->
+                                <div class="viq-elevated-card h-100">
+                                    <div class="viq-card-header-dark-ice d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold text-smokewhite-brand" style="font-size: 0.85rem;">Assessment Loans</span>
+                                        <button type="button" class="btn btn-primary btn-update-font py-1 px-2 shadow-sm" @onclick='() => OpenConfigurationPanel("ASSESSMENT-LOANS", 0)'>
+                                            <i class="bi bi-plus-lg me-1 fw-bold"></i>Add New
+                                        </button>
                                     </div>
-                                    <div class="col-md-4 col-12">
-                                        <label class="form-label-custom text-muted mb-1 d-block">Monthly Wage / Director (R)</label>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text bg-light">R</span>
-                                            <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.MonthlyDirectorWagesAmount" @bind-value:event="oninput" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-12">
-                                        <label class="form-label-custom text-muted mb-1 d-block">Combined Monthly Impact</label>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text bg-light">R</span>
-                                            <input type="text" class="form-control text-end fw-semibold bg-light" value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled />
-                                        </div>
+                                    <div class="p-0">
+                                        <AssessmentLoansListComponent @ref="AssessmentLoansListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("ASSESSMENT-LOANS", id)' />
                                     </div>
                                 </div>
                             </div>
@@ -364,7 +386,8 @@
             }
         </div>
 
-        <div class="col-lg-2 col-12 order-lg-2 order-1">
+        <!-- DIRECTOR WAGES-->
+        <div class="col-lg-2 col-3 order-lg-2 order-1">
             <div class="viq-elevated-card viq-security-sidebar-card h-100 p-2">
                 <span class="fw-bold text-dark d-block mb-2 border-bottom pb-1 px-1" style="font-size: 0.78rem;">
                     <i class="fas fa-sliders-h me-1 text-muted"></i> Quick Settings
@@ -393,6 +416,8 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 </div>
 

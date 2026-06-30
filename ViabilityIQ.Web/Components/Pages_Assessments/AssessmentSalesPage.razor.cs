@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
@@ -17,6 +18,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal BulkAnnualValueTarget;
 
         private FormContextType ActiveFormType { get; set; } = FormContextType.Sales;
+
+        private bool blAlert { get; set; } = true;
+        private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
+        private string AlertHeading { get; set; } = "Sales Notice:";
+        private string AlertMessage { get; set; } = "Verify that your sales values align accurately with your cost of sales allocations for this assessment phase.";
+
+
 
         // Reactive Evaluation Properties
         private decimal GrandTotalSales => SalesCategories?.Sum(c => c.MonthlySales.Sum()) ?? 0;
@@ -41,6 +49,41 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             new ExpenseCategoryViewModel { Id = 102, ExpenseName = "Operational Overheads & Headcount Remittances", MonthlyExpenses = new decimal[] { 12000, 12000, 12500, 12500, 13000, 13000, 13500, 13500, 14000, 14000, 15000, 16000 } }
         };
 
+
+        protected override void OnInitialized()
+        {
+            DisplayNotificationAlerts();
+        }
+
+        void DisplayNotificationAlerts()
+        {
+
+            if (SundryTotalPrincipal > 90)
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Danger;
+                AlertHeading = "Critical Turnover Slowdown:";
+                AlertMessage = $"Inventory is holding for {SundryTotalPrincipal} days! This exceeds standard cash flow risk thresholds.";
+            }
+            else if (SundryTotalPrincipal <= 30)
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Success;
+                AlertHeading = "Optimized Turnover Efficiency:";
+                AlertMessage = "Excellent efficiency setup! Holding days indicate rapid product movement cycles.";
+            }
+            else
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Info;
+                AlertHeading = "Information Ledger:";
+                AlertMessage = "Inventory configurations are active. Adjust parameters using the edit action button framework at any time.";
+            }
+        }
+
+
+
+
         private SundryIncomeViewModel SundryIncome = new()
         {
             IncomeName = "Property Sublet Revenue",
@@ -48,9 +91,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             MonthlyValues = new decimal[] { 5000, 5000, 5500, 5500, 5500, 6000, 6000, 6000, 6500, 6500, 7000, 7500 }
         };
 
+
+
+
         private GrantsDonationsViewModel GrantsDonations = new()
         {
-            FundingName = "SADC Green Innovation Grant",
+            FundingName = "Donations & Grants",
             MonthlyAllocations = new decimal[] { 20000, 0, 0, 20000, 0, 0, 25000, 0, 0, 30000, 0, 15000 }
         };
 

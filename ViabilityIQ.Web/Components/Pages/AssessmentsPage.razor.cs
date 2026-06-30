@@ -139,12 +139,15 @@ namespace ViabilityIQ.Web.Components.Pages
                          clientId: selectedRecord.ClientId,
                          clientName: selectedRecord.BusinessOwner,
                          assessmentType: selectedRecord.AssessmentType,
+
                          HasExpensesData: true,        // selectedRecord.HasExpensesData,
                          HasSalesData: true,           // selectedRecord.HasSalesData,
                          HasStockData: false,           // selectedRecord.HasStockData,
                          HasReportsData: false,          // selectedRecord.HasReportsData,
                          HasReviewsData: false,           // selectedRecord.HasReviewsData,
-                         HasReviews: false
+                         HasReviews: false,
+                         HasDebtorsCreditorsData: true,     //for testing only
+                         HasLoansData: true                 //for testing only
                     );
                 }
 

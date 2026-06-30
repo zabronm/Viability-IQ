@@ -76,10 +76,10 @@
 .fa-nav-item {
     display: flex;
     align-items: center;
-    padding: 10px 12px;
+    padding: 6px 12px;
     color: #475569;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 0.88rem;
     font-weight: 500;
     transition: all 0.2s ease;
@@ -199,6 +199,12 @@
     color: #334155;
 }
 
+.footer-main-text-sm {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #334155;
+}
+
 .footer-sub-text {
     font-size: 0.7rem;
     color: #64748b;
@@ -228,7 +234,7 @@
 }
 
     .fa-toggle-sidebar-btn:hover {
-        color: #000099;
+        color: #000099;        
     }
 
 .fa-top-bar-right {
@@ -432,7 +438,7 @@
 .fa-main-content-surface {
     flex: 1;
     background-color: #f8fafc;
-    overflow-y: auto;
+    overflow-y: visible;
 }
 
 .content-body-padding {

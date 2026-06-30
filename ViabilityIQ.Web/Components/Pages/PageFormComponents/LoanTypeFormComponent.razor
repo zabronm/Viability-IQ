@@ -1,0 +1,63 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="zab-form-wrapper mb-4">
+    @if (isProcessingData)
+    {
+        <div class="form-processing-overlay animate-fade-in">
+            <div class="spinner-container-box">
+                <div class="sleek-form-spinner"></div>
+                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="@loanTypeModel" OnValidSubmit="HandleFormSubmissionAsync">
+        <DataAnnotationsValidator />
+
+        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
+
+        <div class="mb-3">
+            <label for="bankName" class="form-label-custom">Loan Type Name <span class="text-danger">*</span></label>
+            <InputText id="bankName" class="form-control-compact" @bind-Value="loanTypeModel.LoanTypeName" />
+            <ValidationMessage For="@(() => loanTypeModel.LoanTypeName)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3">
+            <label for="shortName" class="form-label-custom">Other Name/s <span class="text-danger">*</span></label>
+            <InputText id="shortName" class="form-control-compact" @bind-Value="loanTypeModel.ShortName" />
+            <ValidationMessage For="@(() => loanTypeModel.ShortName)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-4">
+            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="loanTypeModel.Remarks" />
+            <ValidationMessage For="@(() => loanTypeModel.Remarks)" class="text-danger small mt-1" />
+        </div>
+
+        <div class="mb-3 d-flex align-items-center justify-content-start ">
+            <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
+                @(isRowActive ? "Loan Type Active" : "Loan Type Not Active")
+            </label>
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center col-2">
+                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+            </div>
+        </div>       
+
+        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+                @if (isProcessingData)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-square me-1.5"></i>
+                    <span>@(LoanTypeId  == 0 ? "Commit Record" : "Apply Modifications")</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>

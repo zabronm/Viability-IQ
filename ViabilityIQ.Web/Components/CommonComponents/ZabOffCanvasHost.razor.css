@@ -1,0 +1,200 @@
+﻿/* ===========================================================
+   ZAB OFFCANVAS THEME v2.1
+   Viability.IQ Enterprise UI Framework
+   =========================================================== */
+
+
+/*============================================================
+  OFFCANVAS CONTAINER
+============================================================*/
+
+.offcanvas {
+    background: #fcfdff;
+    border-left: solid 1px #dbe6ef;
+    box-shadow: -10px 0 35px rgba(20,35,60,.18);
+}
+
+
+/*============================================================
+  HEADER
+============================================================*/
+
+.zab-offcanvas-header {
+    position: relative;
+    background: linear-gradient( 180deg, #edf5ff 0%, #f7fbff 40%, #ffffff 75% );
+    border-bottom: solid 1px #d9e5ef;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 4px 14px rgba(64,115,184,.10);
+}
+
+
+    /*============================================================
+  SOFT BLUE LIGHT EFFECT
+============================================================*/
+
+    .zab-offcanvas-header::before {
+        content: "";
+        position: absolute;
+        left: -5%;
+        width: 110%;
+        top: -30px;
+        height: 110px;
+        background: radial-gradient( ellipse, rgba(96,164,255,.26), rgba(96,164,255,.10) 45%, transparent 85% );
+        pointer-events: none;
+    }
+
+
+    /*============================================================
+  HEADER BOTTOM UNDERLINE
+============================================================*/
+
+    .zab-offcanvas-header::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 1px;
+        background: #b9d3e8;
+    }
+
+
+    /*============================================================
+  TITLE
+============================================================*/
+
+    .zab-offcanvas-header .offcanvas-title {
+        color: #5c5c5c; /* Marble */
+
+        font-weight: 700;
+        letter-spacing: .35px;
+        text-shadow: 0 1px 0 rgba(255,255,255,.85), 0 2px 5px rgba(0,0,0,.08);
+    }
+
+
+    /*============================================================
+  CLOSE BUTTON
+============================================================*/
+    .zab-offcanvas-header .btn-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        transition: all .20s ease;
+    }
+
+        .zab-offcanvas-header .btn-close:hover {
+            background-color: rgba(0,120,215,.08);
+            box-shadow: 0 1px 6px rgba(0,120,215,.18);
+            transform: scale(1.08);
+        }
+
+
+/*============================================================
+  BODY
+============================================================*/
+
+.zab-offcanvas-body {
+    position: relative;
+    background-color: #ffffff;
+    overflow: auto;
+    padding: 1rem;
+}
+
+
+    /*============================================================
+  SPORTS PATTERN
+============================================================*/
+
+    .zab-offcanvas-body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: .85;
+        background: radial-gradient(circle at 12% 22%, rgba(52,125,255,.05) 0 2px, transparent 2px), radial-gradient(circle at 84% 18%, rgba(52,125,255,.05) 0 2px, transparent 2px), radial-gradient(circle at 30% 40%, rgba(52,125,255,.05) 0 2px, transparent 2px), radial-gradient(circle at 65% 55%, rgba(52,125,255,.05) 0 2px, transparent 2px), radial-gradient(circle at 15% 72%, rgba(52,125,255,.06) 0 2px, transparent 2px), radial-gradient(circle at 90% 85%, rgba(52,125,255,.07) 0 2px, transparent 2px);
+        background-size: 24px 24px;
+        mask-image: linear-gradient( to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,.10) 20%, rgba(0,0,0,.30) 40%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.85) 85%, rgba(0,0,0,1) 100% );
+    }
+
+
+/*============================================================
+  INNER CONTENT CARD
+============================================================*/
+
+.soft-card {
+    background: white;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    box-shadow: 0 8px 26px rgba(36,56,92,.06), 0 2px 6px rgba(36,56,92,.05);
+}
+
+
+/*============================================================
+  SCROLLBAR
+============================================================*/
+
+.zab-offcanvas-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.zab-offcanvas-body::-webkit-scrollbar-thumb {
+    background: #c8d7e8;
+    border-radius: 8px;
+}
+
+    .zab-offcanvas-body::-webkit-scrollbar-thumb:hover {
+        background: #9fbad8;
+    }
+
+.zab-offcanvas-body::-webkit-scrollbar-track {
+    background: #f7fafc;
+}
+
+
+/*============================================================
+  OPEN ANIMATION
+============================================================*/
+
+.offcanvas {
+    transition: transform .30s cubic-bezier(.22,.61,.36,1), visibility .30s;
+}
+
+.zab-offcanvas-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: .35px;
+    background: linear-gradient( 180deg, #6b6b6b 0%, #4f4f4f 45%, #2f2f2f 100% );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 0 rgba(255,255,255,.65), 0 2px 3px rgba(0,0,0,.10);
+}
+
+.zab-close-button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all .22s ease;
+    cursor: pointer;
+}
+
+    .zab-close-button i {
+        font-size: 1.35rem;
+        color: #6a7482;
+        transition: all .22s ease;
+    }
+
+    .zab-close-button:hover {
+        background: rgba(58,124,212,.10);
+        box-shadow: 0 3px 10px rgba(58,124,212,.18);
+        transform: scale(1.08);
+    }
+
+        .zab-close-button:hover i {
+            color: #2f73d6;
+            transform: rotate(90deg);
+        }

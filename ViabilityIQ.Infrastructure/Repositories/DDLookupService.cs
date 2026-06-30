@@ -23,6 +23,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField)> _metadataRegistry = new()
         {
             { DDLookupEnums.Banks, ("tblBank", "BankId", "BankName") },
+            { DDLookupEnums.LoanTypes, ("tblLoanTypes", "LoanTypeId", "LoanTypeName") },
             { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName") },
             { DDLookupEnums.Businesses, ("tblBusiness", "BusinessId", "BusinessName") },
             { DDLookupEnums.ClientCategories, ("tblClientCategories", "ClientCategoryId", "ClientCategoryName") },

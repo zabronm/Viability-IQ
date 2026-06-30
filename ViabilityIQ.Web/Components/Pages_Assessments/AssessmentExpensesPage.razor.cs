@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
 using static ViabilityIQ.Web.Components.Pages_Assessments.AssessmentSalesPage;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
@@ -10,7 +11,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
     {
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
-       
+
+        private bool blAlert { get; set; } = true;
+        private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
+        private string AlertHeading { get; set; } = "Sales Notice:";
+        private string AlertMessage { get; set; } = "Verify that your sales values align accurately with your cost of sales allocations for this assessment phase.";
+
 
         private ZabOffCanvas OffCanvasControlRef;
         private string SearchQuery { get; set; } = string.Empty;
@@ -48,10 +54,39 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         protected override void OnInitialized()
         {
+            DisplayNotificationAlerts();
             LoadMockSetupExpensesSnapshot();
             InitializeSuggestedBulkMatrixPool();
             LoadCoherentMockRevenueStreams();
         }
+
+
+        void DisplayNotificationAlerts()
+        {
+            if (GrandTotalSales > 90)
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Danger;
+                AlertHeading = "Critical Turnover Slowdown:";
+                AlertMessage = $"Inventory is holding for {SundryTotalPrincipal} days! This exceeds standard cash flow risk thresholds.";
+            }
+            else if (SundryTotalPrincipal <= 30)
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Success;
+                AlertHeading = "Optimized Turnover Efficiency:";
+                AlertMessage = "Excellent efficiency setup! Holding days indicate rapid product movement cycles.";
+            }
+            else
+            {
+                blAlert = true;
+                AlertSeverity = AlertSeverity.Info;
+                AlertHeading = "Information Ledger:";
+                AlertMessage = "Inventory configurations are active. Adjust parameters using the edit action button framework at any time.";
+            }
+        }
+
+
 
         private IEnumerable<ExpenseEntryViewModel> FilteredExpenses =>
             string.IsNullOrWhiteSpace(SearchQuery)

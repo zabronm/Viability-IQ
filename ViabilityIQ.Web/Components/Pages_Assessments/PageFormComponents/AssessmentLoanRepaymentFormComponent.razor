@@ -1,0 +1,90 @@
+﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="p-3 bg-white h-100">
+    @if (WorkflowContext == WorkflowContextType.AssessmentLoanView)
+    {
+        <div class="alert alert-info text-xxs mb-3 rounded py-2">
+            <i class="bi bi-info-circle me-1"></i> Synchronizing configurations for parameter structural map key: <strong>@LoanId</strong>
+        </div>
+        <p class="text-xs text-muted">Core placeholder simulation grid representing child instance assembly integration mapping workspace.</p>
+        <div class="pt-3 border-top d-flex justify-content-end">
+            <button type="button" class="btn btn-sm btn-secondary text-xxs shadow-sm" @onclick="CancelFormWorkflowAsync">Close Panel</button>
+        </div>
+    }
+    else if (WorkflowContext == WorkflowContextType.RepaymentsEdit && ActiveRepaymentModel != null)
+    {
+        <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync">
+
+            <div class="mb-3">
+                <label class="form-label text-xxs text-muted fw-bold mb-1">Loan Type Designation</label>
+                <input type="text" class="form-control bg-light text-xs text-dark fw-semibold" value="@ActiveRepaymentModel.LoanTypeName" disabled />
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label text-xxs text-muted fw-bold mb-1">Start Horizon Month</label>
+                    <select class="form-select form-select-sm text-xs" @bind="ActiveRepaymentModel.StartMonth">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m">Month @m</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 d-flex align-items-end">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="sendToCashbookChild" @bind="ActiveRepaymentModel.SendToCashbook" />
+                        <label class="form-check-label text-xxs fw-bold text-secondary" for="sendToCashbookChild">Send to Cashbook</label>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="text-xxs fw-bold text-muted text-uppercase tracking-wider mb-2">
+                <i class="bi bi-grid-3x3-gap me-1 text-primary"></i>Repayments Ledger Input Grid
+            </h6>
+
+            <div class="border rounded bg-white p-1 text-nowrap mb-3" style="overflow-x: auto; max-height: 380px; overflow-y: auto;">
+                <table class="table table-sm table-borderless align-middle mb-0 text-xxs">
+                    <thead>
+                        <tr class="bg-light fw-bold border-bottom">
+                            <th class="ps-1 align-middle text-center" style="width: 45px;">Month</th>
+                            <th class="text-end pe-1">Expected (R)</th>
+                            <th class="text-end pe-1">Interest (R)</th>
+                            <th class="text-end pe-1">Extra (R)</th>
+                            <th class="text-end pe-2 text-navy-brand">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < 12; i++)
+                        {
+                            var idx = i;
+                            <tr class="border-bottom">
+                                <td class="fw-bold text-dark text-center bg-light-subtle">M@(idx + 1)</td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm text-end font-monospace py-0.5" style="font-size: 11px;"
+                                           @bind="ActiveRepaymentModel.MonthlyLines[idx].Expected" @bind:event="oninput" min="0" step="0.01" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm text-end font-monospace py-0.5" style="font-size: 11px;"
+                                           @bind="ActiveRepaymentModel.MonthlyLines[idx].Interest" @bind:event="oninput" min="0" step="0.01" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm text-end font-monospace py-0.5" style="font-size: 11px;"
+                                           @bind="ActiveRepaymentModel.MonthlyLines[idx].Extra" @bind:event="oninput" min="0" step="0.01" />
+                                </td>
+                                <td class="text-end font-monospace fw-bold text-navy-brand pe-2">
+                                    @((ActiveRepaymentModel.MonthlyLines[idx].Expected + ActiveRepaymentModel.MonthlyLines[idx].Interest + ActiveRepaymentModel.MonthlyLines[idx].Extra).ToString("N0"))
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 pt-2 border-top">
+                <button type="submit" class="btn btn-primary btn-sm flex-fill text-xs fw-bold"><i class="bi bi-save me-1"></i>Commit Repayments</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-xs" @onclick="CancelFormWorkflowAsync">Cancel</button>
+            </div>
+        </EditForm>
+    }
+</div>

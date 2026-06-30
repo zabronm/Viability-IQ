@@ -9,8 +9,17 @@
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Sales" PageTitle="Sales & Forecasts" CurrentPage="PageType.Sales" />
 
-    <div class="row bg-white g-3 mt-1 mb-5 py-2 px-2" style="border-radius: 6px;">
-        <div class="col-xl-12 col-lg-12 col-12 py-2" style="background-color: #f6f6f6; border: solid 0px #566D7E; border-radius:6px;">
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
+        @if (blAlert == true)
+        {
+            <div class="my-0">
+                <ViqAlertComponent Severity="AlertSeverity"
+                                   Heading="@AlertHeading"
+                                   Message="@AlertMessage"
+                                   AllowDismiss="true" />
+            </div>
+        }
+        <div class="col-xl-12 col-lg-12 col-12 py-2" style="background-color: #ffffff; border: solid 0px #566D7E; border-radius:6px;">
 
             <!-- INCOME: Sales Revenue -->
             <div class="mb-4">
@@ -232,8 +241,8 @@
     </div>
 
     <!-- CLEAN EXTRACTED COMPONENT SUMMARY METRICS GRIDS CONTROLLERS -->
-    <div class="row bg-white g-3 mt-1 p-2" style="border-radius: 6px;">
-        <div class="col-xl-12 col-lg-12 col-12 p-2" style="background-color: #f6f6f6; border: solid 0px #566D7E; border-radius:6px;">
+    <div class="row bg-white g-3 mt-1 p-0" style="border-radius: 6px;">
+        <div class="col-xl-12 col-lg-12 col-12 p-2" style="background-color: #ffffff; border: solid 0px #566D7E; border-radius:6px;">
             
             <CashFlowSummaryDetailComponent
                 SalesCategories="SalesCategories"
@@ -243,8 +252,8 @@
                 GrandTotalGlobalInflows="GrandTotalGlobalInflows"
                 GrandTotalExpenses="GrandTotalExpenses" />
 
-            <div class="mb-3">               
-                <div class="row g-3 mt-2 mb-4">
+            <div class="mb-3 bg-white">               
+                <div class="row g-3 mt-2 mb-4 bg-white">
                     <div class="col-xl-4 col-lg-4 col-md-12 col-12">
                         <AnalysisOfTotalReceiptsGraphComponent 
                             ExpenseChartPercentage="GetExpenseChartPercentage()"

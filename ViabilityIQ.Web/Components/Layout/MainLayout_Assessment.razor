@@ -11,17 +11,16 @@
         <div class="fa-brand-zone">
             <span class="brand-main fs-2">Viability</span><span class="brand-iq fs-2 fst-italic">.IQ</span>
         </div>
-
         <div class="d-flex align-items-center gap-2 ms-2 me-0">
-            <button class="fa-toggle-sidebar-btn pe-0" @onclick="ToggleSidebar">
+            <button class="fa-toggle-sidebar-btn pe-0 me-0" @onclick="ToggleSidebar">
                 <span class="nav-icon-avatar-round"><i class="bi bi-list"></i></span>
             </button>
 
             <div class="ms-0 dropdown-container">
-                <button class="avatar-trigger-btn custom-shortcut-trigger" @onclick="ToggleShortcutsMenu" @onfocusout="CloseShortcutsMenu">
-                    <div class="nav-icon-avatar-round">
-                        <i class="bi bi-lightning-charge-fill"></i>
-                    </div>
+                <button class="fa-toggle-sidebar-btn" @onclick="ToggleShortcutsMenu" @onfocusout="CloseShortcutsMenu">
+                    <span class="nav-icon-avatar-round">
+                        <i class="bi bi-menu-down"></i>
+                    </span>
                 </button>
                 <div class="viq-elevated-card profile-card-dropdown shortcut-menu-dropdown @(isShortcutsOpen ? "show" : "")" style="border: solid 0.4px #778899">
                     <div class="p-0 ">
@@ -76,46 +75,66 @@
 
                 <NavLink class="fa-nav-item mt-1 py-1 mb-0 home-nav-link" href="home" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-house-door-fill"></i></div>
-                    <span class="nav-text font-weight-bold">Home</span>
+                    <span class="footer-main-text-sm">Home</span>
                 </NavLink>
                 @* <hr class="border-secondary my-0" /> *@
 
                 <NavLink class="fa-nav-item py-1 my-0" href="assessment/dashboards" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-speedometer2"></i></div>
-                    <span class="nav-text font-weight-bold">Dashboard</span>
+                    <span class="footer-main-text-sm">Dashboard</span>
                 </NavLink>
 
                 <div class="fa-nav-heading" style="border-top: dotted 0.6px #92c7c7; border-bottom: dotted 0.6px #92c7c7;">Main Operations</div>
 
                 <NavLink class="fa-nav-item py-1 my-0" href="assessment/sales">
                     <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
-                    <span class="nav-text font-weight-bold">Sales</span>
+                    <span class="footer-main-text-sm">Sales/Income</span>
                     <span class="ms-1 viq-indicator-dot @(HasSalesData ? "status-success" : "status-warning")"
-                          title="@(HasSalesData ? "Client data entry verified" : "No client records populated yet")"></span>
+                          title="@(HasSalesData ? "Sales data entry verified" : "No Sales records populated yet")"></span>
                 </NavLink>
+
+                @if (HasDebtorsCreditorsData)               //Shows when NOT Cash business
+                {
+                    <NavLink class="fa-nav-item py-1 my-0" href="assessment/debtors-creditors">
+                        <div class="nav-icon-avatar-round"><i class="bi bi-incognito"></i></div>
+                        <span class="footer-main-text-sm">Debtors/Creditors</span>
+                        <span class="ms-1 viq-indicator-dot @(HasDebtorsCreditorsData ? "status-success" : "status-warning")"
+                        title="@(HasSalesData ? "Debtors/Creditors data verified" : "No Debtors/Creditors data populated yet")"></span>
+                    </NavLink>
+                }
 
                 <NavLink class="fa-nav-item py-1 my-0" href="assessment/stock">
                     <div class="nav-icon-avatar-round"><i class="bi bi-boxes"></i></div>
-                    <span class="nav-text font-weight-bold">Stock</span>
+                    <span class="footer-main-text-sm">Stock</span>
                     <span class="ms-1 viq-indicator-dot @(HasStockData ? "status-success" : "status-warning")"
                           title="@(HasStockData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item py-1 my-0" href="assessment/expenses">
                     <div class="nav-icon-avatar-round"><i class="bi bi-wallet2"></i></div>
-                    <span class="nav-text font-weight-bold">Expenses</span>
+                    <span class="footer-main-text-sm">Expenses</span>
                     <span class="ms-1 viq-indicator-dot @(HasExpensesData ? "status-success" : "status-warning")"
                           title="@(HasExpensesData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
+               @*  @if (HasLoansData)              //Shows when Loans are available
+                { *@
+                    <NavLink class="fa-nav-item py-1 my-0" href="assessment/loan-repayments">
+                        <div class="nav-icon-avatar-round"><i class="bi bi-umbrella-fill"></i></div>
+                    <span class="footer-main-text-sm">Loan Repayments</span>
+                        <span class="ms-1 viq-indicator-dot @(HasLoansData ? "status-success" : "status-warning")"
+                        title="@(HasExpensesData ? "Loans data entry verified" : "No Loans records populated yet")"></span>
+                    </NavLink>
+                @* } *@
+
                 <NavLink class="fa-nav-item py-1" href="assessment/VAT">
                     <div class="nav-icon-avatar-round"><i class="bi bi-bug"></i></div>
-                    <span class="nav-text font-weight-bold">Value Added Tax(VAT)</span>
+                    <span class="footer-main-text-sm">Value Added Tax(VAT)</span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item py-1 my-0" href="assessment/reports">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
-                    <span class="nav-text font-weight-bold">Reports</span>
+                    <span class="footer-main-text-sm">Reports</span>
                     @* <span class="ms-1 viq-indicator-dot @(HasReportsData ? "status-success" : "status-warning")"
                           title="@(HasReportsData ? "Client report generation verified" : "Reports ungenerated")"></span> *@
                 </NavLink>
@@ -124,7 +143,7 @@
 
                 <NavLink class="fa-nav-item" href="assessment/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
-                    <span class="nav-text font-weight-bold">Settings</span>&nbsp;<i class="bi bi-caret-right-fill"></i>
+                    <span class="footer-main-text">Setup</span>&nbsp;<i class="bi bi-caret-right-fill"></i>
                 </NavLink>
             </div>
 
@@ -169,16 +188,21 @@
             </div>
         </main>
     </div>
+
+    <ZabOffCanvasHost />                        <!--THIS IS THE NEW HOST FOR offCanvas component -->
 </div>
 
 <ToastComponent />
 
-@code {
+@code {   
+
     private bool isSidebarCollapsed = false;
     private bool isSetupOpen = false;
     private bool isProfileOpen = false;
     private bool isShortcutsOpen = false;
 
+    private bool HasDebtorsCreditorsData => SessionService.HasDebtorsCreditorsData;
+    private bool HasLoansData => SessionService!.HasLoansData;
     private bool HasSalesData => SessionService!.HasSalesEntries;
     private bool HasStockData => SessionService!.HasStockEntries;
     private bool HasExpensesData => SessionService!.HasExpensesEntries;
@@ -216,4 +240,5 @@
     {
         SessionService.OnSessionChanged -= SynchronizeComponentViewLayout;
     }
+
 }

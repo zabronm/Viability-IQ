@@ -8,160 +8,166 @@
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Expenses" PageTitle="Expenses & Outflow Management" CurrentPage="PageType.Expenses" />
 
-    <div class="row bg-white px-0 g-3 mt-1" style="border-radius: 6px;">
-        <div class="px-2">
-            <div class="row g-2 mt-3 align-items-center p-0 mx-0">
-                <div class="col-md-7 col-12 d-flex gap-1.5">
-                    <button type="button" class="btn btn-primary text-xs  py-2 px-2 shadow-sm" @onclick="OpenNewExpensePanel">
-                        <i class="bi bi-plus-circle me-1"></i>Add Single Expense
-                    </button>
-                    &nbsp;&nbsp;
-                    <button type="button" class="btn btn-outline-primary text-xxs py-1 px-2.5 fw-semibold bg-white" @onclick="OpenBulkSetupPanel">
-                        <i class="bi bi-grid-3x3-gap me-1"></i>Bulk Expense Setup
-                    </button>
-                </div>
-                <div class="col-md-5 col-12 d-flex justify-content-end">
-                    <div class="input-group input-group-sm w-50" style="min-width: 200px;">
-                        <span class="input-group-text bg-white border-end-0 text-muted py-0.5 px-2" style="font-size: 0.7rem;"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control form-control-sm border-start-0 text-xxs shadow-none py-0.5"
-                               placeholder="Filter records..."
-                               @bind="SearchQuery" @bind:event="oninput" />
+    <div class="row px-0 g-3 mt-1" >
+        @if (blAlert == true)
+        {
+            <div class="my-0">
+                <ViqAlertComponent Severity="AlertSeverity"
+                                   Heading="@AlertHeading"
+                                   Message="@AlertMessage"
+                                   AllowDismiss="true" />
+            </div>
+        }
+        <div class="row bg-white g-2 mt-1 p-1 pt-1 mb-3" style="border-radius: 6px;">
+            <div class="px-0">
+                <div class="row g-2 mt-1 align-items-center p-0 mx-0">
+                    <div class="col-md-7 col-12 d-flex gap-1.5">
+                        <button type="button" class="btn btn-primary text-xs  py-2 px-2 shadow-sm" @onclick="OpenNewExpensePanel">
+                            <i class="bi bi-plus-circle me-1"></i>Add Single Expense
+                        </button>
+                        &nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline-success text-xxs py-1 px-2.5 fw-semibold " @onclick="OpenBulkSetupPanel">
+                            <i class="bi bi-grid-3x3-gap me-1"></i>Bulk Expense Setup
+                        </button>
+                    </div>
+                    <div class="col-md-5 col-12 d-flex justify-content-end">
+                        <div class="input-group input-group-sm w-50" style="min-width: 200px;">
+                            <span class="input-group-text bg-white border-end-0 text-muted py-0.5 px-2" style="font-size: 0.7rem;"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control form-control-sm border-start-0 text-xxs shadow-none py-0.5"
+                                   placeholder="Filter records..."
+                                   @bind="SearchQuery" @bind:event="oninput" />
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-12 col-lg-12 col-12">
-
-            @if (!FilteredExpenses.Any())
-            {
-                <div class="text-center py-4 border border-dashed rounded bg-light my-2">
-                    <i class="bi bi-wallet2 text-muted fs-2 d-block mb-1"></i>
-                    <span class="text-muted fw-medium text-xxs">No matching expense lines found.</span>
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive shadow-sm border border-secondary-subtle mb-3" style="border-radius: 4px; background-color:#ffffff;">
-                    <table class="table table-sm table-hover text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table" style="font-size: 0.72rem; --bs-table-padding-y: 0.2rem; --bs-table-padding-x: 0.4rem;">
-                        <thead>
-                            <tr class="bg-light header-row text-muted fw-bold border-bottom">
-                                <th class="ps-2 text-uppercase text-xxs" style="width: 175px;">Expense Line</th>
-                                <th class="text-start text-uppercase text-xxs" style="width: 140px;">Category</th>
-                                <th class="text-center text-uppercase text-xxs" style="width: 65px;">Cashbook</th>
-                                @for (int m = 1; m <= 12; m++)
-                                {
-                                    <th class="text-end" style="width: 60px;">M@(m)</th>
-                                }
-                                <th class="text-end font-weight-bold text-white bg-navy" style="width: 105px; background-color: #1a365d !important;">Total Outflow</th>
-                                <th class="text-center sticky-action-header" style="width: 35px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var exp in FilteredExpenses)
-                            {
-                                <tr style="line-height: 1.2; @(exp.AffectsCashbookDirectly ? "" : "background-color: #f8fafc !important; opacity: 0.85;")">
-                                    <td class="ps-2 fw-normal text-dark text-truncate" style="max-width: 160px;" title="@exp.ExpenseName">
-                                        @TruncateString(exp.ExpenseName, 20)
-                                        @if (exp.AffectsCashbookDirectly)
-                                        {
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle ms-1 py-0 px-1 text-xxs" style="font-size: 0.6rem; font-weight: normal; border-radius: 3px;">
-                                                <i class="bi bi-check"></i>
-                                            </span>
-                                        }
-                                    </td>
-                                    <td class="text-start">
-                                        <span class="badge text-xxs px-1.5 py-0.5 fw-normal text-dark border bg-light text-truncate d-inline-block" style="max-width: 135px; border-radius: 3px;" title="@GetClassificationShortLabel(exp.Classification)">
-                                            @TruncateString(GetClassificationShortLabel(exp.Classification), 20)
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <input type="checkbox" class="form-check-input cursor-pointer shadow-none align-middle"
-                                               style="width: 12px; height: 12px; margin-top: 0;"
-                                               checked="@exp.AffectsCashbookDirectly"
-                                               @onchange="(e) => ToggleExpenseCashbookState(exp, e.Value)" />
-                                    </td>
-                                    @for (int i = 0; i < 12; i++)
+            <div class="col-xl-12 col-lg-12 col-12">
+                @if (!FilteredExpenses.Any())
+                {
+                    <div class="text-center py-4 border border-dashed rounded bg-light my-2">
+                        <i class="bi bi-wallet2 text-muted fs-2 d-block mb-1"></i>
+                        <span class="text-muted fw-medium text-xxs">No matching expense lines found.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive shadow-sm border border-secondary-subtle mb-3" style="border-radius: 4px; background-color:#ffffff;">
+                        <table class="table table-sm table-hover text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table" style="font-size: 0.72rem; --bs-table-padding-y: 0.2rem; --bs-table-padding-x: 0.4rem;">
+                            <thead>
+                                <tr class="bg-light header-row text-muted fw-bold border-bottom">
+                                    <th class="ps-2 text-uppercase text-xxs" style="width: 175px;">Expense Line</th>
+                                    <th class="text-start text-uppercase text-xxs" style="width: 140px;">Category</th>
+                                    <th class="text-center text-uppercase text-xxs" style="width: 65px;">Cashbook</th>
+                                    @for (int m = 1; m <= 12; m++)
                                     {
-                                        <td class="text-end font-monospace text-secondary">
-                                            @exp.MonthlyValues[i].ToString("N0")
+                                        <th class="text-end" style="width: 60px;">M@(m)</th>
+                                    }
+                                    <th class="text-end font-weight-bold text-white bg-navy" style="width: 105px; background-color: #1a365d !important;">Total Outflow</th>
+                                    <th class="text-center sticky-action-header" style="width: 35px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var exp in FilteredExpenses)
+                                {
+                                    <tr style="line-height: 1.2; @(exp.AffectsCashbookDirectly ? "" : "background-color: #f8fafc !important; opacity: 0.85;")">
+                                        <td class="ps-2 fw-normal text-dark text-truncate" style="max-width: 160px;" title="@exp.ExpenseName">
+                                            @TruncateString(exp.ExpenseName, 20)
+                                            @if (exp.AffectsCashbookDirectly)
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-1 py-0 px-1 text-xxs" style="font-size: 0.6rem; font-weight: normal; border-radius: 3px;">
+                                                    <i class="bi bi-check"></i>
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-start">
+                                            <span class="badge text-xxs px-1.5 py-0.5 fw-normal text-dark border bg-light text-truncate d-inline-block" style="max-width: 135px; border-radius: 3px;" title="@GetClassificationShortLabel(exp.Classification)">
+                                                @TruncateString(GetClassificationShortLabel(exp.Classification), 20)
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input cursor-pointer shadow-none align-middle"
+                                                   style="width: 12px; height: 12px; margin-top: 0;"
+                                                   checked="@exp.AffectsCashbookDirectly"
+                                                   @onchange="(e) => ToggleExpenseCashbookState(exp, e.Value)" />
+                                        </td>
+                                        @for (int i = 0; i < 12; i++)
+                                        {
+                                            <td class="text-end font-monospace text-secondary">
+                                                @exp.MonthlyValues[i].ToString("N0")
+                                            </td>
+                                        }
+                                        <td class="text-end font-monospace fw-bold bg-navy-light-summary" style="color: #1a365d; background-color: #f1f5f9;">
+                                            @exp.MonthlyValues.Sum().ToString("N0")
+                                        </td>
+                                        <td class="text-center pe-1">
+                                            <button type="button" class="btn btn-outline-primary btn-xs p-0 px-1 shadow-sm line-action-btn"
+                                                    style="font-size: 0.65rem;" @onclick="() => OpenEditExpensePanel(exp)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light border-top border-2 text-dark" style="border-top-color: #1a365d !important; background-color: #f8fafc !important;">
+                                    <td class="ps-2 text-uppercase text-xxs" colspan="2" style="color: #1a365d;">Total Expenditures</td>
+                                    <td class="text-center text-muted text-xxs">—</td>
+                                    @for (int m = 0; m < 12; m++)
+                                    {
+                                        <td class="text-end font-monospace" style="color: #1a365d;">
+                                            @CalculateAggregateMonthlyTotal(m).ToString("N0")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace fw-bold bg-navy-light-summary" style="color: #1a365d; background-color: #f1f5f9;">
-                                        @exp.MonthlyValues.Sum().ToString("N0")
+                                    <td class="text-end font-monospace text-white bg-navy" style="background-color: #1a365d !important;">
+                                        @CalculateGlobalGrandTotalExpenses().ToString("N0")
                                     </td>
-                                    <td class="text-center pe-1">
-                                        <button type="button" class="btn btn-outline-primary btn-xs p-0 px-1 shadow-sm line-action-btn"
-                                                style="font-size: 0.65rem;" @onclick="() => OpenEditExpensePanel(exp)">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </td>
+                                    <td></td>
                                 </tr>
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr class="fw-bold bg-light border-top border-2 text-dark" style="border-top-color: #1a365d !important; background-color: #f8fafc !important;">
-                                <td class="ps-2 text-uppercase text-xxs" colspan="2" style="color: #1a365d;">Total Expenditures</td>
-                                <td class="text-center text-muted text-xxs">—</td>
-                                @for (int m = 0; m < 12; m++)
-                                {
-                                    <td class="text-end font-monospace" style="color: #1a365d;">
-                                        @CalculateAggregateMonthlyTotal(m).ToString("N0")
-                                    </td>
-                                }
-                                <td class="text-end font-monospace text-white bg-navy" style="background-color: #1a365d !important;">
-                                    @CalculateGlobalGrandTotalExpenses().ToString("N0")
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            }
+                            </tfoot>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="row bg-white g-2 mt-1 p-1 pt-1" style="border-radius: 6px;">
+            <div class="col-12 p-2" style="background-color: #ffffff;">
 
-            <div class="row bg-white g-2 mt-1 p-1 pt-3" style="border-radius: 6px;">
-                <div class="col-12 p-2 rounded" style="background-color: #f6f6f6;">
+                <CashFlowSummaryDetailComponent SalesCategories="SalesCategories"
+                                                ExpenseCategories="ConvertedExpenseCategoriesForSummary"
+                                                SundryIncome="SundryIncome"
+                                                GrantsDonations="GrantsDonations"
+                                                GrandTotalGlobalInflows="GrandTotalGlobalInflows"
+                                                GrandTotalExpenses="CalculateGlobalGrandTotalExpenses()" />
 
-                    <CashFlowSummaryDetailComponent SalesCategories="SalesCategories"
-                                                    ExpenseCategories="ConvertedExpenseCategoriesForSummary"
-                                                    SundryIncome="SundryIncome"
-                                                    GrantsDonations="GrantsDonations"
-                                                    GrandTotalGlobalInflows="GrandTotalGlobalInflows"
-                                                    GrandTotalExpenses="CalculateGlobalGrandTotalExpenses()" />
-
-                    <div class="row g-3 mt-1 mb-2 pt-3" style="border-top: 2px solid #ffffff;">
-                        <div class="col-xl-4 col-lg-4 col-12">
-                            <AnalysisOfTotalReceiptsGraphComponent ExpenseChartPercentage="GetExpenseChartPercentage()"
-                                                                   CosChartPercentage="GetCosChartPercentage()"
-                                                                   NetProfitChartPercentage="GetNetProfitChartPercentage()" />
-                        </div>
-
-                        <div class="col-xl-4 col-lg-4 col-12">
-                            <IncomeStatementSummaryComponent GrandTotalSales="GrandTotalSales"
-                                                             AnnualCostOfSales="GetAnnualCostOfSales()"
-                                                             AnnualGrossProfit="GetAnnualGrossProfit()"
-                                                             AnnualSecondarySundry="@(SundryTotalPrincipal + SundryTotalInterestYield)"
-                                                             AnnualGrossIncome="GetAnnualGrossIncome()"
-                                                             AnnualOperatingExpenses="CalculateGlobalGrandTotalExpenses()"
-                                                             AnnualNetProfit="GetAnnualNetProfit()" />
-                        </div>
-
-                        <div class="col-xl-4 col-lg-4 col-12">
-                            <BusinessRatiosMatrixComponent BreakEvenSales="CalculateBreakEvenSales()"
-                                                           MarginOfSafetyPercent="CalculateMarginOfSafetyPercent()"
-                                                           GrossProfitMarginPercent="CalculateGrossProfitMarginPercent()"
-                                                           OperatingLeverage="CalculateOperatingLeverage()" />
-                        </div>
+                <div class="row g-3 mt-1 mb-2 pt-3" style="border-top: 2px solid #ffffff;">
+                    <div class="col-xl-4 col-lg-4 col-12">
+                        <AnalysisOfTotalReceiptsGraphComponent ExpenseChartPercentage="GetExpenseChartPercentage()"
+                                                               CosChartPercentage="GetCosChartPercentage()"
+                                                               NetProfitChartPercentage="GetNetProfitChartPercentage()" />
                     </div>
 
+                    <div class="col-xl-4 col-lg-4 col-12">
+                        <IncomeStatementSummaryComponent GrandTotalSales="GrandTotalSales"
+                                                         AnnualCostOfSales="GetAnnualCostOfSales()"
+                                                         AnnualGrossProfit="GetAnnualGrossProfit()"
+                                                         AnnualSecondarySundry="@(SundryTotalPrincipal + SundryTotalInterestYield)"
+                                                         AnnualGrossIncome="GetAnnualGrossIncome()"
+                                                         AnnualOperatingExpenses="CalculateGlobalGrandTotalExpenses()"
+                                                         AnnualNetProfit="GetAnnualNetProfit()" />
+                    </div>
+
+                    <div class="col-xl-4 col-lg-4 col-12">
+                        <BusinessRatiosMatrixComponent BreakEvenSales="CalculateBreakEvenSales()"
+                                                       MarginOfSafetyPercent="CalculateMarginOfSafetyPercent()"
+                                                       GrossProfitMarginPercent="CalculateGrossProfitMarginPercent()"
+                                                       OperatingLeverage="CalculateOperatingLeverage()" />
+                    </div>
                 </div>
             </div>
-
         </div>
-        @* <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
-            <RightSummary01 />
-        </div> *@
     </div>
 </div>
+
+
 
 <footer class="py-2 bg-light mt-3">
     <BFooter />

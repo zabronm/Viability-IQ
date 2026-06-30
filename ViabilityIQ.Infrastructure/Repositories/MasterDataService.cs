@@ -78,9 +78,51 @@ namespace ViabilityIQ.Infrastructure.Repositories
         }
 
 
-        //-------PRODUCT CATEGORY CRUD OPERATIONS-------
+        //-------LOAN TYPE CRUD OPERATIONS-------
 
-        //
+        public async Task<LoanType?> GetLoanTypeByIdAsync(long loanTypeId) => await _dbConnectionFactory.CreateConnection().GetAsync<LoanType>(loanTypeId);
+
+        public async Task<IEnumerable<LoanType>> GetAllLoanTypesAsync()
+        {
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                var loanTypes = await connection.GetAllAsync<LoanType>();
+                return loanTypes.OrderBy(l => l.LoanTypeName).ToList();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (ex) as needed
+                return null;
+            }
+        }
+
+        public async Task<bool> SaveLoanTypeAsync(LoanType loanType)
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
+
+            if (loanType.LoanTypeId == 0)
+            {
+                loanType.CreatedDate = DateTime.UtcNow;             // Set metadata values automatically on creation
+                loanType.CreatedBy = _sessionService.UserId;
+                loanType.Active = true;
+
+                var newId = await connection.InsertAsync(loanType);     // InsertAsync automatically maps all properties and inserts them safely
+                return newId > 0;
+            }
+            else
+            {
+                loanType.ModifiedDate = DateTime.UtcNow;       // Maintain audit trail details on modifications
+                loanType.ModifiedBy = _sessionService.UserId;
+                return await connection.UpdateAsync(loanType);  // UpdateAsync automatically matches the [Key] property to modify the row
+            }
+        }
+
+        public async Task<bool> DeleteLoanTypeAsync(LoanType loanType)
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.DeleteAsync(loanType); // Automatically runs: DELETE FROM LoanTypes WHERE LoanTypeId = @id
+        }
 
 
     }
