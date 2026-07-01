@@ -159,12 +159,12 @@
 }
 
 .zab-offcanvas-title {
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 0.99rem;
+    font-weight: 600;
     letter-spacing: .35px;
     background: linear-gradient( 180deg, #6b6b6b 0%, #4f4f4f 45%, #2f2f2f 100% );
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+   /* -webkit-text-fill-color: transparent;*/
     text-shadow: 0 1px 0 rgba(255,255,255,.65), 0 2px 3px rgba(0,0,0,.10);
 }
 

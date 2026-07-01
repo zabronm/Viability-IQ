@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
     public partial class AssessmentLoanRepaymentFormComponent : ComponentBase
     {
-        [Parameter] public long LoanId { get; set; }
-        [Parameter] public WorkflowContextType WorkflowContext { get; set; }
-        [Parameter] public EventCallback<RepaymentFormViewModel> OnSaveComplete { get; set; }
-        [Parameter] public EventCallback OnCancel { get; set; }
+        [Inject]        public ZabOffCanvasService zabCanvasService { get; set; } = default!;
+        [Parameter]        public long LoanId { get; set; } 
+        //[Parameter]        public WorkflowContextType WorkflowContext { get; set; }
 
-        private RepaymentFormViewModel ActiveRepaymentModel { get; set; }
+        private RepaymentFormViewModel ActiveRepaymentModel { get; set; } = new();
 
         protected override void OnParametersSet()
         {
@@ -22,13 +20,18 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void LoadIsolatedFormModel()
         {
-            if (WorkflowContext != WorkflowContextType.RepaymentsEdit) return;
+            //if (WorkflowContext != WorkflowContextType.RepaymentsEdit)
+                //return;
 
-            string targetedName = LoanId == 301
-                ? "Commercial Office Facility Industrial Branch"
-                : "Core Datacenter Azure Tech Cluster Infrastructure";
+            LoanId = 301;
 
-            int targetStartMonth = LoanId == 301 ? 5 : 3;
+            string targetedName =
+                LoanId == 301
+                    ? "Commercial Office Facility Industrial Branch"
+                    : "Core Datacenter Azure Tech Cluster Infrastructure";
+
+            int targetStartMonth =
+                LoanId == 301 ? 5 : 3;
 
             ActiveRepaymentModel = new RepaymentFormViewModel
             {
@@ -36,29 +39,43 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 LoanTypeName = targetedName,
                 StartMonth = targetStartMonth,
                 SendToCashbook = true,
-                MonthlyLines = Enumerable.Range(0, 12).Select(i => new RepaymentMetricCell
-                {
-                    Expected = LoanId == 301 ? 14000 : 8500,
-                    Interest = LoanId == 301 ? (i >= 4 ? 3200 : 2500) : 1900,
-                    Extra = (LoanId == 301 && i == 8) ? 8500 : 0
-                }).ToList()
+
+                MonthlyLines =
+                    Enumerable.Range(0, 12)
+                    .Select(i => new RepaymentMetricCell
+                    {
+                        Expected = LoanId == 301 ? 14000 : 8500,
+
+                        Interest =
+                            LoanId == 301
+                                ? (i >= 4 ? 3200 : 2500)
+                                : 1900,
+
+                        Extra =
+                            (LoanId == 301 && i == 8)
+                                ? 8500
+                                : 0
+                    })
+                    .ToList()
             };
         }
 
         private async Task SubmitFormWorkflowAsync()
         {
-            if (OnSaveComplete.HasDelegate)
-                await OnSaveComplete.InvokeAsync(ActiveRepaymentModel);
+            // TODO:
+            // Later this will become:
+            //
+            // SaveResult result =
+            //      await LoanRepository.SaveAsync(ActiveRepaymentModel);
+            //
+            // await zabCanvasService.CloseAsync(result);
 
-            await OnCancel.InvokeAsync();
+            await zabCanvasService.CloseAsync();
         }
 
         private async Task CancelFormWorkflowAsync()
         {
-            if (OnCancel.HasDelegate)
-            {
-                await OnCancel.InvokeAsync();
-            }
+            await zabCanvasService.CloseAsync();
         }
     }
 }

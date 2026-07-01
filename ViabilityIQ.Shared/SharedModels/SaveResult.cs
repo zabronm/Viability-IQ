@@ -9,6 +9,7 @@ namespace ViabilityIQ.Shared.SharedModels
     public class SaveResult
     {
         public bool Success { get; set; }
+        public bool Cancelled { get; set; }
         public bool CreateSave { get; set; }
         public bool ClosePanel { get; set; }
 

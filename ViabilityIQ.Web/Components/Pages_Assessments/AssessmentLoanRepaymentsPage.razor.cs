@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
@@ -92,49 +94,80 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 x.BankName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
         }
 
-        private async Task HandleGridActionBindingAsync(long targetLoanId, WorkflowContextType targetedWorkflow)
+
+        //===================================== OPEN ADD NEW LOAN COMPONENT PASSING 0 PARAMETER
+        private async Task AddLoanAsync()
         {
-            SelectedLoanId = targetLoanId;
-            ActiveWorkflowContext = targetedWorkflow;
-            ActivePanelTitle = targetedWorkflow == WorkflowContextType.AssessmentLoanView
-                ? "Assessment Loan Configuration Blueprint"
-                : "Modify Scheduled Operational Repayments";
-
-            await zabCanvasService.ShowAsync(
-    new CanvasRequest
-    {
-        Title = ActivePanelTitle,
-
-        Width = 460,
-
-        ComponentType = typeof(AssessmentLoanRepaymentFormComponent),
-
-        Parameters = new Dictionary<string, object?>
-        {
-            ["LoanId"] = SelectedLoanId,
-
-            ["WorkflowContext"] = ActiveWorkflowContext,
-
-            ["OnSaveComplete"] = EventCallback.Factory.Create<RepaymentFormViewModel>(this, ProcessExecutionFeedback),
-
-            ["OnCancel"] = EventCallback.Factory.Create(this, CloseEditorAsync)
-        }
-    });
+            await OpenLoanFormAsync(0);
         }
 
-        private async Task ProcessExecutionFeedback(RepaymentFormViewModel updatedModel)
+        private async Task EditLoanAsync(long assessmenytLoanId)
         {
-            var matchedLoan = LoanProfilesDataset.FirstOrDefault(x => x.LoanId == updatedModel.LoanId);
-            if (matchedLoan != null)
+            await OpenLoanFormAsync(assessmenytLoanId);
+
+        }
+
+        //===================================== METHOD CALLING OFFCANVAS 
+        private async Task OpenLoanFormAsync(long assessmentLoanId)
+        {
+            try
             {
-                matchedLoan.StartMonth = updatedModel.StartMonth;
-                matchedLoan.MonthlyData = updatedModel.MonthlyLines.Select(x => new RepaymentMetricCell
-                {
-                    Expected = x.Expected,
-                    Interest = x.Interest,
-                    Extra = x.Extra
-                }).ToList();
+                ActivePanelTitle = assessmentLoanId == 0 ?
+                    "Add Assessment Loan" : "Edit Assessment Loan";
+
+                await zabCanvasService.ShowAsync(
+                    new CanvasRequest
+                    {
+                        Title = ActivePanelTitle,
+                        Width = 350,
+                        ComponentType = typeof(AssessmentLoansListComponent),
+
+                        Parameters =  new 
+                        {
+                            AssessmentId = assessmentLoanId,
+                            //LoanId = AssessmentId
+                        }
+                    });
             }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally { }
+        }
+
+
+        //================ OPEN THE LOAN REPAYMENTS FORM  ==========================
+        private async Task OpenRepaymentsFormAsync(long LoanRepaymentId)
+        {
+            try
+            {
+                ActivePanelTitle = LoanRepaymentId == 0 ?
+                    "Add Loan Repayment" : "Edit Loan Repayment";
+
+                await zabCanvasService.ShowAsync(
+                    new CanvasRequest
+                    {
+                        Title = ActivePanelTitle,
+                        Width = 350,
+                        ComponentType = typeof(AssessmentLoanRepaymentFormComponent),
+                        Parameters = new
+                        {
+                            LoanId = LoanRepaymentId
+                        }
+                    });
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+
+            }
+            
+        
         }
 
         private async Task CloseEditorAsync()

@@ -11,47 +11,27 @@
      style="width:@(_width)px;">
 
 
-    <div class="offcanvas-header zab-offcanvas-header">
+    <div class="offcanvas-header zab-offcanvas-header py-2">
+        <h5 class="offcanvas-title zab-offcanvas-title fw-bold">@_title</h5>
 
-        <h5 class="offcanvas-title zab-offcanvas-title fw-bold">
-
-            @_title
-
-        </h5>
-
-       @*  <button class="btn-close"                @onclick="CloseCanvasAsync">
-        <i class="bi bi-x-circle"></i>
-        </button> *@
-
-        <button class="zab-close-button"
-                type="button"
-                title="Close"
-                @onclick="CloseCanvasAsync">
-
-            <i class="bi bi-x-lg"></i>
-
+        <button class="zab-close-button" type="button" title="Close" @onclick="CloseCanvasAsync">
+            <i class="bi bi-x-circle"></i>
         </button>
-
-
-
     </div>
 
     <div class="offcanvas-body zab-offcanvas-body">
+        <div class="mt-0 mb-2 p-2 shadow-sm soft-card" style="border-radius:10px; border: solid 0.5px #EBF4FA">
+            @if (_componentType != null)
+            {
+            <DynamicComponent Type="_componentType" Parameters="_parameters" />
+            }
 
-        @if (_componentType != null)
-        {
-            <DynamicComponent Type="_componentType"
-                              Parameters="_parameters" />
-        }
-
+        </div>
     </div>
-
 </div>
 
 <style type="text/css">
-    .fade-effect{
-        transition: transform .28s ease,
-        visibility .28s ease;
+    .fade-effect {
+        transition: transform .28s ease, visibility .28s ease;
     }
-        
 </style>

@@ -1,19 +1,7 @@
 ﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments
 @using Microsoft.AspNetCore.Components.Forms
 
-<div class="p-3 bg-white h-100">
-    @if (WorkflowContext == WorkflowContextType.AssessmentLoanView)
-    {
-        <div class="alert alert-info text-xxs mb-3 rounded py-2">
-            <i class="bi bi-info-circle me-1"></i> Synchronizing configurations for parameter structural map key: <strong>@LoanId</strong>
-        </div>
-        <p class="text-xs text-muted">Core placeholder simulation grid representing child instance assembly integration mapping workspace.</p>
-        <div class="pt-3 border-top d-flex justify-content-end">
-            <button type="button" class="btn btn-sm btn-secondary text-xxs shadow-sm" @onclick="CancelFormWorkflowAsync">Close Panel</button>
-        </div>
-    }
-    else if (WorkflowContext == WorkflowContextType.RepaymentsEdit && ActiveRepaymentModel != null)
-    {
+<div class="p-3 bg-white h-100">  
         <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync">
 
             <div class="mb-3">
@@ -86,5 +74,5 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm text-xs" @onclick="CancelFormWorkflowAsync">Cancel</button>
             </div>
         </EditForm>
-    }
+  
 </div>
