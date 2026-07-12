@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using ViabilityIQ.Application.Dtos;
+using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 
 
@@ -7,6 +9,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class AssessmentLoansListComponent
     {
+
+        [Inject] ISessionService? sessionService { get; set; }
+        [Inject] IGenericDataRepository<AssessmentLoanDto>? AssessmentLoanRepository { get; set; }
+        [Inject] MasterDataService? MasterData { get; set; }
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public EventCallback<long> OnEditRequested { get; set; }
 
@@ -16,6 +22,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         protected override async Task OnParametersSetAsync()
         {
+            AssessmentId = sessionService.AssessmentId.Value;
             await LoadAssessmentLoanAsync();
         }
 
@@ -30,7 +37,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 // FORCE the database operation onto an isolated background thread pool worker to prevent deadlocks
                 var rawRecords = await Task.Run(async () =>
                 {
-                    return await AssessmentLoanRepository.GetAllAsync();
+                    return await MasterData!.GetAssessmentLoansByIdAsync(AssessmentId);
+                    //return await AssessmentLoanRepository!.GetAllAsync();
                 });
 
                 if (rawRecords != null)
@@ -74,7 +82,15 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             >= 5.00m and < 15.00m => "bg-warning text-dark",
             >= 15.00m and < 30.00m => "bg-info text-dark",
             >= 30.00m and <= 50.00m => "bg-success text-white",
-            _ => "bg-white text-dark border border-danger fw-bold" // > 50 design block setup
+            _ => "bg-white text-dark border border-danger" // > 50 design block setup
+        };
+
+        private string GetInterestBadgeClass(decimal markupPercent) => markupPercent switch
+        {
+            <= 9.00m => "bg-info text-black",
+            > 9.00m and < 15.00m => "bg-warning text-dark",
+            >15.00m => "bg-danger text-white",           
+            _ => "bg-white text-dark border border-danger" // > 50 design block setup
         };
     }
 }

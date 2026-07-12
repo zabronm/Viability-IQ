@@ -1,0 +1,74 @@
+﻿@using ViabilityIQ.Shared.DataModels
+
+<div class="mb-2 mt-4 pt-2 border-top border-secondary-subtle">
+    <div class="py-1 px-1">
+        <span class="h6 text-navy-brand mb-0 fw-bold small"><i class="bi bi-layers-half text-dark"></i>&nbsp;CONSOLIDATED REVENUE ANALYSIS LEDGER</span>
+        <span class="small text-xs text-muted">&nbsp;|&nbsp; Combined Position Map Across All Inflow Structures</span>
+    </div>
+    <div class="table-responsive shadow border border-secondary rounded">
+        <table class="table table-sm text-nowrap vertical-align-middle align-middle mb-0 summary-cashflow-table text-xs">
+            <thead>
+                <tr class="fw-bold">
+                    <th class="ps-3 py-2" style="width: 250px;">Revenue Classification Stream</th>
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        <th class="text-end py-2">Month @m</th>
+                    }
+                    <th class="text-end pe-3 py-2 text-white bg-navy header-totals-navy" style="width: 130px;">Annual Cumulative</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 1. Sales Category A Row mapping -->
+                <tr>
+                    <td class="ps-3 text-muted py-1.5"><i class="bi bi-wallet2 me-1.5"></i>Sales Category A Turnover</td>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        var idx = i;
+                        <td class="text-end font-monospace text-secondary py-1.5">@GetStreamMonthlySum(IncomeTypeEnum.SalesCategoryA, idx)</td>
+                    }
+                    <td class="text-end font-monospace text-navy-brand fw-bold bg-navy-light-summary pe-3 py-1.5">@GetStreamAnnualSum(IncomeTypeEnum.SalesCategoryA)</td>
+                </tr>
+                <!-- 2. Sales Category B Row mapping -->
+                <tr>
+                    <td class="ps-3 text-muted py-1.5"><i class="bi bi-wallet2 me-1.5"></i>Sales Category B Turnover</td>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        var idx = i;
+                        <td class="text-end font-monospace text-secondary py-1.5">@GetStreamMonthlySum(IncomeTypeEnum.SalesCategoryB, idx)</td>
+                    }
+                    <td class="text-end font-monospace text-navy-brand fw-bold bg-navy-light-summary pe-3 py-1.5">@GetStreamAnnualSum(IncomeTypeEnum.SalesCategoryB)</td>
+                </tr>
+                <!-- 3. Sundry Operating Inflows Row mapping -->
+                <tr>
+                    <td class="ps-3 text-muted py-1.5"><i class="bi bi-cash-stack me-1.5"></i>Sundry Operating Income</td>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        var idx = i;
+                        <td class="text-end font-monospace text-secondary py-1.5">@GetStreamMonthlySum(IncomeTypeEnum.SundryIncome, idx)</td>
+                    }
+                    <td class="text-end font-monospace text-navy-brand fw-bold bg-navy-light-summary pe-3 py-1.5">@GetStreamAnnualSum(IncomeTypeEnum.SundryIncome)</td>
+                </tr>
+                <!-- 4. External Infusions Mapping -->
+                <tr>
+                    <td class="ps-3 text-muted py-1.5"><i class="bi bi-award me-1.5"></i>Grants & External Infusions</td>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        var idx = i;
+                        <td class="text-end font-monospace text-secondary py-1.5">@GetStreamMonthlySum(IncomeTypeEnum.GrantsDonations, idx)</td>
+                    }
+                    <td class="text-end font-monospace text-navy-brand fw-bold bg-navy-light-summary pe-3 py-1.5">@GetStreamAnnualSum(IncomeTypeEnum.GrantsDonations)</td>
+                </tr>
+                <!-- Final Aggregation Cross Intersection Row -->
+                <tr class="cashflow-profit-row fw-bold bg-light">
+                    <td class="ps-3 text-dark text-uppercase py-2"><i class="bi bi-calculator-fill me-1.5 text-navy-brand"></i>Total Aggregated Cash Revenue</td>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        var idx = i;
+                        <td class="text-end font-monospace text-navy-brand py-2">@GetCombinedTotalMonthlySum(idx)</td>
+                    }
+                    <td class="text-end font-monospace text-white bg-navy pe-3 py-2 header-totals-navy">@GetCombinedTotalAnnualSum()</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

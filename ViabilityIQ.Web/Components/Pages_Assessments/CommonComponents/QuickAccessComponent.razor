@@ -1,5 +1,4 @@
-﻿
-<div class="viq-card-header-dark-ice text-white text-uppercase" style="font-size:0.75rem;">Quick Access Shortcuts</div>
+﻿<div class="viq-card-header-dark-ice text-white text-uppercase" style="font-size:0.75rem;">Quick Access Shortcuts</div>
 
 <div class="quick-access-grid">
 
@@ -27,7 +26,8 @@
     </a>
 
     <a class="quick-grid-item" href="/reports/balance-sheet">
-        <div class="grid-icon-wrapper text-primary"><i class="bi bi-balance-scale"></i></div>
+        <!-- 5) Updated Icon asset mapping for Balance Sheet statement ledger views -->
+        <div class="grid-icon-wrapper text-primary"><i class="bi bi-receipt-cutoff"></i></div>
         <div class="grid-item-text">
             <span class="strong">Balance Sheet</span>
             <span class="sub-text">Statement File</span>
@@ -58,11 +58,7 @@
         </div>
     </a>
 
-   
-
 </div>
-
-
 
 @code {
     private bool isQuickAccessOpen = true;
@@ -74,7 +70,6 @@
 
     private async Task HandleBlur()
     {
-        // Gives the click navigation sequence time to resolve routing steps before dropping visibility context
         await Task.Delay(180);
         isQuickAccessOpen = true;
         StateHasChanged();

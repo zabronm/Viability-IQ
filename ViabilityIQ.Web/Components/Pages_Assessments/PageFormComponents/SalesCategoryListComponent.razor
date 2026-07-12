@@ -24,7 +24,8 @@
                 <tr class="pb-1" style="background-color: #ffffff !important;">
                     <th class="text-center viq-th-style" style="width: 60px;">Item#</th>
                     <th class="text-start viq-th-style">Category</th>
-                    <th class="text-end viq-th-style" style="width: 90px;">Markup</th>
+                    <th class="text-end viq-th-style" style="width: 90px;">Markup(%)</th>
+                    <th class="text-end viq-th-style" style="width: 90px;">Opening Stock(R)</th>
                     <th class="text-center viq-th-style" style="width: 80px;">Status</th>
                     <th class="text-center viq-th-style" style="width: 70px;">Action</th>
                 </tr>
@@ -43,10 +44,16 @@
                             @cat.SalesCategoryName
                         </td>
                         <td class="text-end">
-                            <span class="badge px-2 py-1 @GetMarkupBadgeClass(cat.MarkupPercentage)" style="min-width: 65px; font-size: inherit;">
+                            <span class="badge rounded-pill fw-normal px-2 py-1 @GetMarkupBadgeClass(cat.MarkupPercentage)" style="min-width: 65px; font-size: 0.75rem;">
                                 @cat.MarkupPercentage.ToString("N2")%
                             </span>
                         </td>
+
+                        @* ==============PUT ACTUAL OPENING STOCK FOR THE CATEGORY HERE ==================== *@
+                        <td class="text-end text-dark fw-medium">
+                            R 0.00
+                        </td>
+
                         <td class="text-center">
                             @if (cat.Active)
                             {

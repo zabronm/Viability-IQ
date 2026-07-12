@@ -1,0 +1,130 @@
+﻿@using ViabilityIQ.Infrastructure.Repositories
+
+
+@if (loadingStateActive)
+{
+    <FormLoadingComponent />
+}
+else
+{
+<EditForm Model="@vatUpdateModel" OnValidSubmit="UpdateVATRateOnly">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+
+    <div class="d-flex flex-column gap-3">
+        <div class="viq-elevated-card">
+            <div class="viq-card-header-dark-ice">
+                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Core Parameters</span>
+            </div>
+
+            <div class="p-3" style="background-color: #FEFCFF;">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2 col-12 py-0">
+                        <label class="form-label-custom mb-0">Case Number</label>
+                        <input type="text" class="form-control-compact bg-light" value="@vatUpdateModel.CaseNumber" readonly disabled />
+                    </div>
+                    <div class="col-md-2 col-12 py-0">
+                        <label class="form-label-custom">Period Start Date</label>
+                        <input type="text" class="form-control-compact bg-light" value="@vatUpdateModel.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
+                    </div>
+                    <div class="col-md-2 col-12 py-0">
+                        <label class="form-label-custom">Period End Date</label>
+                        <input type="text" class="form-control-compact bg-light" value="@vatUpdateModel.AssessmentFinishDate?.ToString("yyyy-MM-dd")" readonly disabled />
+                    </div>
+                    <div class="col-md-3 col-12">
+                        <label for="businessName" class="form-label-custom">Business<span class="text-danger">*</span></label>
+                        <DDLookupComponent SourceKey="DDLookupEnums.Businesses" Label="Business" @bind-Value="@vatUpdateModel.BusinessId" IsDisabled=true />
+                        <ValidationMessage For="() => vatUpdateModel.BusinessId" class="text-danger small" />
+                    </div>
+
+                    <div class="col-md-3 col-12">
+                        <div class="p-1 border border-light-subtle shadow-sm" style="background-color: #E0E5E5; border-radius:8px;">
+                            <label class="mb-0 fw-bold text-navy text-nowrap d-block" style="font-size: 0.65rem; letter-spacing: -0.2px;">&nbsp;Value Added Tax(VAT) Rate (%)</label>
+                            <div class="d-flex align-items-center gap-1 mt-1">
+                                <input type="number" class="form-control-compact text-end px-1 w-100 fw-bold" @bind-value="@vatUpdateModel.VatRate" min="0" max="100" style="height: 24px; font-size: 0.78rem;" />
+                                <button type="submit" class="btn btn-xs btn-primary shadow-sm py-0 px-2 fw-semibold text-nowrap d-flex align-items-center justify-content-center"
+                                        style="height: 24px; font-size: 0.62rem;" disabled="@IsSubmitting">
+                                    <i class="bi bi-save me-1"></i>Update VAT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+}
+
+
+
+@code {
+
+    [Inject] private MasterDataService? ViqCrudService { get; set; }
+
+    [Parameter] public VatUpdateModel vatUpdateModel { get; set; } = new();
+    [Parameter] public EventCallback<SaveResult> OnUpdate { get; set; }
+
+    private SaveResult? result = new();
+    private bool IsSubmitting = false;
+    string str_sql = string.Empty;
+    bool loadingStateActive = false;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Start with the spinner active
+        loadingStateActive = true;
+        await Task.Delay(150);
+
+        loadingStateActive = false;
+        StateHasChanged();
+    }
+
+
+    private async Task UpdateVATRateOnly()
+    {       
+        str_sql = $"UPDATE tblAssessments SET VATRate = @VATRate WHERE (AssessmentId=@AssessmentId);";
+        var _parameters = new
+        {
+            VATRate = vatUpdateModel!.VatRate,
+            AssessmentId = vatUpdateModel.AssessmentId,
+        };
+
+        try
+        {
+            var _recs = await ViqCrudService!.ExecuteCommandAsync(str_sql, _parameters);
+            if (_recs > 0)
+            {
+                result = new()
+                    {
+                        Message = "VAT Rate updated successfully",
+                        Success = true,
+                    };
+            }
+            else
+            {
+                result = new()
+                    {
+                        Message = "VAT Rate not updated, please retry or contact support.",
+                        Success = false,
+                    };
+            }
+
+        }
+        catch (Exception ex)
+        {
+            result = new()
+                {
+                    Message = $"Error encountered:{ex.Message}",
+                    Success = false,
+                };
+        }
+        finally
+        {            
+            await OnUpdate.InvokeAsync(result!);
+        }
+        
+    }
+}

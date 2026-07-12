@@ -15,7 +15,7 @@ namespace ViabilityIQ.Shared.DataModels
     {
         [Dapper.Contrib.Extensions.Key] public long LoanTypeId { get; set; }
         public string? ShortName { get; set; }
-        [Required] public string LoanTypeName { get; set; }
+        [Required] public string? LoanTypeName { get; set; }
 
 
         public string? Remarks { get; set; }

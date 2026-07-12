@@ -8,14 +8,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
     public partial class AssessmentLoanFormComponent 
     {
         [Parameter] public long AssessmentId { get; set; }
-
-        /// <summary>
-        /// Pass a non-zero identifier parameter context to place this component into EDIT mode.
-        /// Keep this parameter omitted or bound to 0 to automatically drop into CREATE mode.
-        /// </summary>
+       
         [Parameter] public long AssessmentLoanId { get; set; }
-        [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
-
+       
         [Inject] private IGenericDataRepository<AssessmentLoan> DataRepository { get; set; } = default!;
 
         private AssessmentLoan? Model { get; set; }
@@ -43,12 +38,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     }
                     else
                     {
-                        await OnSaveComplete.InvokeAsync(new SaveResult
-                        {
-                            Success = false,
-                            ClosePanel = false,
-                            Message = $"Error: Loan targeting reference key #{AssessmentLoanId} missing."
-                        });
+                        //await OnSaveComplete.InvokeAsync(new SaveResult
+                        //{
+                        //    Success = false,
+                        //    ClosePanel = false,
+                        //    Message = $"Error: Loan targeting reference key #{AssessmentLoanId} missing."
+                        //});
                     }
                 }
                 else
@@ -67,12 +62,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
             catch (Exception ex)
             {
-                await OnSaveComplete.InvokeAsync(new SaveResult
-                {
-                    Success = false,
-                    ClosePanel = false,
-                    Message = $"Error encountered: {ex.Message}"
-                });
+                //await OnSaveComplete.InvokeAsync(new SaveResult
+                //{
+                //    Success = false,
+                //    ClosePanel = false,
+                //    Message = $"Error encountered: {ex.Message}"
+                //});
             }
             finally
             {
@@ -107,16 +102,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         : "Error encountered while saving, please contact Administrator."
                 };
 
-                await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
+                //await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
             }
             catch (Exception ex)
             {
-                await OnSaveComplete.InvokeAsync(new SaveResult
-                {
-                    Success = false,
-                    ClosePanel = false,
-                    Message = $"Critical error encountered: {ex.Message}"
-                });
+                //await OnSaveComplete.InvokeAsync(new SaveResult
+                //{
+                //    Success = false,
+                //    ClosePanel = false,
+                //    Message = $"Critical error encountered: {ex.Message}"
+                //});
             }
             finally
             {

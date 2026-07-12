@@ -76,7 +76,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             >= 5.00m and < 15.00m => "bg-warning text-dark",
             >= 15.00m and < 30.00m => "bg-info text-dark",
             >= 30.00m and <= 50.00m => "bg-success text-white",
-            _ => "bg-white text-dark border border-danger fw-bold" // > 50 design block setup
+            _ => "bg-white text-dark border border-danger" // > 50 design block setup
         };
     }
 }

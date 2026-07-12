@@ -1,0 +1,105 @@
+﻿@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Infrastructure.Repositories
+@using ViabilityIQ.Shared.DataModels
+
+@if (loadingStateActive)
+{
+    <FormLoadingComponent />
+}
+else
+{
+    <EditForm Model="@debtorsCreditorsModel" OnValidSubmit="UpdateDebtorsCreditors">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+        <div class="viq-elevated-card">
+            <div class="viq-card-header-dark-ice">
+                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Debtors/Creditors Ageing Profiles</span>
+                <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
+                    <i class="bi bi-save me-1"></i> Update Profiles
+                </button>
+            </div>
+
+            <div class="p-3">
+                <div class="row g-3">
+                    <div class="form-check form-switch bg-light my-0 py-2">
+                        <input class="form-check-input" type="checkbox" id="entryModeSwitch" @bind="debtorsCreditorsModel.EntryMode" @onclick="StateHasChanged" />
+                        <label class="form-check-label fw-semibold text-navy pt-2" for="entryModeSwitch">
+                            &nbsp;&nbsp;&nbsp;@(debtorsCreditorsModel.EntryMode ? "Entry Mode : Actual Values" : "Entry Mode : Percentages")
+                        </label>
+                    </div>
+
+                    @* Creditors Section *@
+                    <div class="col-md-6 col-12 border-end pe-md-3">
+                        <div class="row mb-2 pb-1 border-bottom g-1 text-uppercase fw-bold text-dark" style="font-size: 0.68rem; letter-spacing: 0.3px;">
+                            <div class="col-6 text-start">Creditors Profile Items</div>
+                            <div class="col-2 text-end">% Value</div>
+                            <div class="col-4 text-end">Actual Value</div>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            @RenderCreditorsRow("0-30 Days (Auto):", CalculatedCreditors0To30, null, null)
+                            @RenderCreditorsRow("31-60 Days:", null, debtorsCreditorsModel.Creditors_60, (e) => InterceptCreditorsInput(e, 60))
+                            @RenderCreditorsRow("31-60 Days:", null, debtorsCreditorsModel.Creditors_60, (e) => InterceptCreditorsInput(e, 60))
+                            @RenderCreditorsRow("61-90 Days:", null, debtorsCreditorsModel.Creditors_90, (e) => InterceptCreditorsInput(e, 60))
+                            @RenderCreditorsRow("91-120 Days:", null, debtorsCreditorsModel.Creditors_120, (e) => InterceptCreditorsInput(e, 60))
+                            @RenderCreditorsRow("120+ Days:", null, debtorsCreditorsModel.Creditors_120Plus, (e) => InterceptCreditorsInput(e, 60))
+                        </div>
+                    </div>
+
+                    @* Debtors Section *@
+                    <div class="col-md-6 col-12 ps-md-2">
+                        <div class="row mb-2 pb-1 border-bottom g-1 text-uppercase fw-bold text-dark" style="font-size: 0.68rem; letter-spacing: 0.3px;">
+                            <div class="col-6 text-start">Debtors Profile Items</div>
+                            <div class="col-2 text-end">% Value</div>
+                            <div class="col-4 text-end">Actual Value</div>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            @RenderDebtorsRow("0-30 Days (Auto):", CalculatedDebtors0To30, null, null)
+                            @RenderDebtorsRow("31-60 Days:", null, debtorsCreditorsModel.Debtors_60, (e) => InterceptDebtorsInput(e, 60))
+                            @RenderDebtorsRow("61-90 Days:", null, debtorsCreditorsModel.Debtors_90, (e) => InterceptDebtorsInput(e, 60))
+                            @RenderDebtorsRow("91-120 Days:", null, debtorsCreditorsModel.Debtors_120, (e) => InterceptDebtorsInput(e, 60))
+                            @RenderDebtorsRow("120+ Days:", null, debtorsCreditorsModel.Debtors_120Plus, (e) => InterceptDebtorsInput(e, 60))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    // private EventCallback<ChangeEventArgs> GetCallback(Action<ChangeEventArgs>? action) =>
+    //     action != null ? EventCallback.Factory.Create<ChangeEventArgs>(this, action) : EventCallback.Empty;
+
+
+    private EventCallback<ChangeEventArgs> GetCallback(Action<ChangeEventArgs>? action) =>
+        action != null
+            ? EventCallback.Factory.Create<ChangeEventArgs>(this, action)
+            : EventCallback<ChangeEventArgs>.Empty; // Use the generic version
+
+
+    RenderFragment RenderCreditorsRow(string label, decimal? autoPerc, decimal? manualPerc, Action<ChangeEventArgs>? onInput) => @<div class="row form-inline-align-row g-1">
+        <div class="col-6"><label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">@label</label></div>
+        <div class="col-2">
+            <input type="text" class="form-control form-control-sm text-end @(IsPercentageReadonly ? "input-disabled-bg" : "")" value="@(autoPerc ?? manualPerc)%" readonly="@IsPercentageReadonly" @oninput="GetCallback(onInput)" />
+        </div>
+        <div class="col-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                <input type="number" step="0.01" class="form-control form-control-sm text-end @(IsValueReadonly ? "input-disabled-bg" : "")" readonly="@IsValueReadonly" @bind-value="debtorsCreditorsModel.CreditorsValue_30" />
+            </div>
+        </div>
+    </div>;
+
+    RenderFragment RenderDebtorsRow(string label, decimal? autoPerc, decimal? manualPerc, Action<ChangeEventArgs>? onInput) => @<div class="row form-inline-align-row g-1">
+        <div class="col-6"><label class="form-label-custom text-muted mb-0" style="font-size: 0.78rem;">@label</label></div>
+        <div class="col-2">
+            <input type="text" class="form-control form-control-sm text-end @(IsPercentageReadonly ? "input-disabled-bg" : "")" value="@(autoPerc ?? manualPerc)%" readonly="@IsPercentageReadonly" @oninput="GetCallback(onInput)" />
+        </div>
+        <div class="col-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light py-0 px-1 font-size-xs">R</span>
+                <input type="number" step="0.01" class="form-control form-control-sm text-end @(IsValueReadonly ? "input-disabled-bg" : "")" readonly="@IsValueReadonly" @bind-value="debtorsCreditorsModel.DebtorsValue_30" />
+            </div>
+        </div>
+    </div>;
+}

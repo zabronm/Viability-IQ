@@ -5,7 +5,8 @@
     min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
-    overflow-y: auto;
+    /*overflow-y: auto;*/
+    overflow-y: hidden;
     font-family: Arial, sans-serif, Helvetica, "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
 }
 
@@ -23,7 +24,7 @@
 .fa-workspace-container {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Sidebar Core Panels */
@@ -439,8 +440,37 @@
 .fa-main-content-surface {
     flex: 1;
     background-color: #f8fafc;
-    overflow-y: visible;
+    /*overflow-y: visible;*/
+    height: calc(100vh - 60px); /* Fill the exact remaining space below the 60px top bar */
+    overflow-y: auto;
+    /* --- ADD SCROLLBAR COLOR FOR FIREFOX --- */
+    scrollbar-width: auto;
+    scrollbar-color: #5E7D7E #F0FFFF; /* thumb color | track background color */
 }
+
+    /* --- ADD SCROLLBAR COLOR FOR CHROMIUM BROWSERS (CHROME, EDGE, SAFARI) --- */
+    .fa-main-content-surface::-webkit-scrollbar {
+        width: 8px; /* Set a clean, slim width for the scrollbar track */
+    }
+
+    .fa-main-content-surface::-webkit-scrollbar-track {
+        background: #f1f5f9; /* Subtle background track color to match your workspace */
+        border-radius: 4px;
+    }
+
+    .fa-main-content-surface::-webkit-scrollbar-thumb {
+        background-color: #4C787E; /* Your custom color */
+        border-radius: 4px; /* Round edges for a smooth look */
+        border: 2px solid #f1f5f9; /* Gives it a tiny bit of breathing room inside the track */
+    }
+
+        .fa-main-content-surface::-webkit-scrollbar-thumb:hover {
+            background-color: #3b5d62; /* Slightly darker shade on hover for user feedback */
+        }
+
+
+
+
 
 .content-body-padding {
     padding: 24px;

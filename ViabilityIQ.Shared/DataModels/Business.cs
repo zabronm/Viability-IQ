@@ -16,7 +16,9 @@ namespace ViabilityIQ.Shared.DataModels
         [Key] public long BusinessId { get; set; }
         public string? BusinessName { get; set; }
         public long BusinessSectorId { get; set; }
-        public bool Registered { get; set; }
+        public bool IsRegistered { get; set; }
+        public bool IsVATRegistered { get; set; }
+        public bool IsBEE_Exempt { get; set; }
         public DateTime? RegisteredDate { get; set; } = null;
         public long ClientId { get; set; }
         public string? CKNumber { get; set; }

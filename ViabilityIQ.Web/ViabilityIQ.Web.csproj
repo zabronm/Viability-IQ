@@ -19,11 +19,15 @@
 
   <ItemGroup>
     <Compile Remove="Components\Pages\ReportsPage.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Remove="Components\CommonComponents\BFooter.razor" />
     <Content Remove="Components\Pages\AppInitializer.razor" />
+    <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor" />
+    <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor" />
     <Content Remove="wwwroot\css\AssessmentSettings.css" />
   </ItemGroup>
 

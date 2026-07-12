@@ -1,287 +1,167 @@
 ﻿@page "/assessment/sales/"
-
 @layout MainLayout_Assessment
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
+@using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
+@using ViabilityIQ.Shared.DataModels
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Sales" PageTitle="Sales & Forecasts" CurrentPage="PageType.Sales" />
 
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
-        @if (blAlert == true)
+        @if (blAlert)
         {
             <div class="my-0">
-                <ViqAlertComponent Severity="AlertSeverity"
-                                   Heading="@AlertHeading"
-                                   Message="@AlertMessage"
-                                   AllowDismiss="true" />
+                <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
             </div>
         }
         <div class="col-xl-12 col-lg-12 col-12 py-2" style="background-color: #ffffff; border: solid 0px #566D7E; border-radius:6px;">
 
-            <!-- INCOME: Sales Revenue -->
             <div class="mb-4">
                 <div class="py-1 px-1">
-                    <span class="h6 text-marble-light mb-0 fw-bold small"><i class="bi bi-wallet-fill text-primary"></i>&nbsp;INCOME: Sales Revenue ..</span>
-                    <span class="small text-xs text-muted">&nbsp;|&nbsp;Configure monthly sales distributions for each category in the assessment period.</span>
+                    <span class="h6 text-marble-light mb-0 fw-bold small"><i class="bi bi-wallet-fill text-primary"></i>&nbsp;Unified Revenue Income Streams ..</span>
+                    <span class="small text-xs text-muted">&nbsp;|&nbsp; Combined Position View Matrix</span>
                 </div>
 
-                <div class="table-responsive shadow mt-0" style="max-height: 350px; overflow-y: auto; border: solid 1px #98AFC7; border-radius: 6px;">
-                    <table class="table table-hover table-sm text-nowrap bg-white vertical-align-middle align-middle mb-0 matrix-grid-table">
+                <div class="px-0 mb-3">
+                    <div class="row g-2 mt-1 align-items-center p-0 mx-0">
+                        <div class="col-md-4 col-12">
+                            <button type="button" class="btn btn-primary text-xs py-2 px-2 shadow-sm" @onclick="() => AddIncomeStream()">
+                                <i class="bi bi-plus-circle me-1"></i>Add Revenue Stream
+                            </button>
+                        </div>
+
+                        <!-- (3) Filter & Search Header Controls Area -->
+                        <div class="col-md-8 col-12 d-flex gap-2 justify-content-end">
+                            <!-- Dropdown width scaled to 18% -->
+                            <select class="form-select form-select-sm text-xs shadow-sm" style="width: 18%;" @bind="SelectedFilterType">
+                                <option value="">All Income Types</option>
+                                <option value="@IncomeTypeEnum.SalesCategoryA">Sales Category A</option>
+                                <option value="@IncomeTypeEnum.SalesCategoryB">Sales Category B</option>
+                                <option value="@IncomeTypeEnum.SundryIncome">Sundry Income</option>
+                                <option value="@IncomeTypeEnum.GrantsDonations">Grants / Donations</option>
+                            </select>
+
+                            <!-- Search container explicitly scaled down to 20% using inline styling -->
+                            <div class="input-group input-group-sm shadow-sm search-input-frame" style="width: 30%;">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search entries..." @bind="SearchQuery" @bind:event="oninput" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive shadow-sm border border-secondary-subtle">
+                    <table class="table table-sm table-hover text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table grid-font-standard">
                         <thead>
-                            <tr class="bg-light header-row">
-                                <th class="ps-3 sticky-col first-header uppercase small" style="width: 210px; min-width: 210px; left: 0;">Sales Category</th>
-                                <th class="text-center text-xs text-muted font-weight-bold px-2" style="width: 75px;">Inc. VAT?</th>
+                            <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
+                                <th class="sticky-col ps-2 text-uppercase text-xxs">Revenue Channels &nbsp;<i class="bi bi-caret-right-fill"></i></th>
+                                <!-- (1) Substituted Inc VAT with Income Type Header Contexts -->
+                                <th class="text-start text-xxs text-uppercase px-2">Income Type</th>
                                 @for (int m = 1; m <= 12; m++)
                                 {
-                                    <th class="text-end text-xs text-muted font-weight-bold px-2">M@(m)</th>
+                                    <th class="text-end text-xxs text-uppercase">M@(m)</th>
                                 }
-                                <th class="text-end text-xs font-weight-bold text-navy-brand px-2 bg-light-totals">Total Sales</th>
-                                <th class="text-center text-xs font-weight-bold text-navy-brand px-2 bg-light-totals">% Mix</th>
-                                <th class="text-center text-xs font-weight-bold text-dark px-2 sticky-action-header" style="width: 50px; right: 0;"></th>
+                                <th class="text-end font-weight-bold text-white bg-navy text-uppercase text-xxs header-totals-navy">Total Revenue</th>
+                                <th class="text-center sticky-action-header text-xxs"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if (SalesCategories != null && SalesCategories.Any())
+                            @if (FilteredIncomeStreams != null && FilteredIncomeStreams.Any())
                             {
-                                @foreach (var cat in SalesCategories)
+                                @foreach (var item in FilteredIncomeStreams)
                                 {
-                                    var rowTotal = cat.MonthlySales.Sum();
-                                    var percentMix = GrandTotalSales > 0 ? (rowTotal / GrandTotalSales) * 100 : 0;
-                                    var vatRowClass = cat.IncludeVat ? "vat-inclusive-row" : "";
+                                    var truncatedName = item.Description.Length > 20
+                                    ? ".." + item.Description.Substring(item.Description.Length - 20)
+                                    : item.Description;
 
-                                    <tr class="@vatRowClass">
-                                        <td class="ps-3 text-dark sticky-col category-title-cell" style="left: 0;" title="@cat.CategoryName">
-                                            <div class="d-inline-flex align-items-center row-title-wrapper">
-                                                <span class="text-truncate" style="max-width: 145px;">@TruncateName(cat.CategoryName)</span>
-                                                @if (cat.IncludeVat)
-                                                {
-                                                    <span class="badge rounded-pill bg-warning text-white text-xxs custom-vat-tag animate-fade">VAT!</span>
-                                                }
-                                            </div>
+                                    <tr>
+                                        <td class="sticky-col ps-2 text-dark font-weight-bold text-truncate" title="@item.Description">
+                                            @truncatedName
+                                            @if (item.IncludesVat)
+                                            {
+                                                <span class="badge bg-light text-secondary border custom-vat-tag ms-1 fw-normal">VAT</span>
+                                            }
                                         </td>
-                                        <td class="text-center px-2">
-                                            <input type="checkbox" class="form-check-input large-matrix-checkbox cursor-pointer"
-                                                   checked="@cat.IncludeVat"
-                                                   @onchange="(e) => ToggleVatExclusionState(cat, e.Value)" />
-                                        </td>
+                                        <td class="px-2"><span class="badge bg-soft-blue text-navy-brand text-xs">@GetDisplayTypeName(item.Type)</span></td>
                                         @for (int i = 0; i < 12; i++)
                                         {
                                             var index = i;
-                                            <td class="text-end font-monospace text-xs px-2 text-secondary">
-                                                @cat.MonthlySales[index].ToString("N0")
+                                            <td class="text-end font-monospace text-secondary">
+                                                @item.MonthlyValues[index].ToString("N0").Replace(",", " ")
                                             </td>
                                         }
-                                        <td class="text-end font-monospace text-xs fw-bold text-navy-brand px-2 bg-light-totals-cell">
-                                            @rowTotal.ToString("N0")
+                                        <td class="text-end font-monospace font-weight-bold bg-navy-light-summary text-navy-brand">
+                                            @item.MonthlyValues.Sum().ToString("N0").Replace(",", " ")
                                         </td>
-                                        <td class="text-center font-monospace text-xs fw-bold text-primary px-2 bg-light-totals-cell">
-                                            @percentMix.ToString("F1")%
-                                        </td>
-                                        <td class="text-center px-2 sticky-action-cell" style="right: 0;">
-                                            <button type="button" class="btn btn-outline-primary btn-xs p-1 shadow-sm line-action-btn"
-                                                    @onclick="() => OpenSalesDataEntryPanel(cat)">
-                                                <i class="bi bi-pencil-square fs-6 m-0"></i>
+                                        <td class="text-center bg-light-totals-cell">
+                                            <button type="button" class="btn btn-outline-primary btn-xs p-0 px-1 shadow-sm" @onclick="() => OpenIncomeFormPanel(item)">
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- INCOME: Sundry Revenue -->
-            <div class="mb-4">
-                <div class="py-2 px-1 ">
-                    <span class="h6 text-marble-light mb-0 fw-bold small"><i class="bi bi-pin-angle-fill text-navy"></i>&nbsp;INCOME: Sundry Revenue ..</span>
-                    <span class="small text-xs text-muted">&nbsp;|&nbsp;Manage localized secondary revenue streams with simulated deferred yield tracking.</span>
-                </div>
-                <div class="table-responsive shadow mt-0" style="max-height: 300px; overflow-y: auto; border: solid 1px #98AFC7; border-radius: 6px;">
-                    <table class="table table-hover table-sm text-nowrap bg-white vertical-align-middle align-middle mb-0 matrix-grid-table">
-                        <thead>
-                            <tr class="bg-light header-row">
-                                <th class="ps-3 sticky-col first-header uppercase small" style="width: 210px; min-width: 210px; left: 0;">Income Source / Rate</th>
-                                <th class="text-center text-xs text-muted font-weight-bold px-2" style="width: 75px;">Interest %</th>
-                                @for (int m = 1; m <= 12; m++)
-                                {
-                                    <th class="text-end text-xs text-muted font-weight-bold px-2">M@(m)</th>
-                                }
-                                <th class="text-end text-xs font-weight-bold text-navy-brand px-2 bg-light-totals">Cumulative Total</th>
-                                <th class="text-center text-xs font-weight-bold text-dark px-2 sticky-action-header" style="width: 50px; right: 0;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (SundryIncome != null)
-                            {
-                                <tr>
-                                    <td class="ps-3 text-dark sticky-col category-title-cell" style="left: 0;">
-                                        <i class="bi bi-cash-coin text-success me-1"></i> @SundryIncome.IncomeName
-                                    </td>
-                                    <td class="text-center font-monospace text-xs text-muted px-2">
-                                        @SundryIncome.AnnualInterestRate.ToString("F1")%
-                                    </td>
+                                <tr class="bg-light-totals font-weight-bold border-top-navy">
+                                    <td class="sticky-col ps-2 text-navy-brand text-uppercase text-xxs fw-bold" colspan="2">Grand Total Inflows:</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         var index = i;
-                                        <td class="text-end font-monospace text-xs px-2 text-secondary">
-                                            @SundryIncome.MonthlyValues[index].ToString("N0")
+                                        <td class="text-end font-monospace text-navy-brand font-weight-bold">
+                                            @FilteredIncomeStreams.Sum(c => c.MonthlyValues[index]).ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-xs fw-bold text-navy-brand px-2 bg-light-totals-cell">
-                                        @SundryTotalPrincipal.ToString("N0")
+                                    <td class="text-end font-monospace text-white bg-navy font-weight-bold header-totals-navy">
+                                        @GrandTotalRevenue.ToString("N0").Replace(",", " ")
                                     </td>
-                                    <td class="text-center px-2 sticky-action-cell" style="right: 0;" rowspan="@(SundryIncome.AnnualInterestRate > 0 ? "3" : "2")">
-                                        <button type="button" class="btn btn-outline-primary btn-xs p-1 shadow-sm line-action-btn"
-                                                @onclick="OpenSundryEntryPanel">
-                                            <i class="bi bi-pencil-square fs-6 m-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                @if (SundryIncome.AnnualInterestRate > 0)
-                                {
-                                    <tr class="bg-light-yield-row text-xs">
-                                        <td class="ps-4 text-muted italic-cell sticky-col bg-light-yield-cell" style="left: 0;">
-                                            <i class="bi bi-graph-up-arrow text-primary me-1"></i>Interest Yield
-                                        </td>
-                                        <td class="text-center text-muted">—</td>
-                                        @for (int i = 0; i < 12; i++)
-                                        {
-                                            var index = i;
-                                            <td class="text-end font-monospace text-xs px-2 text-primary">
-                                                @CalculateMonthlyInterest(index).ToString("N0")
-                                            </td>
-                                        }
-                                        <td class="text-end font-monospace text-xs fw-bold text-primary px-2 bg-light-totals-cell">
-                                            @SundryTotalInterestYield.ToString("N0")
-                                        </td>
-                                    </tr>
-                                }
-
-                                <tr class="fw-bold bg-light-totals text-xs border-top">
-                                    <td class="ps-3 sticky-col bg-light-totals-cell" style="left: 0; color: #1a365d;">
-                                        <i class="bi bi-plus-square-fill me-1"></i> Total Sundry & Interest
-                                    </td>
-                                    <td class="text-center text-muted">—</td>
-                                    @for (int i = 0; i < 12; i++)
-                                    {
-                                        var index = i;
-                                        var combinedMonthTotal = SundryIncome.MonthlyValues[index] + CalculateMonthlyInterest(index);
-                                        <td class="text-end font-monospace text-xs px-2 text-dark">
-                                            @combinedMonthTotal.ToString("N0")
-                                        </td>
-                                    }
-                                    <td class="text-end font-monospace text-xs fw-bold px-2 text-dark bg-light-totals-cell" style="border-bottom: 1px double #1a365d;">
-                                        @((SundryTotalPrincipal + SundryTotalInterestYield).ToString("N0"))
-                                    </td>
+                                    <td class="text-center bg-light-totals-cell"></td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <!-- INCOME: Grants & Donations -->
-            <div class="mb-2">
-                <div class="py-2 px-1 my-0">
-                    <span class="h6 text-marble-light mb-0 fw-bold small"><i class="bi bi-gift text-info"></i>&nbsp;INCOME: Grants & Donations ..</span>
-                    <span class="small text-xs text-muted">&nbsp;|&nbsp;Track structured institutional grants and external non-repayable cash allocations.</span>
-                </div>
-
-                <div class="table-responsive shadow mt-0" style="max-height: 200px; overflow-y: auto; border: solid 1px #98AFC7; border-radius: 6px;">
-                    <table class="table table-hover table-sm text-nowrap bg-white vertical-align-middle align-middle mb-0 matrix-grid-table">
-                        <thead>
-                            <tr class="bg-light header-row">
-                                <th class="ps-3 sticky-col first-header uppercase small" style="width: 210px; min-width: 210px; left: 0;">Allocation Stream</th>
-                                <th class="text-center text-xs text-muted font-weight-bold px-2" style="width: 75px;">Source</th>
-                                @for (int m = 1; m <= 12; m++)
-                                {
-                                    <th class="text-end text-xs text-muted font-weight-bold px-2">M@(m)</th>
-                                }
-                                <th class="text-end text-xs font-weight-bold text-navy-brand px-2 bg-light-totals">Total Funding</th>
-                                <th class="text-center text-xs font-weight-bold text-dark px-2 sticky-action-header" style="width: 50px; right: 0;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (GrantsDonations != null)
-                            {
-                                <tr>
-                                    <td class="ps-3 text-dark sticky-col category-title-cell" style="left: 0;">
-                                        <i class="bi bi-gift text-info me-1"></i> @GrantsDonations.FundingName
-                                    </td>
-                                    <td class="text-center text-xs text-muted px-2">External</td>
-                                    @for (int i = 0; i < 12; i++)
-                                    {
-                                        var index = i;
-                                        <td class="text-end font-monospace text-xs px-2 text-secondary">
-                                            @GrantsDonations.MonthlyAllocations[index].ToString("N0")
-                                        </td>
-                                    }
-                                    <td class="text-end font-monospace text-xs fw-bold text-navy-brand px-2 bg-light-totals-cell">
-                                        @GrantsTotalFunding.ToString("N0")
-                                    </td>
-                                    <td class="text-center px-2 sticky-action-cell" style="right: 0;">
-                                        <button type="button" class="btn btn-outline-primary btn-xs p-1 shadow-sm line-action-btn"
-                                                @onclick="OpenGrantsEntryPanel">
-                                            <i class="bi bi-pencil-square fs-6 m-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- CLEAN EXTRACTED COMPONENT SUMMARY METRICS GRIDS CONTROLLERS -->
-    <div class="row bg-white g-3 mt-1 p-0" style="border-radius: 6px;">
-        <div class="col-xl-12 col-lg-12 col-12 p-2" style="background-color: #ffffff; border: solid 0px #566D7E; border-radius:6px;">
-            
-            <CashFlowSummaryDetailComponent
-                SalesCategories="SalesCategories"
-                ExpenseCategories="ExpenseCategories"
-                SundryIncome="SundryIncome"
-                GrantsDonations="GrantsDonations"
-                GrandTotalGlobalInflows="GrandTotalGlobalInflows"
-                GrandTotalExpenses="GrandTotalExpenses" />
+    <div class="row g-3 mt-2 mb-4 pt-1 pb-4 shadow" style="border-radius: 8px;">
+        <div class="col-xl-12 col-lg-12 col-12 py-2" style="background-color: #ffffff; border: solid 0px #566D7E; border-radius:6px;">
+            <div class="fs-4 my-1">Cash Flow & Business Health Analysis</div>
 
-            <div class="mb-3 bg-white">               
-                <div class="row g-3 mt-2 mb-4 bg-white">
-                    <div class="col-xl-4 col-lg-4 col-md-12 col-12">
-                        <AnalysisOfTotalReceiptsGraphComponent 
-                            ExpenseChartPercentage="GetExpenseChartPercentage()"
-                            CosChartPercentage="GetCosChartPercentage()"
-                            NetProfitChartPercentage="GetNetProfitChartPercentage()" />
-                    </div>
-
-                    <div class="col-xl-4 col-lg-4 col-md-12 col-12">
-                        <IncomeStatementSummaryComponent 
-                            GrandTotalSales="GrandTotalSales"
-                            AnnualCostOfSales="GetAnnualCostOfSales()"
-                            AnnualGrossProfit="GetAnnualGrossProfit()"
-                            AnnualSecondarySundry="@(SundryTotalPrincipal + SundryTotalInterestYield)"
-                            AnnualGrossIncome="GetAnnualGrossIncome()"
-                            AnnualOperatingExpenses="GetAnnualOperatingExpenses()"
-                            AnnualNetProfit="GetAnnualNetProfit()" />
-                    </div>
-
-                    <div class="col-xl-4 col-lg-4 col-md-12 col-12">
-                        <BusinessRatiosMatrixComponent 
-                            BreakEvenSales="CalculateBreakEvenSales()"
-                            MarginOfSafetyPercent="CalculateMarginOfSafetyPercent()"
-                            GrossProfitMarginPercent="CalculateGrossProfitMarginPercent()"
-                            OperatingLeverage="CalculateOperatingLeverage()" />
-                    </div>
+            <!-- (4) Isolated Components Parameters Bridge Interface Contexts Mapping -->
+            <CashFlowSummaryDetailComponent IncomeStreams="IncomeStreams" />
+            <!-- New Cross-Section Analysis Grid Containers Added Below -->
+            @*  @if (AreSummariesReady)
+            { *@
+            <!-- Tier 1: Matrix Ledger Profile Summary -->
+            <div class="row g-3 mt-3 fade-staged-panel delay-tier-1">
+                <div class="col-12">
+                    <NetProfitSummaryComponent Data="ConsolidatedAssessmentData" />
                 </div>
             </div>
 
+            <!-- Tier 2: Newly Introduced Intermediate Dual Columns Row (Trend Graph + Totals Summary) -->
+            <div class="row g-3 mt-2 fade-staged-panel delay-tier-2">
+                <div class="col-xl-7 col-lg-7 col-12">
+                    <NetProfitMonthlyGraphComponent Data="ConsolidatedAssessmentData" />
+                </div>
+                <div class="col-xl-5 col-lg-5 col-12">
+                    <NetProfitAnnualSummaryComponent Data="ConsolidatedAssessmentData" />
+                </div>
+            </div>
+
+            <!-- Tier 3: Ratios and Graph Allocations Base Footer Panels -->
+            <div class="row g-3 mt-1 fade-staged-panel delay-tier-3">
+                <div class="col-xl-6 col-lg-6 col-12">
+                    <AnalysisOfReceiptsGraphComponent Data="ConsolidatedAssessmentData" />
+                </div>
+                <div class="col-xl-6 col-lg-6 col-12">
+                    <SalesRatiosComponent Data="ConsolidatedAssessmentData" />
+                </div>
+            </div>
+            @*  } *@
+            }
         </div>
     </div>
 </div>
@@ -289,107 +169,3 @@
 <footer class="py-2 bg-light mt-3">
     <BFooter />
 </footer>
-
-<ZabOffCanvas @ref="OffCanvasControlRef" HeaderTitle="@ActivePanelTitle" dWidth="400">
-    <div class="p-3">
-        @if (ActiveFormType == FormContextType.Sales && SelectedCategoryContext != null)
-        {
-            <div class="alert alert-info py-2 rounded mb-3 text-xs shadow-sm">
-                <i class="bi bi-info-circle-fill me-1"></i> Modifying sales records for <strong>@TruncateName(SelectedCategoryContext.CategoryName)</strong>.
-            </div>
-
-            <div class="card bg-light border-0 mb-3 p-2 rounded">
-                <label class="form-label fw-bold text-xxs text-secondary uppercase mb-1">Quick-Fill Annual Target Distributor</label>
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white text-muted text-xs">R</span>
-                    <input type="number" class="form-control font-monospace" placeholder="e.g. 120000" @bind="BulkAnnualValueTarget" min="0" />
-                    <button class="btn btn-navy text-white text-xs px-2 fw-bold" type="button" @onclick="DistributeAnnualSalesEvenly">
-                        <i class="bi bi-magic me-1"></i> Split Evenly
-                    </button>
-                </div>
-            </div>
-
-            <hr class="text-muted my-3" />
-            <h6 class="text-xs fw-bold text-secondary mb-2 uppercase">Monthly Breakdown Values</h6>
-            <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;" class="pe-1 dynamic-input-scroll-pane">
-                @for (int i = 0; i < 12; i++)
-                {
-                    var index = i;
-                    <div class="row align-items-center mb-2 g-2 input-row-hover">
-                        <div class="col-4"><span class="text-xs font-weight-bold text-muted ms-1">Month @(index + 1)</span></div>
-                        <div class="col-8">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text py-0 px-1 font-monospace text-xxs bg-light">M@(index + 1)</span>
-                                <input type="number" class="form-control form-control-sm text-end font-monospace text-xs" @bind="SelectedCategoryContext.MonthlySales[index]" min="0" step="1000" />
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else if (ActiveFormType == FormContextType.Sundry && SundryIncome != null)
-        {
-            <div class="alert alert-success py-2 rounded mb-3 text-xs shadow-sm">
-                <i class="bi bi-cash-coin me-1"></i> Updating <strong>Sundry Revenue & Yield Rate Parameters</strong>.
-            </div>
-
-            <div class="card bg-light border-0 mb-3 p-2 rounded">
-                <label class="form-label fw-bold text-xxs text-secondary uppercase mb-1">Annual Simulated Yield Interest Rate (%)</label>
-                <div class="input-group input-group-sm">
-                    <input type="number" step="0.1" class="form-control font-monospace" placeholder="e.g. 6.5" @bind="SundryIncome.AnnualInterestRate" />
-                    <span class="input-group-text bg-white text-muted text-xs">% p.a.</span>
-                </div>
-            </div>
-
-            <hr class="text-muted my-3" />
-            <h6 class="text-xs fw-bold text-secondary mb-2 uppercase">Monthly Principal Injections</h6>
-            <div style="max-height: 320px; overflow-y: auto; overflow-x: hidden;" class="pe-1 dynamic-input-scroll-pane">
-                @for (int i = 0; i < 12; i++)
-                {
-                    var index = i;
-                    <div class="row align-items-center mb-2 g-2 input-row-hover">
-                        <div class="col-4"><span class="text-xs font-weight-bold text-muted ms-1">Month @(index + 1)</span></div>
-                        <div class="col-8">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text py-0 px-1 font-monospace text-xxs bg-light">M@(index + 1)</span>
-                                <input type="number" class="form-control form-control-sm text-end font-monospace text-xs" @bind="SundryIncome.MonthlyValues[index]" min="0" step="500" />
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else if (ActiveFormType == FormContextType.Grants && GrantsDonations != null)
-        {
-            <div class="alert alert-warning py-2 rounded mb-3 text-xs shadow-sm">
-                <i class="bi bi-gift me-1"></i> Updating <strong>Endowment Capital Allotments</strong>.
-            </div>
-
-            <h6 class="text-xs fw-bold text-secondary mb-2 uppercase">Monthly Tranche Distributions</h6>
-            <div style="max-height: 380px; overflow-y: auto; overflow-x: hidden;" class="pe-1 dynamic-input-scroll-pane">
-                @for (int i = 0; i < 12; i++)
-                {
-                    var index = i;
-                    <div class="row align-items-center mb-2 g-2 input-row-hover">
-                        <div class="col-4"><span class="text-xs font-weight-bold text-muted ms-1">Month @(index + 1)</span></div>
-                        <div class="col-8">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text py-0 px-1 font-monospace text-xxs bg-light">M@(index + 1)</span>
-                                <input type="number" class="form-control form-control-sm text-end font-monospace text-xs" @bind="GrantsDonations.MonthlyAllocations[index]" min="0" step="1000" />
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-
-        <div class="d-flex align-items-center gap-2 mt-4 pt-2 border-top">
-            <button type="button" class="btn btn-primary btn-sm flex-fill py-2 text-xs fw-bold shadow-sm" @onclick="HandleWorkflowStateChanged">
-                <i class="bi bi-check-circle me-1"></i> Save Matrix Parameters
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm py-2 text-xs" @onclick="() => OffCanvasControlRef.CloseAsync()">
-                Cancel
-            </button>
-        </div>
-    </div>
-</ZabOffCanvas>

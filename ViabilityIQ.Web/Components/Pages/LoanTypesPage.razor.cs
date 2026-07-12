@@ -51,6 +51,8 @@ namespace ViabilityIQ.Web.Components.Pages
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
+
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()

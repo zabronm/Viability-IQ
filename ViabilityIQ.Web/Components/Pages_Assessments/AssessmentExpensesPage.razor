@@ -4,275 +4,163 @@
 
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
+@using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Expenses" PageTitle="Expenses & Outflow Management" CurrentPage="PageType.Expenses" />
 
-    <div class="row px-0 g-3 mt-1" >
-        @if (blAlert == true)
-        {
-            <div class="my-0">
-                <ViqAlertComponent Severity="AlertSeverity"
-                                   Heading="@AlertHeading"
-                                   Message="@AlertMessage"
-                                   AllowDismiss="true" />
-            </div>
-        }
+    <div class="row px-0 g-3 mt-1">
         <div class="row bg-white g-2 mt-1 p-1 pt-1 mb-3" style="border-radius: 6px;">
+            @if (blAlert == true)
+            {
+                <div class="my-0">
+                    <ViqAlertComponent Severity="AlertSeverity"
+                                       Heading="@AlertHeading"
+                                       Message="@AlertMessage"
+                                       AllowDismiss="true" />
+                </div>
+            }
             <div class="px-0">
                 <div class="row g-2 mt-1 align-items-center p-0 mx-0">
-                    <div class="col-md-7 col-12 d-flex gap-1.5">
-                        <button type="button" class="btn btn-primary text-xs  py-2 px-2 shadow-sm" @onclick="OpenNewExpensePanel">
+                    <div class="col-md-6 col-12 d-flex gap-1.5">
+                        <button type="button" class="btn btn-primary text-xs py-2 px-2 shadow-sm" @onclick="OpenNewExpensePanel">
                             <i class="bi bi-plus-circle me-1"></i>Add Single Expense
                         </button>
                         &nbsp;&nbsp;
-                        <button type="button" class="btn btn-outline-success text-xxs py-1 px-2.5 fw-semibold " @onclick="OpenBulkSetupPanel">
-                            <i class="bi bi-grid-3x3-gap me-1"></i>Bulk Expense Setup
+                        <button type="button" class="btn btn-outline-success text-xs py-2 px-2 shadow-sm" style="border-radius: 8px;" @onclick="OpenBulkSetupPanel">
+                            <i class="bi bi-magic me-1"></i>Bulk Expenses Setup
                         </button>
                     </div>
-                    <div class="col-md-5 col-12 d-flex justify-content-end">
-                        <div class="input-group input-group-sm w-50" style="min-width: 200px;">
-                            <span class="input-group-text bg-white border-end-0 text-muted py-0.5 px-2" style="font-size: 0.7rem;"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control form-control-sm border-start-0 text-xxs shadow-none py-0.5"
-                                   placeholder="Filter records..."
-                                   @bind="SearchQuery" @bind:event="oninput" />
+
+                    <!-- Filter and Search Controls Row Area Grid Alignment -->
+                    <div class="col-md-6 col-12 d-flex gap-2 justify-content-end">
+                        <!-- Expense Classification Filtering Dropdown Menu -->
+                        <select class="form-select form-select-sm text-xs shadow-sm" style="width: 20%;" @bind="SelectedClassificationFilter">
+                            <option value="">All Classifications</option>
+                            @foreach (var enumVal in Enum.GetValues<ExpenseClassification>())
+                            {
+                                <option value="@enumVal">@enumVal.ToString()</option>
+                            }
+                        </select>
+
+                        <!-- Normalized Input Field Sizing -->
+                        <div class="input-group input-group-sm shadow-sm search-input-frame" style="width: 35%;">
+                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search expense profiles..." @bind="SearchQuery" @bind:event="oninput" />
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-12 col-lg-12 col-12">
-                @if (!FilteredExpenses.Any())
-                {
-                    <div class="text-center py-4 border border-dashed rounded bg-light my-2">
-                        <i class="bi bi-wallet2 text-muted fs-2 d-block mb-1"></i>
-                        <span class="text-muted fw-medium text-xxs">No matching expense lines found.</span>
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive shadow-sm border border-secondary-subtle mb-3" style="border-radius: 4px; background-color:#ffffff;">
-                        <table class="table table-sm table-hover text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table" style="font-size: 0.72rem; --bs-table-padding-y: 0.2rem; --bs-table-padding-x: 0.4rem;">
-                            <thead>
-                                <tr class="bg-light header-row text-muted fw-bold border-bottom">
-                                    <th class="ps-2 text-uppercase text-xxs" style="width: 175px;">Expense Line</th>
-                                    <th class="text-start text-uppercase text-xxs" style="width: 140px;">Category</th>
-                                    <th class="text-center text-uppercase text-xxs" style="width: 65px;">Cashbook</th>
-                                    @for (int m = 1; m <= 12; m++)
-                                    {
-                                        <th class="text-end" style="width: 60px;">M@(m)</th>
-                                    }
-                                    <th class="text-end font-weight-bold text-white bg-navy" style="width: 105px; background-color: #1a365d !important;">Total Outflow</th>
-                                    <th class="text-center sticky-action-header" style="width: 35px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var exp in FilteredExpenses)
+
+            <div class="col-xl-12 col-lg-12 col-12 mt-3">
+                <div class="table-responsive shadow-sm border border-secondary-subtle mb-3">
+                    <table class="table table-sm table-hover text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table grid-font-standard">
+                        <thead>
+                            <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
+                                <th class="sticky-col ps-2 text-uppercase text-xxs">Expense Line Item &nbsp;<i class="bi bi-caret-right-fill"></i></th>
+                                <th class="text-start text-xxs text-uppercase">Classification</th>
+                                <th class="text-center text-xxs text-uppercase">Cashbook</th>
+                                @for (int m = 1; m <= 12; m++)
                                 {
-                                    <tr style="line-height: 1.2; @(exp.AffectsCashbookDirectly ? "" : "background-color: #f8fafc !important; opacity: 0.85;")">
-                                        <td class="ps-2 fw-normal text-dark text-truncate" style="max-width: 160px;" title="@exp.ExpenseName">
-                                            @TruncateString(exp.ExpenseName, 20)
-                                            @if (exp.AffectsCashbookDirectly)
-                                            {
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-1 py-0 px-1 text-xxs" style="font-size: 0.6rem; font-weight: normal; border-radius: 3px;">
-                                                    <i class="bi bi-check"></i>
-                                                </span>
-                                            }
-                                        </td>
-                                        <td class="text-start">
-                                            <span class="badge text-xxs px-1.5 py-0.5 fw-normal text-dark border bg-light text-truncate d-inline-block" style="max-width: 135px; border-radius: 3px;" title="@GetClassificationShortLabel(exp.Classification)">
-                                                @TruncateString(GetClassificationShortLabel(exp.Classification), 20)
-                                            </span>
-                                        </td>
-                                        <td class="text-center">
-                                            <input type="checkbox" class="form-check-input cursor-pointer shadow-none align-middle"
-                                                   style="width: 12px; height: 12px; margin-top: 0;"
-                                                   checked="@exp.AffectsCashbookDirectly"
-                                                   @onchange="(e) => ToggleExpenseCashbookState(exp, e.Value)" />
-                                        </td>
-                                        @for (int i = 0; i < 12; i++)
-                                        {
-                                            <td class="text-end font-monospace text-secondary">
-                                                @exp.MonthlyValues[i].ToString("N0")
-                                            </td>
-                                        }
-                                        <td class="text-end font-monospace fw-bold bg-navy-light-summary" style="color: #1a365d; background-color: #f1f5f9;">
-                                            @exp.MonthlyValues.Sum().ToString("N0")
-                                        </td>
-                                        <td class="text-center pe-1">
-                                            <button type="button" class="btn btn-outline-primary btn-xs p-0 px-1 shadow-sm line-action-btn"
-                                                    style="font-size: 0.65rem;" @onclick="() => OpenEditExpensePanel(exp)">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <th class="text-end text-xxs text-uppercase">M@(m)</th>
                                 }
-                            </tbody>
-                            <tfoot>
-                                <tr class="fw-bold bg-light border-top border-2 text-dark" style="border-top-color: #1a365d !important; background-color: #f8fafc !important;">
-                                    <td class="ps-2 text-uppercase text-xxs" colspan="2" style="color: #1a365d;">Total Expenditures</td>
-                                    <td class="text-center text-muted text-xxs">—</td>
-                                    @for (int m = 0; m < 12; m++)
+                                <th class="text-end font-weight-bold text-white text-uppercase text-xxs header-totals-navy">Total Expense</th>
+                                <th class="text-center sticky-action-header text-xxs"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ExpenseDatasetLines != null)
+                            {
+                                @foreach (var expense in FilteredExpenseLines)
+                                {
+                                    var truncatedName = expense.ExpenseName.Length > 20
+                                    ? expense.ExpenseName.Substring(0, 20) + ".."
+                                    : expense.ExpenseName;
+
+                                    <tr class="@(!expense.AffectsCashbookDirectly ? "row-shaded-dark" : "")">
+                                        <td class="sticky-col ps-2 text-dark font-weight-bold text-truncate" title="@expense.ExpenseName">
+                                            @truncatedName@if(expense.AffectsCashbookDirectly){
+                                            <span style="margin-left: 1px;"><i class="bi bi-check text-success font-weight-bold"></i></span>
+                                        }
+                                    </td>
+                                    <td class="text-start"><span class="badge bg-light text-secondary border">@expense.Classification.ToString()</span></td>
+                                    <td class="text-center">
+                                        <input type="checkbox" @bind="expense.AffectsCashbookDirectly" class="form-check-input shadow-none" />
+                                    </td>
+                                    @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end font-monospace" style="color: #1a365d;">
-                                            @CalculateAggregateMonthlyTotal(m).ToString("N0")
+                                        var index = i;
+                                        <td class="text-end font-monospace text-secondary">
+                                            @expense.MonthlyValues[index].ToString("N0")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-white bg-navy" style="background-color: #1a365d !important;">
-                                        @CalculateGlobalGrandTotalExpenses().ToString("N0")
+                                    <td class="text-end font-monospace font-weight-bold bg-navy-light-summary text-navy-brand">
+                                        @expense.MonthlyValues.Sum().ToString("N0")
                                     </td>
-                                    <td></td>
+                                    <td class="text-center bg-light-totals-cell">
+                                        <button type="button" class="btn btn-outline-primary btn-xs p-0 px-1 shadow-sm" @onclick="() => OpenEditExpensePanel(expense)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                }
-            </div>
-        </div>
-        <div class="row bg-white g-2 mt-1 p-1 pt-1" style="border-radius: 6px;">
-            <div class="col-12 p-2" style="background-color: #ffffff;">
-
-                <CashFlowSummaryDetailComponent SalesCategories="SalesCategories"
-                                                ExpenseCategories="ConvertedExpenseCategoriesForSummary"
-                                                SundryIncome="SundryIncome"
-                                                GrantsDonations="GrantsDonations"
-                                                GrandTotalGlobalInflows="GrandTotalGlobalInflows"
-                                                GrandTotalExpenses="CalculateGlobalGrandTotalExpenses()" />
-
-                <div class="row g-3 mt-1 mb-2 pt-3" style="border-top: 2px solid #ffffff;">
-                    <div class="col-xl-4 col-lg-4 col-12">
-                        <AnalysisOfTotalReceiptsGraphComponent ExpenseChartPercentage="GetExpenseChartPercentage()"
-                                                               CosChartPercentage="GetCosChartPercentage()"
-                                                               NetProfitChartPercentage="GetNetProfitChartPercentage()" />
-                    </div>
-
-                    <div class="col-xl-4 col-lg-4 col-12">
-                        <IncomeStatementSummaryComponent GrandTotalSales="GrandTotalSales"
-                                                         AnnualCostOfSales="GetAnnualCostOfSales()"
-                                                         AnnualGrossProfit="GetAnnualGrossProfit()"
-                                                         AnnualSecondarySundry="@(SundryTotalPrincipal + SundryTotalInterestYield)"
-                                                         AnnualGrossIncome="GetAnnualGrossIncome()"
-                                                         AnnualOperatingExpenses="CalculateGlobalGrandTotalExpenses()"
-                                                         AnnualNetProfit="GetAnnualNetProfit()" />
-                    </div>
-
-                    <div class="col-xl-4 col-lg-4 col-12">
-                        <BusinessRatiosMatrixComponent BreakEvenSales="CalculateBreakEvenSales()"
-                                                       MarginOfSafetyPercent="CalculateMarginOfSafetyPercent()"
-                                                       GrossProfitMarginPercent="CalculateGrossProfitMarginPercent()"
-                                                       OperatingLeverage="CalculateOperatingLeverage()" />
-                    </div>
+                            }
+                            <tr class="bg-light-totals font-weight-bold border-top-navy">
+                                <td class="sticky-col ps-2 text-navy-brand text-uppercase text-xxs fw-bold" colspan="3">Aggregated Expense Outflows:</td>
+                                @for (int i = 0; i < 12; i++)
+                                {
+                                    var index = i;
+                                    <td class="text-end font-monospace text-navy-brand font-weight-bold">
+                                        @ExpenseDatasetLines.Sum(e => e.MonthlyValues[index]).ToString("N0")
+                                    </td>
+                                }
+                                <td class="text-end font-monospace text-white font-weight-bold header-totals-navy">
+                                    @ExpenseDatasetLines.Sum(e => e.MonthlyValues.Sum()).ToString("N0")
+                                </td>
+                                <td class="text-center bg-light-totals-cell"></td>
+                            </tr>
+                                                        }
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+
+        <div class="row bg-white g-2 mt-2 p-2 mb-3" style="border-radius: 6px;">
+            <div class="fs-4 my-1">Cash Flow & Business Health Analysis</div>
+            <!-- Cross-Section Financial Analytics Summary Dashboard Engine Panel Section -->
+            @if (AreSummariesReady)
+            {
+                <!-- Tier 1 View: Grid Matrix Table -->
+                <div class="row g-3 px-0 mx-0 fade-staged-panel delay-tier-1">
+                    <div class="col-12 px-0">
+                        <NetProfitSummaryComponent Data="ConsolidatedAssessmentData" />
+                    </div>
+                </div>
+
+                <!-- Tier 2 View: Intermediate Visual Combinations -->
+                <div class="row g-3 px-0 mx-0 mt-2 fade-staged-panel delay-tier-2">
+                    <div class="col-xl-7 col-lg-7 col-12 ps-0">
+                        <NetProfitMonthlyGraphComponent Data="ConsolidatedAssessmentData" />
+                    </div>
+                    <div class="col-xl-5 col-lg-5 col-12 pe-0">
+                        <NetProfitAnnualSummaryComponent Data="ConsolidatedAssessmentData" />
+                    </div>
+                </div>
+
+                <!-- Tier 3 View: Financial KPI Ratios Metric Indexes -->
+                <div class="row g-3 px-0 mx-0 mt-2 fade-staged-panel delay-tier-3">
+                    <div class="col-xl-6 col-lg-6 col-12 ps-0">
+                        <AnalysisOfReceiptsGraphComponent Data="ConsolidatedAssessmentData" />
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-12 pe-0">
+                        <SalesRatiosComponent Data="ConsolidatedAssessmentData" />
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
 
-
-
 <footer class="py-2 bg-light mt-3">
     <BFooter />
 </footer>
-
-<ZabOffCanvas @ref="OffCanvasControlRef" HeaderTitle="@ActivePanelTitle" dWidth="430">
-    <div class="p-3">
-        @if (ActiveWizardMode == WizardMode.BulkSetupStep1)
-        {
-            <div class="alert alert-info py-1.5 rounded mb-2 text-xxs shadow-sm">
-                <i class="bi bi-info-circle-fill me-1"></i> Check standard system baselines to initialize.
-            </div>
-            <div class="mb-3 px-1" style="max-height: 400px; overflow-y: auto;">
-                @foreach (var suggestion in BulkSetupCheckboxList)
-                {
-                    <div class="form-check p-1.5 border-bottom d-flex align-items-center justify-content-between">
-                        <div>
-                            <input class="form-check-input cursor-pointer ms-0 me-2" type="checkbox" id="bulk_@suggestion.Id" @bind="suggestion.IsSelected" />
-                            <label class="form-check-label text-xs text-dark cursor-pointer" for="bulk_@suggestion.Id">
-                                @TruncateString(suggestion.ExpenseName, 35)
-                            </label>
-                        </div>
-                    </div>
-                }
-            </div>
-            <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-                <button type="button" class="btn btn-primary btn-sm flex-fill py-1.5 text-xs fw-bold shadow-sm" @onclick="CommitBulkSelectionFrameworks">
-                    Initialize Selection
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm py-1.5 text-xs" @onclick="CloseCanvasPanel">Cancel</button>
-            </div>
-        }
-        else if (ActiveWizardMode == WizardMode.SingleEntryOrEdit)
-        {
-            <div class="mb-2">
-                <label class="form-label fw-bold text-xxs text-secondary uppercase mb-0.5">Description (Max 20 characters show in table)</label>
-                <input type="text" class="form-control form-control-sm text-xs" maxlength="100" placeholder="e.g. Server hosting fees" @bind="EditingExpenseContext.ExpenseName" />
-            </div>
-
-            <div class="row mb-2 g-2">
-                <div class="col-6">
-                    <label class="form-label fw-bold text-xxs text-secondary uppercase mb-0.5">Category Mappings</label>
-                    <select class="form-select form-select-sm text-xs" @bind="EditingExpenseContext.Classification">
-                        <option value="@ExpenseClassification.Operating">Operating (OPEX)</option>
-                        <option value="@ExpenseClassification.Capex">Capital (CAPEX)</option>
-                        <option value="@ExpenseClassification.LoanInterest">Loan Interest</option>
-                        <option value="@ExpenseClassification.LoanCapital">Loan Capital</option>
-                    </select>
-                </div>
-                <div class="col-6">
-                    <label class="form-label fw-bold text-xxs text-secondary uppercase mb-0.5">Cashbook Target</label>
-                    <div class="form-check form-switch mt-1 ms-1 d-flex align-items-center" style="min-height: auto;">
-                        <input class="form-check-input cursor-pointer shadow-none" type="checkbox" id="cashbook_direct_toggle"
-                               style="width: 1.8em; height: 0.9em; margin-top: 0; cursor: pointer;" @bind="EditingExpenseContext.AffectsCashbookDirectly" />
-                        <label class="form-check-label text-xxs text-muted ms-1 cursor-pointer" for="cashbook_direct_toggle" style="line-height: 1;">Direct Impact</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card border border-primary-subtle bg-light-subtle mb-2 p-2 rounded">
-                <label class="form-label fw-bold text-xxs text-primary uppercase mb-1">
-                    <i class="bi bi-percent me-1"></i>Calculate Outflows as % of Sales Projections
-                </label>
-                <div class="row g-1.5 align-items-center">
-                    <div class="col-5">
-                        <div class="input-group input-group-sm">
-                            <input type="number" class="form-control form-control-sm font-monospace text-xs text-end"
-                                   placeholder="0.0" @bind="SalesPercentageTarget" min="0" max="100" step="0.5" />
-                            <span class="input-group-text bg-white text-muted py-0 px-1 text-xxs">%</span>
-                        </div>
-                    </div>
-                    <div class="col-7">
-                        <button class="btn btn-outline-primary btn-sm w-100 text-xxs py-1 fw-bold bg-white" type="button" @onclick="ComputeAndDistributeSalesPercentageOutflows">
-                            <i class="bi bi-cpu me-1"></i> Run Matrix Distribution
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-light border-0 mb-2 p-1.5 rounded">
-                <label class="form-label fw-bold text-xxs text-secondary uppercase mb-0.5">Quick Manual Distribution Engine</label>
-                <div class="input-group input-group-sm">
-                    <input type="number" class="form-control font-monospace text-xs" placeholder="Annualized total value" @bind="BulkAnnualValueTarget" min="0" />
-                    <button class="btn btn-navy text-white text-xxs px-2 fw-bold" type="button" @onclick="DistributeAnnualExpensesEvenly">Apply Split</button>
-                </div>
-            </div>
-
-            <h6 class="text-xxs fw-bold text-secondary mb-1 uppercase">12-Month Projection Horizon Values</h6>
-            <div class="pe-1 border p-1.5 rounded bg-light-subtle mb-3">
-                @for (int i = 0; i < 12; i++)
-                {
-                    var index = i;
-                    <div class="row align-items-center mb-1 g-2 mx-0 input-row-hover rounded py-0.5">
-                        <div class="col-4"><span class="text-xxs fw-semibold text-muted">Month @(index + 1)</span></div>
-                        <div class="col-8">
-                            <input type="number" class="form-control form-control-sm text-end font-monospace text-xs py-0.5 text-dark fw-bold" @bind="EditingExpenseContext.MonthlyValues[index]" min="0" />
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-                <button type="button" class="btn btn-primary btn-sm flex-fill py-1.5 text-xs fw-bold shadow-sm" @onclick="SaveExpenseStateContext">Save Changes</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm py-1.5 text-xs" @onclick="CloseCanvasPanel">Cancel</button>
-            </div>
-        }
-    </div>
-</ZabOffCanvas>

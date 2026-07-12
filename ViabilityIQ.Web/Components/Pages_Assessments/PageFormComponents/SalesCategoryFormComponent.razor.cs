@@ -8,11 +8,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
     public partial class SalesCategoryFormComponent 
     {
         [Parameter] public long AssessmentId { get; set; }
-
-        /// <summary>
-        /// Pass a non-zero identifier parameter context to place this component into EDIT mode.
-        /// Keep this parameter omitted or bound to 0 to automatically drop into CREATE mode.
-        /// </summary>
         [Parameter] public long AssessmentSalesCategoryId { get; set; }
         [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
 

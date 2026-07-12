@@ -1,0 +1,152 @@
+﻿@using ViabilityIQ.Infrastructure.Repositories
+
+
+@if (loadingStateActive)
+{
+    <FormLoadingComponent />
+}
+else
+{
+    <EditForm Model="@openingBalancesModel" OnValidSubmit="UpdateOpeningBalances">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+
+        <div class="viq-elevated-card h-100">
+            <div class="viq-card-header-dark-ice">
+                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.85rem;">Opening Balances</span>
+                <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
+                    <i class="bi bi-save me-1"></i> Update Opening Balances
+                </button>
+            </div>
+            <div class="p-3">
+                <div class="d-flex flex-column gap-1">
+                    <div class="row align-items-center g-1">
+                        <div class="col-6">
+                            <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Opening Balances(Stock):</label>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light">R</span>
+                                <input type="number" step="0.01" class="form-control text-end" @bind-value="openingBalancesModel.OpeningBalance_Assets" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-center g-1">
+                        <div class="col-6">
+                            <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Opening Balance (Bank):</label>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light">R</span>
+                                <input type="number" step="0.01" class="form-control text-end" @bind-value="openingBalancesModel.OpeningBalance_Bank" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-center g-1">
+                        <div class="col-6">
+                            <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Interest On Overdraft:</label>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-sm">
+                                <input type="number" step="0.01" class="form-control text-end" @bind-value="openingBalancesModel.InterestOnOverDraft" />
+                                <span class="input-group-text bg-light">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-center g-1">
+                        <div class="col-6">
+                            <label class="form-label text-muted mb-0" style="font-size: 0.78rem;">Depreciation Projected Amount:</label>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light">R</span>
+                                <input type="number" step="0.01" class="form-control text-end" @bind-value="openingBalancesModel.DepreciationProjectedAmount" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+
+    [Inject] private MasterDataService? ViqCrudService { get; set; }
+    [Parameter] public OpeningBalancesModel openingBalancesModel { get; set; } = new();
+    [Parameter] public EventCallback<SaveResult> OnUpdate { get; set; }
+
+    private SaveResult? result = new();
+    private bool IsSubmitting = false;
+    string str_sql = string.Empty;
+    bool loadingStateActive = false;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Start with the spinner active
+        loadingStateActive = true;       
+        await Task.Delay(150);
+
+        loadingStateActive = false;
+        StateHasChanged();
+    }
+
+
+    //===================================== UPDATE OPENING BALANCES ================
+    async Task UpdateOpeningBalances()
+    {
+        str_sql = @"UPDATE tblAssessments SET OpeningBalance_Assets = @OpeningBalance_Assets,
+                        OpeningBalance_Bank = @OpeningBalance_Bank, InterestOnOverDraft = @InterestOnOverDraft,
+                        DepreciationProjectedAmount = @DepreciationProjectedAmount
+                        WHERE ([AssessmentId]=@AssessmentId)";
+
+        var _parameters = new
+        {
+            openingBalancesModel!.OpeningBalance_Assets,
+            openingBalancesModel.OpeningBalance_Bank,
+            openingBalancesModel.InterestOnOverDraft,
+            openingBalancesModel.DepreciationProjectedAmount,
+            openingBalancesModel.AssessmentId
+        };
+
+        try
+        {
+            var _recs = await ViqCrudService!.ExecuteCommandAsync(str_sql, _parameters);
+            if (_recs > 0)
+            {
+                result = new()
+                {
+                    Message = "Opening balances updated successfully",
+                    Success = true,
+                };
+            }
+            else
+            {
+                result = new()
+                {
+                    Message = "Opening Balances not updated, please retry or contact support.",
+                    Success = false,
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            result = new()
+            {
+                Message = $"Error encountered:{ex.Message}",
+                Success = false,
+            };
+        }
+        finally
+        {
+            if (OnUpdate.HasDelegate)
+            {
+                await OnUpdate.InvokeAsync(result);
+            }
+        }
+
+    }
+
+
+}

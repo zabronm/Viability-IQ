@@ -1,34 +1,37 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
-using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
-using static ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.SalesCategoryFormComponent;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
-    public partial class AssessmentStockPage
+    public partial class AssessmentStockPage : ComponentBase
     {
+        [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
+        [Inject] ISessionService? sessionService { get; set; }
+        [Inject] ToastService? _Toast { get; set; }
+
         [Parameter] public long AssessmentId { get; set; }
-        [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
-
-        private ZabOffCanvas OffCanvasControlRef;
-        private string ActivePanelTitle { get; set; } = string.Empty;
-        private FormContextType ActiveFormType { get; set; } = FormContextType.Stock;
+       
+        private string ActivePanelTitle { get; set; } = string.Empty;        
         private StockManagementViewModel StockInventoryContext { get; set; } = new();
-        private decimal BulkStockValueTarget { get; set; }
 
+        // ALERT NOTIFICATION VARIABLES
         private bool blAlert { get; set; } = true;
-        private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
+        private ViqAlertComponent.AlertSeverity AlertSeverity { get; set; } = ViqAlertComponent.AlertSeverity.Warning;
         private string AlertHeading { get; set; } = "Inventory Notice:";
-        private string AlertMessage { get; set; } = "Verify that your closing stock values align accurately with your cost of sales allocations for this assessment phase.";
+        private string AlertMessage { get; set; } = "Verify that your closing stock values align accurately with your cost of sales allocations.";
 
-        // Mock/Assumed Context Projections to cross-plot trends elegantly
         private readonly decimal[] MonthlySalesBaselineProjections = new decimal[12]
             { 45000, 48000, 52000, 51000, 58000, 62000, 60000, 65000, 68000, 71000, 74000, 80000 };
 
-        // Basic Operational Evaluation Properties
+        // Basic Evaluation Calculations
         private decimal OpeningStockValue => StockInventoryContext?.MonthlyBalances?.FirstOrDefault() ?? 0;
         private decimal ClosingStockValue => StockInventoryContext?.MonthlyBalances?.LastOrDefault() ?? 0;
         private decimal AverageStockValue => StockInventoryContext?.MonthlyBalances?.Average() ?? 0;
@@ -38,7 +41,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal TurnoverTimes => AverageStockValue > 0 ? Math.Round(CostOfSalesValue / AverageStockValue, 2) : 0;
         private decimal StockTurnoverDays => TurnoverTimes > 0 ? Math.Round(365m / TurnoverTimes, 0) : 0;
 
-        // Working Capital Operations Parameters
         private decimal DebtorDaysBaseline => 42m;
         private decimal CreditorDaysBaseline => 30m;
         private decimal CashCycleDays => Math.Round(StockTurnoverDays + DebtorDaysBaseline - CreditorDaysBaseline, 0);
@@ -58,7 +60,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            // Always initialize or update charts downstream following DOM painting cycles
             await TriggerAnalyticsChartRenderCyclesAsync();
         }
 
@@ -79,52 +80,100 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 var stockArray = StockInventoryContext.MonthlyBalances.Select(m => (double)m).ToArray();
                 var salesArray = MonthlySalesBaselineProjections.Select(s => (double)s).ToArray();
 
-                // Invoke JavaScript Interop Handlers to initialize ChartJs Context
                 await JSRuntime.InvokeVoidAsync("renderViqSalesStockTrends", "viqSalesStockTrendChart", salesArray, stockArray);
                 await JSRuntime.InvokeVoidAsync("renderViqCashCycleBars", "viqCashCycleHorizontalChart", (double)StockTurnoverDays, (double)DebtorDaysBaseline, (double)CreditorDaysBaseline, (double)CashCycleDays);
             }
-            catch { /* Intercept pre-rendering abstractions safely */ }
+            catch { /* Catch rendering abstraction skips safely */ }
         }
 
-        private void OpenStockDataEntryPanel()
-        {
-            ActiveFormType = FormContextType.Stock;
-            ActivePanelTitle = "Modify Stock Inventory Allocations";
-            BulkStockValueTarget = 0;
-            OffCanvasControlRef.OpenAsync();
-        }
 
-        private void DistributeStockValuesEvenly()
+        //================ OPEN THE LOAN REPAYMENTS FORM  ==========================
+        private async Task OpenStockDataEntryPanel(long _mode)
         {
-            if (BulkStockValueTarget <= 0) return;
-            for (int i = 0; i < 12; i++)
+            try
             {
-                StockInventoryContext.MonthlyBalances[i] = Math.Round(BulkStockValueTarget, 0);
+                ActivePanelTitle = _mode == 0 ?
+                    "Add Stock Balances" : "Edit Stock Balances";
+
+                await zabCanvasService!.ShowAsync(
+                    new CanvasRequest
+                    {
+                        Title = ActivePanelTitle,
+                        Width = 350,
+                        ComponentType = typeof(AssessmentStockFormComponent),
+                        Parameters = new
+                        {
+                            StockContext = StockInventoryContext
+                        },
+
+                        ResultCallback = HandleSaveStockChangesAsync                 //Handle results from component
+                    });
+
             }
-            BulkStockValueTarget = 0;
-            EvaluateStockMetricsAndTriggerAlerts();
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+
+            }
         }
+
+
+       
+
+        private async Task HandleSaveStockChangesAsync(SaveResult result)
+        {
+            if (result.Success)
+            {
+                // Refresh the loan profiles dataset or perform any necessary actions
+                EvaluateStockMetricsAndTriggerAlerts();
+                StateHasChanged();                
+
+                _Toast.ShowSuccess(result.Message, sessionService!.AppTitle);
+
+                await Task.CompletedTask;
+            }
+
+            if (!result.Success)
+            {
+                // Refresh the loan profiles dataset or perform any necessary actions
+                _Toast.ShowError(result.Message, sessionService!.AppTitle);
+                await Task.CompletedTask;
+            }
+
+            if (!result.Cancelled)
+            {
+                // Refresh the loan profiles dataset or perform any necessary actions
+                _Toast.ShowInfo("You aborted the operation", sessionService!.AppTitle);
+                await Task.CompletedTask;
+            }
+
+        }
+
+
 
         private void EvaluateStockMetricsAndTriggerAlerts()
         {
             if (StockTurnoverDays > 90)
             {
                 blAlert = true;
-                AlertSeverity = AlertSeverity.Danger;
+                AlertSeverity = ViqAlertComponent.AlertSeverity.Danger;
                 AlertHeading = "Critical Turnover Slowdown:";
                 AlertMessage = $"Inventory is holding for {StockTurnoverDays} days! This exceeds standard cash flow risk thresholds.";
             }
             else if (StockTurnoverDays <= 30)
             {
                 blAlert = true;
-                AlertSeverity = AlertSeverity.Success;
+                AlertSeverity = ViqAlertComponent.AlertSeverity.Success;
                 AlertHeading = "Optimized Turnover Efficiency:";
                 AlertMessage = "Excellent efficiency setup! Holding days indicate rapid product movement cycles.";
             }
             else
             {
                 blAlert = true;
-                AlertSeverity = AlertSeverity.Info;
+                AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
                 AlertHeading = "Information Ledger:";
                 AlertMessage = "Inventory configurations are active. Adjust parameters using the edit action button framework at any time.";
             }
@@ -137,27 +186,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             <= 90 => "bg-warning text-dark text-xxs px-1.5 py-0.5 rounded-pill",
             _ => "bg-danger text-white text-xxs px-1.5 py-0.5 rounded-pill"
         };
+    }
 
-        private void HandleWorkflowStateChanged()
-        {
-            EvaluateStockMetricsAndTriggerAlerts();
-            OffCanvasControlRef.CloseAsync();
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            // Perform clean memory/disposal allocation tracking hooks if required
-            await Task.CompletedTask;
-        }
-
-        public enum FormContextType { Sales, Sundry, Grants, Expenses, Stock }
-
-        public class StockManagementViewModel
-        {
-            public string StockRowLabel { get; set; } = "Monthly inventory";
-            public decimal[] MonthlyBalances { get; set; } = new decimal[12];
-        }
-
-
+    public class StockManagementViewModel
+    {
+        public string StockRowLabel { get; set; } = "Monthly inventory";
+        public decimal[] MonthlyBalances { get; set; } = new decimal[12];
     }
 }

@@ -1,0 +1,246 @@
+﻿@using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents.WorkingCapital
+
+<div class="wcm-module">
+
+    <div class="wcm-module-header @HeaderCss">
+        <div>
+            <i class="bi @Module.Icon me-2"></i>
+            @Module.Title
+        </div>
+
+        <div>
+            Working Capital Distribution
+        </div>
+    </div>
+
+    <div class="wcm-module-body">
+
+        <div class="row">
+
+            <div class="col-lg-4">
+
+                <div class="wcm-card">
+
+                    <div class="wcm-card-header">
+                        <i class="bi bi-sliders2 me-2"></i>
+                        Collection / Payment Profile
+                        <button class="btn btn-sm btn-outline-secondary float-end"
+                                @onclick="ResetProfile">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Reset
+                        </button>
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-6">
+                            <div class="wcm-profile-tile">
+                                <div class="tile-title">0-30 Days</div>
+                                <InputNumber class="@ProfileInputCss"
+                                             @bind-Value="Module.Profile.Days0To30"
+                                             @bind-Value:after="Recalculate"/>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="wcm-profile-tile">
+                                <div class="tile-title">30-60 Days</div>
+                                <InputNumber class="@ProfileInputCss"
+                                             @bind-Value="Module.Profile.Days30To60"
+                                             @bind-Value:after="Recalculate"/>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="wcm-profile-tile">
+                                <div class="tile-title">60-90 Days</div>
+                                <InputNumber class="@ProfileInputCss"
+                                             @bind-Value="Module.Profile.Days60To90"
+                                             @bind-Value:after="Recalculate"/>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="wcm-profile-tile">
+                                <div class="tile-title">90-120 Days</div>
+                                <InputNumber class="@ProfileInputCss"
+                                             @bind-Value="Module.Profile.Days90To120"
+                                             @bind-Value:after="Recalculate"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-3">
+
+                        <div class="wcm-profile-total">
+
+                            <span>Total</span>
+
+                            <span>
+
+                                @Module.Profile.Total %
+
+                                @if (IsProfileValid)
+                                {
+                                    <i class="bi bi-check-circle-fill text-success ms-2"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-exclamation-circle-fill text-danger ms-2"></i>
+                                }
+
+                            </span>
+
+                        </div>
+
+                        @if (!IsProfileValid)
+                        {
+                            <div class="alert alert-warning mt-2 py-2">
+                                Collection profile must total 100%.
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-8">
+
+                <div class="wcm-card">
+
+                    <div class="wcm-card-header">
+                        <i class="bi bi-grid-3x3-gap me-2"></i>
+                        Distribution Matrix
+                    </div>
+
+                    <table class="table table-bordered table-hover table-sm wcm-distribution-table">
+
+                        <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th class="text-end">Invoiced</th>
+
+                            <th class="text-end">0-30</th>
+                            <th class="text-end">30-60</th>
+                            <th class="text-end">60-90</th>
+                            <th class="text-end">90-120</th>
+
+                            <th class="text-end">Total</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+
+                        @foreach (var row in Module.Distribution)
+                        {
+                            <tr>
+
+                                <td class="wcm-month-column">@row.Month</td>
+
+                                <td class="text-end wcm-invoiced-column">
+                                    @row.Invoiced.ToString("N0")
+                                </td>
+
+                                @foreach(var value in row.Values)
+                                {
+                                    <td class="text-end">
+                                        @value.ToString("N0")
+                                    </td>
+                                }
+
+                                <td class="text-end fw-bold wcm-row-total">
+                                    @row.Total.ToString("N0")
+                                </td>
+
+                            </tr>
+                        }
+
+                        <tr class="wcm-grand-total">
+
+                            <td>TOTAL</td>
+
+                            <td class="text-end">
+                                @Module.TotalInvoiced.ToString("N0")
+                            </td>
+
+                            @foreach(var total in Module.DistributionTotals)
+                            {
+                                <td class="text-end">
+                                    @total.ToString("N0")
+                                </td>
+                            }
+
+                            <td class="text-end">
+                                @Module.TotalDistributed.ToString("N0")
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row mt-4">
+
+            <div class="col-md-4">
+
+                <div class="wcm-kpi-card">
+
+                    <div class="wcm-kpi-title">
+                        Outstanding
+                    </div>
+
+                    <div class="wcm-kpi-value">
+                        @Module.Summary.Outstanding.ToString("N0")
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="wcm-kpi-card">
+
+                    <div class="wcm-kpi-title">
+                        Days
+                    </div>
+
+                    <div class="wcm-kpi-value">
+                        @Module.Summary.Days
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="wcm-kpi-card">
+
+                    <div class="wcm-kpi-title">
+                        % Sales / Purchases
+                    </div>
+
+                    <div class="wcm-kpi-value">
+                        @Module.Summary.Percentage %
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

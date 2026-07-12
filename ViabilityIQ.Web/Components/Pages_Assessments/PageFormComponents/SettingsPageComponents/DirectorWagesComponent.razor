@@ -1,0 +1,134 @@
+﻿@using ViabilityIQ.Infrastructure.Repositories
+<EditForm Model="@directorWagesModel" OnValidSubmit="UpdateDirectorWages">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
+    <div class="viq-elevated-card h-100">
+
+        @* <div class="viq-elevated-card"> *@
+        <div class="viq-card-header-dark-ice">
+            <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Director Wages</span>
+            <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
+                <i class="bi bi-save me-1"></i> Update Director Wages
+            </button>
+        </div>
+
+        <div class="d-flex flex-column gap-3 p-3">
+
+            <!-- 1. Number of Directors -->
+            <div class="row align-items-center">
+                <div class="col-md-6 col-12">
+                    <label class="form-label-custom text-muted mb-md-0 mb-1">Number of Directors</label>
+                </div>
+                <div class="col-md-5 col-12">
+                    <input type="number" class="form-control form-control-sm text-end w-100" min="1" max="100" @bind-value="directorWagesModel.NumberOfDirectors" @bind-value:event="oninput" />
+                </div>
+            </div>
+
+            <!-- 2. Monthly Wage / Director (R) -->
+            <div class="row align-items-center">
+                <div class="col-md-6 col-12">
+                    <label class="form-label-custom text-muted mb-md-0 mb-1">Monthly Wage / Director (R)</label>
+                </div>
+                <div class="col-md-5 col-12">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light">R</span>
+                        <input type="number" step="0.01" class="form-control text-end" @bind-value="directorWagesModel.MonthlyDirectorWagesAmount" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Combined Monthly Impact -->
+            <div class="row align-items-center">
+                <div class="col-md-6 col-12">
+                    <label class="form-label-custom text-muted mb-md-0 mb-1 fw-semibold text-dark">Combined Monthly Impact</label>
+                </div>
+                <div class="col-md-5 col-12">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light">R</span>
+                        <input type="text" class="form-control text-end fw-semibold bg-light" value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Inject] private MasterDataService? ViqCrudService { get; set; }
+    [Parameter] public DirectorWagesModel directorWagesModel { get; set; } = new();
+    [Parameter] public EventCallback<SaveResult> OnUpdate { get; set; }
+
+    private SaveResult? result = new();
+    private bool IsSubmitting = false;
+    string str_sql = string.Empty;
+    bool loadingStateActive = false;
+
+    private decimal TotalCalculatedDirectorWages => (directorWagesModel?.NumberOfDirectors ?? 0) * (directorWagesModel?.MonthlyDirectorWagesAmount ?? 0m);
+   
+    protected override async Task OnParametersSetAsync()
+    {
+        // Start with the spinner active
+        loadingStateActive = true;
+        await Task.Delay(150);
+
+        loadingStateActive = false;
+        StateHasChanged();
+    }
+
+
+    //===================================== DIRECTOR WAGES ================
+    async Task UpdateDirectorWages()
+    {
+
+        str_sql = @"UPDATE tblAssessments SET MonthlyDirectorWagesAmountTotal = @MonthlyDirectorWagesAmountTotal,
+                        NumberOfDirectors = @NumberOfDirectors,
+                        MonthlyDirectorWagesAmount = @MonthlyDirectorWagesAmount WHERE AssessmentId = @AssessmentId";
+
+        var _parameters = new
+        {
+            directorWagesModel!.MonthlyDirectorWagesAmountTotal,
+            directorWagesModel.MonthlyDirectorWagesAmount,
+            directorWagesModel.NumberOfDirectors,
+            directorWagesModel.AssessmentId
+        };
+
+        try
+        {
+            var _recs = await ViqCrudService!.ExecuteCommandAsync(str_sql, _parameters);
+            if (_recs > 0)
+            {
+                result = new()
+                {
+                    Message = "Director wages updated successfully",
+                    Success = true,
+                };
+            }
+            else
+            {
+                result = new()
+                {
+                    Message = "Director wages not updated, please retry or contact support.",
+                    Success = false,
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            result = new()
+            {
+                Message = $"Error encountered:{ex.Message}",
+                Success = false,
+            };
+        }
+        finally
+        {
+            if (OnUpdate.HasDelegate)
+            {
+                await OnUpdate.InvokeAsync(result);
+            }
+        }
+    }
+
+}

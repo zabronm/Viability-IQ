@@ -11,7 +11,7 @@ namespace ViabilityIQ.Application.Dtos
         public long AssessmentLoanId { get; set; }
         public long AssessmentId { get; set; }
         public DateTime LoanDate { get; set; }
-        public string? LonaType { get; set; }
+        public string? LoanTypeName { get; set; }
         public string? BankName { get; set; }    
         public decimal LoanAmount { get; set; }
         public decimal LoanBalanceAtAssessmentDate { get; set; }

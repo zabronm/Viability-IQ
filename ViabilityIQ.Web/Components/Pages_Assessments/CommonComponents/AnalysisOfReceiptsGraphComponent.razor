@@ -1,0 +1,54 @@
+﻿
+
+<div class="card h-100 shadow-sm border border-secondary-subtle">
+    <div class="card-header bg-light py-2 px-3 border-bottom d-flex align-items-center">
+        <span class="fw-bold text-xs text-navy-brand text-uppercase"><i class="bi bi-graph-up-arrow me-1.5 text-primary"></i>Analysis of Receipts Allocation %</span>
+    </div>
+    <div class="card-body p-3 d-flex flex-column justify-content-center">
+
+        <div class="mb-3 text-center">
+            <span class="text-xxs text-muted text-uppercase fw-semibold">Total Revenue Outflow Distributions (Normalized to 100%)</span>
+        </div>
+
+        <!-- Stacked Horizontal Bar Container Frame -->
+        <div class="progress rounded-sm shadow-sm border border-light-subtle mb-4" style="height: 42px;">
+            @if (TotalPool > 0)
+            {
+                <div class="progress-bar bg-primary-gradient position-relative d-flex align-items-center justify-content-center"
+                     style="width: @CosPct.ToString("F1")%; background-color: #368BC1;" title="Cost of Sales: @CosPct.ToString("F1")%">
+                    <span class="font-monospace text-white text-xxs fw-bold px-1">COS: @CosPct.ToString("F0")%</span>
+                </div>
+                <div class="progress-bar bg-navy-brand position-relative d-flex align-items-center justify-content-center"
+                     style="width: @ExpPct.ToString("F1")%; background-color: #1a365d;" title="Expenses: @ExpPct.ToString("F1")%">
+                    <span class="font-monospace text-white text-xxs fw-bold px-1">EXP: @ExpPct.ToString("F0")%</span>
+                </div>
+                <div class="progress-bar bg-success position-relative d-flex align-items-center justify-content-center"
+                     style="width: @ProfitPct.ToString("F1")%; background-color: #2e7d32;" title="Net Profit: @ProfitPct.ToString("F1")%">
+                    <span class="font-monospace text-white text-xxs fw-bold px-1">NET: @ProfitPct.ToString("F0")%</span>
+                </div>
+            }
+            else
+            {
+                <div class="w-100 bg-light text-center text-muted small py-2">No revenue performance metrics found.</div>
+            }
+        </div>
+
+        <!-- Legend Map Infrastructure Grid -->
+        <div class="row g-2 text-center border-top pt-2">
+            <div class="col-4 border-end">
+                <div class="text-xxs text-muted uppercase font-weight-bold mb-0.5"><i class="bi bi-square-fill me-1" style="color: #368BC1;"></i> Cost of Sales</div>
+                <span class="font-monospace text-xs text-dark fw-bold">R @TotalCos.ToString("N0").Replace(",", " ")</span>
+            </div>
+            <div class="col-4 border-end">
+                <div class="text-xxs text-muted uppercase font-weight-bold mb-0.5"><i class="bi bi-square-fill me-1" style="color: #1a365d;"></i> Expenses</div>
+                <span class="font-monospace text-xs text-dark fw-bold">R @TotalExp.ToString("N0").Replace(",", " ")</span>
+            </div>
+            <div class="col-4">
+                <div class="text-xxs text-muted uppercase font-weight-bold mb-0.5"><i class="bi bi-square-fill me-1" style="color: #2e7d32;"></i> Net Profit</div>
+                <span class="font-monospace text-xs text-success fw-bold">R @TotalProfit.ToString("N0").Replace(",", " ")</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+

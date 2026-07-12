@@ -44,6 +44,22 @@
         border-left: 1px solid #cbdde0 !important;
     }
 
+/* 4) Standard Table Fonts Override */
+.grid-font-standard th,
+.grid-font-standard td {
+    font-size: 0.75rem !important;
+}
+
+.grid-font-standard .text-xxs {
+    font-size: 0.68rem !important;
+}
+
+/* 4) Navy Background and White Text on Table Header and Total Row intersections */
+.header-totals-navy {
+    background-color: #0B192C !important;
+    color: #ffffff !important;
+}
+
 .line-action-btn {
     width: 28px;
     height: 28px;
@@ -60,7 +76,6 @@
     font-size: 0.58rem !important;
     padding: 1px 3px !important;
     line-height: 1;
-    font-weight: 800;
     letter-spacing: 0.3px;
 }
 
@@ -105,7 +120,7 @@
     background-color: #f8fafc !important;
 }
 
-/* (2) Clean Minimalist Text Identity Override */
+/* Clean Minimalist Text Identity Override */
 .text-marble-light {
     color: #1a365d !important;
 }
@@ -171,5 +186,60 @@
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+
+/* Decorative Badge Adjustments for the Unified Income Type Display Column */
+.bg-soft-blue {
+    background-color: rgba(54, 139, 193, 0.12) !important;
+    color: #1a365d !important;
+    border: 1px solid rgba(54, 139, 193, 0.2);
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+.w-35 {
+    width: 35% !important;
+}
+
+.w-40 {
+    width: 40% !important;
+}
+
+/* Form Scroll Container Matrix Context Tweaks */
+.sales-input-pane::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sales-input-pane::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+
+.fade-staged-panel {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: cubicBezierPanelArrival 0.55s cubic-bezier(0.215, 0.610, 0.355, 1) forwards;
+}
+
+.delay-tier-1 {
+    animation-delay: 0.15s;
+}
+
+.delay-tier-2 {
+    animation-delay: 0.30s;
+}
+
+.delay-tier-3 {
+    animation-delay: 0.45s;
+}
+
+@keyframes cubicBezierPanelArrival {
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

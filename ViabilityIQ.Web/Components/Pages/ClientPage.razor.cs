@@ -40,8 +40,7 @@ namespace ViabilityIQ.Web.Components.Pages
             // ALIGNED: Corrected property mappings for column expressions
             tableColumns = new List<ZabDataTableAdvanced<ClientDto>.ColumnDefinition<ClientDto>>
             {
-                new() { Title = "Client Name", Value = x => x.ClientName },
-                new() { Title = "Type", Value = x => x.ClientType ?? "" },
+                new() { Title = "Client Name", Value = x => x.Client },                
                 new() { Title = "Gender", Value = x => x.Gender ?? "" },
                 new() { Title = "Class", Value = x => x.Race ?? "" },
                 new() { Title = "Province", Value = x => x.ProvinceName ?? "" }, // Maps clean description or tracking ID
@@ -91,7 +90,7 @@ namespace ViabilityIQ.Web.Components.Pages
             var targetClient = new Client
             {
                 ClientId = targetClientDto.ClientId,
-                ClientName = targetClientDto.ClientName
+                ClientName = targetClientDto.Client
             };
 
             var success = await clientGenRepository!.DeleteAsync(targetClient);
@@ -132,7 +131,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
                 var PrintDataSet = targetedDataset.Select(item => new clientListPrintDto
                 {
-                    ClientName = item.ClientName,
+                    ClientName = item.Client,
                     Gender = item.Gender,
                     Race = item.Race,
                     Province = item.ProvinceName,

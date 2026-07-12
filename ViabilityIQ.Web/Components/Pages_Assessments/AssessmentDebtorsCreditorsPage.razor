@@ -1,23 +1,128 @@
-﻿
-@page "/assessment/debtors-creditors/"
-
+﻿@page "/assessment/debtors-creditors/"
 @layout MainLayout_Assessment
 
-@inherits Microsoft.AspNetCore.Components.ComponentBase
-@using ViabilityIQ.Web.Components.CommonComponents
-@using ViabilityIQ.Web.Components.Layout
-
-<div class="p-0 position-relative dashboard-workspace container-fluid">
+<div class="debtors-creditors-container p-0">
     <PageHeading_Assessment _pageTitle="Debtors/Creditors" PageTitle="Debtors/Creditors" CurrentPage="PageType.Creditors" />
 
-    <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">    
-        <div class="col-xl-12 col-lg-12 col-12">
-            <!-- place Debtors/Creditors components here-->
-            
-        </div>        
-    </div>
-</div>
+    <div class="row bg-white g-3 mt-1 mb-3 py-2 px-2" style="border-radius: 6px;">
+        @if (blAlert)
+        {
+            <div class="my-0">
+                <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+            </div>
+        }    
+        <!-- Configuration Profile (Col-2) -->
+        <div class="col-lg-2">
+            <div class="card p-2 shadow border-0 h-100" style="border-radius: 10px;">
+                <h6 class="text-uppercase fw-bold text-secondary mb-2" style="font-size: 0.6rem;">Collection Profile (%)</h6>
+                @foreach (var range in new[] { "0-30", "30-60", "60-90", "90-120", "120+" })
+                {
+                    <div class="profile-input-group mb-1">
+                        <label>Debtors @range Days</label>
+                        <input type="number" class="form-control form-control-sm"
+                               value="@GetProfileValue(range)"
+                               @oninput="(e) => UpdateProfile(range, e)" />
+                    </div>
+                }
+            </div>
+        </div>
 
-    <footer class="py-2 bg-light mt-3">
-        <BFooter />
-    </footer>
+        <!-- Matrix Table (Col-10) -->
+        <div class="col-lg-10">
+            <div class="card p-2 shadow border-0 h-100" style="border-radius: 10px;">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th class="header-yellow">Invoiced</th>
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <th>M @i</th>
+                            }
+                            <th class="total-col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in DebtorsRows)
+                        {
+                            <tr>
+                                <td class="text-start fw-bold">@row.SourceMonth</td>
+                                <td class="header-yellow">@row.InvoicedAmount.ToString("N0")</td>
+
+                                @* Render exactly 12 columns *@
+                                @for (int i = 0; i < 12; i++)
+                                {
+                                    var val = (i < row.MonthlyAllocations.Count) ? row.MonthlyAllocations[i] : 0;
+                                    <td class="@(val > 0 ? "cell-data" : "cell-empty")">
+                                        @(val > 0 ? val.ToString("N0") : "-")
+                                    </td>
+                                }
+
+                                <td class="total-col">@row.RowTotal.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Dashboard Row -->
+    <div class="row bg-white g-3 mt-1 mb-3 py-2 px-2" style="border-radius: 6px;">  
+        <div class="fs-5 my-1">Debtors Analytics</div>
+        <!-- Card 1: Exploded Pie Chart -->
+        <div class="col-lg-4">
+            <div class="card p-3 shadow-sm border-0" style="border-radius: 8px;">
+                <h6 class="text-uppercase fw-bold text-secondary mb-3" style="font-size: 0.75rem;">
+                    <i class="bi bi-pie-chart-fill me-2"></i>Debtors Aging Distribution
+                </h6>
+                <canvas id="debtorsChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Card 2: Summary Cash Flow -->
+        <div class="col-lg-4">
+            <div class="card p-3 shadow-sm border-0" style="border-radius: 8px;">
+                <h6 class="text-uppercase fw-bold text-secondary mb-3" style="font-size: 0.75rem;">
+                    <i class="bi bi-pie-chart-fill me-2"></i>Cash Flow Summary
+                </h6>
+                <p class="text-muted small">Coming soon...</p>
+            </div>
+        </div>
+
+        <!-- Card 3: KPI Indicators -->
+        <div class="col-lg-4">
+            <div class="card p-3 shadow-sm border-0" style="border-radius: 8px;">
+                <h6 class="text-uppercase fw-bold text-secondary mb-3" style="font-size: 0.75rem;">
+                    <i class="bi bi-pie-chart-fill me-2"></i>Key Performance Indicators
+                </h6>
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><i class="bi bi-wallet2 me-2 text-primary"></i>&nbsp;Debtors Balance</td>
+                            <td class="text-end fw-bold">@DebtorsBalance.ToString("C0")</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-calendar-check me-2 text-primary"></i>&nbsp;Debtor Days</td>
+                            <td class="text-end fw-bold">@DebtorDays</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-graph-up-arrow me-2 text-primary"></i>&nbsp;Collection Efficiency</td>
+                            <td class="text-end fw-bold">@CollectionEfficiency%</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-percent me-2 text-primary"></i>&nbsp;% Of Sales</td>
+                            <td class="text-end fw-bold">100%</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-exclamation-triangle me-2 text-danger"></i>&nbsp;High Risk (>90)</td>
+                            <td class="text-end text-danger fw-bold">@HighRiskDebtors.ToString("C0")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,17 +1,17 @@
 ﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments
 @using Microsoft.AspNetCore.Components.Forms
 
-<div class="p-3 bg-white h-100">  
+<div class="p-2 bg-white h-100">  
         <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync">
 
-            <div class="mb-3">
-                <label class="form-label text-xxs text-muted fw-bold mb-1">Loan Type Designation</label>
+            <div class="mb-2 mt-0">
+                <label class="form-label text-xxs text-muted fw-bold mb-1">Loan Description</label>
                 <input type="text" class="form-control bg-light text-xs text-dark fw-semibold" value="@ActiveRepaymentModel.LoanTypeName" disabled />
             </div>
 
             <div class="row g-2 mb-3">
                 <div class="col-6">
-                    <label class="form-label text-xxs text-muted fw-bold mb-1">Start Horizon Month</label>
+                    <label class="form-label text-xxs text-muted fw-bold mb-1">First Repayment Month</label>
                     <select class="form-select form-select-sm text-xs" @bind="ActiveRepaymentModel.StartMonth">
                         @for (int m = 1; m <= 12; m++)
                         {
@@ -20,7 +20,7 @@
                     </select>
                 </div>
                 <div class="col-6 d-flex align-items-end">
-                    <div class="form-check form-switch mb-2">
+                    <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="sendToCashbookChild" @bind="ActiveRepaymentModel.SendToCashbook" />
                         <label class="form-check-label text-xxs fw-bold text-secondary" for="sendToCashbookChild">Send to Cashbook</label>
                     </div>
@@ -28,7 +28,7 @@
             </div>
 
             <h6 class="text-xxs fw-bold text-muted text-uppercase tracking-wider mb-2">
-                <i class="bi bi-grid-3x3-gap me-1 text-primary"></i>Repayments Ledger Input Grid
+                <i class="bi bi-grid-3x3-gap me-1 text-primary"></i>Monthly Extra/Repayments
             </h6>
 
             <div class="border rounded bg-white p-1 text-nowrap mb-3" style="overflow-x: auto; max-height: 380px; overflow-y: auto;">

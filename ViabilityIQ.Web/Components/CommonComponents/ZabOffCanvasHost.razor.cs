@@ -10,7 +10,7 @@ namespace ViabilityIQ.Web.Components.CommonComponents
 
         private string _title = "";
 
-        private int _width = 700;
+        private int _width = 350;
 
         private Type? _componentType;
 

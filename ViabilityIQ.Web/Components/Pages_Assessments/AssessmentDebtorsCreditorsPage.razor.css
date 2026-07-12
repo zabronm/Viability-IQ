@@ -1,0 +1,82 @@
+﻿.debtors-creditors-container .card {
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    background: #ffffff;
+    height: 100%;
+}
+
+.profile-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+    .profile-input-group label {
+        font-size: 0.65rem;
+        color: #495057;
+        margin-bottom: 0;
+    }
+
+    .profile-input-group .form-control-sm {
+        width: 45px;
+        height: 20px;
+        font-size: 0.65rem;
+        padding: 0 4px;
+    }
+
+.text-navy {
+    color: #002147 !important;
+}
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.7rem;
+}
+
+    .finance-table th {
+        background-color: #f8f9fa;
+        padding: 8px 4px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+    }
+
+    .finance-table td {
+        padding: 8px 4px;
+        border: 1px solid #dee2e6;
+        text-align: right;
+    }
+
+.cell-data {
+    background-color: #e3f2fd !important;
+    color: #0d47a1;
+    font-weight: 500;
+}
+
+.cell-empty {
+    background-color: #f8f9fa !important;
+    color: #dee2e6;
+}
+
+.header-yellow {
+    background-color: #fff9c4 !important;
+    font-weight: bold;
+}
+
+.total-col {
+    background-color: #002147 !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; /* Elegant shadow */
+    border-radius: 8px !important;
+}
+
+.table td {
+    padding: 0.75rem 0.25rem !important;
+    font-size: 0.85rem;
+    color: #495057;
+}

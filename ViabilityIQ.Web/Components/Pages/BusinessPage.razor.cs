@@ -40,11 +40,11 @@ namespace ViabilityIQ.Web.Components.Pages
             {
                 new() { Title = "Business Name", Value = x => x.BusinessName ?? "" },
                 new() { Title = "Sector", Value = x => x.BusinessSector ?? "" },
-                new() { Title = "Owner", Value = x => x.BusinessOwner ?? "" },
+                new() { Title = "Owner", Value = x => x.Client ?? "" },
+                new() { Title = "Reg?", Value = x => x.Registered==true? "Yes": "No" },
+                new() { Title = "VAT Reg?", Value = x => x.VATRegistered==true? "Yes": "No" },
                 new() { Title = "Province", Value = x => x.ProvinceName ?? "" },
-                new() { Title = "Telephone", Value = x => x.Telephone ?? "" },
-                new() { Title = "Mobile", Value = x => x.Mobile ?? "" },
-                new() { Title = "Email", Value = x => x.Email ?? "" },
+                new() { Title = "Website", Value = x => x.Website ?? "" },
                 new() {
                     Title = "Status",
                     Value = x => x.Active == true ? "Active" : "Inactive",
@@ -52,6 +52,8 @@ namespace ViabilityIQ.Web.Components.Pages
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
+
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -120,8 +122,9 @@ namespace ViabilityIQ.Web.Components.Pages
                 var PrintDataSet = targetedDataset.Select(item => new businessPrintDto
                 {
                     BusinessName = item.BusinessName,
-                    BusinessOwner = item.BusinessOwner,
+                    BusinessOwner = item.Client,                    
                     Province = item.ProvinceName,
+
                     Telephone = item.Telephone,
                     Mobile = item.Mobile,
                     Email = item.Email,

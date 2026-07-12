@@ -15,7 +15,7 @@ namespace ViabilityIQ.Application.Dtos
     public class ClientDto
     {
         [Key] public long ClientId { get; set; }      
-        public string? ClientName { get; set; }       
+        public string? Client { get; set; }       
         public string? IDNumber { get; set; }
         public long GenderId { get; set; }
         public string? Gender { get; set; }

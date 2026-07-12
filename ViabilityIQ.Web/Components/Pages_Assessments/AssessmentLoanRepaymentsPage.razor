@@ -9,19 +9,28 @@
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Loans" PageTitle="Loan Repayments" CurrentPage="PageType.Loans" />
 
-    <div class="row bg-white g-3 mt-1 p-3 content-rounded-frame">
+    <div class="row bg-white g-2 mt-1 p-1 content-rounded-frame">
+        @if (blAlert == true)
+        {
+            <div class="my-0">
+                <ViqAlertComponent Severity="AlertSeverity"
+                                   Heading="@AlertHeading"
+                                   Message="@AlertMessage"
+                                   AllowDismiss="true" />
+            </div>
+        }
         <div class="col-12">
 
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
-                    <button type="button" class="btn btn-primary text-xs shadow-sm" @onclick="AddLoanAsync">
+                    <button type="button" class="btn btn-primary text-xs shadow-sm px-3" @onclick="() => OpenLoanFormAsync(0)">
                         <i class="bi bi-plus-lg me-1.5 fw-bold"></i>Add Loan
                     </button>
                 </div>
                 <div style="width: 280px;">
                     <div class="input-group input-group-sm shadow-sm search-input-frame">
                         <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search loan matrix balances..." @bind="SearchQuery" @bind:event="oninput" />
+                        <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search loans here..." @bind="SearchQuery" @bind:event="oninput" />
                     </div>
                 </div>
             </div>
@@ -45,24 +54,26 @@
                         {
                             @foreach (var loan in GetFilteredLoanProfiles())
                             {
-                                <tr class="border-top border-secondary-subtle font-row-group">
-                                    <td rowspan="4" class="ps-3 align-top pt-2 text-navy-brand fw-bold clickable-matrix-cell"
-                                        @onclick="() => EditLoanAsync(loan.LoanId)"
-                                        title="Click to view full loan parameters">
-                                        @FormatLoanName(loan.LoanTypeName)
+                                <tr class="border-top border-secondary-subtle font-row-group" style="border-bottom: 1px solid #728FCE;">
+                                    <td rowspan="4" class="ps-2 align-top pt-2"
+                                        @onclick="() => OpenLoanFormAsync(loan.LoanId)"
+                                        title=@loan.LoanTypeName>
+                                        <span class="clickable-cell fw-bold" style="font-size:0.78rem;">@FormatLoanName(loan.LoanTypeName)</span>
                                         <small class="d-block text-muted fw-normal font-monospace text-xxs mt-0.5">@loan.BankName</small>
                                     </td>
                                     <td class="text-xxs text-muted fw-semibold py-1.5 bg-light-subtle ps-2">Expected Repayment</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         var monthIdx = i + 1;
-                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 bg-light-subtle pe-2 position-relative">
+                                        // Dynamic conditional formatting evaluation logic applied to the td matrix layer[cite: 5]
+                                        var isRepaymentActive = monthIdx >= loan.StartMonth;
+                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2 position-relative @(isRepaymentActive ? "bg-active-repayment" : "bg-light-subtle")">
                                             <div class="d-flex align-items-center justify-content-end gap-1">
                                                 <span>@loan.MonthlyData[i].Expected.ToString("N0").Replace(",", " ")</span>
                                                 @if (loan.StartMonth == monthIdx)
                                                 {
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1 d-inline-flex align-items-center start-indicator-pill" title="Starting Repayment Month">
-                                                        <i class="bi bi-dot m-0 p-0 lh-1"></i>
+                                                    <span class="badge bg-info text-white border border-success-subtle rounded-pill px-1 d-inline-flex align-items-center start-indicator-pill" title="First Repayment Month">
+                                                        <i class="bi bi-arrow-down m-0 p-0"></i>
                                                     </span>
                                                 }
                                             </div>
@@ -83,7 +94,9 @@
                                     <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Calculated Interest</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2">
+                                        var monthIdx = i + 1;
+                                        var isRepaymentActive = monthIdx >= loan.StartMonth;
+                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2 @(isRepaymentActive ? "bg-active-repayment" : "")">
                                             @loan.MonthlyData[i].Interest.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
@@ -96,7 +109,9 @@
                                     <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Extra Repayment</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end font-monospace text-xs text-success py-1.5 pe-2">
+                                        var monthIdx = i + 1;
+                                        var isRepaymentActive = monthIdx >= loan.StartMonth;
+                                        <td class="text-end font-monospace text-xs text-success py-1.5 pe-2 @(isRepaymentActive ? "bg-active-repayment" : "")">
                                             @loan.MonthlyData[i].Extra.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
@@ -105,11 +120,13 @@
                                     </td>
                                 </tr>
 
-                                <tr class="bg-light-totals-cell border-bottom border-secondary-subtle font-row-group">
+                                <tr class="bg-light-totals-cell font-row-group" style="border-bottom: 0px solid #728FCE;">
                                     <td class="text-xxs text-dark fw-bold py-1.5 ps-2">Total Repaid</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end font-monospace text-xs fw-bold text-navy-brand py-1.5 pe-2">
+                                        var monthIdx = i + 1;
+                                        var isRepaymentActive = monthIdx >= loan.StartMonth;
+                                        <td class="text-end font-monospace text-xs fw-bold text-navy-brand py-1.5 pe-2 @(isRepaymentActive ? "bg-active-repayment-total" : "")">
                                             @loan.MonthlyData[i].Total.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
@@ -118,6 +135,24 @@
                                     </td>
                                 </tr>
                             }
+
+                            <!-- Aggregated Repayments Grand Totals Ledger Row[cite: 5] -->
+                            <tr class="bg-secondary-subtle font-row-group fw-bold border-top border-dark-subtle" style="border-top: 2px solid #1a365d !important;">
+                                <td colspan="2" class="text-start ps-3 py-2 text-dark text-xxs text-uppercase fw-bold align-middle">
+                                    <i class="bi bi-calculator me-1 text-navy-brand"></i>Grand Total Repayments:
+                                </td>
+                                @for (int i = 0; i < 12; i++)
+                                {
+                                    var monthIdx = i;
+                                    <td class="text-end font-monospace text-xs text-navy-brand py-2 pe-2 align-middle">
+                                        @GetMonthlyGrandTotal(monthIdx).ToString("N0").Replace(",", " ")
+                                    </td>
+                                }
+                                <td class="text-end font-monospace text-white py-2 pe-3 fw-bold align-middle cell-val-size" style="background-color: #1a365d;">
+                                    @GetAccumulatedGrandTotal().ToString("N0").Replace(",", " ")
+                                </td>
+                                <td class="bg-light border-start"></td>
+                            </tr>
                         }
                         else
                         {
@@ -137,3 +172,4 @@
 <footer class="py-2 bg-light mt-3">
     <BFooter />
 </footer>
+

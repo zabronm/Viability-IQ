@@ -1,0 +1,45 @@
+﻿
+
+
+<div class="card h-100 shadow-sm border border-secondary-subtle">
+    <div class="card-header bg-light py-2 px-3 border-bottom d-flex align-items-center">
+        <span class="fw-bold text-xs text-navy-brand text-uppercase"><i class="bi bi-shield-check me-1.5 text-primary"></i>Viability Health Ratios & Indices</span>
+    </div>
+    <div class="card-body p-2">
+        <div class="row g-2">
+            <!-- Break-Even Target Card -->
+            <div class="col-6">
+                <div class="p-2 border rounded bg-light-subtle h-100">
+                    <span class="text-xxs text-muted d-block text-uppercase fw-semibold">Break-Even Revenue Target</span>
+                    <span class="h6 font-monospace fw-bold text-dark d-block my-1">R @BreakEvenSales.ToString("N0").Replace(",", " ")</span>
+                    <span class="text-xxs text-muted">Required sales to clear costs.</span>
+                </div>
+            </div>
+            <!-- Margin of Safety Index -->
+            <div class="col-6">
+                <div class="p-2 border rounded h-100 @(MarginOfSafetyIndex >= 15 ? "bg-success-subtle-custom text-success" : "bg-danger-subtle-custom text-danger")" style="border-radius: 4px;">
+                    <span class="text-xxs text-muted d-block text-uppercase fw-semibold">Margin of Safety Index</span>
+                    <span class="h6 font-monospace fw-bold d-block my-1">@MarginOfSafetyIndex.ToString("F1") %</span>
+                    <span class="text-xxs small">Revenue breathing space cushion.</span>
+                </div>
+            </div>
+            <!-- Asset Efficiency -->
+            <div class="col-6">
+                <div class="p-2 border rounded bg-light-subtle h-100">
+                    <span class="text-xxs text-muted d-block text-uppercase fw-semibold">Asset Turnover Ratio</span>
+                    <span class="h6 font-monospace fw-bold text-navy-brand d-block my-1">@AssetEfficiency.ToString("F2") x</span>
+                    <span class="text-xxs text-muted">R1 asset value deployment return.</span>
+                </div>
+            </div>
+            <!-- Stock Turn Efficiency -->
+            <div class="col-6">
+                <div class="p-2 border rounded bg-light-subtle h-100">
+                    <span class="text-xxs text-muted d-block text-uppercase fw-semibold">Stock Inventory Velocity</span>
+                    <span class="h6 font-monospace fw-bold text-navy-brand d-block my-1">@StockTurnover.ToString("F1") cycles/yr</span>
+                    <span class="text-xxs text-muted">Stock conversion velocity speed.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

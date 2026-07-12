@@ -20,16 +20,16 @@
 
         <!-- TWO COLUMN CONTAINER HOOK -->
         <div class="row">
-            <div class="col-12 mb-2">
+            @* <div class="col-12 mb-2">
                 <span class="text-uppercase tracking-wider fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">
                     <i class="bi bi-person-badge me-1"></i> Personal Information
                 </span>
                 <hr class="mt-1 mb-2" style="opacity: 0.1;" />
-            </div>
+            </div> *@
             <!-- LEFT COLUMN -->
             <div class="col-md-6">
                 <div class="mb-2">
-                    <label for="clientName" class="form-label-custom">Client Name<span class="text-danger">*</span></label>
+                    <label for="clientName" class="form-label-custom">Full Name/s<span class="text-danger">*</span></label>
                     <InputText id="clientName" class="form-control-compact" @bind-Value="clientModel.ClientName" />
                     <ValidationMessage For="@(() => clientModel.ClientName)" class="text-danger small mt-1" />
                 </div>

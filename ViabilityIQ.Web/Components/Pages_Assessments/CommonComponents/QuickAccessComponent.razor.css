@@ -23,16 +23,16 @@
         border-color: rgba(26, 43, 76, 0.1);
     }
 
-/* Core Dropdown Matrix Board Shell (REDUCED WIDTH & OVERFLOW FIXED) */
+/* Core Dropdown Matrix Board Shell */
 .dropdown-card-menu {
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
-    width: 360px; /* Reduced width from 440px to 360px */
+    width: 360px;
     background-color: #ffffff;
     border: 1px solid rgba(26, 43, 76, 0.12);
     border-radius: 8px;
-    overflow: hidden; /* Ensures the bottom row clips cleanly to the rounded borders */
+    overflow: hidden;
     box-shadow: 0 10px 25px rgba(26, 43, 76, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
     z-index: 1050;
     opacity: 0;
@@ -47,9 +47,9 @@
         transform: translateY(0);
     }
 
-/* Minimalist Light Grey Header Block (REDUCED PADDING) */
+/* Minimalist Header Block */
 .dropdown-card-header {
-    padding: 8px 12px; /* Reduced padding for tighter vertical height */
+    padding: 8px 12px;
     background-color: #ababab;
     border-bottom: 1px solid rgba(26, 43, 76, 0.08);
 }
@@ -69,79 +69,88 @@
         color: #6D7B8D;
     }
 
-/* Matrix Layout Framework (REDUCED INNER GAP AND PADDING FOR LESS HEIGHT) */
+/* 4) Matrix Layout Framework with Faded Abstract Dot Wallpaper Array Elements */
 .quick-access-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px; /* Reduced gap from 8px to 6px */
-    padding: 8px; /* Reduced outer padding from 12px to 8px */
-    background-color: #ffffff;
+    gap: 6px;
+    padding: 8px;
     border: solid 1px #f5f5f5;
     border-radius: 12px;
-    /*background-color: #778899;*/
+    background-color: #ffffff;
+    background-image: radial-gradient(rgba(54, 139, 193, 0.08) 1.5px, transparent 1.5px), radial-gradient(rgba(54, 139, 193, 0.05) 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-position: 0 0, 8px 8px;
 }
 
-/* Interactive Grid Items (REDUCED VERTICAL PADDING TO COMPRESS HEIGHT) */
+/* 1) 2) 3) Interactive Grid Items Customizations */
 .quick-grid-item {
     display: flex;
     align-items: center;
-    gap: 10px; /* Snug text-to-icon distance alignment */
-    padding: 8px 10px; /* Reduced padding from 10px 12px to compress layout height */
-    background-color: #f4f6f9;   
-    border: 1px solid #368BC1;
+    gap: 10px;
+    padding: 8px 10px;
+    background-color: #f4f8fb; /* Clean, faded off-white bluish default color */
+    border: 1px solid rgba(54, 139, 193, 0.25); /* Lighter, thinner modern bluish border profile */
     border-radius: 8px;
     text-decoration: none !important;
     color: #333333;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Seamless animation transition rules */
 }
 
 /* Wide bottom span layout item context row mapping rules */
 .wide-grid-span {
     grid-column: span 2;
-    background-color: #f4f6f9;
 }
 
-/* Icon Resizing Engines (UNTOUCHED STABLE SCALING) */
+/* Icon Resizing Engines */
 .grid-icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px; /* Kept exact same icon wrapper size */
-    height: 28px; /* Kept exact same icon wrapper size */
-    background-color: #ffffff;
+    width: 28px;
+    height: 28px;
+    background-color: #ffffff; /* Swapped inner icon wrapper to white to contrast against the off-white cell background */
     border-radius: 6px;
-    font-size: 0.95rem; /* Kept exact same internal font size scaling */
+    font-size: 0.95rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
     flex-shrink: 0;
 }
 
-/* Item Content Typography Blocks (UNTOUCHED STABLE SCALING) */
+/* Item Content Typography Blocks */
 .grid-item-text {
     display: flex;
     flex-direction: column;
     line-height: 1.25;
-    align-items:center;
+    align-items: flex-start;
 }
 
     .grid-item-text .strong {
-        font-size: 0.79rem; /* Kept exact same structural font size */
+        font-size: 0.79rem;
         font-weight: 600;
         color: #1a2b4c;
     }
 
     .grid-item-text .sub-text {
-        font-size: 0.7rem; /* Kept exact same structural font size */
+        font-size: 0.7rem;
         color: #6D7B8D;
     }
 
-/* Smooth Lift Interactivity Transitions on Hover Actions */
+/* 3) Distinct Hover States Enhancements */
 .quick-grid-item:hover {
-    background-color: #f6f6f6;
+    background-color: #ffffff; /* Flips to pure white background on hover */
     color: #000000;
-    border-color: #4863A0; /*rgba(26, 43, 76, 0.18);*/
+    border-color: #368BC1; /* Enhanced accent highlight border definition */
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(26, 43, 76, 0.08);
+    box-shadow: 0 4px 10px rgba(54, 139, 193, 0.12);
 }
+
+    .quick-grid-item:hover .grid-item-text .strong {
+        color: #000000;
+    }
+
+    .quick-grid-item:hover .grid-icon-wrapper {
+        background-color: #f4f6f9; /* Inverts the icon background cleanly on hover */
+    }
 
     .quick-grid-item:hover .grid-item-text .strong {
         color: #000000;

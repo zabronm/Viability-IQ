@@ -1,7 +1,10 @@
-﻿namespace ViabilityIQ.Web.Services
+﻿using ViabilityIQ.Shared.SharedModels;
+
+namespace ViabilityIQ.Web.Services
 {
     public sealed class CanvasRequest
     {
+        public Func<SaveResult, Task>? ResultCallback { get; set; }
         public string? HeaderIcon { get; init; }
         public string Title { get; set; } = string.Empty;
         public Type ComponentType { get; set; } = default;

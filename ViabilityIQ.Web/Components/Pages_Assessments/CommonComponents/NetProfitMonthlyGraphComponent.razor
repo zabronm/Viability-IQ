@@ -1,0 +1,55 @@
+﻿
+<div class="card h-100 shadow-sm border border-secondary-subtle">
+    <div class="card-header bg-light py-2 px-3 border-bottom d-flex align-items-center">
+        <span class="fw-bold text-xs text-navy-brand text-uppercase"><i class="bi bi-bar-chart-line me-1.5 text-primary"></i>Operational Performance Trends</span>
+    </div>
+    <div class="card-body p-3 d-flex flex-column justify-content-between" style="min-height: 260px;">
+        @if (MaxVal > 0)
+        {
+            <div class="w-100 position-relative" style="height: 180px;">
+                <svg viewBox="0 0 600 180" width="100%" height="100%" preserveAspectRatio="none">
+                    <!-- Background Grid Lines -->
+                    @for (int i = 1; i <= 3; i++)
+                    {
+                        var yPos = 180 - (i * 45);
+                        <line x1="30" y1="@yPos" x2="580" y2="@yPos" stroke="#e2e8f0" stroke-width="0.7" stroke-dasharray="4,4" />
+                    }
+
+                    <!-- 12-Month Grid Loop Nodes -->
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        var x = 45 + (i * 46);
+                        var salesY = GetY(Data.MonthlySales[i]);
+                        var cosY = GetY(Data.MonthlyCostOfSales[i]);
+                        var profitVal = Data.MonthlySales[i] - Data.MonthlyCostOfSales[i] + Data.MonthlySundryIncome[i] - Data.MonthlyExpenses[i];
+                        var profitH = (double)(Math.Abs(profitVal) / MaxVal * 140m);
+                        var profitY = profitVal >= 0 ? 150 - profitH : 150;
+
+                        <!-- Net Profit Bar Columns -->
+                        <rect x="@(x - 10)" y="@profitY" width="20" height="@(profitH > 0 ? profitH : 1)"
+                              fill="@(profitVal >= 0 ? "#2e7d32" : "#c62828")" opacity="0.85" rx="2" />
+                    }
+
+                    <!-- Line Overlays Path Traces -->
+                    <path d="@GetLinePath(Data.MonthlySales)" fill="none" stroke="#368BC1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="@GetLinePath(Data.MonthlyCostOfSales)" fill="none" stroke="#1a365d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2,2" />
+
+                    <!-- Baseline Zero Grid Marker Axis -->
+                    <line x1="30" y1="150" x2="580" y2="150" stroke="#94a3b8" stroke-width="1.2" />
+                </svg>
+            </div>
+
+            <!-- Custom Built Key Inline Legend System Map -->
+            <div class="d-flex justify-content-center gap-3 text-xxs pt-2 border-top mt-2">
+                <span><i class="bi bi-graph-up text-primary me-1"></i>Sales (Line)</span>
+                <span><i class="bi bi-graph-down text-navy-brand me-1"></i>COS (Dashed)</span>
+                <span><i class="bi bi-square-fill text-success me-1"></i>Net Profit (Bar)</span>
+            </div>
+        }
+        else
+        {
+            <div class="w-100 text-center text-muted text-xs py-5">Awaiting active channel processing values...</div>
+        }
+    </div>
+</div>
+
