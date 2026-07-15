@@ -26,27 +26,19 @@
                 <InputText id="caseNumber" class="form-control-compact bg-light" @bind-Value="assessmentModel.CaseNumber" placeholder="SYSTEM GENERATED" disabled />
             </div>
 
-            <div class="mb-3">
-                <label for="businessId" class="form-label-custom">Business Name <span class="text-danger">*</span></label>
-                <InputSelect id="businessId" class="form-control-compact form-select" @bind-Value="assessmentModel.BusinessId">
-                    <option value="0">-- Select Business Context --</option>
-                    @foreach (var biz in activeBusinessLookup)
-                    {
-                        <option value="@biz.Key">@biz.Value</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => assessmentModel.BusinessId)" class="text-danger small mt-1" />
+            <div class="mb-1">
+                <label class="form-label-custom">Business Name<span class="text-danger">*</span></label>
+                <DDLookupComponent SourceKey="DDLookupEnums.Businesses"
+                                   @bind-Value="assessmentModel.BusinessId" />
+                <ValidationMessage For="() => assessmentModel.BusinessId" class="text-danger small" />
             </div>
 
-            <div class="mb-3">
-                <label for="assessmentType" class="form-label-custom">Assessment Type <span class="text-danger">*</span></label>
-                <InputSelect id="assessmentType" class="form-control-compact form-select" @bind-Value="assessmentModel.AssessmentType">
-                    @foreach (var enumVal in Enum.GetValues<AssessmentType_Enums>())
-                    {
-                        <option value="@enumVal">@enumVal.ToString()</option>
-                    }
-                </InputSelect>
-            </div>          
+            <div class="mb-1">
+                <label class="form-label-custom">Assessment Type<span class="text-danger">*</span></label>
+                <DDLookupComponent SourceKey="DDLookupEnums.AssessmentTypes"
+                                   @bind-Value="assessmentModel.AssessmentTypeId" />
+                <ValidationMessage For="() => assessmentModel.AssessmentTypeId" class="text-danger small" />
+            </div>    
 
             <div class="mb-3">
                 <label for="startDate" class="form-label-custom">Assessment Start Date</label>

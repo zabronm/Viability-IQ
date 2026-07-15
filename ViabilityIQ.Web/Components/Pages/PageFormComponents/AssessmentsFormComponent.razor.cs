@@ -83,7 +83,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 assessmentModel = new Assessment
                 {
                     StatusId = 1,
-                    AssessmentType = "Cash",                               //AssessmentType_Enums.Cash,
+                     AssessmentTypeId = 1,                               //AssessmentType_Enums.Cash,
                     Active = true
                 };              
 

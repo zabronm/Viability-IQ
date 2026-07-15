@@ -28,6 +28,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
 
         protected override async Task OnParametersSetAsync() => await LoadDebtorsCreditorsAsync();
 
+        public async Task RefreshAsync()
+        { 
+            await LoadDebtorsCreditorsAsync();  
+            StateHasChanged();           
+        }
+
         private async Task LoadDebtorsCreditorsAsync()
         {
             loadingStateActive = true;

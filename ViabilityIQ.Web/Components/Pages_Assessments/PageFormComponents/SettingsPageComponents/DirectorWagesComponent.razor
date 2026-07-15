@@ -1,4 +1,5 @@
 ﻿@using ViabilityIQ.Infrastructure.Repositories
+
 <EditForm Model="@directorWagesModel" OnValidSubmit="UpdateDirectorWages">
     <DataAnnotationsValidator />
     <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
@@ -54,6 +55,7 @@
     </div>
 </EditForm>
 
+
 @code {
 
     [Inject] private MasterDataService? ViqCrudService { get; set; }
@@ -66,8 +68,14 @@
     bool loadingStateActive = false;
 
     private decimal TotalCalculatedDirectorWages => (directorWagesModel?.NumberOfDirectors ?? 0) * (directorWagesModel?.MonthlyDirectorWagesAmount ?? 0m);
-   
+
+
     protected override async Task OnParametersSetAsync()
+    {
+        await RefreshAsync();
+    }
+
+    public async Task RefreshAsync()
     {
         // Start with the spinner active
         loadingStateActive = true;
@@ -76,7 +84,6 @@
         loadingStateActive = false;
         StateHasChanged();
     }
-
 
     //===================================== DIRECTOR WAGES ================
     async Task UpdateDirectorWages()

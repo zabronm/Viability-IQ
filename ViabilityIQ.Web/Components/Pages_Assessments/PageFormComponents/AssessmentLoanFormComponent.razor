@@ -4,10 +4,7 @@
 <div class="p-3 bg-white">
     @if (IsLoading)
     {
-        <div class="p-5 d-flex flex-column align-items-center justify-content-center text-center">
-            <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
-            <div>Synchronizing sales category configuration matrix...</div>
-        </div>
+        <FormLoadingComponent />
     }
     else if (Model != null)
     {

@@ -15,7 +15,9 @@ namespace ViabilityIQ.Application.Dtos
     public class ClientDto
     {
         [Key] public long ClientId { get; set; }      
-        public string? Client { get; set; }       
+        public string? Client { get; set; }        
+        public long ClientTypeId { get; set; }
+        public string? ClientTypeName { get; set; }
         public string? IDNumber { get; set; }
         public long GenderId { get; set; }
         public string? Gender { get; set; }
@@ -26,9 +28,7 @@ namespace ViabilityIQ.Application.Dtos
         public string? Email { get; set; }       
         public string? Address_Street{ get; set; }
         public string? Address_Surburb { get; set; }
-        public string? Address_CityTown { get; set; }
-        public long ClientTypeId { get; set; }
-        public string? ClientType { get; set; }
+        public string? Address_CityTown { get; set; } 
         public long ProvinceId { get; set; }
         public string? ProvinceName { get; set; }
         public string? Address_Postal { get; set; }

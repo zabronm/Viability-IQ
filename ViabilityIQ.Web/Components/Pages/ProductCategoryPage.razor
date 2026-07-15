@@ -2,6 +2,7 @@
 
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Application.Dtos
 @using ViabilityIQ.Web.Components.Pages.PageFormComponents
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
@@ -9,16 +10,17 @@
     <PageHeading _pageTitle="Product/Service Categories" CurrentPage="PageType.ProductCategory" _pageHeading="Product/Service Categories" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
-        <div class="app-workspace-shell">
-           
-
-            <ZabDataTableAdvanced TItem="ProductCategory"
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
+        <div class="app-workspace-shell">       
+            <ZabDataTableAdvanced TItem="ProductCategoryDto"
                                   Items="@productCategoryList"
                                   ItemName="Product/Service Category"
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"
                                   ShowAdd="true"
-                                  ShowDelete="true"
+                                  ShowDelete="false"
                                   OnDelete="DeleteSelectedBank"
                                   GetRowId="@(x => x.ProductCategoryId)"
                                   OnAddRecordId="HandleFormExecution"
@@ -26,12 +28,10 @@
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
-
-
         </div>
     </main>
 
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle">
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="300">
         @if (canvasOpenStatus)
     {
         <ProductCategoryFormComponent ProductCategoryId="@activeRecordId" OnSavedSuccess="RefreshWorkspaceGridData" />

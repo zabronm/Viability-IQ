@@ -7,6 +7,9 @@
     <PageHeading _pageTitle="Assessments" CurrentPage="PageType.Settings" _pageHeading="Settings" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
         <div class="app-workspace-shell">
 
             <div class="row g-4">
@@ -37,7 +40,7 @@
                             </a>
 
                             @* ===============/settings/client-categories ====================== *@
-                            <a href="settings/client-categories" class="settings-icon-card">
+                            <a href="settings/client-types" class="settings-icon-card">
                                 <div class="settings-icon-avatar"><i class="bi bi-people-fill"></i></div>
                                 <div class="settings-card-body">
                                     <span class="settings-card-label">Client Categories</span>
@@ -63,23 +66,32 @@
                                 </div>
                             </a>
 
-                            @* ===============/settings/product-category ====================== *@
-                            <a href="/settings/product-category" class="settings-icon-card">
+                            @* ===============/settings/revenue streams ====================== *@
+                            <a href="/settings/income-types" class="settings-icon-card">
                                 <div class="settings-icon-avatar"><i class="bi bi-diagram-3-fill"></i></div>
                                 <div class="settings-card-body">
-                                    <span class="settings-card-label">Product/Service Categories</span>
+                                    <span class="settings-card-label">Revenue Streams</span>
+                                    <p class="settings-card-narration">Organize revenue streams and auxiliary services into income groups.</p>
+                                </div>
+                            </a>
+
+                            @* ===============/settings/product-category ====================== *@
+                            <a href="/settings/product-category" class="settings-icon-card">
+                                <div class="settings-icon-avatar"><i class="bi bi- bi-boxes"></i></div>
+                                <div class="settings-card-body">
+                                    <span class="settings-card-label">Sales Categories</span>
                                     <p class="settings-card-narration">Organize products and auxiliary services into functional accounting groups.</p>
                                 </div>
                             </a>
 
                             @* ===============/settings/products ====================== *@
-                            <a href="/settings/products" class="settings-icon-card">
+                            @* <a href="/settings/products" class="settings-icon-card">
                                 <div class="settings-icon-avatar"><i class="bi bi-boxes"></i></div>
                                 <div class="settings-card-body">
                                     <span class="settings-card-label">Products/Services</span>
                                     <p class="settings-card-narration">Configure unified professional service items, core systems offerings, and custom tasks.</p>
                                 </div>
-                            </a>
+                            </a> *@
 
                            @*  <a href="settings/products" class="settings-icon-card">
                                 <div class="settings-icon-avatar"><i class="bi bi-box-seam-fill"></i></div>

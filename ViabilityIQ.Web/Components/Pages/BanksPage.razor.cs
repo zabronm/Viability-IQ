@@ -19,11 +19,19 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
         [Inject] MasterDataService? MasterData { get; set; }
-
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
         //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
+
+        //---------------------------------------------------------
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Banks/Funders";
+        private string AlertMessage = "Setup all base GLOBAL banks master-data that will be assumed and/or inherited by your accounts/loans.";
+
 
         private List<Bank> banksList = new();
         private List<ZabDataTableAdvanced<Bank>.ColumnDefinition<Bank>> tableColumns = new();

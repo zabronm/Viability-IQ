@@ -17,11 +17,11 @@ namespace ViabilityIQ.Shared.SharedModels
 
     public class UnifiedIncomeViewModel
     {
-        public long Id { get; set; }
+        public long Id { get; set; }           // Ensure this line exists
         public string Description { get; set; } = string.Empty;
-        public IncomeTypeEnum Type { get; set; }
+        public string TypeName { get; set; } = string.Empty;
+        public long TypeId { get; set; }
         public bool IncludesVat { get; set; }
         public decimal[] MonthlyValues { get; set; } = new decimal[12];
-
     }
 }

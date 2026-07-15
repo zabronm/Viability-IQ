@@ -16,7 +16,7 @@ namespace ViabilityIQ.Web.Components.Pages
 {
     public partial class ProductCategoryPage
     {
-        [Inject] private IGenericDataRepository<ProductCategory> productCategoryRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<ProductCategoryDto> productCategoryRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
         [Inject] private IJSRuntime JS { get; set; } = default!;
@@ -24,8 +24,15 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
         //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
 
-        private List<ProductCategory> productCategoryList = new();
-        private List<ZabDataTableAdvanced<ProductCategory>.ColumnDefinition<ProductCategory>> tableColumns = new();
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Product Categories";
+        private string AlertMessage = "Register your all your company's product/service categories under which your sales revenue will be classified, for example Clothing, Groceries, Alcohol, etc";
+
+        private List<ProductCategoryDto> productCategoryList = new();
+        private List<ZabDataTableAdvanced<ProductCategoryDto>.ColumnDefinition<ProductCategoryDto>> tableColumns = new();
 
         // State Machine parameters for modal canvas controls
         private ZabOffCanvas? canvasShell;
@@ -38,12 +45,13 @@ namespace ViabilityIQ.Web.Components.Pages
         {
             _ = LoadGridDatasetAsync();
 
-            tableColumns = new List<ZabDataTableAdvanced<ProductCategory>.ColumnDefinition<ProductCategory>>
+            tableColumns = new List<ZabDataTableAdvanced<ProductCategoryDto>.ColumnDefinition<ProductCategoryDto>>
             {
                 new() { Title = "Category Name", Value = x => x.ProductCategoryName },
-                new() { Title = "UoM", Value = x => x.UOM },
+                new() { Title = "Income Type", Value = x => x.IncomeTypeName },
+                new() { Title = "UoM", Value = x => x.UoM },
                 new() { Title = "Markup(%)", Value = x => x.MarkupPercentage },
-                new() { Title = "Remarks/Details", Value = x => x.Remarks ?? "N/A" },
+                //new() { Title = "Remarks/Details", Value = x => x.Remarks ?? "N/A" },
                 new() {
                     Title = "Status",
                     Value = x => x.Active == true ? "Active" : "Inactive",
@@ -51,6 +59,8 @@ namespace ViabilityIQ.Web.Components.Pages
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
+
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -59,12 +69,9 @@ namespace ViabilityIQ.Web.Components.Pages
             StateHasChanged(); // Instantly show overlay spinner block
 
             try
-            {
-                // = await MasterData!.GetAllBanksAsync();
-                //banksList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Bank>();
-
+            {              
                 var resultSet = (await productCategoryRepository.GetAllAsync());
-                productCategoryList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ProductCategory>();
+                productCategoryList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ProductCategoryDto>();
 
             }
             finally
@@ -94,7 +101,7 @@ namespace ViabilityIQ.Web.Components.Pages
             await LoadGridDatasetAsync();
         }
 
-        private async Task DeleteSelectedBank(ProductCategory targetCategory)
+        private async Task DeleteSelectedBank(ProductCategoryDto targetCategory)
         {
             var success = await productCategoryRepository!.DeleteAsync(targetCategory);
             if (success)
@@ -127,19 +134,20 @@ namespace ViabilityIQ.Web.Components.Pages
 
         //PDF EXPORT 
         //private async Task ExecutePrintFormatProcess(List<ProductCategory> targetedDataset)
-        private async Task ExecutePrintFormatProcess(List<ProductCategory> targetedDataset)
+        private async Task ExecutePrintFormatProcess(List<ProductCategoryDto> targetedDataset)
         {
             try
             {
                 loadingStateActive = true;
-                StateHasChanged();                
+                StateHasChanged();
 
                 //MOVE DATA TO FORMATTTED DTO
                 var PrintDataSet = targetedDataset.Select(item => new ProductCategoryDto
                 {
-                    CategoryName = item.ProductCategoryName,
-                    Markup = item.MarkupPercentage,
-                    UoM = item.UOM,
+                    ProductCategoryName = item.ProductCategoryName,
+                    IncomeTypeName = item.IncomeTypeName,
+                    MarkupPercentage = item.MarkupPercentage,
+                    UoM = item.UoM,
                     Active = item.Active,
                     Remarks = item.Remarks
                 }).ToList();
@@ -169,11 +177,6 @@ namespace ViabilityIQ.Web.Components.Pages
 
 
 
-
-
-
-
-
         //private async Task ExecutePrintFormatProcess(List<Bank> targetedDataset)
         //{
         //    _Toast!.ShowInfo($"Preparing {targetedDataset.Count} records for system print spool...", sessionService!.AppTitle);
@@ -186,7 +189,7 @@ namespace ViabilityIQ.Web.Components.Pages
         /// <summary>
         /// 2. Action: Export current active listing straight into a downloadable Excel Binary stream
         /// </summary>
-        private async Task ExecuteExcelExportProcess(List<ProductCategory> targetedDataset)
+        private async Task ExecuteExcelExportProcess(List<ProductCategoryDto> targetedDataset)
         {
             try
             {
@@ -196,7 +199,7 @@ namespace ViabilityIQ.Web.Components.Pages
                 byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Registered Banks List");
 
                 // Use a standard JavaScript save file utility to trigger an instant download stream
-                string fileName = $"Bank_Funder_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                string fileName = $"Product_Category_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", fileName, Convert.ToBase64String(excelBytes));
 
                 _Toast.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
@@ -214,7 +217,7 @@ namespace ViabilityIQ.Web.Components.Pages
         /// <summary>
         /// 3. Action: Email document attachments down to targeted distribution users
         /// </summary>
-        private async Task ExecuteEmailDistributionProcess(List<ProductCategory> targetedDataset)
+        private async Task ExecuteEmailDistributionProcess(List<ProductCategoryDto> targetedDataset)
         {
             try
             {

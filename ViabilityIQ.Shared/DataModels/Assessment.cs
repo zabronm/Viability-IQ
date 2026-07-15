@@ -1,7 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 using System.Collections.Generic;
-
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
@@ -16,13 +16,18 @@ namespace ViabilityIQ.Shared.DataModels
     [Table("tblAssessments")]
     public class Assessment : IEntity, IAuditableEntity, ISortableEntity
     {
-        [Key] public long AssessmentId { get; set; }
-        public string? CaseNumber { get; set; }
-        public long AssessmentTypeId { get; set; }      //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors
-        public string? AssessmentType { get; set; }    //If to use direct string values from the Enum class
+        [Dapper.Contrib.Extensions.Key] public long AssessmentId { get; set; }
+        [Computed] public string? CaseNumber { get; set; }
+
+        [Required(ErrorMessage ="Assessment type is required")]
+        public long AssessmentTypeId { get; set; }      //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors        
+
+        [Required(ErrorMessage ="Business being assessed must be specified.")]
         public long BusinessId { get; set; }
-        public DateTime? AssessmentStartDate { get; set; } = null;
-        public DateTime? AssessmentFinishDate { get; set; } = null;
+
+        [Required(ErrorMessage ="Specify starting date")]
+        public DateTime? AssessmentStartDate { get; set; } = DateTime.UtcNow;
+        public DateTime? AssessmentFinishDate { get; set; } = DateTime.UtcNow.AddDays(25); //Assessment is expected to take 3 working weeks
 
 
         //VAT SECTION
@@ -37,38 +42,7 @@ namespace ViabilityIQ.Shared.DataModels
         //DIRECTORS WAGES SECTION
         public decimal MonthlyDirectorWagesAmountTotal { get; set; }
         public decimal MonthlyDirectorWagesAmount { get; set; }
-        public int NumberOfDirectors { get; set; }
-
-        //CREDITORS SECTION - Creditors - Percentages
-        public decimal Creditors_30 { get; set; }
-        public decimal Creditors_60 { get; set; }
-        public decimal Creditors_90 { get; set; }
-        public decimal Creditors_120 { get; set; }
-        public decimal Creditors_120Plus { get; set; }
-
-        //CREDITORS SECTION - Creditors - Vaues
-        public decimal CreditorsValue_30 { get; set; }
-        public decimal CreditorsValue_60 { get; set; }
-        public decimal CreditorsValue_90 { get; set; }
-        public decimal CreditorsValue_120 { get; set; }
-        public decimal CreditorsValue_120Plus { get; set; }
-
-
-        //DEBTORS SECTION - Debtors => Percentages
-        public decimal Debtors_30 { get; set; }
-        public decimal Debtors_60 { get; set; }
-        public decimal Debtors_90 { get; set; }
-        public decimal Debtors_120 { get; set; }
-        public decimal Debtors_120Plus { get; set; }
-
-        //DEBTORS SECTION - Debtors => Values
-        public decimal DebtorsValue_30 { get; set; }
-        public decimal DebtorsValue_60 { get; set; }
-        public decimal DebtorsValue_90 { get; set; }
-        public decimal DebtorsValue_120 { get; set; }
-        public decimal DebtorsValue_120Plus { get; set; }
-
-
+        public int NumberOfDirectors { get; set; }  
         public long StatusId { get; set; }
         public long ProgressPercentage { get; set; }
         public long blStock { get; set; }
@@ -78,9 +52,9 @@ namespace ViabilityIQ.Shared.DataModels
         public long blVat { get; set; }
         public string? Remarks { get; set; }
         public bool Active { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => AssessmentId;

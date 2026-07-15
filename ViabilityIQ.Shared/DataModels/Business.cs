@@ -1,7 +1,8 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 using System.Collections.Generic;
-
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,18 +14,22 @@ namespace ViabilityIQ.Shared.DataModels
     [Table("tblBusiness")]
     public class Business: IEntity, IAuditableEntity, ISortableEntity
     {
-        [Key] public long BusinessId { get; set; }
+        [Dapper.Contrib.Extensions.Key] public long BusinessId { get; set; }
+        [Required(ErrorMessage = "Business Name is required.")]
         public string? BusinessName { get; set; }
+
+        [Required(ErrorMessage = "Business Sector must be known.")]
         public long BusinessSectorId { get; set; }
-        public bool IsRegistered { get; set; }
+        public bool IsRegistered { get; set; }      
         public bool IsVATRegistered { get; set; }
         public bool IsBEE_Exempt { get; set; }
         public DateTime? RegisteredDate { get; set; } = null;
+        [Required(ErrorMessage = "Business Owner(Client) is required.")]
         public long ClientId { get; set; }
         public string? CKNumber { get; set; }
         public string? ContactPerson { get; set; }
         public string? Street_Address { get; set; }
-        public string? Suburb { get; set; }
+        public string? Surburb { get; set; }
         public string? CityTown { get; set; }
         public long ProvinceId { get; set; }
         public string? Country { get; set; }  //Use public, free API to get country name

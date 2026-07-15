@@ -21,11 +21,23 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         [Inject] private ISessionService? sessionService { get; set; }
         [Inject] private ZabOffCanvasService zabOffCanvasService { get; set; } = default!;
         [Inject] private ToastService _Toast { get; set; } = default!;
-        [Inject] private IGenericDataRepository<Assessment> DataRepository { get; set; } = default!;
-       
+        [Inject] private IGenericDataRepository<Assessment> DataRepository { get; set; } = default!;       
 
         [Parameter] public long ActiveAssessmentId { get; set; }
 
+        
+        // Alert variables
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Success;
+        private string AlertHeading = "Assessment Settings";
+        private string AlertMessage = "Specify ALL base parameters that the assessment will assume when it incorporates projection transactions.";
+
+        // Added references for targeted refresh
+        private VATEditComponent? VATEditRef;
+        private OpeningBalancesComponent? OpeningBalancesRef;
+        private DebtorsCreditorsComponent? DebtorsCreditorsRef;
+        private DirectorWagesComponent? DirectorWagesRef;
         private SalesCategoryListComponent? SalesCategoryListRef;
         private AssessmentLoansListComponent? AssessmentLoansListRef;
 
@@ -34,9 +46,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         //=========== INDEPENDENT VARIABLES      
         VatUpdateModel? vatUpdateModel { get; set; }
         DirectorWagesModel? directorWagesModel { get; set; }
-        //DebtorsCreditorsModel? debtorsCreditorsModel { get; set; }
         OpeningBalancesModel? openingBalancesModel { get; set; }
-
 
         private bool IsLoading { get; set; } = true;
         private bool IsSubmitting { get; set; } = false;
@@ -133,11 +143,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             try
             {
                 IsSubmitting = true;
-
-                //Model.Creditors_30 = CalculatedCreditors0To30;
-                //Model.Debtors_30 = CalculatedDebtors0To30;
-                //Model.MonthlyDirectorWagesAmountTotal = TotalCalculatedDirectorWages;
-
                 bool success = await DataRepository.SaveAsync(Model);
 
                 if (success)
@@ -170,6 +175,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 case "ASSESSMENT":
                     ActivePanelTitle = "Setup Corporate Profiles";
                     break;
+
                 case "DEBTORS-CREDITORS":
                     ActivePanelTitle = "Map Debtors/Creditors Profiles";
                     break;
@@ -189,7 +195,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                             {
                                 AssessmentSalesCategoryId = selectedId,
                                 AssessmentId = ActiveAssessmentId,
-                            }
+                                OnSaveComplete = EventCallback.Factory.Create<SaveResult>(this, (result) => RefreshComponentData(result, "SALES-CATEGORY")),
+                            }                        
                         });
 
                     break;
@@ -208,50 +215,99 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                             {
                                 AssessmentLoanId = 0L,                      //INDICATE LONHG INTERGER WHICH PARAMETER EXPECTS ===========>
                                 AssessmentId = ActiveAssessmentId,
+                                OnSaveComplete = EventCallback.Factory.Create<SaveResult>(this, (result) => RefreshComponentData(result, "LOANS")),
                             }
                         });
 
                     break;
             }
 
-            if (ActiveFormType != null)
-            {
-                ActiveFormParameters.Add("AssessmentId", ActiveAssessmentId);
-                ActiveFormParameters.Add("OnSaveComplete", EventCallback.Factory.Create<SaveResult>(this, HandleFormExecutionCallback));
-                OffCanvasControlRef?.OpenAsync();
-            }
+            //if (ActiveFormType != null)
+            //{
+            //    ActiveFormParameters.Add("AssessmentId", ActiveAssessmentId);
+            //    ActiveFormParameters.Add("OnSaveComplete", EventCallback.Factory.Create<SaveResult>(this, HandleFormExecutionCallback));
+            //    OffCanvasControlRef?.OpenAsync();
+            //}
         }
 
 
         //============================== REFEESH AFTER UPDATING ANY COMPONENT ============
-        private async Task RefreshComponentData(SaveResult saveResult)
+        //private async Task RefreshComponentData(SaveResult saveResult, string refName = "")
+            private async Task RefreshComponentData(SaveResult saveResult, string refName = "")
         {
             if (saveResult.Success)
             {
                 _Toast.ShowSuccess(saveResult.Message, sessionService!.AppTitle);
-                await HydrateAssessmentRecordAsync();
-                PopulateDataModels();
-                StateHasChanged();
+
+                // 1. Logic for specific component refresh
+                if (!string.IsNullOrEmpty(refName))
+                {
+                    await ExecuteTargetedRefresh(refName);
+                    PopulateDataModels();
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Fallback: If no refName, do the full page hydration as before
+                    await HydrateAssessmentRecordAsync();
+                }
+
+                               
             }
             else
             {
                 _Toast.ShowError(saveResult.Message, sessionService!.AppTitle);
-            }
-             
+            }             
         }
 
+
+
+        // Switch logic to handle specific component refreshes
+        private async Task ExecuteTargetedRefresh(string refName)
+        {
+            switch (refName)
+            {
+                case "SALES-CATEGORY":
+                    if (SalesCategoryListRef != null) await SalesCategoryListRef.RefreshAsync();
+                    break;
+
+                case "VAT-UPDATE":
+                    if (VATEditRef != null) await VATEditRef.RefreshAsync();
+                    break;
+
+                case "OPENING-BALANCES":
+                    if (OpeningBalancesRef != null) await OpeningBalancesRef.RefreshAsync();
+                    break;
+
+                case "DEBTORS-CREDITORS":
+                    if (DebtorsCreditorsRef != null) await DebtorsCreditorsRef.RefreshAsync();
+                    break;
+
+                case "DIRECTOR-WAGES":
+                    if (DirectorWagesRef != null) await DirectorWagesRef.RefreshAsync();
+                    break;
+
+                case "LOANS":
+                    if (AssessmentLoansListRef != null) await AssessmentLoansListRef.RefreshAsync();
+                    break;
+
+                default:
+                    await HydrateAssessmentRecordAsync();
+                    break;
+            }
+        }
 
 
 
         private async Task HandleFormExecutionCallback(SaveResult executionPackage)
         {
-            if (SalesCategoryListRef != null)
-            {
-                // Forces the child list to execute a fresh database round-trip check instantly
-                await SalesCategoryListRef.RefreshListAsync();
-            }
+            //if (SalesCategoryListRef != null)
+            //{
+            //    // Forces the child list to execute a fresh database round-trip check instantly
+            //    await SalesCategoryListRef.RefreshListAsync();
+            //}
 
-            if (executionPackage == null) return;
+            //if (executionPackage == null) return;
 
             if (executionPackage.Success)
             {
@@ -262,11 +318,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     OffCanvasControlRef?.CloseAsync();
                     ActiveFormType = null;
                 }
-                StateHasChanged();
+                //StateHasChanged();
             }
-            else
+            else if (executionPackage != null)
             {
-                _Toast.ShowError(executionPackage.Message ?? "An unexpected parameter verification crash occurred.");
+                _Toast.ShowError(executionPackage.Message ?? "Error encountered:");
             }
         }
                 

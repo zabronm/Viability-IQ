@@ -62,20 +62,21 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
         }
 
-        public async Task RefreshListAsync()
-        {
-            await LoadSalesCategoriesAsync();
-        }
+        //same as below but different name in settings page
+        public async Task RefreshAsync()
+                => await LoadSalesCategoriesAsync();
 
-        /// <summary>
-        /// Evaluates numeric markup thresholds and returns explicit design presentation tokens
-        /// </summary>
+        public async Task RefreshListAsync()
+                => await LoadSalesCategoriesAsync();
+
+      
+        /// Evaluates numeric markup thresholds and returns explicit design presentation tokens        
         private string GetMarkupBadgeClass(decimal markupPercent) => markupPercent switch
         {
-            < 5.00m => "bg-danger text-white",
-            >= 5.00m and < 15.00m => "bg-warning text-dark",
+            < 5.00m => "btn-danger text-black",
+            >= 5.00m and < 15.00m => "btn-warning text-dark",
             >= 15.00m and < 30.00m => "bg-info text-dark",
-            >= 30.00m and <= 50.00m => "bg-success text-white",
+            >= 30.00m and <= 50.00m => "bg-success text-dark",
             _ => "bg-white text-dark border border-danger" // > 50 design block setup
         };
     }

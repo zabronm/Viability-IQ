@@ -24,6 +24,15 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
         //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
 
+      
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Products/Services";
+        private string AlertMessage = "Register your main products/services here, which will be inherited by your assessments in sales.";
+
+
         private List<ProductService> productList = new();
         private List<ZabDataTableAdvanced<ProductService>.ColumnDefinition<ProductService>> tableColumns = new();
 

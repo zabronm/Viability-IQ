@@ -31,22 +31,23 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             {
                 clientModel = new()
                 {
-                    ClientName = string.Empty,
+                    FullName = string.Empty,
                     IDNumber = string.Empty,
-                    Gender = 0,
-                    Race = 0,
+                    GenderId = 0,
+                    RaceId = 0,
                     SA_ID = false,
                     Telephone = string.Empty,
                     Mobile = string.Empty,
                     Email = string.Empty,
-                    Street_Address = string.Empty,
-                    Suburb = string.Empty,
-                    CityTown = string.Empty,
+                    Address_Street = string.Empty,
+                    Address_Surburb = string.Empty,
+                    Address_CityTown = string.Empty,
                     ProvinceId = 0,
                     //Province = string.Empty,
-                    Postal_Address = string.Empty,
-                    Postal_City = string.Empty,
-                    PostalCode = string.Empty,
+                    Address_Postal = string.Empty,
+                    Address_PostalCity = string.Empty,
+                    Address_PostalCode = string.Empty,
+                    Address_PostalLocation = string.Empty,                    
                     Country = string.Empty,
                     Remarks = string.Empty,
                     Active = true                    
@@ -98,13 +99,13 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     {
                         saveResult.ClearForm = true;
                         saveResult.ClosePanel = false;
-                        saveResult.Message = $"{clientModel.ClientName} added successfully";
+                        saveResult.Message = $"{clientModel.FullName} added successfully";
                     }
                     else
                     {
                         saveResult.ClearForm = true;
                         saveResult.ClosePanel = true;
-                        saveResult.Message = $"{clientModel.ClientName} updated successfully";
+                        saveResult.Message = $"{clientModel.FullName} updated successfully";
                     }
 
                     await OnSavedSuccess.InvokeAsync(saveResult);

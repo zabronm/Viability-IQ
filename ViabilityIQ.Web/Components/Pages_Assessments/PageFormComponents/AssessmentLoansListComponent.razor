@@ -22,16 +22,16 @@
     {
         <table class="table table-sm table-hover align-middle mb-0 text-nowrap border-0">
             <thead>
-                <tr class="pb-1" style="background-color: #ffffff !important;">
-                    <th class="text-center viq-th-style" style="width: 60px;">Item#</th>
-                    <th class="text-start viq-th-style">Loan Type</th>
-                    <th class="text-start viq-th-style">Bank</th>
-                    <th class="text-end viq-th-style" style="width: 70px;">Loan Balance</th>
+                <tr class="pb-1" style="background-color: #f5f5f5 !important;">
+                    <th class="text-center small text-secondary" style="width: 60px;font-size:0.70rem;">Item#</th>
+                    <th class="text-start small text-secondary " style="font-size:0.70rem;">Loan Type</th>
+                    <th class="text-start small text-secondary " style="font-size:0.70rem;">Bank</th>
+                    <th class="text-end small text-secondary " style="font-size:0.70rem;">Loan Balance</th>
                     @* <th class="text-end viq-th-style" style="width: 60px;">Term(months)</th> *@
-                    <th class="text-end viq-th-style" style="width: 60px;">Interest(%)</th>
-                    <th class="text-end viq-th-style" style="width: 90px;">Installment</th>
-                    <th class="text-center viq-th-style" style="width: 70px;">Status</th>
-                    <th class="text-center viq-th-style" style="width: 70px;">Action</th>
+                    <th class="text-end small text-secondary " style="font-size:0.70rem;">Interest(%)</th>
+                    <th class="text-end small text-secondary " style="font-size:0.70rem;">Installment</th>
+                    <th class="text-center small text-secondary " style="font-size:0.70rem;">Status</th>
+                    <th class="text-center small text-secondary " style="font-size:0.70rem;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,7 +61,7 @@
                             </span>
                         </td> *@
                         <td class="text-end">
-                            <span class="badge fw-normal rounded-pill px-1 py-1 @GetInterestBadgeClass(loan.InterestRatePerAnnum)" style="min-width: 65px; font-size: inherit;">
+                            <span class="badge fw-normal px-1 py-1 @GetInterestBadgeClass(loan.InterestRatePerAnnum)" style="min-width: 65px; font-size: inherit;">
                                 @loan.InterestRatePerAnnum.ToString("N2")%
                             </span>
                         </td>

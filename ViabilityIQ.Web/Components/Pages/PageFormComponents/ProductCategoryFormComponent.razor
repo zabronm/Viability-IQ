@@ -18,31 +18,38 @@
 
         <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
 
-        <div class="mb-3">
+        <div class="mb-2">
             <label for="categoryName" class="form-label-custom">Product Category Name <span class="text-danger">*</span></label>
             <InputText id="categoryName" class="form-control-compact" @bind-Value="productCategoryModel.ProductCategoryName" />
             <ValidationMessage For="@(() =>productCategoryModel.ProductCategoryName)" class="text-danger small mt-1" />
         </div>
 
-        <div class="mb-3">
-            <label for="UoM" class="form-label-custom">Unit Of Measure(Weight, Height, Volume) <span class="text-danger">*</span></label>
+        <div class="mb-2">
+            <label class="form-label-custom">Income/Revenue Type<span class="text-danger">*</span></label>
+            <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
+                               @bind-Value="productCategoryModel.IncomeTypeId" />
+            <ValidationMessage For="() => productCategoryModel.IncomeTypeId" class="text-danger small" />
+        </div>
+
+        <div class="mb-2">
+            <label for="UoM" class="form-label-custom">Unit Of Measure(Kgs, Meters, etc) <span class="text-danger">*</span></label>
             <InputText id="UoM" class="form-control-compact" @bind-Value="productCategoryModel.UOM" />
             <ValidationMessage For="@(() => productCategoryModel.UOM)" class="text-danger small mt-1" />
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
             <label for="MarkupPC" class="form-label-custom">Markup(%) <span class="text-danger">*</span></label>
             <InputNumber id="MarkupPC" class="form-control-compact" @bind-Value="productCategoryModel.MarkupPercentage" />
             <ValidationMessage For="@(() => productCategoryModel.MarkupPercentage)" class="text-danger small mt-1" />
         </div>
 
-        <div class="mb-4">
+        <div class="mb-2">
             <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
             <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="productCategoryModel.Remarks" />
             <ValidationMessage For="@(() => productCategoryModel.Remarks)" class="text-danger small mt-1" />
         </div>
 
-        <div class="mb-3 d-flex align-items-center justify-content-start ">
+        <div class="mb-2 d-flex align-items-center justify-content-start ">
             <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
                 @(isRowActive ? "Category Active" : "Category Not-Active")
             </label>

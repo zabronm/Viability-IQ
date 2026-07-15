@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.Security.Cryptography.Pkcs;
 using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
@@ -7,6 +8,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
     {
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
+               
+        public async Task RefreshAsync()
+        {
+            // Reload internal data logic here            
+            StateHasChanged();
+            await Task.CompletedTask;
+        }
 
         private async Task HandleSubmitData()
         {

@@ -22,6 +22,13 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
+       
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Business Sectors";
+        private string AlertMessage = "Setup all base GLOBAL business sectors that will be assumed and/or inherited by your assessments.";
 
         private List<BusinessSector> sectorList = new();
         private List<ZabDataTableAdvanced<BusinessSector>.ColumnDefinition<BusinessSector>> tableColumns = new();
@@ -95,7 +102,7 @@ namespace ViabilityIQ.Web.Components.Pages
             }
             else
             {
-                _Toast!.ShowError(_result.Message, "Operational Error");
+                _Toast!.ShowError(_result.Message, "Error encountered:");
             }
 
             if (_result.ClosePanel && canvasShell != null)

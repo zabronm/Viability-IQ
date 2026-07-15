@@ -17,14 +17,22 @@ using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 namespace ViabilityIQ.Web.Components.Pages
 {
     public partial class CompanyPage
-    {
-        [Inject] private IGenericDataRepository<Company>  companyRepository { get; set; } = default!;
+    {        [Inject] private IGenericDataRepository<Company>  companyRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
         //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
+
+        //---------------------------------------------------------
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Company Register";
+        private string AlertMessage = "Register your company details here. All users will be registered under your company tenant; All reports will be based on information from this section.";
+
 
         private List<Company>  companyList = new();
         private List<ZabDataTableAdvanced<Company>.ColumnDefinition<Company>> tableColumns = new();

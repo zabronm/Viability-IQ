@@ -22,6 +22,9 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // 1. Centralized hardcoded database mapping definitions mapping
         private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField)> _metadataRegistry = new()
         {
+            { DDLookupEnums.AssessmentTypes, ("tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName") },
+            { DDLookupEnums.Genders, ("tblGender", "GenderId", "Gender") },
+            { DDLookupEnums.Races, ("tblRace", "RaceId", "Race") },
             { DDLookupEnums.Banks, ("tblBank", "BankId", "BankName") },
             { DDLookupEnums.LoanTypes, ("tblLoanType", "LoanTypeId", "LoanTypeName") },
             { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName") },
@@ -31,8 +34,12 @@ namespace ViabilityIQ.Infrastructure.Repositories
             { DDLookupEnums.Products, ("tblProduct", "ProductServiceId", "ProductServiceName") },
             { DDLookupEnums.Provinces, ("tblProvince", "ProvinceId", "ProvinceName") },
             { DDLookupEnums.Users, ("tblUsers", "UserId", "FullName") },
-            { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSector") },
+            { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSectorName") },
             { DDLookupEnums.Clients, ("tblClient", "ClientId", "FullName") },
+            { DDLookupEnums.ClientTypes, ("tblClientTYpe", "ClientTypeId", "ClientTypeName") },
+            { DDLookupEnums.IncomeTypes, ("tblIncomeTYpe", "IncomeTypeId", "IncomeTypeName") },
+
+
         };
 
         public DDLookupService(IDbConnectionFactory dbConnectionFactory, IMemoryCache cache)

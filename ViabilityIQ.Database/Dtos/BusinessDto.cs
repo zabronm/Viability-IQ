@@ -1,6 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,20 +13,20 @@ namespace ViabilityIQ.Shared.DataModels
     [Table("vw_business_list")]
     public class BusinessDto
     {
-        [Key] public long BusinessId { get; set; }
+        [Dapper.Contrib.Extensions.Key] public long BusinessId { get; set; }     
         public string? BusinessName { get; set; }
         public bool Registered { get; set; }
         public bool VATRegistered { get; set; }
         public bool BEE_Exempt { get; set; }
-        public long BusinessSectorId { get; set; }
-        public string ? BusinessSector { get; set; }
+        public long BusinessSectorId { get; set; }     
+        public string ? BusinessSectorName { get; set; }
         public DateTime? RegisteredDate { get; set; } = null;
         public long ClientId { get; set; }
         public string? Client { get; set; }
         public string? CKNumber { get; set; }
         public string? ContactPerson { get; set; }
         public string? Street_Address { get; set; }
-        public string? Suburb { get; set; }
+        public string? Surburb { get; set; }        
         public string? CityTown { get; set; }
         public long ProvinceId { get; set; }
         public string? ProvinceName { get; set; }

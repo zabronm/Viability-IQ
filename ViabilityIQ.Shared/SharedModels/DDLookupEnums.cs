@@ -8,11 +8,16 @@ namespace ViabilityIQ.Shared.SharedModels
 {
     public enum DDLookupEnums
     {
+        AssessmentTypes,
+        Genders,
+        Races,
         Banks,
         BusinessCategories,
         Businesses,
         ClientCategories,
         LoanTypes,
+        ClientTypes,
+        IncomeTypes,
         Clients,
         ProductServiceCategories,
         Products,

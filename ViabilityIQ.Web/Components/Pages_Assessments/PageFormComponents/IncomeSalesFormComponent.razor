@@ -4,74 +4,71 @@
 <div class="p-3">
     @if (FormModel != null)
     {
-        <!-- (2.i) Income Description -->
-        <div class="mb-2.5">
-            <label class="form-label fw-bold text-xxs text-secondary uppercase mb-1">Income Description</label>
-            <input type="text" class="form-control form-control-sm text-xs" @bind="FormModel.Description" placeholder="Enter revenue channel description..." />
-        </div>
+        <EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <!-- (2.ii) Income Type Dropdown Selection -->
-        <div class="mb-2.5">
-            <label class="form-label fw-bold text-xxs text-secondary uppercase mb-1">Income Type Category</label>
-            <select class="form-select form-select-sm text-xs" @bind="FormModel.Type">
-                <option value="@IncomeTypeEnum.SalesCategoryA">Sales Category A</option>
-                <option value="@IncomeTypeEnum.SalesCategoryB">Sales Category B</option>
-                <option value="@IncomeTypeEnum.SundryIncome">Sundry Income</option>
-                <option value="@IncomeTypeEnum.GrantsDonations">Grants / Donations</option>
-            </select>
-        </div>
-
-        <!-- (2.iii) Include VAT Field Entry Toggle -->
-        <div class="form-check form-switch mb-3 text-xs align-items-center d-flex gap-2">
-            <input class="form-check-input" type="checkbox" id="vatToggleSwitch" @bind="FormModel.IncludesVat" />
-            <label class="form-check-label fw-semibold text-muted mb-0" for="vatToggleSwitch">Include VAT Calculations (+15%)</label>
-        </div>
-
-        <!-- (2.iv) Bulk Same Monthly Value Split Distribution Engine -->
-        <div class="card bg-light border-0 mb-3 p-1.5 rounded">
-            <label class="form-label fw-bold text-xxs text-secondary uppercase mb-0.5">Quick Distribution Engine (Even Annual Split)</label>
-            <div class="input-group input-group-sm">
-                <input type="number" class="form-control font-monospace text-xs" placeholder="Enter target annual revenue..." @bind="BulkAnnualValueTarget" min="0" />
-                <button class="btn btn-outline-success text-xxs px-2 fw-bold" type="button" @onclick="DistributeAnnualValueEvenly">Apply Split</button>
+            <div class="mb-2 mt-0">
+                <label class="form-label-custom  mb-1">Income Type Category</label>
+                <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes" @bind-Value="FormModel.IncomeTypeId" />
             </div>
-        </div>
 
-        <!-- (2.v) 12-Month Matrix Fields View System -->
-        <h6 class="text-xxs fw-bold text-secondary mb-1 uppercase">12-Month Values Projections Matrix</h6>
-        <div class="pe-1 border p-1.5 rounded bg-light-subtle mb-2 sales-input-pane" style="max-height: 260px; overflow-y: auto;">
-            @for (int i = 0; i < 12; i++)
-            {
-                var index = i;
-                <div class="row align-items-center mb-1 g-2 mx-0 input-row-hover rounded py-0.5">
-                    <div class="col-4"><span class="text-xxs fw-semibold text-muted">Month @(index + 1)</span></div>
-                    <div class="col-8">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text py-0 px-1 font-monospace text-xxs bg-light">M@(index + 1)</span>
-                            <input type="number" class="form-control form-control-sm text-end font-monospace text-xs py-0.5 text-dark fw-bold"
-                                   @bind="FormModel.MonthlyValues[index]" @bind:event="oninput" min="0" />
-                        </div>
-                    </div>
+            <div class="mb-2">
+                <label class="form-label-custom mb-1">Income Description</label>
+                <input type="text" class="form-control-compact form-control" @bind="FormModel.Description" />
+            </div>            
+
+            <div class="form-check form-switch mb-2 mt-0 d-flex gap-2">
+                <input class="form-check-input" type="checkbox" checked="@(FormModel.IncludeVAT > 0)"
+                       @onchange="@(e => FormModel.IncludeVAT = (bool)e.Value! ? 1 : 0)" value="true" />
+                <label class="form-check-label fw-semibold text-muted">Include VAT (+15%)</label>
+            </div>
+
+            <div class="card bg-light border-0 mb-3 p-1.5 rounded">
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" @bind="BulkAnnualValueTarget" />
+                    <button class="btn btn-outline-success" type="button" @onclick="DistributeAnnualValueEvenly">Apply Split</button>
                 </div>
-            }
-        </div>
-
-        <!-- (2.v) Dynamically computed total running sum visual boxes -->
-        <div class="p-2 bg-navy-light-summary rounded mb-3 border border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center text-xs text-navy-brand mb-0.5">
-                <span class="fw-semibold">Sub-Total Base Figure:</span>
-                <span class="font-monospace fw-bold">R @BaseTotalSum.ToString("N2")</span>
             </div>
-            <div class="d-flex justify-content-between align-items-center text-xs text-success">
-                <span class="fw-semibold">Grand Total (Inc. Applied VAT):</span>
-                <span class="font-monospace fw-bold">R @GrandCalculatedTotalSum.ToString("N2")</span>
-            </div>
-        </div>
 
-        <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top">
-            <button type="button" class="btn btn-primary btn-sm flex-fill py-1.5 text-xs fw-bold shadow-sm" @onclick="ExecuteSaveWorkflowAsync">
-                <i class="bi bi-check-circle me-1"></i> Save Matrix Parameters
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm py-1.5 text-xs" @onclick="CancelFormAsync">Cancel</button>
-        </div>
+            <h6 class="text-xs fw-bold text-secondary mb-1 uppercase">Assessment Period Sales Projections</h6>
+            <div class="sales-input-pane" style="max-height:260px; overflow-y:auto;">
+                @for (int i = 0; i < 12; i++)
+                {
+                    int index = i;
+
+                    <div class="d-flex align-items-center mb-2">
+                        <label class="me-2 mb-0" style="width:100px;">
+                            Month-@(index + 1)
+                        </label>
+
+                        <input type="number"
+                               class="form-control form-control-sm text-end"
+                               @bind="MonthlyValues[index]"
+                               @bind:event="oninput" />
+                    </div>
+                }
+            </div>
+            @* <div class="sales-input-pane" style="max-height: 260px; overflow-y: auto;">
+                @for (int i = 0; i < 12; i++)
+                {
+                    int index = i;                   
+                    <div class="input-group input-group-sm mb-1">
+                        
+                        <span class="input-group-text text-xs">Month-@(index + 1)</span>
+                        <input type="number" class="form-control-compact text-end" @bind="MonthlyValues[index]" @bind:event="oninput" />
+                    </div>
+                }
+            </div> *@
+
+            <div class="p-2 bg-light rounded mt-3">
+                <div class="d-flex justify-content-between text-xs"><span>Total:</span> <b>R @GrandCalculatedTotalSum.ToString("N2")</b></div>
+            </div>
+
+            <div class="mt-3 border-top pt-2 d-flex gap-2">
+                <button class="btn btn-primary btn-sm flex-fill" @onclick="ExecuteSaveWorkflowAsync">Save</button>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="CancelFormAsync">Cancel</button>
+            </div>
+        </EditForm>
     }
 </div>

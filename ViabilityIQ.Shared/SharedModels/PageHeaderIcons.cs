@@ -7,6 +7,7 @@
         Assessments,
         Assessment,
         Businesses,
+        ClientTypes,
         Contacts,
         Communication,
         Settings,
@@ -29,7 +30,8 @@
         Stock,
         VAT,
         Sales,
-        LoanTypes
+        LoanTypes,
+        IncomeTypes,
     }
 
     public static class PageHeaderIcons
@@ -67,6 +69,8 @@
             PageType.Stock => "bi bi-boxes",
             PageType.VAT => "bi bi-bug",
             PageType.LoanTypes => "bi bi-umbrella-fill",
+            PageType.ClientTypes => "bi bi-people-fill",
+            PageType.IncomeTypes => "bi bi-diagram-3-fill",
 
             _ => "bi bi-circle"
         };

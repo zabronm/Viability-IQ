@@ -10,6 +10,9 @@
     <PageHeading _pageTitle="Clients" CurrentPage="PageType.Contacts" _pageHeading="Client Contacts" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
         <div class="app-workspace-shell">
 
             <ZabDataTableAdvanced TItem="ClientDto"
@@ -30,7 +33,7 @@
     </main>
 
     @* ALIGNED: Merged duplicate canvas segments into a single entry block *@
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500">
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="550">
         @if (canvasOpenStatus)
         {
             <ClientFormComponent ClientId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />

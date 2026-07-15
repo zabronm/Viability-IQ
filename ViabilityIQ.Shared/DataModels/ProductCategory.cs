@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ViabilityIQ.Shared.DataModelsInterfaces;
 
+
 namespace ViabilityIQ.Shared.DataModels
 {
     [Table("tblProductCategory")] 
@@ -15,9 +16,9 @@ namespace ViabilityIQ.Shared.DataModels
     {
         [Dapper.Contrib.Extensions.Key] public long ProductCategoryId { get; set; }
         [Required] public string? ProductCategoryName { get; set; }
+        [Required] public long IncomeTypeId { get; set; }
         public string? UOM { get; set; }
         public decimal? MarkupPercentage { get; set; }
-
     
         public string? Remarks { get; set; }
         public bool Active { get; set; } = false;

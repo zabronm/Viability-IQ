@@ -10,21 +10,10 @@
     <PageHeading _pageTitle="Banks/Funders" CurrentPage="PageType.Banks" _pageHeading="Banks/Funders" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
         <div class="app-workspace-shell">
-@* 
-            <ZabDataTableAdvanced TItem="Bank"
-                                  Items="@banksList"
-                                  Columns="@tableColumns"
-                                  IsRowClickable="false"
-                                  IsLoading="@loadingStateActive"
-                                  ShowAdd="true"
-                                  ShowDelete="true"
-                                  OnAddRecordId="HandleFormExecution"
-                                  OnEditRecordId="HandleFormExecution"
-                                  OnDelete="DeleteSelectedBank"
-                                  GetRowId="@(x => x.BankId)"
-                                   ItemName="Bank"/> *@
-
             <ZabDataTableAdvanced TItem="Bank"
                                   Items="@banksList"
                                   ItemName="Bank"
@@ -39,8 +28,6 @@
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
-
-
         </div>
     </main>
 

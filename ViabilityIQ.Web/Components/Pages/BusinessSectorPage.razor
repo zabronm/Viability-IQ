@@ -9,6 +9,9 @@
     <PageHeading _pageTitle="Business Sectors" CurrentPage="PageType.Sectors" _pageHeading="Business Sectors" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true"  />
+        </div>
         <div class="app-workspace-shell">
            
             <ZabDataTableAdvanced TItem="BusinessSector"
@@ -17,7 +20,7 @@
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"
                                   ShowAdd="true"
-                                  ShowDelete="true"
+                                  ShowDelete="false"
                                   OnDelete="DeleteSelectedSector"
                                   GetRowId="@(x => x.BusinessSectorId)"
                                   OnAddRecordId="HandleFormExecution"

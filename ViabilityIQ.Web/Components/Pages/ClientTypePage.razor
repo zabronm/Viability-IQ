@@ -1,0 +1,44 @@
+﻿@page "/settings/client-types"
+
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Components.Pages.PageFormComponents
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+<div class="p-0 position-relative">
+    <PageHeading _pageTitle="Client Type" CurrentPage="PageType.ClientTypes" _pageHeading="Client Types" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true"  />
+        </div>
+        <div class="app-workspace-shell">
+           
+            <ZabDataTableAdvanced TItem="ClientType"
+                                  Items="@clientTypeList"
+                                  ItemName="Client Type"
+                                  Columns="@tableColumns"
+                                  IsLoading="@loadingStateActive"
+                                  ShowAdd="true"
+                                  ShowDelete="false"
+                                  OnDelete="DeleteSelectedSector"
+                                  GetRowId="@(x => x.ClientTypeId)"
+                                  OnAddRecordId="HandleFormExecution"
+                                  OnEditRecordId="HandleFormExecution"
+                                  OnPrintList="ExecutePrintFormatProcess"
+                                  OnExportExcelList="ExecuteExcelExportProcess"
+                                  OnEmailList="ExecuteEmailDistributionProcess" />
+        </div>
+    </main>
+
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
+        @if (canvasOpenStatus)
+        {
+            <ClientTypeFormComponent ClientTypeId="@activeRecordId" OnSavedSuccess="@(res =>ProcessExecutionFeedback(res))" />
+        }
+    </ZabOffCanvas>
+
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

@@ -63,7 +63,7 @@ namespace ViabilityIQ.Web.Components.Pages
                         builder.CloseElement();
                     }
                 },
-                new() { Title = "Case Type", Value = x => x.AssessmentType ?? "" },
+                new() { Title = "Case Type", Value = x => x.AssessmentTypeName ?? "" },
                 
                 // COLUMN 2: Business Name Link-Button
                 new() {
@@ -138,7 +138,7 @@ namespace ViabilityIQ.Web.Components.Pages
                          businessName: selectedRecord.BusinessName,
                          clientId: selectedRecord.ClientId,
                          clientName: selectedRecord.BusinessOwner,
-                         assessmentType: selectedRecord.AssessmentType,
+                         assessmentType: selectedRecord.AssessmentTypeName,
 
                          HasExpensesData: true,        // selectedRecord.HasExpensesData,
                          HasSalesData: true,           // selectedRecord.HasSalesData,

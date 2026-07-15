@@ -3,6 +3,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 
+
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class SalesCategoryFormComponent 
@@ -11,11 +12,18 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         [Parameter] public long AssessmentSalesCategoryId { get; set; }
         [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
 
+        [Inject] private ISessionService sessionService { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentSalesCategory> DataRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<AssessmentSales> salesRepository { get; set; }
+
 
         private AssessmentSalesCategory? Model { get; set; }
+        private AssessmentSales? SalesModel { get; set; }
+
+
         private bool IsLoading { get; set; } = true;
         private bool IsSubmitting { get; set; } = false;
+
 
         protected override async Task OnInitializedAsync()
         {
@@ -51,6 +59,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     // Mode B: CREATE mode clean canvas allocation blueprint initialization
                     Model = new AssessmentSalesCategory
                     {
+                        IncomeTypeId = 1,      //Default to Sales type
                         AssessmentSalesCategoryId = 0, // Signals repo to trigger an automated SQL INSERT statement
                         AssessmentId = AssessmentId,
                         SalesCategoryName = string.Empty,
@@ -79,10 +88,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         public async Task ExecuteSaveWorkflow()
         {
-            if (Model == null || IsSubmitting) return;
+            SaveResult executionFeedbackPackage;
 
-            // Interface validation step guard check
-            if (string.IsNullOrWhiteSpace(Model.SalesCategoryName))
+            if (Model == null || IsSubmitting) return;            
+            if (string.IsNullOrWhiteSpace(Model.SalesCategoryName))         //// Interface validation step guard check
             {
                 return;
             }
@@ -90,21 +99,38 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             try
             {
                 IsSubmitting = true;
+                bool isNewCategory = Model.AssessmentSalesCategoryId == 0 ? true : false;
 
-                // Fire transaction block updates down to persistent database tier
-                // GenericDataRepository handles routing INSERT vs UPDATE dynamically based on AssessmentSalesCategoryId being 0
                 bool isExecutionSuccess = await DataRepository.SaveAsync(Model);
+                if (isExecutionSuccess)
+                {
+                    if (isNewCategory)           //write this record into sales if its new
+                    {
+                        SalesModel = new()
+                        {
+                            AssessmentSalesId = 0, // Signals repo to trigger an automated SQL INSERT statement
+                            AssessmentId = Model.AssessmentId,
+                            ProductCategoryId = Model.AssessmentSalesCategoryId,
+                            Description = Model.SalesCategoryName,
+                            IncomeTypeId = Model.IncomeTypeId,
+                            CreatedDate = DateTime.Now,
+                            CreatedBy = sessionService.UserId,
+                        };
+                    }
+                    isExecutionSuccess = await salesRepository.SaveAsync(SalesModel);
+                }
 
-                var executionFeedbackPackage = new SaveResult
+                executionFeedbackPackage = new()
                 {
                     Success = isExecutionSuccess,
                     ClosePanel = isExecutionSuccess,
                     Message = isExecutionSuccess
                         ? "Sales category details committed successfully."
-                        : "The transactional operation request was turned down by the repository validation engine."
+                        : "Error encountered; sales category not saved."
                 };
 
                 await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
+
             }
             catch (Exception ex)
             {
@@ -117,6 +143,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
             finally
             {
+                
                 IsSubmitting = false;
             }
         }

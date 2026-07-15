@@ -24,6 +24,15 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
+        //---------------------------------------------------------
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Client Register";
+        private string AlertMessage = "Register clients who will own businesses in your assessments. Provide as accurate and detailed data as possible to ensure more accurate statistics and projections.";
+
+
         private List<ClientDto> clientsList = new();
         private List<ZabDataTableAdvanced<ClientDto>.ColumnDefinition<ClientDto>> tableColumns = new();
 
@@ -40,12 +49,12 @@ namespace ViabilityIQ.Web.Components.Pages
             // ALIGNED: Corrected property mappings for column expressions
             tableColumns = new List<ZabDataTableAdvanced<ClientDto>.ColumnDefinition<ClientDto>>
             {
-                new() { Title = "Client Name", Value = x => x.Client },                
+                new() { Title = "Client Name", Value = x => x.Client },
+                new() { Title = "Category", Value = x => x.ClientTypeName ?? "" },
                 new() { Title = "Gender", Value = x => x.Gender ?? "" },
                 new() { Title = "Class", Value = x => x.Race ?? "" },
                 new() { Title = "Province", Value = x => x.ProvinceName ?? "" }, // Maps clean description or tracking ID
-                new() { Title = "Mobile", Value = x => x.Mobile ?? "" },     // Adjusted column tracking
-                new() { Title = "Email", Value = x => x.Email ?? "" },
+                new() { Title = "Mobile", Value = x => x.Mobile ?? "" },     // Adjusted column tracking                
                 new() {
                     Title = "Status",
                     Value = x => x.Active == true ? "Active" : "Inactive",
@@ -90,7 +99,7 @@ namespace ViabilityIQ.Web.Components.Pages
             var targetClient = new Client
             {
                 ClientId = targetClientDto.ClientId,
-                ClientName = targetClientDto.Client
+                FullName = targetClientDto.Client
             };
 
             var success = await clientGenRepository!.DeleteAsync(targetClient);

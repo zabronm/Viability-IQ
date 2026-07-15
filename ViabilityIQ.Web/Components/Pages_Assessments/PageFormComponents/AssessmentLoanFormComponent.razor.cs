@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.Globalization;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
@@ -7,13 +8,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class AssessmentLoanFormComponent 
     {
-        [Parameter] public long AssessmentId { get; set; }
-       
+        [Parameter] public long AssessmentId { get; set; }      
         [Parameter] public long AssessmentLoanId { get; set; }
-       
+        [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
+
         [Inject] private IGenericDataRepository<AssessmentLoan> DataRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<AssessmentSales> salesRepository { get; set; }
 
         private AssessmentLoan? Model { get; set; }
+        private AssessmentSales? SalesModel { get; set; }
+
         private bool IsLoading { get; set; } = true;
         private bool IsSubmitting { get; set; } = false;
 
@@ -38,12 +42,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     }
                     else
                     {
-                        //await OnSaveComplete.InvokeAsync(new SaveResult
-                        //{
-                        //    Success = false,
-                        //    ClosePanel = false,
-                        //    Message = $"Error: Loan targeting reference key #{AssessmentLoanId} missing."
-                        //});
+                        await OnSaveComplete.InvokeAsync(new SaveResult
+                        {
+                            Success = false,
+                            ClosePanel = false,
+                            Message = $"Error: Loan targeting reference key #{AssessmentLoanId} missing."
+                        });
                     }
                 }
                 else
@@ -62,12 +66,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
             catch (Exception ex)
             {
-                //await OnSaveComplete.InvokeAsync(new SaveResult
-                //{
-                //    Success = false,
-                //    ClosePanel = false,
-                //    Message = $"Error encountered: {ex.Message}"
-                //});
+                await OnSaveComplete.InvokeAsync(new SaveResult
+                {
+                    Success = false,
+                    ClosePanel = false,
+                    Message = $"Error encountered: {ex.Message}"
+                });               
             }
             finally
             {
@@ -75,24 +79,14 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
         }
 
+
         public async Task ExecuteSaveWorkflow()
         {
             if (Model == null || IsSubmitting) return;
-
-            // Interface validation step guard check
-            //if (string.IsNullOrWhiteSpace(Model.LoanAmount.ToString))
-            //{
-            //    return;
-            //}
-
             try
             {
-                IsSubmitting = true;
-
-                // Fire transaction block updates down to persistent database tier
-                // GenericDataRepository handles routing INSERT vs UPDATE dynamically based on AssessmentSalesCategoryId being 0
+                IsSubmitting = true;               
                 bool isExecutionSuccess = await DataRepository.SaveAsync(Model);
-
                 var executionFeedbackPackage = new SaveResult
                 {
                     Success = isExecutionSuccess,
@@ -102,16 +96,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         : "Error encountered while saving, please contact Administrator."
                 };
 
-                //await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
+                await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
             }
             catch (Exception ex)
             {
-                //await OnSaveComplete.InvokeAsync(new SaveResult
-                //{
-                //    Success = false,
-                //    ClosePanel = false,
-                //    Message = $"Critical error encountered: {ex.Message}"
-                //});
+                await OnSaveComplete.InvokeAsync(new SaveResult
+                {
+                    Success = false,
+                    ClosePanel = false,
+                    Message = $"Critical error encountered: {ex.Message}"
+                });
             }
             finally
             {

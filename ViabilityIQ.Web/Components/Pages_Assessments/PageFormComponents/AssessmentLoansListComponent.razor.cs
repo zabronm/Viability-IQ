@@ -26,6 +26,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             await LoadAssessmentLoanAsync();
         }
 
+        public async Task RefreshAsync()
+        {
+            await LoadAssessmentLoanAsync();
+            StateHasChanged();
+        }
+
         private async Task LoadAssessmentLoanAsync()
         {
             try

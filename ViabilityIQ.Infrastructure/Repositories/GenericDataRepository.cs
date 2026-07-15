@@ -88,7 +88,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             catch (Exception)
             {
                 throw;
-            }           
+            }
         }
 
         public async Task<bool> DeleteAsync(T entity)

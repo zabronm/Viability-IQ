@@ -10,6 +10,9 @@
     <PageHeading _pageTitle="Loan Types" CurrentPage="PageType.LoanTypes" _pageHeading="Loan Types" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
         <div class="app-workspace-shell">
 
             <ZabDataTableAdvanced TItem="LoanType"

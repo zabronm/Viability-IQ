@@ -10,6 +10,9 @@
     <PageHeading _pageTitle="Businesses" CurrentPage="PageType.Businesses" _pageHeading="Businesses" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
         <div class="app-workspace-shell">
 
             <ZabDataTableAdvanced TItem="BusinessDto"
@@ -31,7 +34,7 @@
     </main>
 
     <!-- FIXED: Removed duplicate canvas instance block to fix dual binding compilation errors -->
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500">
+    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="550">
         @if (canvasOpenStatus)
         {
             <BusinessFormComponent BusinessId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />

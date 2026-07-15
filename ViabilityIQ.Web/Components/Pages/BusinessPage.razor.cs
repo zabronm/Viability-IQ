@@ -23,6 +23,18 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
+        //---------------------------------------------------------
+        // Alert
+        //---------------------------------------------------------
+
+        private bool blAlert = true;
+
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+
+        private string AlertHeading = "Businesses";
+
+        private string AlertMessage = "Register a business before it can be assessed. Supply all relevant details that will assist the assessment to be more accurate.";
+
         private List<BusinessDto> businessList = new();
         private List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>> tableColumns = new();
 
@@ -39,7 +51,7 @@ namespace ViabilityIQ.Web.Components.Pages
             tableColumns = new List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>>
             {
                 new() { Title = "Business Name", Value = x => x.BusinessName ?? "" },
-                new() { Title = "Sector", Value = x => x.BusinessSector ?? "" },
+                new() { Title = "Sector", Value = x => x.BusinessSectorName ?? "" },
                 new() { Title = "Owner", Value = x => x.Client ?? "" },
                 new() { Title = "Reg?", Value = x => x.Registered==true? "Yes": "No" },
                 new() { Title = "VAT Reg?", Value = x => x.VATRegistered==true? "Yes": "No" },

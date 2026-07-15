@@ -9,9 +9,10 @@
     <PageHeading _pageTitle="Companies" CurrentPage="PageType.Company" _pageHeading="Company Customers" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
-        <div class="app-workspace-shell">
-           
-
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
+        <div class="app-workspace-shell">      
             <ZabDataTableAdvanced TItem=" Company"
                                   Items="@companyList"
                                   ItemName="Company"
@@ -26,8 +27,6 @@
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
-
-
         </div>
     </main>
 

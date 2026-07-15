@@ -84,14 +84,19 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        await RefreshAsync();
+    }
+
+
+    public async Task RefreshAsync()
+    {
         // Start with the spinner active
-        loadingStateActive = true;       
+        loadingStateActive = true;
         await Task.Delay(150);
 
         loadingStateActive = false;
-        StateHasChanged();
+        StateHasChanged();    
     }
-
 
     //===================================== UPDATE OPENING BALANCES ================
     async Task UpdateOpeningBalances()

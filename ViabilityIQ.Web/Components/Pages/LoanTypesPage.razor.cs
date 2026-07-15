@@ -25,6 +25,13 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
         //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
 
+        // Alert
+        //---------------------------------------------------------
+        private bool blAlert = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
+        private string AlertHeading = "Loan Types";
+        private string AlertMessage = "Register types of typical loans here. Each loan type will have different implications like interest rates and regulations ";
+
         private List<LoanType> loanTypesList = new();
         private List<ZabDataTableAdvanced<LoanType>.ColumnDefinition<LoanType>> tableColumns = new();
 

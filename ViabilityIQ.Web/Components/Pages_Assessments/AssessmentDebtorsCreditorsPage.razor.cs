@@ -19,13 +19,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         //---------------------------------------------------------
         // Alert
         //---------------------------------------------------------
-
         private bool blAlert = true;
-
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
-
         private string AlertHeading = "Working Capital";
-
         private string AlertMessage = "Collection and payment profiles determine when cash moves through the projected cashbook. Monthly receipts and payments are calculated automatically from your forecasts.";
 
 

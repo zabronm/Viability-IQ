@@ -8,9 +8,10 @@
     <PageHeading _pageTitle="Product/Service Categories" CurrentPage="PageType.ProductCategory" _pageHeading="Product/Service Categories" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
         <div class="app-workspace-shell">
-           
-
             <ZabDataTableAdvanced TItem="ProductService"
                                   Items="@productList"
                                   ItemName="Product/Service"
@@ -25,8 +26,6 @@
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
-
-
         </div>
     </main>
 
