@@ -3,11 +3,10 @@
 @using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-
 <div class="zab-form-wrapper mb-4">
     @if (isProcessingData)
     {
-        <FormLoadingComponent LoadingMessage="Synchronizing Income Types ..." />
+        <FormLoadingComponent LoadingMessage="Synchronizing Expense Types ..." />
     }
 
     <EditForm Model="@incomeTypeModel" OnValidSubmit="HandleFormSubmissionAsync">
@@ -16,8 +15,8 @@
 
         <div class="mb-3">
             <label for="TypeName" class="form-label-custom">Revenue Stream <span class="text-danger">*</span></label>
-            <InputText id="TypeName" class="form-control-compact" @bind-Value="incomeTypeModel.IncomeTypeName" placeholder="e.g. Individual, corporation, NPO" />
-            <ValidationMessage For="@(() => incomeTypeModel.IncomeTypeName)" class="text-danger small mt-1" />
+            <InputText id="TypeName" class="form-control-compact" @bind-Value="incomeTypeModel.ExpenseTypeName" placeholder="e.g. Individual, corporation, NPO" />
+            <ValidationMessage For="@(() => incomeTypeModel.ExpenseTypeName)" class="text-danger small mt-1" />
         </div>
 
         <div class="col-12 mb-4">
@@ -45,7 +44,7 @@
                 else
                 {
                     <i class="bi bi-check2-square me-1.5"></i>
-                    <span>@(IncomeTypeId == 0 ? "Create income type" : "Modify income type")</span>
+                    <span>@(ExpenseTypeId == 0 ? "Create income type" : "Modify income type")</span>
                 }
             </button>
         </div>

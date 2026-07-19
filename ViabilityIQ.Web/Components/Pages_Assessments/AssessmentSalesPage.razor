@@ -6,51 +6,58 @@
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Sales" PageTitle="Sales & Forecasts" CurrentPage="PageType.Sales" />
 
-    @if (IsLoading)
-    {
-        <div class="text-center p-5"><FormLoadingComponent /></div>
-    }
-    else
-    {
-        <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
-            <div class="col-12 py-2">
-                <div class="px-0 mb-3">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-md-4">
-                            <button class="btn btn-primary btn-sm text-xs" @onclick="() => AddIncomeStream()">
-                                <i class="bi bi-plus-circle me-1"></i>&nbsp;Add Revenue Stream
-                            </button>
+
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
+
+        <div class="col-12 py-2">
+            <div class="px-0 mb-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <button class="btn btn-primary btn-sm text-xs" @onclick="() => AddIncomeStream()">
+                            <i class="bi bi-plus-circle me-1"></i>&nbsp;Add Revenue Stream
+                        </button>
+                    </div>
+                    <div class="col-md-8 d-flex gap-2 justify-content-end">
+                        <!-- (1) Implementation of DDLookupComponent -->
+                        <div style="width: 25%; font-weight: normal!important;">
+                            <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
+                                               @bind-Value="SelectedFilterId"
+                                               Placeholder="All Revenue Sources" />
                         </div>
-                        <div class="col-md-8 d-flex gap-2 justify-content-end">
-                            <!-- (1) Implementation of DDLookupComponent -->
-                            <div style="width: 25%;">
-                                <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
-                                                   @bind-Value="SelectedFilterId"
-                                                   Placeholder="All Revenue Sources" />
-                            </div>
-                            <input type="text" class="form-control form-control-sm" style="width: 30%;" placeholder="Search..." @bind="SearchQuery" @bind:event="oninput" />
-                        </div>
+                        <input type="text" class="form-control form-control-sm" style="width: 30%;" placeholder="Search..." @bind="SearchQuery" @bind:event="oninput" />
                     </div>
                 </div>
+            </div>
 
-                <!-- (5) Table border-radius applied via wrapper -->
-                <div class="table-responsive shadow-sm border border-secondary-subtle" style="border-radius: 6px; overflow: hidden;">
-                    <table class="table table-sm table-hover mb-0">
-                        <!-- Table Header with restored font sizes -->
-                        <thead class="text-xxs">
-                            <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                                <th class="sticky-col ps-2 text-uppercase">Revenue Channels</th>
-                                <th class="text-start text-uppercase px-2">Income Type</th>
-                                @for (int m = 1; m <= 12; m++)
-                                {
-                                    <th class="text-end text-uppercase">M@(m)</th>
-                                }
-                                <!-- (2) Marble background for Total column -->
-                                <th class="text-end text-uppercase" style="background-color: #d1d5db; color: #000080;">Total Revenue</th>
-                                <th class="text-center"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="grid-font-standard">
+            <!-- (5) Table border-radius applied via wrapper -->
+            <div class="table-responsive shadow-sm border border-secondary-subtle" style="border-radius: 6px; overflow: hidden;">
+                <table class="table table-sm table-hover mb-0">
+                    <!-- Table Header with restored font sizes -->
+                    <thead class="text-xxs">
+                        <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
+                            <th class="sticky-col ps-2 text-uppercase">Revenue Channels</th>
+                            <th class="text-start text-uppercase px-2">Income Type</th>
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <th class="text-end text-uppercase">M@(m)</th>
+                            }
+                            <!-- (2) Marble background for Total column -->
+                            <th class="text-end text-uppercase" style="background-color: #d1d5db; color: #000080;">Total Revenue</th>
+                            <th class="text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="grid-font-standard">
+
+                        @if (IsLoading)
+                        {
+                            <LoadingTableRowsComponent />
+                        }
+                        else if (!FilteredIncomeStreams.Any())
+                        {
+                            <EmptyTableRowComponent EmptyRowMessage="No income/revenue records mapped to this assessment yet. " />
+                        }
+                        else
+                        {
                             @foreach (var item in FilteredIncomeStreams)
                             {
                                 <tr class="hover-light-blue">
@@ -88,10 +95,10 @@
                                 <td class="text-end font-monospace">@GrandTotalRevenue.ToString("N0")</td>
                                 <td></td>
                             </tr>
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
-    }
+    </div>
 </div>

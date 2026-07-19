@@ -17,7 +17,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long AssessmentId { get; set; }
 
         [Required(ErrorMessage ="Sales category description is required")]
-        public string? SalesCategoryName { get; set; }
+        public string? AssessmentSalesCategoryName { get; set; }
 
         [Required(ErrorMessage="Income type is required, please select one.")]
         public long IncomeTypeId { get; set; }
@@ -34,7 +34,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => AssessmentSalesCategoryId;
-        string ISortableEntity.DisplayName => SalesCategoryName;
+        string ISortableEntity.DisplayName => AssessmentSalesCategoryName;
 
     }
 }

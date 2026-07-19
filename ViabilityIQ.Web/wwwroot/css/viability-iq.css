@@ -585,3 +585,9 @@ body .sb-sidenav,.nav-link {
         opacity: 1;
     }
 }
+
+.td-header-ice {
+    background-color: #99A3A3 !important;
+    color: #f5f5f5 !important;
+    border-bottom: solid 1px #000080 !important;
+}

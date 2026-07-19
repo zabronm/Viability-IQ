@@ -62,7 +62,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         IncomeTypeId = 1,      //Default to Sales type
                         AssessmentSalesCategoryId = 0, // Signals repo to trigger an automated SQL INSERT statement
                         AssessmentId = AssessmentId,
-                        SalesCategoryName = string.Empty,
+                        AssessmentSalesCategoryName = string.Empty,
                         MarkupPercentage = 0x00000000, // Explicit clean decimal baseline initialization
                         Active = true,
                         Remarks = string.Empty,
@@ -91,7 +91,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             SaveResult executionFeedbackPackage;
 
             if (Model == null || IsSubmitting) return;            
-            if (string.IsNullOrWhiteSpace(Model.SalesCategoryName))         //// Interface validation step guard check
+            if (string.IsNullOrWhiteSpace(Model.AssessmentSalesCategoryName))         //// Interface validation step guard check
             {
                 return;
             }
@@ -111,7 +111,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                             AssessmentSalesId = 0, // Signals repo to trigger an automated SQL INSERT statement
                             AssessmentId = Model.AssessmentId,
                             ProductCategoryId = Model.AssessmentSalesCategoryId,
-                            Description = Model.SalesCategoryName,
+                            Description = Model.AssessmentSalesCategoryName,
                             IncomeTypeId = Model.IncomeTypeId,
                             CreatedDate = DateTime.Now,
                             CreatedBy = sessionService.UserId,

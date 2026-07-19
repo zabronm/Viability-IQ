@@ -32,6 +32,7 @@
         Sales,
         LoanTypes,
         IncomeTypes,
+        ExpenseTypes,
     }
 
     public static class PageHeaderIcons
@@ -71,6 +72,7 @@
             PageType.LoanTypes => "bi bi-umbrella-fill",
             PageType.ClientTypes => "bi bi-people-fill",
             PageType.IncomeTypes => "bi bi-diagram-3-fill",
+            PageType.ExpenseTypes => "bi bi-palette2",   
 
             _ => "bi bi-circle"
         };

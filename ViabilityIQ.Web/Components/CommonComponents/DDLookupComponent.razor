@@ -5,7 +5,12 @@
 @inject IDDLookupService LookupService
 
 <div class="form-group lookup-dropdown-group">
-    <select class="form-select form-select-sm @FieldClass"
+    @*  <select class="form-select form-select-sm @FieldClass"
+            value="@Value"
+            @onchange="HandleChange"
+            disabled="@(IsDisabled || _isLoading || Readonly)"> *@
+
+    <select class="form-select form-select-sm @FieldClass @SelectedStyleClass"
             value="@Value"
             @onchange="HandleChange"
             disabled="@(IsDisabled || _isLoading || Readonly)">
@@ -25,6 +30,25 @@
     </select>
 </div>
 
+
+@* Define custom styles scoped to this component *@
+<style>
+    .dd-normal {
+        font-weight: 400 !important;
+    }
+
+    .dd-bold {
+        font-weight: 700 !important;
+    }
+
+    .dd-light {
+        font-weight: 300 !important;
+    }
+</style>
+
+
+
+
 @code {
     private IEnumerable<LookupItem> _options = Array.Empty<LookupItem>();
     private bool _isLoading = true;
@@ -43,6 +67,17 @@
 
     // Added Readonly parameter defaulting to false
     [Parameter] public bool Readonly { get; set; } = false;
+
+    // Parameter to pick the style: "normal", "bold", or "light"
+    [Parameter] public string StyleOption { get; set; } = "normal";
+
+    private string SelectedStyleClass => StyleOption switch
+    {
+        "bold" => "dd-bold",
+        "light" => "dd-light",
+        _ => "dd-normal"
+    };
+
 
     private string FieldClass => EditContext != null && ValueExpression != null &&
                                  EditContext.GetValidationMessages(_fieldIdentifier).Any()

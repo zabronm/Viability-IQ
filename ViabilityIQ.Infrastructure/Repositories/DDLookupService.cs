@@ -22,6 +22,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // 1. Centralized hardcoded database mapping definitions mapping
         private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField)> _metadataRegistry = new()
         {
+            //============= master data lookups  ======================================
             { DDLookupEnums.AssessmentTypes, ("tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName") },
             { DDLookupEnums.Genders, ("tblGender", "GenderId", "Gender") },
             { DDLookupEnums.Races, ("tblRace", "RaceId", "Race") },
@@ -36,8 +37,15 @@ namespace ViabilityIQ.Infrastructure.Repositories
             { DDLookupEnums.Users, ("tblUsers", "UserId", "FullName") },
             { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSectorName") },
             { DDLookupEnums.Clients, ("tblClient", "ClientId", "FullName") },
-            { DDLookupEnums.ClientTypes, ("tblClientTYpe", "ClientTypeId", "ClientTypeName") },
-            { DDLookupEnums.IncomeTypes, ("tblIncomeTYpe", "IncomeTypeId", "IncomeTypeName") },
+            { DDLookupEnums.ClientTypes, ("tblClientType", "ClientTypeId", "ClientTypeName") },
+            { DDLookupEnums.IncomeTypes, ("tblIncomeType", "IncomeTypeId", "IncomeTypeName") },
+            { DDLookupEnums.ExpenseTypes, ("tblExpenseType", "ExpenseTypeId", "ExpenseTypeName") },
+            { DDLookupEnums.ExpenseItems, ("tblExpenseItems", "ExpenseItemId", "ExpenseItemName") },
+
+
+            //============= assessment lookups =======================================
+            { DDLookupEnums.AssessmentSalesCategories, ("tblAssessmentSalesCategory", "AssessmentSalesCategoryId", "AssessmentSalesCategoryName") },
+
 
 
         };

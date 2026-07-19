@@ -22,11 +22,13 @@ namespace ViabilityIQ.Shared.SharedModels
         ProductServiceCategories,
         Products,
         ExpenseTypes,
+        ExpenseItems,
         Assessments,
         Company,
         Provinces,
         Users,
         Sectors,
+        AssessmentSalesCategories,
 
     }
 }

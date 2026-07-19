@@ -2,165 +2,131 @@
 @layout MainLayout_Assessment
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
+@using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Web.Components.CommonComponents
-@using ViabilityIQ.Web.Components.Layout
-@using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Expenses" PageTitle="Expenses & Outflow Management" CurrentPage="PageType.Expenses" />
 
     <div class="row px-0 g-3 mt-1">
-        <div class="row bg-white g-2 mt-1 p-1 pt-1 mb-3" style="border-radius: 6px;">
-            @if (blAlert == true)
-            {
-                <div class="my-0">
-                    <ViqAlertComponent Severity="AlertSeverity"
-                                       Heading="@AlertHeading"
-                                       Message="@AlertMessage"
-                                       AllowDismiss="true" />
-                </div>
-            }
-            <div class="px-0">
-                <div class="row g-2 mt-1 align-items-center p-0 mx-0">
-                    <div class="col-md-6 col-12 d-flex gap-1.5">
-                        <button type="button" class="btn btn-primary text-xs py-2 px-2 shadow-sm" @onclick="OpenNewExpensePanel">
-                            <i class="bi bi-plus-circle me-1"></i>Add Single Expense
-                        </button>
-                        &nbsp;&nbsp;
-                        <button type="button" class="btn btn-outline-success text-xs py-2 px-2 shadow-sm" style="border-radius: 8px;" @onclick="OpenBulkSetupPanel">
-                            <i class="bi bi-magic me-1"></i>Bulk Expenses Setup
-                        </button>
+
+        <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
+
+            <div class="col-12 py-2">
+                <div class="px-0 mb-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="row align-items-center mb-2">
+
+                            <!-- Left -->
+                            <div class="col-md-6 d-flex gap-2">
+                                <button class="btn btn-primary btn-sm text-xs"
+                                        @onclick="AddExpenseStream">
+                                    <i class="bi bi-plus-circle me-1"></i>
+                                    Add Expense Stream
+                                </button>
+
+                                <button class="btn btn-outline-success btn-sm text-xs"
+                                        @onclick="OpenBulkImport">
+                                    <i class="bi bi-upload me-1"></i>
+                                    Bulk Expenses Import
+                                </button>
+                            </div>
+
+                            <!-- Right -->
+                            <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
+
+                                <div style="width:220px;">
+                                    <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes"
+                                                       @bind-Value="SelectedFilterId"
+                                                       Placeholder="All Expense Types" />
+                                </div>
+
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       style="width:250px;"
+                                       placeholder="Search..."
+                                       @bind="SearchQuery"
+                                       @bind:event="oninput" />
+                            </div>
+                        </div>                        
                     </div>
-
-                    <!-- Filter and Search Controls Row Area Grid Alignment -->
-                    <div class="col-md-6 col-12 d-flex gap-2 justify-content-end">
-                        <!-- Expense Classification Filtering Dropdown Menu -->
-                        <select class="form-select form-select-sm text-xs shadow-sm" style="width: 20%;" @bind="SelectedClassificationFilter">
-                            <option value="">All Classifications</option>
-                            @foreach (var enumVal in Enum.GetValues<ExpenseClassification>())
-                            {
-                                <option value="@enumVal">@enumVal.ToString()</option>
-                            }
-                        </select>
-
-                        <!-- Normalized Input Field Sizing -->
-                        <div class="input-group input-group-sm shadow-sm search-input-frame" style="width: 35%;">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search expense profiles..." @bind="SearchQuery" @bind:event="oninput" />
-                        </div>
-                    </div>
                 </div>
-            </div>
 
-            <div class="col-xl-12 col-lg-12 col-12 mt-3">
-                <div class="table-responsive shadow-sm border border-secondary-subtle mb-3">
-                    <table class="table table-sm table-hover text-nowrap vertical-align-middle align-middle mb-0 matrix-grid-table grid-font-standard">
-                        <thead>
+                <!-- (5) Table border-radius applied via wrapper -->
+                <div class="table-responsive shadow-sm border border-secondary-subtle" style="border-radius: 6px; overflow: hidden;">
+                    <table class="table table-sm table-hover mb-0">
+                        <!-- Table Header with restored font sizes -->
+                        <thead class="py-1">
                             <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                                <th class="sticky-col ps-2 text-uppercase text-xxs">Expense Line Item &nbsp;<i class="bi bi-caret-right-fill"></i></th>
-                                <th class="text-start text-xxs text-uppercase">Classification</th>
-                                <th class="text-center text-xxs text-uppercase">Cashbook</th>
+                                <th class="sticky-col ps-2 text-xs">Expense Description</th>
+                                <th class="text-start td-header-ice text-uppercase px-1 text-xxs">Expense Type</th>
                                 @for (int m = 1; m <= 12; m++)
                                 {
-                                    <th class="text-end text-xxs text-uppercase">M@(m)</th>
+                                    <th class="text-end td-header-ice text-uppercase text-xxs">M@(m)</th>
                                 }
-                                <th class="text-end font-weight-bold text-white text-uppercase text-xxs header-totals-navy">Total Expense</th>
-                                <th class="text-center sticky-action-header text-xxs"></th>
+                                <!-- (2) Marble background for Total column -->
+                                <th class="text-end text-uppercase text-xxs" style="background-color: #d1d5db; color: #000080;">Total Revenue</th>
+                                <th class="text-center td-header-ice text-xxs"></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @if (ExpenseDatasetLines != null)
+                        <tbody class="grid-font-standard">
+                            @if (IsLoading)
                             {
-                                @foreach (var expense in FilteredExpenseLines)
-                                {
-                                    var truncatedName = expense.ExpenseName.Length > 20
-                                    ? expense.ExpenseName.Substring(0, 20) + ".."
-                                    : expense.ExpenseName;
+                                <LoadingTableRowsComponent />
+                            }
+                            else if (!FilteredExpenseStreams.Any())
+                            {
+                                <EmptyTableRowComponent EmptyRowMessage="No expenses mapped to this assessment yet." />
+                            }
+                            else
+                            {
 
-                                    <tr class="@(!expense.AffectsCashbookDirectly ? "row-shaded-dark" : "")">
-                                        <td class="sticky-col ps-2 text-dark font-weight-bold text-truncate" title="@expense.ExpenseName">
-                                            @truncatedName@if(expense.AffectsCashbookDirectly){
-                                            <span style="margin-left: 1px;"><i class="bi bi-check text-success font-weight-bold"></i></span>
+                                @foreach (var item in FilteredExpenseStreams)
+                                {
+                                    <tr class="hover-light-blue">
+                                        <!-- Applied hover effect class -->
+                                        <td class="ps-2 text-black">
+                                            <span style="font-size:0.75rem !important;">@item.ExpenseItemName</span>
+                                            @if (item.blSendToCashBook)
+                                            {
+                                                <span class="badge bg-white text-xxs border-0 ms-1 btn-outline-dark rounded-pill" style="font-size: 0.60rem;">
+                                                    <i class="bi bi-check text-navy"></i>
+                                                </span>
+                                            }
+                                        </td>
+
+                                        <td class="px-2"><span class="badge text-black text-xxs fw-normal" style="border: solid 1px #cdcdcd !important; background-color: #DBE9FA !important;">@item.TypeName.ToString()</span></td>
+                                        @* <td class="px-2"><span class="badge bg-soft-blue text-navy-brand text-xs">@item.TypeName.ToString()</span></td> *@
+                                        @for (int i = 0; i < 12; i++)
+                                        {
+                                            <td class="text-end font-monospace text-secondary">@item.MonthlyValues[i].ToString("N0")</td>
                                         }
-                                    </td>
-                                    <td class="text-start"><span class="badge bg-light text-secondary border">@expense.Classification.ToString()</span></td>
-                                    <td class="text-center">
-                                        <input type="checkbox" @bind="expense.AffectsCashbookDirectly" class="form-check-input shadow-none" />
-                                    </td>
+                                        <!-- (2) Marble background -->
+                                        <td class="text-end font-monospace fw-bold" style="background-color: #d1d5db; color: #000080;">@item.MonthlyValues.Sum().ToString("N0")</td>
+                                        <td class="text-center">
+                                            <button class="btn-action-operation btn-edit-accent"
+                                                    @onclick="() => OpenExpenseFormPanel(item)">
+                                                <i class="bi bi-vector-pen text-navy"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+
+                                <!-- (4) Grand Total Row with dark blue theme -->
+                                <tr style="background-color: #d1d5db; color: #000080; font-weight: bold;">
+                                    <td colspan="2" class="ps-2 text-uppercase text-xxs">Grand Total Inflows:</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        var index = i;
-                                        <td class="text-end font-monospace text-secondary">
-                                            @expense.MonthlyValues[index].ToString("N0")
-                                        </td>
+                                        <td class="text-end font-monospace">@FilteredExpenseStreams.Sum(c => c.MonthlyValues[i]).ToString("N0")</td>
                                     }
-                                    <td class="text-end font-monospace font-weight-bold bg-navy-light-summary text-navy-brand">
-                                        @expense.MonthlyValues.Sum().ToString("N0")
-                                    </td>
-                                    <td class="text-center bg-light-totals-cell">
-                                        <button type="button" class="btn btn-outline-primary btn-xs p-0 px-1 shadow-sm" @onclick="() => OpenEditExpensePanel(expense)">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </td>
+                                    <td class="text-end font-monospace">@GrandTotalRevenue.ToString("N0")</td>
+                                    <td></td>
                                 </tr>
                             }
-                            <tr class="bg-light-totals font-weight-bold border-top-navy">
-                                <td class="sticky-col ps-2 text-navy-brand text-uppercase text-xxs fw-bold" colspan="3">Aggregated Expense Outflows:</td>
-                                @for (int i = 0; i < 12; i++)
-                                {
-                                    var index = i;
-                                    <td class="text-end font-monospace text-navy-brand font-weight-bold">
-                                        @ExpenseDatasetLines.Sum(e => e.MonthlyValues[index]).ToString("N0")
-                                    </td>
-                                }
-                                <td class="text-end font-monospace text-white font-weight-bold header-totals-navy">
-                                    @ExpenseDatasetLines.Sum(e => e.MonthlyValues.Sum()).ToString("N0")
-                                </td>
-                                <td class="text-center bg-light-totals-cell"></td>
-                            </tr>
-                                                        }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
-        <div class="row bg-white g-2 mt-2 p-2 mb-3" style="border-radius: 6px;">
-            <div class="fs-4 my-1">Cash Flow & Business Health Analysis</div>
-            <!-- Cross-Section Financial Analytics Summary Dashboard Engine Panel Section -->
-            @if (AreSummariesReady)
-            {
-                <!-- Tier 1 View: Grid Matrix Table -->
-                <div class="row g-3 px-0 mx-0 fade-staged-panel delay-tier-1">
-                    <div class="col-12 px-0">
-                        <NetProfitSummaryComponent Data="ConsolidatedAssessmentData" />
-                    </div>
-                </div>
-
-                <!-- Tier 2 View: Intermediate Visual Combinations -->
-                <div class="row g-3 px-0 mx-0 mt-2 fade-staged-panel delay-tier-2">
-                    <div class="col-xl-7 col-lg-7 col-12 ps-0">
-                        <NetProfitMonthlyGraphComponent Data="ConsolidatedAssessmentData" />
-                    </div>
-                    <div class="col-xl-5 col-lg-5 col-12 pe-0">
-                        <NetProfitAnnualSummaryComponent Data="ConsolidatedAssessmentData" />
-                    </div>
-                </div>
-
-                <!-- Tier 3 View: Financial KPI Ratios Metric Indexes -->
-                <div class="row g-3 px-0 mx-0 mt-2 fade-staged-panel delay-tier-3">
-                    <div class="col-xl-6 col-lg-6 col-12 ps-0">
-                        <AnalysisOfReceiptsGraphComponent Data="ConsolidatedAssessmentData" />
-                    </div>
-                    <div class="col-xl-6 col-lg-6 col-12 pe-0">
-                        <SalesRatiosComponent Data="ConsolidatedAssessmentData" />
-                    </div>
-                </div>
-            }
-        </div>
     </div>
 </div>
-
-<footer class="py-2 bg-light mt-3">
-    <BFooter />
-</footer>

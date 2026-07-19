@@ -1,108 +1,79 @@
 ﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
-@using static ViabilityIQ.Web.Components.Pages_Assessments.AssessmentExpensesPage
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="p-3">
-    @if (WizardModeContext == WizardMode.BulkSetupStep1)
+<div class="px-1">
+    @if (FormModel != null)
     {
-        <div class="alert alert-warning py-1.5 rounded mb-2 text-xxs shadow-sm">
-            <i class=\"bi bi-lightbulb-fill me-1\"></i> Check the standard line positions you would like to initialize immediately within your assessment grid model.
-        </div>
+        <EditForm Model="@FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
+            <DataAnnotationsValidator />
 
-        <h6 class=\"text-xxs fw-bold text-secondary mb-2 uppercase\">Available Structural Configurations</h6>
-        <div class="pe-1 border p-2 rounded bg-light-subtle mb-3 text-xs" style="max-height: 340px; overflow-y: auto;">
-            @if (LocalSuggestions != null)
-            {
-                @foreach (var item in LocalSuggestions)
+            <!-- Expense Category Row -->
+            <div class="row mb-2 align-items-center">
+                <div class="col-4"><label class="form-label text-xs fw-bold text-secondary mb-0">Expense Type</label></div>
+                <div class="col-8"><DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes" @bind-Value="FormModel.ExpenseTypeId" /></div>
+            </div>
+
+            <!-- Expense Item Lookup Row -->
+            <div class="row mb-2 align-items-center">
+                <div class="col-4"><label class="form-label text-xs fw-bold text-secondary mb-0">Expense Item</label></div>
+                <div class="col-8"><DDLookupComponent SourceKey="DDLookupEnums.ExpenseItems" @bind-Value="FormModel.ExpenseItemId" /></div>
+            </div>
+
+            <!-- Post to cashbook Row -->
+            <div class="row mb-3 align-items-center">
+                <div class="col-5"><label class="form-label text-xs fw-bold text-primary mb-0">Post to Cashbook?</label></div>
+                <div class="col-5"><InputCheckbox class="form-check-input" @bind-Value="FormModel.blSendToCashBook" /></div>
+            </div>
+
+            <!-- % of Sales Checkbox and Conditional Percentage Row -->
+            <div class="row mb-3 align-items-center">
+                <div class="col-5">
+                    <div class="form-check">
+                        <InputCheckbox class="form-check-input" id="salesCheck" @bind-Value="FormModel.blPercentageOfSalesUsed" @onclick="ToggleSalesPercentage" />
+                        <label class="form-check-label text-xs fw-bold text-primary" for="salesCheck">Use % of Sales?</label>
+                    </div>
+                </div>
+                @if (FormModel.blPercentageOfSalesUsed)
                 {
-                    <div class="form-check mb-2 pb-1 border-bottom-subtle">
-                        <input class="form-check-input" type="checkbox" id="chk_@item.Id" @bind="item.IsSelected" />
-                        <label class="form-check-label fw-semibold text-dark ps-1 selection-label-text" for="chk_@item.Id">
-                            @item.ExpenseName
-                            <span class="d-block text-xxs text-muted fst-italic">Classification: @item.Classification.ToString()</span>
-                        </label>
+                    <div class="col-4">
+                        <InputNumber class="form-control form-control-sm text-xs" style="width: 80px;" placeholder="%" @bind-Value="FormModel.PercentageOfSalesRate" />
                     </div>
                 }
-            }
-        </div>
+            </div>
 
-        <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-            <button type="button" class="btn btn-primary btn-sm flex-fill py-1.5 text-xs fw-bold shadow-sm" @onclick="SaveBulkSelectionsAsync">
-                <i class="bi bi-plus-lg me-1"></i>Inject Line Formations
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm py-1.5 text-xs" @onclick="CancelFormAsync">Cancel</button>
-        </div>
-    }
-    else if (WizardModeContext == WizardMode.SingleEntryOrEdit && FormModel != null)
-    {
-        <div class="mb-3">
-            <label class="form-label text-xxs fw-bold text-secondary text-uppercase mb-0.5">Expense Name</label>
-            <input type="text" class="form-control form-control-sm text-xs py-1" placeholder="e.g., Marketing, Broadband fiber..." @bind="FormModel.ExpenseName" />
-        </div>
-
-        <div class="row mb-3 g-2">
-            <div class="row mb-3 g-2">
-                <!-- First Div: Content aligned properly to the far left -->
-                <div class="col-6 d-flex flex-column align-items-start text-start">
-                    <label class="form-label text-xxs fw-bold text-secondary text-uppercase mb-0 pb-0">Expense Category</label>
-                    <select class="form-select form-select-sm text-xs w-100 mt-0" @bind="FormModel.Classification">
-                        @foreach (var enumVal in System.Enum.GetValues(typeof(ExpenseClassification)))
-                        {
-                            <option value="@enumVal">@enumVal.ToString()</option>
-                        }
-                    </select>
-                </div>
-
-                <!-- Second Div: Checkbox structure justified far right remains unchanged -->
-                <div class="col-6 d-flex justify-content-end align-items-end pb-1.5">
-                    <div class="form-check p-0 m-0 d-flex align-items-center justify-content-end gap-2">
-                        <label class="form-check-label text-xxs fw-semibold text-danger order-1" for="switchCashbook">Affects Cashbook?</label>
-                        <input class="form-check-input position-static m-0 order-2" type="checkbox" id="switchCashbook" @bind="FormModel.AffectsCashbookDirectly" />
-                    </div>
+            <!-- Allocation tool -->
+            <div class="card bg-light border-0 mb-3 p-2 rounded shadow-sm">
+                <label class="form-label text-xs fw-bold text-navy-brand uppercase">Apply Allocation (Amount to all months)</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control text-xs" @bind="FormModel.SameMonthlyAmount" />
+                    <button class="btn btn-outline-success text-xxs px-2" type="button" @onclick="ApplyMonthlyAllocation">Apply Allocation</button>
                 </div>
             </div>
-        </div>
 
-        <div class="card bg-light border-0 mb-3 p-2 rounded shadow-sm">
-            <span class="fw-bold text-xxs text-navy-brand uppercase mb-1.5 d-block"><i class="bi bi-calculator me-1"></i>Automated Allocation Distribution Components</span>
-
-            <div class="row g-2">
-                <div class="col-6 border-end pe-2">
-                    <label class="form-label text-xxs text-secondary fw-semibold mb-0.5">Even Split (Annual Total)</label>
-                    <div class="input-group input-group-sm">
-                        <input type="number" class="form-control text-xs font-monospace" placeholder="Total figure" @bind="BulkAnnualValueTarget" min="0" />
-                        <button class="btn btn-outline-success text-success text-xxs px-1.5" type="button" @onclick="DistributeAnnualExpensesEvenly">Split</button>
+            <!-- Projection Grid -->
+            <h6 class="text-xxs fw-bold text-secondary mb-1 uppercase">12-Month Projection</h6>
+            <div class="pe-1 border p-1.5 pt-1 rounded bg-light-subtle mb-2" style="max-height: 240px; overflow-y: auto;">
+                @for (int i = 0; i < 12; i++)
+                {
+                    int index = i;
+                    <div class="row align-items-center mb-1 g-2 mx-0">
+                        <div class="col-4 ps-4"><span class="small text-muted">Month @(index + 1)</span></div>
+                        <div class="col-8"><InputNumber class="form-control form-control-sm text-end text-xs" @bind-Value="MonthlyValues[index]" /></div>
                     </div>
-                </div>
-                <div class="col-6 ps-2">
-                    <label class="form-label text-xxs text-secondary fw-semibold mb-0.5">% Factor of Sales Baseline</label>
-                    <div class="input-group input-group-sm">
-                        <input type="number" class="form-control text-xs font-monospace" placeholder="e.g., 5" @bind="SalesPercentageTarget" min="0" step="0.1" />
-                        <button class="btn btn-outline-success text-success text-xxs px-1.5" type="button" @onclick="DistributeExpensesBySalesPercentage">Factor</button>
-                    </div>
-                </div>
+                }
             </div>
-        </div>
 
-        <h6 class="text-xxs fw-bold text-secondary mb-1 uppercase">12-Month Projection Horizon Values</h6>
-        <div class="pe-1 border p-1.5 rounded bg-light-subtle mb-3 standard-input-pane" style="max-height: 240px; overflow-y: auto;">
-            @for (int i = 0; i < 12; i++)
-            {
-                var index = i;
-                <div class="row align-items-center mb-1 g-2 mx-0 input-row-hover rounded py-0.5">
-                    <div class="col-4"><span class="text-xxs fw-semibold text-muted">Month @(index + 1)</span></div>
-                    <div class="col-8">
-                        <input type="number" class="form-control form-control-sm text-end font-monospace text-xs py-0.5 text-dark fw-bold"
-                               @bind="FormModel.MonthlyValues[index]" @bind:event="oninput" min="0" />
-                    </div>
-                </div>
-            }
-        </div>
+            <!-- Total allocation row -->
+            <div class="d-flex justify-content-between p-2 rounded text-xs fw-bold mb-3" style="background-color: #e0f2fe; color: #1e3a8a;">
+                <span>TOTAL ALLOCATION</span>
+                <span>@MonthlyValues.Sum().ToString("N2")</span>
+            </div>
 
-        <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-            <button type="button" class="btn btn-primary btn-sm flex-fill py-1.5 text-xs fw-bold shadow-sm" @onclick="SaveSingleExpenseAsync">
-                <i class="bi bi-check-circle me-1"></i>Save Changes
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm py-1.5 text-xs" @onclick="CancelFormAsync">Cancel</button>
-        </div>
+            <div class="d-flex gap-2 border-top pt-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-fill">Save Changes</button>
+                @* <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CancelFormAsync">Cancel</button> *@
+            </div>
+        </EditForm>
     }
 </div>

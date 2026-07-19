@@ -32,14 +32,12 @@
 
                 <!--- =================VAT & MAIN HEADER FIELDS =============================================================== -->
                 <div class="row g-3">
-                    <VATEditComponent @ref="VATEditRef" vatUpdateModel="@vatUpdateModel" OnUpdate='(result) => RefreshComponentData(result, "VAT-UPDATE")' />
-                    @* <VATEditComponent vatUpdateModel="@vatUpdateModel"  OnUpdate="RefreshComponentData"/> *@
+                    <VATEditComponent @ref="VATEditRef" vatUpdateModel="@vatUpdateModel" OnUpdate='(result) => RefreshComponentData(result, "VAT-UPDATE")' />                  
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-4 col-12">
-                        <OpeningBalancesComponent @ref="OpeningBalancesRef" openingBalancesModel="@openingBalancesModel" OnUpdate='(result) => RefreshComponentData(result, "OPENING-BALANCES")' />
-                        @* <OpeningBalancesComponent openingBalancesModel="@openingBalancesModel" OnUpdate="RefreshComponentData" /> *@
+                        <OpeningBalancesComponent @ref="OpeningBalancesRef" openingBalancesModel="@openingBalancesModel" OnUpdate='(result) => RefreshComponentData(result, "OPENING-BALANCES")' />                      
                     </div>
                     <div class="col-md-8 col-12">
                         <div class="viq-elevated-card h-100">
@@ -50,8 +48,7 @@
                                 </button>
                             </div>
                             <div class="p-0">
-                                <SalesCategoryListComponent @ref="SalesCategoryListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />
-                                @* <SalesCategoryListComponent @ref="SalesCategoryListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' /> *@
+                                <SalesCategoryListComponent @ref="SalesCategoryListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />                              
                             </div>
                         </div>
                     </div>
@@ -61,14 +58,12 @@
                 <!-- ==============================================CREDITORS/DEBTORS COMPONENT ROW -->
                 <div class="row g-3 mt-2">
                     <DebtorsCreditorsComponent @ref="DebtorsCreditorsRef" AssessmentId="@ActiveAssessmentId" OnUpdate='(result) => RefreshComponentData(result, "DEBTORS-CREDITORS")' />
-                    @* <DebtorsCreditorsComponent AssessmentId="@ActiveAssessmentId"  OnUpdate="RefreshComponentData" /> *@
                 </div>
 
                 <!-- ============================================== DIRECTOR WAGES & LOANS LIST ROW  -->
                 <div class="row g-3">
                     <div class="col-md-4 col-12">
-                        <DirectorWagesComponent @ref="DirectorWagesRef" directorWagesModel="@directorWagesModel" OnUpdate='(result) => RefreshComponentData(result, "DIRECTOR-WAGES")' />
-                        @* <DirectorWagesComponent directorWagesModel="@directorWagesModel" OnUpdate="RefreshComponentData" /> *@
+                        <DirectorWagesComponent @ref="DirectorWagesRef" directorWagesModel="@directorWagesModel" OnUpdate='(result) => RefreshComponentData(result, "DIRECTOR-WAGES")' />          
                     </div>
                     <div class="col-md-8 col-12">
                         <!-- PUT ASSESSMENT LOANS HERE -->
@@ -80,8 +75,7 @@
                                 </button>
                             </div>
                             <div class="p-0">
-                                <AssessmentLoansListComponent @ref="AssessmentLoansListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("ASSESSMENT-LOANS", id)'/>
-                                @* <AssessmentLoansListComponent @ref="AssessmentLoansListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("ASSESSMENT-LOANS", id)'  /> *@
+                                <AssessmentLoansListComponent @ref="AssessmentLoansListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("ASSESSMENT-LOANS", id)'/>                              
                             </div>
                         </div>
                     </div>

@@ -53,7 +53,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     {
                         AssessmentSalesCategoryId = 0, // Signals repo to trigger an automated SQL INSERT statement
                         AssessmentId = AssessmentId,
-                        SalesCategoryName = string.Empty,                        
+                        AssessmentSalesCategoryName = string.Empty,                        
                         MarkupPercentage = 0x00000000, // Explicit clean decimal baseline initialization
                         Active = true,
                         Remarks = string.Empty,
@@ -82,7 +82,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             if (Model == null || IsSubmitting) return;
 
             // Interface validation step guard check
-            if (string.IsNullOrWhiteSpace(Model.SalesCategoryName))
+            if (string.IsNullOrWhiteSpace(Model.AssessmentSalesCategoryName))
             {
                 return;
             }

@@ -8,6 +8,7 @@ using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Shared.UtilityServices; // Added for Mapper
 using ViabilityIQ.Web.Services;
 
+
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class IncomeSalesFormComponent : ComponentBase
@@ -18,7 +19,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public UnifiedIncomeViewModel? IncomeContext { get; set; }
-        [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
+        
 
         private AssessmentSales FormModel { get; set; } = new();
         private decimal[] MonthlyValues { get; set; } = new decimal[12];
@@ -64,9 +65,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             for (int i = 0; i < 12; i++) MonthlyValues[i] = slice;
         }
 
-
-
-
         private async Task ExecuteSaveWorkflowAsync()
         {
             SaveResult executionFeedbackPackage;
@@ -90,21 +88,24 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     {
                         Success = isExecutionSuccess,
                         ClosePanel = isExecutionSuccess,
+                        RefreshGrid= true,
                         Message = isExecutionSuccess
                             ? $"Monthly sales details for {FormModel.Description}  committed successfully."
                             : "Error encountered; monthly sales not saved, please retry."
                     };
 
-                    await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
+                    //await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
+                    await zabCanvasService!.PublishResultAsync(executionFeedbackPackage);
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex)           
             {
-                await OnSaveComplete.InvokeAsync(new SaveResult
+                await zabCanvasService!.PublishResultAsync(new SaveResult
                 {
                     Success = false,
                     ClosePanel = false,
-                    Message = $"Error encountered: {ex.Message}"
+                    Message = $"Error encountered: {ex.Message}",
+                    RefreshGrid = false,
                 });
             }
             finally

@@ -1,110 +1,130 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static ViabilityIQ.Web.Components.Pages_Assessments.AssessmentExpensesPage;
+using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class AssessmentExpensesFormComponent : ComponentBase
     {
-        [Parameter] public ExpenseEntryViewModel ExpenseContext { get; set; }
-        [Parameter] public WizardMode WizardModeContext { get; set; }
-        [Parameter] public List<SetupSuggestionViewModel> SuggestionsDataset { get; set; }
-        [Parameter] public decimal TotalSalesBaseline { get; set; }
+        [Inject] private ISessionService sessionService { get; set; } = default!;
+        [Inject] private ZabOffCanvasService? zabCanvasService { get; set; }
+        [Inject] private IGenericDataRepository<AssessmentExpenses> DataRepository { get; set; } = default!;
 
-        [Parameter] public EventCallback<FormSavePayload> OnSave { get; set; }
-        [Parameter] public EventCallback OnCancel { get; set; }
+        [Parameter] public AssessmentExpenses? ExpenseContext { get; set; }
 
-        private ExpenseEntryViewModel FormModel { get; set; } = new();
-        private List<SetupSuggestionViewModel> LocalSuggestions { get; set; } = new();
-
+        private AssessmentExpenses FormModel { get; set; } = new();
+        private decimal[] MonthlyValues { get; set; } = new decimal[12];
         private decimal BulkAnnualValueTarget { get; set; }
-        private decimal SalesPercentageTarget { get; set; }
+
+        private bool IsSubmitting { get; set; } = false;
 
         protected override void OnParametersSet()
         {
-            if (WizardModeContext == WizardMode.SingleEntryOrEdit && ExpenseContext != null)
+            long assessmentId = sessionService.AssessmentId ?? 0;
+
+            if (ExpenseContext != null)
             {
-                // Isolate model editing state via an explicit clone operation
-                FormModel = new ExpenseEntryViewModel
+                // Clone existing record
+                FormModel = new AssessmentExpenses
                 {
-                    Id = ExpenseContext.Id,
-                    ExpenseName = ExpenseContext.ExpenseName,
-                    Classification = ExpenseContext.Classification,
-                    AffectsCashbookDirectly = ExpenseContext.AffectsCashbookDirectly,
-                    MonthlyValues = (decimal[])ExpenseContext.MonthlyValues.Clone()
+                    AssessmentId = assessmentId,
+                    AssessmentExpenseId = ExpenseContext.AssessmentExpenseId,
+                    Description = ExpenseContext.Description,
+                    ExpenseTypeId = ExpenseContext.ExpenseTypeId,
+                    blSendToCashBook = ExpenseContext.blSendToCashBook,
+                    Month_1 = ExpenseContext.Month_1,
+                    Month_2 = ExpenseContext.Month_2,
+                    Month_3 = ExpenseContext.Month_3,
+                    Month_4 = ExpenseContext.Month_4,
+                    Month_5 = ExpenseContext.Month_5,
+                    Month_6 = ExpenseContext.Month_6,
+                    Month_7 = ExpenseContext.Month_7,
+                    Month_8 = ExpenseContext.Month_8,
+                    Month_9 = ExpenseContext.Month_9,
+                    Month_10 = ExpenseContext.Month_10,
+                    Month_11 = ExpenseContext.Month_11,
+                    Month_12 = ExpenseContext.Month_12
                 };
+                MonthlyValues = FormModel.MonthlyValues;
             }
-            else if (WizardModeContext == WizardMode.BulkSetupStep1 && SuggestionsDataset != null)
+            else
             {
-                // Deep clone suggestions configuration dataset array
-                LocalSuggestions = SuggestionsDataset.Select(s => new SetupSuggestionViewModel
-                {
-                    Id = s.Id,
-                    ExpenseName = s.ExpenseName,
-                    Classification = s.Classification,
-                    IsSelected = s.IsSelected
-                }).ToList();
+                FormModel = new() { AssessmentId = assessmentId };
+            }
+        }
+
+        private void ApplyMonthlyAllocation()
+        {
+            // Sets every month to the specified amount
+            for (int i = 0; i < 12; i++)
+            {
+                MonthlyValues[i] = FormModel.SameMonthlyAmount;
             }
         }
 
         private void DistributeAnnualExpensesEvenly()
         {
-            if (BulkAnnualValueTarget <= 0) return;
-            decimal distributedValue = Math.Round(BulkAnnualValueTarget / 12m, 0);
-            for (int i = 0; i < 12; i++)
+            decimal slice = Math.Round(BulkAnnualValueTarget / 12m, 0);
+            for (int i = 0; i < 12; i++) MonthlyValues[i] = slice;
+        }
+
+        private void ToggleSalesPercentage()
+        {
+            // If we are checking the box, ensure the rate is reset to 0
+            if (!FormModel.blPercentageOfSalesUsed)
             {
-                FormModel.MonthlyValues[i] = distributedValue;
+                FormModel.PercentageOfSalesRate = 0;
             }
+        }
+
+
+        private async Task ExecuteSaveWorkflowAsync()
+        {
+            //if (FormModel == null || IsSubmitting || string.IsNullOrWhiteSpace(FormModel.Description)) return;
+            if (FormModel == null || IsSubmitting) return;
+
+            try
+            {
+                IsSubmitting = true;
+                FormModel.MonthlyValues = MonthlyValues; // Uses your class setter
+
+                bool isExecutionSuccess = await DataRepository.SaveAsync(FormModel);
+                var result = SaveResult.SavedAndNew("Expense details archived successfully.");
+
+               await zabCanvasService!.PublishResultAsync(result);
+
+                if (result.ClearForm) 
+                                ClearForm();
+
+            }
+            catch (Exception ex)
+            {
+                await zabCanvasService!.PublishResultAsync(new SaveResult { Success = false, Message = $"Error: {ex.Message}" });
+            }
+            finally
+            {
+                IsSubmitting = false;
+            }
+        }
+
+        private void ClearForm()
+        {
+            FormModel = new AssessmentExpenses
+            {
+                AssessmentId = sessionService.AssessmentId ?? 0
+            };
+
+            MonthlyValues = new decimal[12];
             BulkAnnualValueTarget = 0;
+            StateHasChanged();
         }
 
-        private void DistributeExpensesBySalesPercentage()
-        {
-            if (SalesPercentageTarget <= 0 || TotalSalesBaseline <= 0) return;
-            decimal calculatedProportionalAllocation = (TotalSalesBaseline * (SalesPercentageTarget / 100m)) / 12m;
-            decimal roundedResult = Math.Round(calculatedProportionalAllocation, 0);
 
-            for (int i = 0; i < 12; i++)
-            {
-                FormModel.MonthlyValues[i] = roundedResult;
-            }
-            SalesPercentageTarget = 0;
-        }
-
-        private async Task SaveSingleExpenseAsync()
-        {
-            if (OnSave.HasDelegate)
-            {
-                await OnSave.InvokeAsync(new FormSavePayload
-                {
-                    Mode = WizardMode.SingleEntryOrEdit,
-                    SingleExpense = FormModel
-                });
-            }
-        }
-
-        private async Task SaveBulkSelectionsAsync()
-        {
-            if (OnSave.HasDelegate)
-            {
-                var selectedItems = LocalSuggestions.Where(x => x.IsSelected).ToList();
-                await OnSave.InvokeAsync(new FormSavePayload
-                {
-                    Mode = WizardMode.BulkSetupStep1,
-                    SelectedBulkItems = selectedItems
-                });
-            }
-        }
-
-        private async Task CancelFormAsync()
-        {
-            if (OnCancel.HasDelegate)
-            {
-                await OnCancel.InvokeAsync();
-            }
-        }
+        private async Task CancelFormAsync() => await zabCanvasService!.HideAsync(SaveResult.Cancel());
     }
 }

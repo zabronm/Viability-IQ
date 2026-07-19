@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Shared.DataModels
 {
-    [TableName("tblExpenseItems")]
+    [Table("tblExpenseItems")]
     public class ExpenseItems: IEntity, IAuditableEntity, ISortableEntity
     {
         [Key] public long ExpenseItemId { get; set; }

@@ -10,17 +10,20 @@ using ViabilityIQ.Shared.DataModelsInterfaces;
 
 namespace ViabilityIQ.Shared.DataModels
 {
-    [Dapper.Contrib.Extensions.Table("vw_assessment_sales_list")]
-    public class AssessmentSalesDto 
+    [Dapper.Contrib.Extensions.Table("vw_assessment_expenses_list")]
+    public class AssessmentExpensesDto 
     {
-        [Key] public int AssessmentSalesId { get; set; }       
+        [Key] public int AssessmentExpensesId { get; set; }       
         public decimal AssessmentId { get; set; }
         public decimal ProductCategoryId { get; set; }
-        public decimal IncomeTypeId { get; set; }
-        public string? IncomeTypeName { get; set; }
-        public string?  Description { get; set; }
-        public bool IncludeVAT { get; set; }
-        public decimal VATRate { get; set; }
+        public long ExpenseTypeId { get; set; }
+        public string? ExpenseTypeName { get; set; }
+        public long ExpenseItemId { get; set; }
+        public string? ExpenseItemName { get; set; }
+        public bool blSendToCashBook { get; set; }
+        public bool blPercentageOfSalesUsed { get; set; } 
+        public decimal PercentageOfSalesRate { get; set;  }
+        public string?  Description { get; set; }   
         public decimal SameMonthlyAmountUsed { get; set; }
         public decimal SameMonthlyAmount { get; set; }
         public decimal Month_1 { get; set; }

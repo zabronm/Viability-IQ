@@ -36,11 +36,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private string SearchQuery { get; set; } = string.Empty;
         private long SelectedFilterId { get; set; } = 0;
         private decimal GrandTotalRevenue => FilteredIncomeStreams?.Sum(c => c.MonthlyValues.Sum()) ?? 0;
-
-        //private IEnumerable<UnifiedIncomeViewModel> FilteredIncomeStreams =>
-        //    IncomeStreams.Where(x => (string.IsNullOrWhiteSpace(SearchQuery) || x.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) &&
-        //                             (!SelectedFilterType.HasValue || x.Type == SelectedFilterType.Value));
-               
+           
         private IEnumerable<UnifiedIncomeViewModel> FilteredIncomeStreams =>
                             IncomeStreams.Where(x =>
                             (string.IsNullOrWhiteSpace(SearchQuery) || x.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) &&
@@ -48,8 +44,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         protected override async Task OnInitializedAsync()
         {
-            AssessmentId = sessionService.AssessmentId ?? 0;
-            //AssessmentId = sessionService!.AssessmentId.Value;
+            AssessmentId = sessionService.AssessmentId ?? 0;           
             await LoadAndMapSalesData();
             await CreateSummaries();
             IsLoading = false;
@@ -68,10 +63,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     Description = s.Description ?? "N/A",
                     TypeId = (long)s.IncomeTypeId,          // Direct cast
                     TypeName = s.IncomeTypeName ?? "N/A",   // Direct map
-                    IncludesVat = s.IncludeVAT > 0,
+                    //IncludesVat = s.IncludeVAT > 0,
                     MonthlyValues = new decimal[] { s.Month_1, s.Month_2, s.Month_3, s.Month_4, s.Month_5, s.Month_6,
                                                     s.Month_7, s.Month_8, s.Month_9, s.Month_10, s.Month_11, s.Month_12 }
                 }).ToList();
+
+                StateHasChanged();
             }
         }
 
@@ -89,12 +86,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     return acc;
                 });
 
-            await Task.CompletedTask;
-            //ConsolidatedAssessmentData.MonthlySales = IncomeStreams.Where(x => x.Inco == IncomeTypeEnum.SalesCategoryA || x.Type == IncomeTypeEnum.SalesCategoryB)
-            //    .Aggregate(new decimal[12], (acc, cur) => { for (int i = 0; i < 12; i++) acc[i] += cur.MonthlyValues[i]; return acc; });
+            await Task.CompletedTask;            
         }
 
         private async Task AddIncomeStream() => await OpenIncomeFormPanel(new UnifiedIncomeViewModel());
+
 
         private async Task OpenIncomeFormPanel(UnifiedIncomeViewModel stream)
         {
