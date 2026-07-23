@@ -1,18 +1,20 @@
 ﻿@if (IsVisible)
 {
-    <div class="modal fade show d-block rounded-3" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-div modal-dialog modal-dialog-centered rounded-3">
-            <div class="modal-header py-1" style="background-color: #edf7fc;">
-            <div class="modal-content rounded-3">
-                    <h6 class="modal-title text-navy">@Title</h6>
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg" style="border-radius: 10px; overflow: hidden;">
+                <div class="modal-header py-2 d-flex align-items-center shadow-sm" style="background-color: #edf7fc;">
+                    <h5 class="modal-title fs-6 fw-bold d-flex align-items-center mb-0">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>@Title
+                    </h5>
                     <button type="button" class="btn-close" @onclick="() => SelectChoice(false)"></button>
                 </div>
-                <div class="modal-body">
-                    <p>@Message</p>
+                <div class="modal-body py-4">
+                    <p class="mb-0 text-secondary">@Message</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary rounded text-xs shadow-sm" @onclick="() => SelectChoice(false)">@CancelText</button>
-                    <button type="button" class="btn btn-warning rounded text-xs shadow-sm" @onclick="() => SelectChoice(true)">@ConfirmText</button>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-outline-secondary fw-bold btn-sm text-xs" @onclick="() => SelectChoice(false)">@CancelText</button>
+                    <button type="button" class="btn btn-warning btn-sm fw-bold text-dark text-xs" @onclick="() => SelectChoice(true)">@ConfirmText</button>
                 </div>
             </div>
         </div>
@@ -28,7 +30,6 @@
 
     private TaskCompletionSource<bool>? _tsc;
 
-    // The parent component invokes this method to trigger the dialog
     public Task<bool> ShowAsync(string title, string message, string confirmText = "OK", string cancelText = "Cancel")
     {
         Title = title;
@@ -39,7 +40,6 @@
         IsVisible = true;
         StateHasChanged();
 
-        // Create a new task completion source to await the user's action
         _tsc = new TaskCompletionSource<bool>();
         return _tsc.Task;
     }
@@ -47,6 +47,6 @@
     private void SelectChoice(bool choice)
     {
         IsVisible = false;
-        _tsc?.SetResult(choice); // Resolves the awaited Task in the parent component
+        _tsc?.SetResult(choice);
     }
 }
