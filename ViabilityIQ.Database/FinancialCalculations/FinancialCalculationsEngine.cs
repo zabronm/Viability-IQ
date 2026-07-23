@@ -66,7 +66,6 @@ namespace ViabilityIQ.Application.FinancialCalculations
             {
                 throw;
             }
-
         }
 
 
@@ -92,27 +91,11 @@ namespace ViabilityIQ.Application.FinancialCalculations
                 MetricTypeId = metricTypeId,
                 AssessmentLoanRepaymentId = 0,                      //======== NEW RECORD HERE ============
                 MonthlyValues = values,
-                Active = true,                                     //======== EXTREMELY IMPORTANT OTHERWISE RECORD WILL NOT USED IN TRANSACTIONS ============
-
-
-                //Month_1 = values[0],
-                //Month_2 = values[1],
-                //Month_3 = values[2],
-                //Month_4 = values[3],
-                //Month_5 = values[4],
-                //Month_6 = values[5],
-                //Month_7 = values[6],
-                //Month_8 = values[7],
-                //Month_9 = values[8],
-                //Month_10 = values[9],
-                //Month_11 = values[10],
-                //Month_12 = values[11]               
+                Active = true,                                     //======== EXTREMELY IMPORTANT OTHERWISE RECORD WILL NOT USED IN TRANSACTIONS ============                            
             };
 
             return row;
         }
-
-
 
 
 

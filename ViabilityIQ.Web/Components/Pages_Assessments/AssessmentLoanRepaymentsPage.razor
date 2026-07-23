@@ -82,14 +82,13 @@
                                 <tr class="border-top border-secondary-subtle font-row-group">
                                     <td rowspan="4" class="ps-2 align-top pt-2"
                                         @onclick="() => OpenLoanFormAsync(loan.LoanId)"
-
                                         title=@(loan.LoanTypeName ?? "(Unknown Loan)")>
-                                        <span class="clickable-cell fw-bold" style="font-size:0.78rem;">@DisplayUtility.TruncateValue(loan.LoanTypeName,20)</span>
-                                       
+                                        <span class="clickable-cell fw-bold" style="font-size:0.78rem;">@DisplayUtility.TruncateValue(loan.LoanTypeName, 20)</span>
+
                                         <small class="d-block text-muted fw-normal font-monospace text-xxs mt-0.5"
-                                            title=@(loan.BankName ?? "(Unknown Bank)") >
-                                            @DisplayUtility.TruncateValue(loan.BankName,20)
-                                         </small>
+                                               title=@(loan.BankName ?? "(Unknown Bank)")>
+                                            @DisplayUtility.TruncateValue(loan.BankName, 20)
+                                        </small>
                                     </td>
                                     <td class="text-xxs text-muted fw-semibold py-1.5 bg-light-subtle ps-2">Expected Repayment</td>
                                     @for (int i = 0; i < 12; i++)
@@ -115,14 +114,18 @@
                                         @loan.MonthlyData.Sum(x => x.Expected).ToString("N0").Replace(",", " ")
                                     </td>
                                     <td rowspan="4" class="text-center border-start align-middle bg-white">
-                                        <button type="button" class="btn-action-operation btn-edit-accent"
-                                                @onclick="() => OpenRepaymentsFormAsync(loan.LoanId)" title="Edit Repayments">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button type="button" class="btn-action-operation btn-delete-accent"
-                                                @onclick="() => HandleDeleteLoanAndRepaymentsAsync(loan.LoanId)" title="Delete Loan">
-                                            <i class="bi bi-file-earmark-x"></i>
-                                        </button>
+                                        <div class="py-1">
+                                            <button type="button" class="btn-action-operation btn-edit-accent"
+                                                    @onclick="() => OpenRepaymentsFormAsync(loan.LoanId)" title="Edit Repayments">
+                                                <i class="bi bi-vector-pen"></i>
+                                            </button>
+                                        </div>
+                                        <div class="py-1">
+                                            <button type="button" class="btn-action-operation btn-delete-accent"
+                                                    @onclick="() => HandleDeleteLoanAndRepaymentsAsync(loan.LoanId)" title="Delete Loan">
+                                                <i class="bi bi-file-earmark-x"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
 
@@ -185,7 +188,7 @@
                                         @GetMonthlyGrandTotal(monthIdx).ToString("N0").Replace(",", " ")
                                     </td>
                                 }
-                                <td class="text-end font-monospace py-2 pe-3 fw-bold align-middle cell-val-size totals-bkg" >
+                                <td class="text-end font-monospace py-2 pe-3 fw-bold align-middle cell-val-size totals-bkg">
                                     @GetAccumulatedGrandTotal().ToString("N0").Replace(",", " ")
                                 </td>
                                 <td class="bg-light border-start"></td>
@@ -197,6 +200,8 @@
         </div>
     </div>
 </div>
+<ZabConfirmDialogComponent @ref="ConfirmDeleteDialog" />
+
 
 <footer class="py-2 bg-light mt-3">
     <BFooter />

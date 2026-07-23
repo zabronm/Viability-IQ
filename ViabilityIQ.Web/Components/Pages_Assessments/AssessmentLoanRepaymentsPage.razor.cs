@@ -26,7 +26,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private bool blAlert { get; set; } = false;
         private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
         private string AlertHeading { get; set; } = "Loan Notice:";
-        private string AlertMessage { get; set; } = "";
+        private string AlertMessage { get; set; } = "Welcome to the loans module. Please note that calculations are done based on selected loan calculation method";
+
+
+        private ZabConfirmDialogComponent? ConfirmDeleteDialog { get; set; } = default!;
+        private string StatusMessage { get; set; } = "";
 
         private string SearchQuery { get; set; } = string.Empty;
         private long? SelectedLoanTypeId { get; set; } = null;
@@ -225,13 +229,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             {
                 ActivePanelTitle = "Edit Loan Repayment Schedule";
 
+                var targetLoan = LoanProfilesDataset.FirstOrDefault(x => x.LoanId == loanRepaymentId);
+                string displayLoanName = targetLoan != null ? $"{targetLoan.LoanTypeName} ({targetLoan.BankName})" : "Loan Repayment Schedule";
+
                 await zabCanvasService.ShowAsync(
                     new CanvasRequest
                     {
                         Title = ActivePanelTitle,
                         Width = 550,
                         ComponentType = typeof(AssessmentLoanRepaymentFormComponent),
-                        Parameters = new { AssessmentLoanId = loanRepaymentId },
+                        Parameters = new 
+                        { 
+                            AssessmentLoanId = loanRepaymentId,
+                            parLoanTypeName = displayLoanName,
+                        },
                         ResultCallback = HandleLoanRepaymentResultAsync
                     });
             }
@@ -241,7 +252,21 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private async Task HandleDeleteLoanAndRepaymentsAsync(long loanRepaymentId)
         {
             try
-            {    
+            {
+                StatusMessage = "Awaiting user confirmation...";
+
+                bool isConfirmed = await ConfirmDeleteDialog!.ShowAsync( 
+                    title: "Delete Loan Permanently?",
+                    message: "Confirm you want to delete this loan and its schedules?", 
+                    confirmText: "Yes Delete", 
+                    cancelText: " No, Keep it"
+                );
+
+                if (!isConfirmed)
+                {
+                    StatusMessage = "Deletion cancelled by user.";
+                    return;
+                }
 
                 var str_sql = "UPDATE tblAssessmentLoanRepayment SET [Active]=@parActive WHERE (AssessmentLoanId = @parAssessmentLoanId); " +
                               "UPDATE tblAssessmentLoan SET [Active]=@parActive WHERE (AssessmentLoanId = @parAssessmentLoanId);";
@@ -250,7 +275,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
                 _ = LoadLoanRepaymentsDataAsync();
 
-                _Toast.ShowSuccess("Loan and repayments deleted successfully.", sessionService!.AppTitle);
+                _Toast.ShowSuccess("Loan/repayments deleted successfully.", sessionService!.AppTitle);
 
             }
             catch (Exception ex)

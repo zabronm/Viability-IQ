@@ -1,0 +1,52 @@
+﻿@if (IsVisible)
+{
+    <div class="modal fade show d-block rounded-3" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-div modal-dialog modal-dialog-centered rounded-3">
+            <div class="modal-header py-1" style="background-color: #edf7fc;">
+            <div class="modal-content rounded-3">
+                    <h6 class="modal-title text-navy">@Title</h6>
+                    <button type="button" class="btn-close" @onclick="() => SelectChoice(false)"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@Message</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded text-xs shadow-sm" @onclick="() => SelectChoice(false)">@CancelText</button>
+                    <button type="button" class="btn btn-warning rounded text-xs shadow-sm" @onclick="() => SelectChoice(true)">@ConfirmText</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool IsVisible { get; set; } = false;
+    private string Title { get; set; } = "Confirm";
+    private string Message { get; set; } = "Are you sure?";
+    private string ConfirmText { get; set; } = "OK";
+    private string CancelText { get; set; } = "Cancel";
+
+    private TaskCompletionSource<bool>? _tsc;
+
+    // The parent component invokes this method to trigger the dialog
+    public Task<bool> ShowAsync(string title, string message, string confirmText = "OK", string cancelText = "Cancel")
+    {
+        Title = title;
+        Message = message;
+        ConfirmText = confirmText;
+        CancelText = cancelText;
+
+        IsVisible = true;
+        StateHasChanged();
+
+        // Create a new task completion source to await the user's action
+        _tsc = new TaskCompletionSource<bool>();
+        return _tsc.Task;
+    }
+
+    private void SelectChoice(bool choice)
+    {
+        IsVisible = false;
+        _tsc?.SetResult(choice); // Resolves the awaited Task in the parent component
+    }
+}

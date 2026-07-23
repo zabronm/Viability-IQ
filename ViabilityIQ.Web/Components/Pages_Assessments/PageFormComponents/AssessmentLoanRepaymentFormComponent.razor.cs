@@ -19,8 +19,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         [Inject] ISessionService? sessionService { get; set; }
 
         [Parameter] public long AssessmentLoanId { get; set; }
+        [Parameter] public string parLoanTypeName { get; set; } = string.Empty; // Added parameter
+        [Parameter] public string BankName { get; set; } = string.Empty; // Added parameter
 
-       private long AssessmentId { get; set; } = new();
+
+        private long AssessmentId { get; set; } = new();
+        private decimal BulkExtraAmount { get; set; } = 0m;
+
         private RepaymentFormViewModel ActiveRepaymentModel { get; set; } = new()
         {
             MonthlyLines = Enumerable.Range(0, 12).Select(_ => new RepaymentMetricCell()).ToList()
@@ -42,45 +47,48 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 string loanTypeName = "Loan Repayment Schedule";
                 int startMonth = 1;
                 var monthlyCells = Enumerable.Range(0, 12).Select(_ => new RepaymentMetricCell()).ToList();
+
+                if (!string.IsNullOrEmpty(parLoanTypeName))
+                {
+                    loanTypeName = parLoanTypeName;
+                }
+
                 ExistingRepaymentIds.Clear();
 
                 if (AssessmentLoanId > 0 && ViqCrudService != null)
                 {
-                    // Fetch existing repayment entries for this Loan from database view/table
+                    // Fetch existing repayment entries matching the exact query pattern used in the parent page list
                     var existingRecords = await ViqCrudService.GetListAsync<AssessmentLoanRepaymentDto>(
-                        "vw_AssessmentLoanRepayment_list",
-                        new { AssessmentLoanId = AssessmentLoanId },
-                        "MetricTypeId"
+                        "vw_assessment_loan_repayment_list",
+                        new { AssessmentId = AssessmentId, Active = true },
+                        "AssessmentLoanId"
                     );
 
                     if (existingRecords != null && existingRecords.Any())
                     {
-                        var firstRow = existingRecords.First();
-                        loanTypeName = firstRow.LoanTypeName ?? loanTypeName;
+                        // Filter specifically for the current AssessmentLoanId being edited
+                        var loanRecords = existingRecords.Where(r => r.AssessmentLoanId == AssessmentLoanId).ToList();
 
-                        var expectedRow = existingRecords.FirstOrDefault(r => r.MetricTypeId == 1);
-                        var interestRow = existingRecords.FirstOrDefault(r => r.MetricTypeId == 2);
-                        var extraRow = existingRecords.FirstOrDefault(r => r.MetricTypeId == 3);
-
-                        if (expectedRow != null) ExistingRepaymentIds[1] = expectedRow.AssessmentLoanRepaymentId;
-                        if (interestRow != null) ExistingRepaymentIds[2] = interestRow.AssessmentLoanRepaymentId;
-                        if (extraRow != null) ExistingRepaymentIds[3] = extraRow.AssessmentLoanRepaymentId;
-
-                        for (int i = 0; i < 12; i++)
+                        if (loanRecords.Any())
                         {
-                            int m = i + 1;
-                            monthlyCells[i].Expected = GetValForMonth(expectedRow, m);
-                            monthlyCells[i].Interest = GetValForMonth(interestRow, m);
-                            monthlyCells[i].Extra = GetValForMonth(extraRow, m);
-                        }
+                            var firstRow = loanRecords.First();
+                            loanTypeName = firstRow.LoanTypeName ?? loanTypeName;
+                            startMonth = firstRow.StartMonth > 0 ? firstRow.StartMonth : 1;
 
-                        // Determine start month dynamically from expected repayment values
-                        for (int m = 0; m < 12; m++)
-                        {
-                            if (monthlyCells[m].Expected > 0)
+                            var expectedRow = loanRecords.FirstOrDefault(r => r.MetricTypeId == 1);
+                            var interestRow = loanRecords.FirstOrDefault(r => r.MetricTypeId == 2);
+                            var extraRow = loanRecords.FirstOrDefault(r => r.MetricTypeId == 3);
+
+                            if (expectedRow != null) ExistingRepaymentIds[1] = expectedRow.AssessmentLoanRepaymentId;
+                            if (interestRow != null) ExistingRepaymentIds[2] = interestRow.AssessmentLoanRepaymentId;
+                            if (extraRow != null) ExistingRepaymentIds[3] = extraRow.AssessmentLoanRepaymentId;
+
+                            for (int i = 0; i < 12; i++)
                             {
-                                startMonth = m + 1;
-                                break;
+                                int m = i + 1;
+                                monthlyCells[i].Expected = GetValForMonth(expectedRow, m);
+                                monthlyCells[i].Interest = GetValForMonth(interestRow, m);
+                                monthlyCells[i].Extra = GetValForMonth(extraRow, m);
                             }
                         }
                     }
@@ -101,7 +109,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
             catch (Exception)
             {
-                // Fall-safe empty model initialization using correct ViewModel type
                 ActiveRepaymentModel = new RepaymentFormViewModel
                 {
                     AssessmentLoanId = AssessmentLoanId,
@@ -110,6 +117,27 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     SendToCashbook = true,
                     MonthlyLines = Enumerable.Range(0, 12).Select(_ => new RepaymentMetricCell()).ToList()
                 };
+            }
+        }
+
+        private void ApplyBulkExtraAllocation()
+        {
+            if (ActiveRepaymentModel?.MonthlyLines == null) return;
+
+            foreach (var line in ActiveRepaymentModel.MonthlyLines)
+            {
+                line.Extra = BulkExtraAmount;
+            }
+        }
+
+        private void ClearBulkExtraAllocation()
+        {
+            BulkExtraAmount = 0m;
+            if (ActiveRepaymentModel?.MonthlyLines == null) return;
+
+            foreach (var line in ActiveRepaymentModel.MonthlyLines)
+            {
+                line.Extra = 0m;
             }
         }
 
@@ -140,10 +168,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             {
                 if (ViqCrudService == null || DataRepository == null) return;
 
-                long assessmentId = sessionService?.AssessmentId ?? 0;
-                int[] metricTypes = { 1, 2, 3 };
+                long assessmentId = AssessmentId > 0 ? AssessmentId : (sessionService?.AssessmentId ?? 0);
 
-                foreach (var metricTypeId in metricTypes)
+                // Persist only MetricTypeId 3 (Extra/Balloon Repayments) modified by the user
+                int[] metricTypesToSave = { 3 };
+
+                foreach (var metricTypeId in metricTypesToSave)
                 {
                     long repaymentId = ExistingRepaymentIds.ContainsKey(metricTypeId) ? ExistingRepaymentIds[metricTypeId] : 0;
 
@@ -153,6 +183,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                         AssessmentId = assessmentId,
                         AssessmentLoanId = ActiveRepaymentModel.AssessmentLoanId,
                         MetricTypeId = metricTypeId,
+                        Active = true,
                         CreatedDate = DateTime.UtcNow,
                         ModifiedDate = DateTime.UtcNow
                     };
@@ -160,20 +191,14 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     decimal[] values = new decimal[12];
                     for (int i = 0; i < 12; i++)
                     {
-                        values[i] = metricTypeId switch
-                        {
-                            1 => ActiveRepaymentModel.MonthlyLines[i].Expected,
-                            2 => ActiveRepaymentModel.MonthlyLines[i].Interest,
-                            3 => ActiveRepaymentModel.MonthlyLines[i].Extra,
-                            _ => 0m
-                        };
+                        values[i] = ActiveRepaymentModel.MonthlyLines[i].Extra;
                     }
                     repaymentEntity.MonthlyValues = values;
 
                     await DataRepository.SaveAsync(repaymentEntity);
                 }
 
-                await zabCanvasService!.PublishResultAsync(SaveResult.SavedAndClose("Loan details saved successfully."));
+                await zabCanvasService!.PublishResultAsync(SaveResult.SavedAndClose("Extra/Balloon repayments saved successfully."));
             }
             catch (Exception ex)
             {
@@ -192,12 +217,4 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public bool SendToCashbook { get; set; }
         public List<RepaymentMetricCell> MonthlyLines { get; set; } = new();
     }
-
-    //public class RepaymentMetricCell
-    //{
-    //    public decimal Expected { get; set; }
-    //    public decimal Interest { get; set; }
-    //    public decimal Extra { get; set; }
-    //    public decimal Total => Expected + Interest + Extra;
-    //}
 }

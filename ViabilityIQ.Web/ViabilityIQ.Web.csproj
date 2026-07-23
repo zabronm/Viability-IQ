@@ -48,6 +48,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazor.Bootstrap" Version="3.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ViabilityIQ.Database\ViabilityIQ.Application.csproj" />
     <ProjectReference Include="..\ViabilityIQ.Infrastructure\ViabilityIQ.Infrastructure.csproj" />
     <ProjectReference Include="..\ViabilityIQ.Modules\ViabilityIQ.Modules.csproj" />
