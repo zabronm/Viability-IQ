@@ -29,6 +29,8 @@ namespace ViabilityIQ.Shared.SharedModels
         Users,
         Sectors,
         AssessmentSalesCategories,
+        AssessmentLoans,
+
 
     }
 }

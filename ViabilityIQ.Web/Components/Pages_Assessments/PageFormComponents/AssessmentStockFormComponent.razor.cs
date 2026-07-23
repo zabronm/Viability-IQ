@@ -35,13 +35,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             {
                 if (AssessmentStockId > 0)
                 {
-                    FormModel = await ViqCrudService!.GetSingleAsync<AssessmentStock>("tblAssessmentStock", AssessmentStockId)
-                                ?? new AssessmentStock { AssessmentId = AssessmentId };
+                    FormModel = await ViqCrudService!.GetSingleAsync<AssessmentStock>("tblAssessmentStock", new { AssessmentStockId })
+                                ?? new AssessmentStock {AssessmentId= AssessmentId };
                     MonthlyValues = FormModel.MonthlyValues;            // Load existing monthly data from the entity
                 }
                 else
                 {
-                    FormModel = new AssessmentStock { AssessmentId = AssessmentId, blIncludeVAT = true, };
+                    FormModel = new AssessmentStock {AssessmentId = AssessmentId, blIncludeVAT = true, };
                     MonthlyValues = new decimal[12];
                 }
             }

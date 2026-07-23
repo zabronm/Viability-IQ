@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Server;
+using ViabilityIQ.Application.ExtensionServices;
 using ViabilityIQ.Infrastructure.Extensions;
 using ViabilityIQ.Web.Components;
 using ViabilityIQ.Web.Extensions;
@@ -18,9 +19,9 @@ namespace ViabilityIQ.Web
                 options.DetailedErrors = true;
             });
 
-            builder.Services.AddWebServices();  //Located in the Web projects
-            builder.Services.AddInfrastructureServices();    //Located in the Infrastructure project
-
+            builder.Services.AddWebServices();                          //Located in the Web projects
+            builder.Services.AddInfrastructureServices();               //Located in the Infrastructure project
+            builder.Services.AddFinancialCalculationServices();         //======== Located in the Applications project ===
 
             var app = builder.Build();
 

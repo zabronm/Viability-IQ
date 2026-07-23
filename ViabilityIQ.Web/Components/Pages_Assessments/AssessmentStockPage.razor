@@ -2,6 +2,9 @@
 @layout MainLayout_Assessment
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Shared.UtilityServices
+
+
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Stock" PageTitle="Stock Management & Valuation" CurrentPage="PageType.Stock" />
@@ -27,7 +30,7 @@
             <table class="table table-sm table-hover mb-0">
                 <thead class="py-1">                    
                     <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                        <th class="sticky-col ps-2 text-xs">Expense Description</th>
+                        <th class="sticky-col ps-2 text-xxs text-uppercase">Stock Category <i class="bi bi-caret-down-fill text-secondary"></i></th>
                         @for (int i = 1; i <= 12; i++)
                         {
                             <th class="text-end td-header-ice text-uppercase text-xxs">M@(i)</th>
@@ -37,7 +40,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Isloading)
+                    @if (Isloading)                     
                     {
                         <LoadingTableRowsComponent />
                     }
@@ -51,13 +54,16 @@
                         {
                             <tr class="hover-light-blue">
                                 <td class="ps-2 text-black">
-                                    <span style="font-size:0.75rem !important;">@item.AssessmentSalesCategoryName</span>
+                                    <span title="@item.AssessmentSalesCategoryName"
+                                        style="font-size:0.75rem !important;">
+                                        @DisplayUtility.TruncateValue(item.AssessmentSalesCategoryName, 20)
+                                    </span>
                                 </td>
                                 @for (int i = 1; i <= 12; i++)
                                 {
-                                    <td class="text-end font-monospace text-secondary">@GetMonthValue(item, i).ToString("N0")</td>
+                                    <td class="text-end font-monospace text-secondary text-xxs">@GetMonthValue(item, i).ToString("N0")</td>
                                 }
-                                <td class="text-end font-monospace fw-bold" style="background-color: #d1d5db; color: #000080;">
+                                <td class="text-end font-monospace fw-bold text-xss" style="background-color: #d1d5db; color: #000080;">
                                     @item.MonthlyValues.Sum().ToString("N0")
                                 </td>
                                 <td class="text-center">

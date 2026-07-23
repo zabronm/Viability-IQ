@@ -239,16 +239,16 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //===== usage examples =================================================================
         //--- var assessment = await ViqCrudService.GetSingleAsync<AssessmentDto>("tblAssessment", new{AssessmentId}); ---single parameter
         //--- var assessment = await ViqCrudService.GetSingleAsync<AssessmentDto>("tblAssessment",new {AssessmentId, Active = true}); ---- multiple parameters
-        
-        public async Task<T?> GetSingleAsync<T>(string tableName,object conditions)
+
+        public async Task<T?> GetSingleAsync<T>(string tableName, object conditions)
         {
-            
+
             ValidateSqlIdentifier(tableName);
 
             string whereClause = BuildWhereClause(conditions);
 
             string sql = $@"SELECT * FROM {SafeIdentifier(tableName)} WHERE {whereClause};";
-                        
+
 
             try
             {
@@ -259,7 +259,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 throw;
             }
-           
+
         }
 
 
@@ -348,14 +348,21 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // Example usage: await repo.ExecuteCommandAsync("UPDATE Farmers SET Name = @Name WHERE Id = @Id", new { Name = "John", Id = 1 });
         public async Task<int> ExecuteCommandAsync(string sql, object parameters = null)
         {
+            using var connection = _dbConnectionFactory.CreateConnection();
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
             try
             {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                return await connection.ExecuteAsync(sql, parameters);
+                var rowsAffected = await connection.ExecuteAsync(sql, parameters, transaction);
+                transaction.Commit();
+                return rowsAffected;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception(ex.Message);
+                transaction.Rollback();
+                throw;
             }
         }
 
@@ -411,7 +418,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
 
         //3. ===================== Count records meeting a key criteria ===================================== CountAsync
-        public async Task<int> CountAsync(  string tableName, string? keyField = null,  object? keyValue = null)
+        public async Task<int> CountAsync(string tableName, string? keyField = null, object? keyValue = null)
         {
             ValidateSqlIdentifier(tableName);
 
@@ -472,7 +479,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
-            string sql =$"SELECT MIN({fieldName}) FROM {tableName}";
+            string sql = $"SELECT MIN({fieldName}) FROM {tableName}";
 
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.ExecuteScalarAsync<T>(sql);
@@ -485,7 +492,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
-            string sql =$"SELECT MAX({fieldName}) FROM {tableName}";
+            string sql = $"SELECT MAX({fieldName}) FROM {tableName}";
 
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.ExecuteScalarAsync<T>(sql);
@@ -498,7 +505,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
-            string sql =$"SELECT ISNULL(AVG({fieldName}),0) FROM {tableName}";
+            string sql = $"SELECT ISNULL(AVG({fieldName}),0) FROM {tableName}";
 
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.ExecuteScalarAsync<decimal>(sql);
@@ -535,5 +542,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.ExecuteAsync(sql, parameters);
         }
+
+
+
     }
 }

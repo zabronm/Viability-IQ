@@ -3,6 +3,7 @@
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 @using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.UtilityServices
 @using ViabilityIQ.Web.Components.CommonComponents
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
@@ -48,7 +49,7 @@
                                        @bind="SearchQuery"
                                        @bind:event="oninput" />
                             </div>
-                        </div>                        
+                        </div>
                     </div>
                 </div>
 
@@ -58,7 +59,7 @@
                         <!-- Table Header with restored font sizes -->
                         <thead class="py-1">
                             <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                                <th class="sticky-col ps-2 text-xs">Expense Description</th>
+                                <th class="sticky-col ps-2 text-xxs text-uppercase">Expense Description <i class="bi bi-caret-down-fill text-secondary"></i></th>
                                 <th class="text-start td-header-ice text-uppercase px-1 text-xxs">Expense Type</th>
                                 @for (int m = 1; m <= 12; m++)
                                 {
@@ -86,7 +87,10 @@
                                     <tr class="hover-light-blue">
                                         <!-- Applied hover effect class -->
                                         <td class="ps-2 text-black">
-                                            <span style="font-size:0.75rem !important;">@item.ExpenseItemName</span>
+                                            <span style="font-size:0.75rem !important;"
+                                                  title="@item.ExpenseItemName">
+                                                @DisplayUtility.TruncateValue(item.ExpenseItemName, 20)
+                                            </span>
                                             @if (item.blSendToCashBook)
                                             {
                                                 <span class="badge bg-white text-xxs border-0 ms-1 btn-outline-dark rounded-pill" style="font-size: 0.60rem;">
@@ -95,7 +99,7 @@
                                             }
                                         </td>
 
-                                        <td class="px-2"><span class="badge text-black text-xxs fw-normal" style="border: solid 1px #cdcdcd !important; background-color: #DBE9FA !important;">@item.TypeName.ToString()</span></td>
+                                        <td class="px-2"><span class="badge text-black text-xxs fw-normal totals-bkg">@item.TypeName.ToString()</span></td>
                                         @* <td class="px-2"><span class="badge bg-soft-blue text-navy-brand text-xs">@item.TypeName.ToString()</span></td> *@
                                         @for (int i = 0; i < 12; i++)
                                         {

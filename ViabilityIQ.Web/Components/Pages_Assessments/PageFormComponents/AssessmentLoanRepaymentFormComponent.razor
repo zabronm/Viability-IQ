@@ -1,48 +1,52 @@
 ﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments
 @using Microsoft.AspNetCore.Components.Forms
 
-<div class="p-2 bg-white h-100">  
-        <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync">
+<div class="p-1 m-1 bg-white h-100">
+    <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync">
 
-            <div class="mb-2 mt-0">
-                <label class="form-label text-xxs text-muted fw-bold mb-1">Loan Description</label>
-                <input type="text" class="form-control bg-light text-xs text-dark fw-semibold" value="@ActiveRepaymentModel.LoanTypeName" disabled />
-            </div>
+        <div class="mb-2 mt-0">
+            <label class="form-label-custom mb-1">Loan Description</label>
+            @* <input type="text" class="form-control-compact bg-light  fw-semibold" value="@ActiveRepaymentModel.LoanTypeName" disabled /> *@
+            <DDLookupComponent SourceKey="DDLookupEnums.AssessmentLoans" IsDisabled=false
+                               @bind-Value=ActiveRepaymentModel.AssessmentLoanId FilterField="AssessmentId" FilterValue="@sessionService.AssessmentId" />
+        </div>
 
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <label class="form-label text-xxs text-muted fw-bold mb-1">First Repayment Month</label>
-                    <select class="form-select form-select-sm text-xs" @bind="ActiveRepaymentModel.StartMonth">
-                        @for (int m = 1; m <= 12; m++)
-                        {
-                            <option value="@m">Month @m</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-6 d-flex align-items-end">
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="sendToCashbookChild" @bind="ActiveRepaymentModel.SendToCashbook" />
-                        <label class="form-check-label text-xxs fw-bold text-secondary" for="sendToCashbookChild">Send to Cashbook</label>
-                    </div>
+        <div class="row g-2 mb-2">            
+            <div class="col-6 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="sendToCashbookChild" @bind="ActiveRepaymentModel.SendToCashbook" />
+                    <label class="form-check-label text-xs fw-bold text-secondary" for="sendToCashbookChild">Send to Cashbook</label>
                 </div>
             </div>
+        </div>
 
-            <h6 class="text-xxs fw-bold text-muted text-uppercase tracking-wider mb-2">
-                <i class="bi bi-grid-3x3-gap me-1 text-primary"></i>Monthly Extra/Repayments
-            </h6>
+        <div class="row g-2 mb-2">
+            <div class="col-6 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="sendToCashbookChild" @bind="ActiveRepaymentModel.SendToCashbook" />
+                    <label class="form-check-label text-xs fw-bold text-secondary" for="sendToCashbookChild">Send to Cashbook</label>
+                </div>
+            </div>
+        </div>
 
-            <div class="border rounded bg-white p-1 text-nowrap mb-3" style="overflow-x: auto; max-height: 380px; overflow-y: auto;">
-                <table class="table table-sm table-borderless align-middle mb-0 text-xxs">
-                    <thead>
-                        <tr class="bg-light fw-bold border-bottom">
-                            <th class="ps-1 align-middle text-center" style="width: 45px;">Month</th>
-                            <th class="text-end pe-1">Expected (R)</th>
-                            <th class="text-end pe-1">Interest (R)</th>
-                            <th class="text-end pe-1">Extra (R)</th>
-                            <th class="text-end pe-2 text-navy-brand">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <h6 class="text-xs fw-bold text-muted tracking-wider mb-2">
+            <i class="bi bi-grid-3x3-gap me-1 text-primary"></i>Monthly Extra(Balloon) Repayments
+        </h6>
+
+        <div class="border rounded bg-white p-1 text-nowrap mb-3" style="overflow-x: auto; max-height: 380px; overflow-y: auto;">
+            <table class="table table-sm table-borderless align-middle mb-0 text-xxs">
+                <thead>
+                    <tr class="bg-light fw-bold border-bottom">
+                        <th class="ps-1 align-middle text-center" style="width: 45px;">Month</th>
+                        <th class="text-end pe-1">Expected (R)</th>
+                        <th class="text-end pe-1">Interest (R)</th>
+                        <th class="text-end pe-1">Extra (R)</th>
+                        <th class="text-end pe-2 text-navy-brand">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ActiveRepaymentModel?.MonthlyLines != null && ActiveRepaymentModel.MonthlyLines.Count == 12)
+                    {
                         @for (int i = 0; i < 12; i++)
                         {
                             var idx = i;
@@ -65,14 +69,21 @@
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center p-3 text-muted">Loading schedule months...</td>
+                        </tr>
+                    }
+                    
+                </tbody>
+            </table>
+        </div>
 
-            <div class="d-flex align-items-center gap-2 pt-2 border-top">
-                <button type="submit" class="btn btn-primary btn-sm flex-fill text-xs fw-bold"><i class="bi bi-save me-1"></i>Commit Repayments</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm text-xs" @onclick="CancelFormWorkflowAsync">Cancel</button>
-            </div>
-        </EditForm>
-  
+        <div class="d-flex align-items-center gap-2 pt-2">
+            <button type="submit" class="btn btn-primary flex-fill text-xs fw-bold"><i class="bi bi-save me-1"></i>Commit Repayments</button>
+            @* <button type="button" class="btn btn-outline-secondary btn-sm text-xs" @onclick="CancelFormWorkflowAsync">Cancel</button> *@
+        </div>
+    </EditForm>
 </div>

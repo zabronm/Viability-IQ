@@ -85,7 +85,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 // Fallback for models that do not have audit features
                 return await connection.UpdateAsync(entity);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

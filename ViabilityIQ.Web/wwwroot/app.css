@@ -1678,3 +1678,9 @@ form-control-compact:focus,
     background-color: #e9ecef !important; /* Darker grey background */
     cursor: not-allowed;
 }
+
+.totals-bkg {
+    border: solid 0px #cdcdcd !important; 
+    background-color: #DBE9FA !important;
+    color: #000080 !important;    
+}

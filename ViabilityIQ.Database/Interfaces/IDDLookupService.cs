@@ -9,7 +9,11 @@ namespace ViabilityIQ.Application.Interfaces
 {
     public interface IDDLookupService
     {
-        Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey);
+        //Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey);
+        //Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey, long? filterId = null);
+        Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey,
+                                                            string? filterField = null,
+                                                            object? filterValue = null);
     }
 
     public class LookupItem

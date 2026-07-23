@@ -2,6 +2,8 @@
 @layout MainLayout_Assessment
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.UtilityServices
+
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Sales" PageTitle="Sales & Forecasts" CurrentPage="PageType.Sales" />
@@ -35,7 +37,7 @@
                     <!-- Table Header with restored font sizes -->
                     <thead class="text-xxs">
                         <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                            <th class="sticky-col ps-2 text-uppercase">Revenue Channels</th>
+                            <th class="sticky-col ps-2 text-xxs text-uppercase">Revenue Channels <i class="bi bi-caret-down-fill text-secondary"></i></th>
                             <th class="text-start text-uppercase px-2">Income Type</th>
                             @for (int m = 1; m <= 12; m++)
                             {
@@ -63,7 +65,9 @@
                                 <tr class="hover-light-blue">
                                     <!-- Applied hover effect class -->
                                     <td class="ps-2 text-black">
-                                        <span style="font-size:0.80rem !important;">@item.Description</span>
+                                        <span title="@item.Description"
+                                              style="font-size:0.80rem !important;">                                           
+                                            @DisplayUtility.TruncateValue(item.Description,20)</span>
                                         @if (item.IncludesVat)
                                         {
                                             <span class="badge bg-light text-secondary fw-light text-xs border ms-1" style="font-size: 0.60rem;">VAT</span>

@@ -18,13 +18,16 @@ namespace ViabilityIQ.Shared.DataModels
         [Required] public long AssessmentId { get; set; }
 
         public long BankId { get; set; }
-        public DateTime LoanDate { get; set; }
+        public DateTime? LoanDate { get; set; } = null;
         public decimal LoanAmount { get; set; }
         public decimal LoanBalanceAtAssessmentDate { get; set; }
         public decimal InterestRatePerAnnum { get; set; }
         public int RepaymentPeriodMonths { get; set; }
         public decimal MinimumRepaymentAmount { get; set; }
         public decimal ActualRepaymentAmount {get; set;}
+
+        [Required(ErrorMessage ="First repayment month is required")]
+        public int StartMonth { get; set; }
 
         public string? Remarks { get; set; }
         public bool Active { get; set; } = true;

@@ -19,6 +19,7 @@ namespace ViabilityIQ.Application.Dtos
         public int RepaymentPeriodMonths { get; set; }
         public decimal MinimumRepaymentAmount { get; set; }
         public decimal ActualRepaymentAmount { get; set; }
+        public int StartMonth { get; set; }
         public bool Active { get; set; } = true;
     }
 }

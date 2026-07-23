@@ -11,7 +11,7 @@ namespace ViabilityIQ.Application.Dtos
         public long AssessmentStockId { get; set; }
         public long AssessmentId { get; set; }
         public long AssessmentSalesCategoryId { get; set; }
-        public string? SalesCategoryName { get; set; }
+        public string? AssessmentSalesCategoryName { get; set; }
         public string? Description { get; set; }
         public bool blIncludeVAT { get; set; }
         public decimal SameMonthlyAmount { get; set; }

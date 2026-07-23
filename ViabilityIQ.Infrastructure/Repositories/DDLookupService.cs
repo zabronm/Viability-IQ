@@ -20,35 +20,36 @@ namespace ViabilityIQ.Infrastructure.Repositories
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
 
         // 1. Centralized hardcoded database mapping definitions mapping
-        private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField)> _metadataRegistry = new()
+        //private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField)> _metadataRegistry = new()
+        private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField, string? ParentIdField)> _metadataRegistry = new()
         {
             //============= master data lookups  ======================================
-            { DDLookupEnums.AssessmentTypes, ("tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName") },
-            { DDLookupEnums.Genders, ("tblGender", "GenderId", "Gender") },
-            { DDLookupEnums.Races, ("tblRace", "RaceId", "Race") },
-            { DDLookupEnums.Banks, ("tblBank", "BankId", "BankName") },
-            { DDLookupEnums.LoanTypes, ("tblLoanType", "LoanTypeId", "LoanTypeName") },
-            { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName") },
-            { DDLookupEnums.Businesses, ("tblBusiness", "BusinessId", "BusinessName") },
-            { DDLookupEnums.ClientCategories, ("tblClientCategories", "ClientCategoryId", "ClientCategoryName") },
-            { DDLookupEnums.ProductServiceCategories, ("tblProductCategory", "ProductCategoryId", "ProductCategoryName") },
-            { DDLookupEnums.Products, ("tblProduct", "ProductServiceId", "ProductServiceName") },
-            { DDLookupEnums.Provinces, ("tblProvince", "ProvinceId", "ProvinceName") },
-            { DDLookupEnums.Users, ("tblUsers", "UserId", "FullName") },
-            { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSectorName") },
-            { DDLookupEnums.Clients, ("tblClient", "ClientId", "FullName") },
-            { DDLookupEnums.ClientTypes, ("tblClientType", "ClientTypeId", "ClientTypeName") },
-            { DDLookupEnums.IncomeTypes, ("tblIncomeType", "IncomeTypeId", "IncomeTypeName") },
-            { DDLookupEnums.ExpenseTypes, ("tblExpenseType", "ExpenseTypeId", "ExpenseTypeName") },
-            { DDLookupEnums.ExpenseItems, ("tblExpenseItems", "ExpenseItemId", "ExpenseItemName") },
+            { DDLookupEnums.AssessmentTypes, ("tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName", null) },
+            { DDLookupEnums.Genders, ("tblGender", "GenderId", "Gender", null) },
+            { DDLookupEnums.Races, ("tblRace", "RaceId", "Race", null) },
+            { DDLookupEnums.Banks, ("tblBank", "BankId", "BankName", null) },
+            { DDLookupEnums.LoanTypes, ("tblLoanType", "LoanTypeId", "LoanTypeName", null) },
+            { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName", null) },
+            { DDLookupEnums.Businesses, ("tblBusiness", "BusinessId", "BusinessName", null) },
+            { DDLookupEnums.ClientCategories, ("tblClientCategories", "ClientCategoryId", "ClientCategoryName", null) },
+            { DDLookupEnums.ProductServiceCategories, ("tblProductCategory", "ProductCategoryId", "ProductCategoryName", null) },
+            { DDLookupEnums.Products, ("tblProduct", "ProductServiceId", "ProductServiceName", null) },
+            { DDLookupEnums.Provinces, ("tblProvince", "ProvinceId", "ProvinceName", null) },
+            { DDLookupEnums.Users, ("tblUsers", "UserId", "FullName", null) },
+            { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSectorName", null) },
+            { DDLookupEnums.Clients, ("tblClient", "ClientId", "FullName", null) },
+            { DDLookupEnums.ClientTypes, ("tblClientType", "ClientTypeId", "ClientTypeName", null) },
+            { DDLookupEnums.IncomeTypes, ("tblIncomeType", "IncomeTypeId", "IncomeTypeName", null) },
+            { DDLookupEnums.ExpenseTypes, ("tblExpenseType", "ExpenseTypeId", "ExpenseTypeName", null) },
+            { DDLookupEnums.ExpenseItems, ("tblExpenseItems", "ExpenseItemId", "ExpenseItemName", null) },
 
 
-            //============= assessment lookups =======================================
-            { DDLookupEnums.AssessmentSalesCategories, ("tblAssessmentSalesCategory", "AssessmentSalesCategoryId", "AssessmentSalesCategoryName") },
-
-
-
+            //============= assessment lookups =============================================================
+            //============= Usage =>(Table/View, IdField(bound field), DisplayField, ParentIdField(parameter field)):)  =======================
+            { DDLookupEnums.AssessmentSalesCategories, ("tblAssessmentSalesCategory", "AssessmentSalesCategoryId", "AssessmentSalesCategoryName", null) },
+            { DDLookupEnums.AssessmentLoans, ("vw_assessment_loans", "AssessmentLoanId", "LoanDescription", "AssessmentId") },
         };
+
 
         public DDLookupService(IDbConnectionFactory dbConnectionFactory, IMemoryCache cache)
         {
@@ -56,7 +57,10 @@ namespace ViabilityIQ.Infrastructure.Repositories
             _cache = cache;
         }
 
-        public async Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey)
+
+        public async Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey,
+                                                                         string? filterField = null,
+                                                                         object? filterValue = null)
         {
             // Safeguard against missing registry settings keys
             if (!_metadataRegistry.TryGetValue(lookupKey, out var meta))
@@ -64,17 +68,31 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 throw new ArgumentException($"Configuration Missing: No table metadata mapped for LookupKey: {lookupKey}");
             }
 
-            string cacheKey = $"lookup_key_{lookupKey}".ToLower();
+            // Build unique cache key including field and value
+            string cacheKey = $"lookup_{lookupKey}" +
+                (!string.IsNullOrWhiteSpace(filterField) && filterValue != null ? $"_{filterField}_{filterValue}" : "").ToLower();
 
             if (!_cache.TryGetValue(cacheKey, out IEnumerable<LookupItem>? cachedItems))
             {
-                // Construct query using trusted internal strings (eliminates SQL Injection completely)
-                string query = $@"SELECT [{meta.IdField}] AS Id, [{meta.DisplayField}] AS Description 
-                                  FROM {meta.Table} 
-                                  ORDER BY [{meta.DisplayField}] ASC;";
-
                 using var connection = _dbConnectionFactory.CreateConnection();
-                cachedItems = await connection.QueryAsync<LookupItem>(query);
+
+                string query = $@"SELECT [{meta.IdField}] AS Id, [{meta.DisplayField}] AS Description 
+                          FROM {meta.Table}";
+
+                var parameters = new DynamicParameters();
+
+                // Apply dynamic WHERE clause if field and value are provided
+                if (!string.IsNullOrWhiteSpace(filterField) && filterValue != null)
+                {
+                    // Sanitize field name to avoid unsafe column identifiers
+                    string safeFieldName = Regex.Replace(filterField, @"[^\w]", "");
+                    query += $" WHERE [{safeFieldName}] = @FilterValue";
+                    parameters.Add("FilterValue", filterValue);
+                }
+
+                query += $" ORDER BY [{meta.DisplayField}] ASC;";
+
+                cachedItems = await connection.QueryAsync<LookupItem>(query, parameters);
 
                 var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(CacheDuration);
                 _cache.Set(cacheKey, cachedItems, cacheOptions);

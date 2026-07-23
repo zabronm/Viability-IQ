@@ -2,9 +2,10 @@
 @layout MainLayout_Assessment
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
+@using ViabilityIQ.Shared.UtilityServices
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
-
+@using ViabilityIQ.Application.Dtos
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Loans" PageTitle="Loan Repayments" CurrentPage="PageType.Loans" />
@@ -21,16 +22,32 @@
         }
         <div class="col-12">
 
-            <div class="d-flex align-items-center justify-content-between mb-3">
+            <!-- Top Action Row: Add Button, Loan Type Filter (DDlookup), and Search Box -->
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                 <div>
                     <button type="button" class="btn btn-primary text-xs shadow-sm px-3" @onclick="() => OpenLoanFormAsync(0)">
                         <i class="bi bi-plus-lg me-1.5 fw-bold"></i>Add Loan
                     </button>
                 </div>
-                <div style="width: 280px;">
-                    <div class="input-group input-group-sm shadow-sm search-input-frame">
-                        <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search loans here..." @bind="SearchQuery" @bind:event="oninput" />
+
+                <div class="d-flex align-items-center gap-2">
+                    <!-- 2) LoanType filter using DDlookup component positioned before search box -->
+                    <div style="width: 220px;">
+                        <div style="width:220px;">
+                            <DDLookupComponent SourceKey="DDLookupEnums.AssessmentLoans"
+                                               FilterValue="@currentAssessmentId"
+                                               Value="SelectedLoanTypeId ?? 0L"
+                                               ValueChanged="@(val => SelectedLoanTypeId = val)"
+                                               Placeholder="Filter by loan" />
+                        </div>
+                    </div>
+
+                    <!-- Search Input Box -->
+                    <div style="width: 250px;">
+                        <div class="input-group input-group-sm shadow-sm search-input-frame">
+                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control text-xs border-start-0 ps-1" placeholder="Search loans here..." @bind="SearchQuery" @bind:event="oninput" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,68 +56,87 @@
                 <table class="table table-sm vertical-align-middle align-middle mb-0 matrix-grid-table">
                     <thead>
                         <tr class="bg-light text-muted text-xxs text-uppercase fw-bold border-bottom text-center row-header-height">
-                            <th class="text-start ps-3 py-2 text-dark col-loan-profile">Loan Profile Type</th>
-                            <th class="py-2 text-secondary text-start ps-2 col-metric-breakdown">Metric Breakdown</th>
+                            <th class="text-start ps-2 py-2 text-dark col-loan-profile">Loan Profile Type<i class="bi bi-caret-down-fill text-secondary"></i></th>
+                            <th class="py-2 text-secondary text-start ps-2 col-metric-breakdown" style="width:150px;">Metric Breakdown</th>
                             @for (int m = 1; m <= 12; m++)
                             {
-                                <th class="py-2 col-month-width">M@(m)</th>
+                                <th class="py-2 col-month-width text-end">M@(m)</th>
                             }
-                            <th class="text-white fw-bold text-center py-2 col-total-cumulative" style="background-color: #1a365d;">Total Outflow</th>
-                            <th class="bg-light border-start text-center py-2 col-actions-box"></th>
+                            <th class="fw-bold border-bottom text-center py-2 totals-bkg" style="width:130px; border-bottom: solid 1px #ababab !important;">Total Outflow</th>
+                            <th class="bg-light border-start text-center py-2 col-actions-box" style="width:70px;"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (GetFilteredLoanProfiles().Any())
+                        @if (IsLoading)
+                        {
+                            <LoadingTableRowsComponent />
+                        }
+                        else if (!GetFilteredLoanProfiles().Any())
+                        {
+                            <EmptyTableRowComponent EmptyRowMessage="No loan data is mapped to this assessment yet." />
+                        }
+                        else
                         {
                             @foreach (var loan in GetFilteredLoanProfiles())
                             {
-                                <tr class="border-top border-secondary-subtle font-row-group" style="border-bottom: 1px solid #728FCE;">
+                                <tr class="border-top border-secondary-subtle font-row-group">
                                     <td rowspan="4" class="ps-2 align-top pt-2"
                                         @onclick="() => OpenLoanFormAsync(loan.LoanId)"
-                                        title=@loan.LoanTypeName>
-                                        <span class="clickable-cell fw-bold" style="font-size:0.78rem;">@FormatLoanName(loan.LoanTypeName)</span>
-                                        <small class="d-block text-muted fw-normal font-monospace text-xxs mt-0.5">@loan.BankName</small>
+
+                                        title=@(loan.LoanTypeName ?? "(Unknown Loan)")>
+                                        <span class="clickable-cell fw-bold" style="font-size:0.78rem;">@DisplayUtility.TruncateValue(loan.LoanTypeName,20)</span>
+                                       
+                                        <small class="d-block text-muted fw-normal font-monospace text-xxs mt-0.5"
+                                            title=@(loan.BankName ?? "(Unknown Bank)") >
+                                            @DisplayUtility.TruncateValue(loan.BankName,20)
+                                         </small>
                                     </td>
                                     <td class="text-xxs text-muted fw-semibold py-1.5 bg-light-subtle ps-2">Expected Repayment</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         var monthIdx = i + 1;
-                                        // Dynamic conditional formatting evaluation logic applied to the td matrix layer[cite: 5]
                                         var isRepaymentActive = monthIdx >= loan.StartMonth;
-                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2 position-relative @(isRepaymentActive ? "bg-active-repayment" : "bg-light-subtle")">
+
+                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2 position-relative @(isRepaymentActive ? "bg-active-repayment" : "bg-no-repayment")">
                                             <div class="d-flex align-items-center justify-content-end gap-1">
                                                 <span>@loan.MonthlyData[i].Expected.ToString("N0").Replace(",", " ")</span>
+
+                                                <!-- 3) First Repayment Month badge preserved -->
                                                 @if (loan.StartMonth == monthIdx)
                                                 {
-                                                    <span class="badge bg-info text-white border border-success-subtle rounded-pill px-1 d-inline-flex align-items-center start-indicator-pill" title="First Repayment Month">
-                                                        <i class="bi bi-arrow-down m-0 p-0"></i>
+                                                    <span class="badge bg-success text-white border border-white rounded-pill px-1 d-inline-flex align-items-center " title="First Repayment Month">
+                                                        <i class="bi bi-arrow-right m-0 p-0"></i>
                                                     </span>
                                                 }
                                             </div>
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-dark py-1.5 pe-3 fw-normal bg-total-column cell-val-size">
+                                    <td class="text-end font-monospace text-dark py-1.5 pe-3 fw-normal totals-bkg cell-val-size">
                                         @loan.MonthlyData.Sum(x => x.Expected).ToString("N0").Replace(",", " ")
                                     </td>
                                     <td rowspan="4" class="text-center border-start align-middle bg-white">
-                                        <button type="button" class="btn btn-outline-primary-action p-1 shadow d-inline-flex align-items-center justify-content-center"
+                                        <button type="button" class="btn-action-operation btn-edit-accent"
                                                 @onclick="() => OpenRepaymentsFormAsync(loan.LoanId)" title="Edit Repayments">
                                             <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button type="button" class="btn-action-operation btn-delete-accent"
+                                                @onclick="() => HandleDeleteLoanAndRepaymentsAsync(loan.LoanId)" title="Delete Loan">
+                                            <i class="bi bi-file-earmark-x"></i>
                                         </button>
                                     </td>
                                 </tr>
 
-                                <tr class="font-row-group">
+                                <tr class="font-row-group bg-white">
                                     <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Calculated Interest</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         var monthIdx = i + 1;
                                         var isRepaymentActive = monthIdx >= loan.StartMonth;
-                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2 @(isRepaymentActive ? "bg-active-repayment" : "")">
+                                        <td class="text-end font-monospace text-xs text-secondary py-1.5 pe-2 @(isRepaymentActive ? "bg-no-repayment" : "bg-no-repayment")">
                                             @loan.MonthlyData[i].Interest.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-secondary py-1.5 pe-3 fw-normal bg-total-column cell-val-size">
+                                    <td class="text-end font-monospace text-secondary py-1.5 pe-3 fw-normal totals-bkg cell-val-size">
                                         @loan.MonthlyData.Sum(x => x.Interest).ToString("N0").Replace(",", " ")
                                     </td>
                                 </tr>
@@ -111,55 +147,48 @@
                                     {
                                         var monthIdx = i + 1;
                                         var isRepaymentActive = monthIdx >= loan.StartMonth;
-                                        <td class="text-end font-monospace text-xs text-success py-1.5 pe-2 @(isRepaymentActive ? "bg-active-repayment" : "")">
+                                        <td class="text-end font-monospace text-xs text-success py-1.5 pe-2 @(isRepaymentActive ? "bg-no-repayment" : "bg-no-repayment")">
                                             @loan.MonthlyData[i].Extra.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-success py-1.5 pe-3 fw-normal bg-total-column cell-val-size">
+                                    <td class="text-end font-monospace text-success py-1.5 pe-3 fw-normal totals-bkg cell-val-size">
                                         @loan.MonthlyData.Sum(x => x.Extra).ToString("N0").Replace(",", " ")
                                     </td>
                                 </tr>
 
-                                <tr class="bg-light-totals-cell font-row-group" style="border-bottom: 0px solid #728FCE;">
+                                <tr class="bg-light-totals-cell font-row-group">
                                     <td class="text-xxs text-dark fw-bold py-1.5 ps-2">Total Repaid</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         var monthIdx = i + 1;
                                         var isRepaymentActive = monthIdx >= loan.StartMonth;
-                                        <td class="text-end font-monospace text-xs fw-bold text-navy-brand py-1.5 pe-2 @(isRepaymentActive ? "bg-active-repayment-total" : "")">
+
+                                        <td class="text-end font-monospace text-xs fw-bold text-navy-brand py-1.5 pe-2 @(isRepaymentActive ? "bg-no-repayments" : "bg-no-repayments")">
                                             @loan.MonthlyData[i].Total.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-navy-brand py-1.5 pe-3 fw-bold bg-total-column cell-val-size">
+                                    <td class="text-end font-monospace text-navy-brand py-1.5 pe-3 fw-bold totals-bkg cell-val-size" style=" border-bottom: solid 1px #dedede !important;">
                                         @loan.MonthlyData.Sum(x => x.Total).ToString("N0").Replace(",", " ")
                                     </td>
                                 </tr>
                             }
 
-                            <!-- Aggregated Repayments Grand Totals Ledger Row[cite: 5] -->
-                            <tr class="bg-secondary-subtle font-row-group fw-bold border-top border-dark-subtle" style="border-top: 2px solid #1a365d !important;">
-                                <td colspan="2" class="text-start ps-3 py-2 text-dark text-xxs text-uppercase fw-bold align-middle">
+                            <!-- Aggregated Repayments Grand Totals Ledger Row -->
+                            <tr class="bg-secondary-subtle font-row-group fw-bold totals-bkg" style="border-top: 1px solid #1a365d !important; border-bottom: 1px solid #1a365d !important;">
+                                <td colspan="2" class="text-start ps-3 py-2 text-dark text-xxs text-uppercase fw-bold align-middle" style="border-top: 1px solid #1a365d !important;">
                                     <i class="bi bi-calculator me-1 text-navy-brand"></i>Grand Total Repayments:
                                 </td>
                                 @for (int i = 0; i < 12; i++)
                                 {
                                     var monthIdx = i;
-                                    <td class="text-end font-monospace text-xs text-navy-brand py-2 pe-2 align-middle">
+                                    <td class="text-end font-monospace text-xs text-navy-brand py-2 pe-2 align-middle totals-bkg">
                                         @GetMonthlyGrandTotal(monthIdx).ToString("N0").Replace(",", " ")
                                     </td>
                                 }
-                                <td class="text-end font-monospace text-white py-2 pe-3 fw-bold align-middle cell-val-size" style="background-color: #1a365d;">
+                                <td class="text-end font-monospace py-2 pe-3 fw-bold align-middle cell-val-size totals-bkg" >
                                     @GetAccumulatedGrandTotal().ToString("N0").Replace(",", " ")
                                 </td>
                                 <td class="bg-light border-start"></td>
-                            </tr>
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="16" class="text-center p-5 text-muted text-xs bg-white">
-                                    <i class="bi bi-clipboard-x fs-4 d-block mb-2 opacity-40"></i>No matching loan segments identified in this view slice.
-                                </td>
                             </tr>
                         }
                     </tbody>
@@ -172,4 +201,5 @@
 <footer class="py-2 bg-light mt-3">
     <BFooter />
 </footer>
+
 

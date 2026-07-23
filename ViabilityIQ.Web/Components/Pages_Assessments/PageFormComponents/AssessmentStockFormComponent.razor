@@ -9,8 +9,8 @@
         </div> *@
 
         <!-- (i) AssessmentSalesCategoryId Lookup -->
-        <div class="mb-3">
-            <label class="form-label fw-bold text-xs text-secondary uppercase">Sales Category</label>
+        <div class="mb-3 mt-1">
+            <label class="form-label fw-bold text-xs text-secondary uppercase pb-1">Sales Category</label>
             <DDLookupComponent SourceKey="DDLookupEnums.AssessmentSalesCategories"
                                @bind-Value="FormModel.AssessmentSalesCategoryId"
                                Placeholder="Select Sales Category" />
@@ -19,13 +19,13 @@
         <!-- (ii) Include VAT Switch -->
         <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" id="vatSwitch" @bind="FormModel.blIncludeVAT">
-            <label class="form-check-label text-xs fw-bold text-secondary ps-2" for="vatSwitch">Include VAT</label>
+            <label class="form-check-label text-xs fw-bold text-secondary ps-2 pt-2" for="vatSwitch">Include VAT</label>
         </div>
 
         <!-- Quick Distribution Engine -->
-        <div class="card bg-light border-0 mb-3 p-1.5 rounded">
-            <label class="form-label fw-bold text-xs">Quick Even Distribution</label>
-            <div class="input-group input-group-sm">
+        <div class="card bg-light border-0 mb-3 p-1.5 rounded pb-0">
+            <label class="form-label fw-bold text-xs pt-1">Quick Even Distribution</label>
+            <div class="input-group input-group-sm pt-0">
                 <input type="number" class="form-control" @bind="BulkTargetValue" />
                 <button class="btn btn-outline-success" type="button" @onclick="DistributeStockValuesEvenly">Apply</button>
             </div>
@@ -45,7 +45,7 @@
             </div>
         }
 
-        <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">            >
+        <div class="d-flex align-items-center gap-2 mt-3 pt-2">            
 
             <button type="submit" class="btn btn-primary w-100 flex-fill py-1.5 text-xs fw-bold " disabled="@IsSubmitting">
                 @if (IsSubmitting)

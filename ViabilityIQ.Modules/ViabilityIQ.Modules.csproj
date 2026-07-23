@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ViabilityIQ.Database\ViabilityIQ.Application.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Shared\ViabilityIQ.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

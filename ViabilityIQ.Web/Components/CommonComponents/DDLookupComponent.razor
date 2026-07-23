@@ -61,14 +61,15 @@
     [Parameter] public Expression<Func<long>>? ValueExpression { get; set; }
 
     [Parameter] public DDLookupEnums SourceKey { get; set; }
+
+    // Dynamic Filter Parameters
+    [Parameter] public string? FilterField { get; set; }
+    [Parameter] public object? FilterValue { get; set; }
+
     [Parameter] public string Label { get; set; } = "";
     [Parameter] public string Placeholder { get; set; } = "Select Option";
     [Parameter] public bool IsDisabled { get; set; } = false;
-
-    // Added Readonly parameter defaulting to false
     [Parameter] public bool Readonly { get; set; } = false;
-
-    // Parameter to pick the style: "normal", "bold", or "light"
     [Parameter] public string StyleOption { get; set; } = "normal";
 
     private string SelectedStyleClass => StyleOption switch
@@ -77,7 +78,6 @@
         "light" => "dd-light",
         _ => "dd-normal"
     };
-
 
     private string FieldClass => EditContext != null && ValueExpression != null &&
                                  EditContext.GetValidationMessages(_fieldIdentifier).Any()
@@ -94,7 +94,8 @@
     protected override async Task OnParametersSetAsync()
     {
         _isLoading = true;
-        _options = await LookupService.GetLookupOptionsAsync(SourceKey);
+        // Pass field name and value to the service
+        _options = await LookupService.GetLookupOptionsAsync(SourceKey, FilterField, FilterValue);
         _isLoading = false;
     }
 

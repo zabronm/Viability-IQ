@@ -10,11 +10,11 @@ using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments;
 
+
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
     public partial class AssessmentStockPage : ComponentBase
     {
-
         [Inject] private IGenericDataRepository<AssessmentStock> DataRepository { get; set; } = default!;
         [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
         [Inject] MasterDataService? ViqCrudService { get; set; }
@@ -58,12 +58,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             // Projection: Convert DTOs to the Unified ViewModel
             var sourceList = string.IsNullOrWhiteSpace(SearchTerm)
                 ? StockDataList
-                : StockDataList.Where(x => x.SalesCategoryName!.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+                : StockDataList.Where(x => x.AssessmentSalesCategoryName!.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
 
             FilteredStockList = sourceList.Select(dto => new UnifiedStockViewModel
             {
                 Id = dto.AssessmentStockId,
-                AssessmentSalesCategoryName = dto.SalesCategoryName ?? "Unknown",
+                AssessmentSalesCategoryName = dto.AssessmentSalesCategoryName ?? "Unknown",
                 Description = dto.Description ?? "",
                 blIncludeVAT = dto.blIncludeVAT,
                 MonthlyValues = new decimal[] { dto.Month_1, dto.Month_2, dto.Month_3, dto.Month_4, dto.Month_5, dto.Month_6, dto.Month_7, dto.Month_8, dto.Month_9, dto.Month_10, dto.Month_11, dto.Month_12 }
