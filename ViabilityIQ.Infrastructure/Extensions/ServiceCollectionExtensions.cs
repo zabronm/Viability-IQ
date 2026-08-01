@@ -24,7 +24,7 @@ namespace ViabilityIQ.Infrastructure.Extensions
             services.AddMemoryCache();
             services.AddScoped<IDDLookupService, DDLookupService>();                                    //Generic DropDown lookup service
             services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));          //Generic Read only
-            
+            services.AddScoped<ICashflowRepository, CashflowRepository>();
 
 
 

@@ -1,0 +1,47 @@
+﻿@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Application.Dtos.IdentityDtos
+
+<EditForm Model="request" OnValidSubmit="OnValidSubmit" class="needs-validation">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label for="email" class="form-label-custom">Email Address</label>
+        <input type="email"
+               id="email"
+               class="form-control @(HasError("Email") ? "is-invalid" : "")"
+               @bind="request.Email"
+               placeholder="Enter your email" />
+        <ValidationMessage For="@(() => request.Email)" class="invalid-feedback" />
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100" disabled="@isSubmitting">
+        @if (isSubmitting)
+        {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span>Sending...</span>
+        }
+        else
+        {
+            <span>Send Reset Link</span>
+        }
+    </button>
+</EditForm>
+
+@code {
+    [Parameter] public EventCallback<ForgotPasswordRequest> OnSubmit { get; set; }
+
+    private ForgotPasswordRequest request = new();
+    private bool isSubmitting = false;
+
+    private async Task OnValidSubmit()
+    {
+        isSubmitting = true;
+        await OnSubmit.InvokeAsync(request);
+        isSubmitting = false;
+    }
+
+    private bool HasError(string field)
+    {
+        return false; // Add validation logic if needed
+    }
+}

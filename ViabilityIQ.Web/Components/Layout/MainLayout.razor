@@ -1,4 +1,5 @@
-﻿@using ViabilityIQ.Web.Components.Shared
+﻿@using ViabilityIQ.Web.Components.Pages.Identity
+@using ViabilityIQ.Web.Components.Shared
 @inherits LayoutComponentBase
 
 
@@ -21,34 +22,7 @@
 
         @if (isAssessmentPage)
         {
-            @* <div class="ms-0 dropdown-container">
-                <button class="btn-quick-access" @onclick="ToggleQuickAccess" @onfocusout="CloseQuickAccess">
-                    <i class="bi bi-ui-radios-grid p-0"></i>
-                </button>
-
-                <div class="dropdown-card-menu g-2 @(isQuickAccessOpen ? "show" : "")">
-                    <div class="dropdown-card-header">Navigation Shortcuts</div>
-                    <div class="quick-access-grid">
-                        <a class="quick-grid-item" style="border-radius: 14px;" href="global/quick1">
-                            <div class="grid-icon-wrapper"><i class="bi bi-speedometer2"></i></div>
-                            <span class="strong">Loans</span>
-                        </a>
-                        <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick2">
-                            <div class="grid-icon-wrapper"><i class="bi bi-file-earmark-text text-secondary"></i></div>
-                            <span class="strong">Debtors</span>
-                        </a>
-                        <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick3">
-                            <div class="grid-icon-wrapper"><i class="bi bi-graph-up-arrow"></i></div>
-                            <span class="strong">CapEx</span>
-                        </a>
-                        <a class="quick-grid-item " style="border-radius: 14px;" href="global/quick4">
-                            <div class="grid-icon-wrapper"><i class="bi bi-database-check"></i></div>
-                            <span class="strong">Creditors</span>
-                        </a>
-                    </div>
-                </div>
-            </div> *@
-            @* <QuickAccessComponent /> *@
+            <!-- Assessment page specific content can go here -->
         }
 
         <div class="fa-top-bar-right">
@@ -70,26 +44,19 @@
                         <div class="profile-avatar-large">ZM</div>
                         <div class="profile-info">
                             <h4 class="profile-name">Zabron Muyambo</h4>
-                            <span class="profile-role">Lead Systems Developer</span>
+                            <span class="profile-role">Lead Developer</span>
                         </div>
                     </div>
                     <div class="profile-card-body">
-                        <div class="profile-section-title">Account Management</div>
-                        <a class="profile-menu-item" href="profile/details">
-                            <i class="bi bi-person-bounding-box"></i> My Profile
+                        <a href="profile" class="profile-dropdown-item">
+                            <i class="bi bi-person me-2"></i> My Profile
                         </a>
-                        <a class="profile-menu-item" href="profile/settings">
-                            <i class="bi bi-sliders"></i> Preferences
+                        <a href="/register" class="profile-dropdown-item">
+                            <i class="bi bi-gear me-2"></i> Account Settings
                         </a>
-
-                        <div class="profile-section-title">Systems & Auditing</div>
-                        <a class="profile-menu-item" href="global/audit-logs">
-                            <i class="bi bi-shield-check"></i> Project Audit Status
-                        </a>
-
                         <div class="dropdown-divider"></div>
-                        <a class="profile-menu-item logout-item" href="logout">
-                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        <a href="/logout" class="profile-dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i> Sign Out
                         </a>
                     </div>
                 </div>
@@ -136,30 +103,7 @@
                 <NavLink class="fa-nav-item " href="/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
                     <span class="strong">Settings</span>&nbsp;<i class="bi bi-caret-right"></i>
-                </NavLink>
-
-                @* <button class="fa-nav-item fa-composite-trigger @(isSetupOpen ? "open" : "")" @onclick="ToggleSetupMenu">
-                    <div class="d-flex align-items-center">
-                        <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
-                        <span>Setup Configuration</span>
-                    </div>
-                    <i class="bi bi-chevron-right chevron"></i>
-                </button>
-
-                @if (isSetupOpen)
-                {
-                    <ul class="fa-sub-menu">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            var index = i;
-                            <li>
-                                <NavLink class="fa-sub-link" href="@($"global/setup/item{index}")">
-                                    <i class="bi bi-circle-fill"></i><span>Global Option @index</span>
-                                </NavLink>
-                            </li>
-                        }
-                    </ul>
-                } *@
+                </NavLink>                
             </div>
 
             <div class="sidebar-footer-static">

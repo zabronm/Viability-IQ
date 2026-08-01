@@ -37,8 +37,7 @@ else
                         </div>
                         <div class="d-flex flex-column gap-1">
                             @RenderCreditorsRow("0-30 Days (Auto):", CalculatedCreditors0To30, null, null)
-                            @RenderCreditorsRow("31-60 Days:", null, debtorsCreditorsModel.Creditors_60, (e) => InterceptCreditorsInput(e, 60))
-                            @RenderCreditorsRow("31-60 Days:", null, debtorsCreditorsModel.Creditors_60, (e) => InterceptCreditorsInput(e, 60))
+                            @RenderCreditorsRow("31-60 Days:", null, debtorsCreditorsModel.Creditors_60, (e) => InterceptCreditorsInput(e, 60))                            
                             @RenderCreditorsRow("61-90 Days:", null, debtorsCreditorsModel.Creditors_90, (e) => InterceptCreditorsInput(e, 60))
                             @RenderCreditorsRow("91-120 Days:", null, debtorsCreditorsModel.Creditors_120, (e) => InterceptCreditorsInput(e, 60))
                             @RenderCreditorsRow("120+ Days:", null, debtorsCreditorsModel.Creditors_120Plus, (e) => InterceptCreditorsInput(e, 60))

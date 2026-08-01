@@ -1,0 +1,20 @@
+﻿@page "/logout"
+@using Microsoft.AspNetCore.Components.Authorization
+@using ViabilityIQ.Application.Interfaces.IdentityInterfaces
+@using ViabilityIQ.Web.Extensions
+@using ViabilityIQ.Web.Services
+@inject IAuthenticationService AuthService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.LogoutAsync(new System.Security.Claims.ClaimsPrincipal());
+
+        var customAuthProvider = (CustomAuthenticationStateProvider)(object)AuthStateProvider;
+        customAuthProvider.NotifyUserLogout();
+
+        Navigation.NavigateTo("/login", replace: true);
+    }
+}

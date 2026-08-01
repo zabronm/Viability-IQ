@@ -180,9 +180,9 @@ namespace ViabilityIQ.Web.Components.Pages
         }
 
 
-        /// <summary>
+        
         /// 2. Action: Export current active listing straight into a downloadable Excel Binary stream
-        /// </summary>
+        
         private async Task ExecuteExcelExportProcess(List<LoanType> targetedDataset)
         {
             try
@@ -208,9 +208,9 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        /// <summary>
+        
         /// 3. Action: Email document attachments down to targeted distribution users
-        /// </summary>
+        
         private async Task ExecuteEmailDistributionProcess(List<LoanType> targetedDataset)
         {
             try

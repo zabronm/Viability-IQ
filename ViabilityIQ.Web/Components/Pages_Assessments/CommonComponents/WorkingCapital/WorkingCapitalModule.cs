@@ -3,10 +3,10 @@ using System.Linq;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents.WorkingCapital
 {
-    /// <summary>
+    
     /// Represents an entire Working Capital module
     /// (Debtors or Creditors).
-    /// </summary>
+    
     public class WorkingCapitalModule
     {
         //--------------------------------------------------------
@@ -81,10 +81,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents.WorkingC
 
         public string Month { get; set; } = "";
 
-        /// <summary>
+        
         /// Monthly Sales (Debtors)
         /// or Monthly Purchases (Creditors)
-        /// </summary>
+        
         public decimal InvoicedAmount { get; set; }
 
         public decimal ActualReceipts { get; set; }
@@ -121,15 +121,15 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents.WorkingC
     {
         public string Month { get; set; } = "";
 
-        /// <summary>
+        
         /// Invoice value for this month.
-        /// </summary>
+        
         public decimal Invoiced { get; set; }
 
-        /// <summary>
+        
         /// Distributed values.
         /// One value per ageing bucket.
-        /// </summary>
+        
         public List<decimal> Values { get; set; }
             = new();
 
@@ -142,24 +142,24 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents.WorkingC
 
     public class WorkingCapitalSummary
     {
-        /// <summary>
+        
         /// Outstanding Debtors / Creditors.
-        /// </summary>
+        
         public decimal Outstanding { get; set; }
 
-        /// <summary>
+        
         /// Debtor Days / Creditor Days.
-        /// </summary>
+        
         public decimal Days { get; set; }
 
-        /// <summary>
+        
         /// Outstanding as % of Sales/Purchases.
-        /// </summary>
+        
         public decimal Percentage { get; set; }
 
-        /// <summary>
+        
         /// Annual Sales/Purchases.
-        /// </summary>
+        
         public decimal AnnualMovement { get; set; }
     }
 }

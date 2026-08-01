@@ -8,9 +8,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
 {
     public static class FinancialMath
     {
-        /// <summary>
+        
         /// Calculates the fixed monthly repayment (PMT).
-        /// </summary>
+        
         public static decimal CalculateMonthlyRepayment(decimal principal, decimal annualRate, int months)
         {
             if (months <= 0) return 0;

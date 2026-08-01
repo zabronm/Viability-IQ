@@ -1,8 +1,11 @@
-﻿@page "/"
-@using System.ComponentModel.DataAnnotations
-@using ViabilityIQ.Web.Components.Layout
+﻿@page "/login"
+@page "/"
 
+@using System.ComponentModel.DataAnnotations
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Application.Interfaces.IdentityInterfaces
 @layout MainLayout_Blank
+
 
 <div class="m-0 font-def">
     <div class="auth-card">
@@ -13,42 +16,63 @@
             <p class="auth-subtitle">Please enter your system credentials to proceed</p>
         </div>
 
-        <EditForm Model="@loginModel" OnSubmit="HandleLogin" FormName="LogUserForm">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                <strong>Authentication Failed</strong>
+                <p class="mb-0 mt-1">@ErrorMessage</p>
+                <button type="button" class="btn-close" @onclick="() => ErrorMessage = null" aria-label="Close"></button>
+            </div>
+        }
+
+        <EditForm Model="@LoginRequest" OnSubmit="HandleLogin" FormName="LoginForm">
             <DataAnnotationsValidator />
 
             <div class="form-group-custom">
-                <label class="form-label">Email Address</label>
+                <label class="form-label-custom">Email Address</label>
                 <div class="input-icon-wrapper">
                     <i class="bi bi-envelope icon-addon"></i>
-                    <InputText @bind-Value="loginModel.Email" class="form-control-custom" placeholder="name@company.com" />
+                    <InputText @bind-Value="LoginRequest.Email"
+                               class="form-control-custom"
+                               placeholder="name@company.com"
+                               disabled="@isSubmitting" />
                 </div>
-                <ValidationMessage For="@(() => loginModel.Email)" class="auth-error-msg" />
+                <ValidationMessage For="@(() => LoginRequest.Email)" class="auth-error-msg" />
             </div>
 
             <div class="form-group-custom">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label mb-0">Password</label>
-                    <button type="button" class="link-btn-inline" @onclick="NavigateToForgotPassword">Forgot Password?</button>
+                    <label class="form-label-custom mb-0">Password</label>
+                    <a href="/forgot-password" class="link-btn-inline">Forgot Password?</a>
                 </div>
                 <div class="input-icon-wrapper">
                     <i class="bi bi-lock icon-addon"></i>
-                    <InputText type="@(showPassword ? "text" : "password")" @bind-Value="loginModel.Password" class="form-control-custom" placeholder="••••••••" />
-                    <button type="button" class="password-toggle-btn" @onclick="TogglePasswordVisibility">
+                    <InputText type="@(showPassword ? "text" : "password")"
+                               @bind-Value="LoginRequest.Password"
+                               class="form-control-custom"
+                               placeholder="••••••••"
+                               disabled="@isSubmitting" />
+                    <button type="button"
+                            class="password-toggle-btn"
+                            @onclick="TogglePasswordVisibility"
+                            tabindex="-1"
+                            disabled="@isSubmitting">
                         <i class="bi @(showPassword ? "bi-eye-slash-fill" : "bi-eye-fill")"></i>
                     </button>
                 </div>
-                <ValidationMessage For="@(() => loginModel.Password)" class="auth-error-msg" />
+                <ValidationMessage For="@(() => LoginRequest.Password)" class="auth-error-msg" />
             </div>
 
             <div class="auth-actions-row">
                 <label class="checkbox-container-custom">
-                    <InputCheckbox @bind-Value="loginModel.RememberMe" />
+                    <InputCheckbox @bind-Value="LoginRequest.RememberMe" disabled="@isSubmitting" />
                     <span class="checkmark"></span>
                     Remember this device
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100" disabled="@isSubmitting">
+            <button type="submit" class="btn btn-primary w-100" disabled="@(isSubmitting || !IsFormValid())">
                 @if (isSubmitting)
                 {
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -62,38 +86,35 @@
         </EditForm>
 
         <div class="auth-card-footer">
-            Need an account recovery option?
-            <button type="button" class="link-btn-inline font-weight-bold" @onclick="NavigateToResetPassword">Reset Password</button><br />
-            Need a new account?
-            <button type="button" class="link-btn-inline font-weight-bold" @onclick="NavigateToSignUp">Sign Up Here</button>
+            <div class="mb-2">
+                Need an account?
+                <a href="/register" class="link-btn-inline font-weight-bold">Sign Up Here</a>
+            </div>
+            <div>
+                Need account recovery?
+                <a href="/reset-password" class="link-btn-inline font-weight-bold">Reset Password</a>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* FIX: Corrected broken multi-line comment notation wrapper */
-    /* ==========================================================================
-        Enterprise Auth Theme System Architecture
-        ========================================================================== */
-    .auth-surface-wrapper {
+    .font-def {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .m-0 {
+        margin: 0;
+    }
+
+    :global(body) {
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont,"arial", "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        margin: 0;
         padding: 20px;
-        box-sizing: border-box;
-    }
-
-    .auth-container {
-        display: flex;
-        padding: 20px;
-        box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont,"arial", "Segoe UI", Roboto, sans-serif;
-        background-repeat: repeat;
-        background-size: cover;
-        background-position: center;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     }
 
     .auth-card {
@@ -102,14 +123,17 @@
         max-width: 420px;
         border-radius: 16px;
         border: 1px solid #d1dbe8;
-        /* UPDATED: Nice corporate navy-blue layout layer shadow signature tokens */
         box-shadow: 0 15px 35px rgba(0, 0, 102, 0.08), 0 5px 15px rgba(0, 0, 102, 0.05), 0 0 1px rgba(0, 0, 102, 0.1);
         padding: 40px 32px;
         box-sizing: border-box;
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* Core Branding & Header Elements */
+        .auth-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 102, 0.12), 0 8px 20px rgba(0, 0, 102, 0.08);
+        }
+
     .auth-header {
         text-align: center;
         margin-bottom: 32px;
@@ -121,18 +145,9 @@
         color: #0f172a;
         letter-spacing: -0.03em;
         margin-bottom: 12px;
+        display: block;
     }
 
-    .auth-brand {
-        color: #000099;
-    }
-
-    .auth-title {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0 0 6px 0;
-    }
 
     .auth-subtitle {
         font-size: 0.875rem;
@@ -141,7 +156,48 @@
         line-height: 1.4;
     }
 
-    /* Custom Form Construction System */
+    .alert {
+        border-radius: 8px;
+        border: 1px solid;
+        margin-bottom: 20px;
+        font-size: 0.875rem;
+        padding: 12px 16px;
+    }
+
+    .alert-danger {
+        background-color: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+    }
+
+    .alert-dismissible {
+        padding-right: 2.5rem;
+        position: relative;
+    }
+
+    .btn-close {
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #991b1b;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        padding: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
     .form-group-custom {
         margin-bottom: 20px;
         position: relative;
@@ -153,6 +209,8 @@
         font-weight: 600;
         color: #475569;
         margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .input-icon-wrapper {
@@ -167,6 +225,8 @@
         color: #94a3b8;
         font-size: 1.1rem;
         pointer-events: none;
+        transition: color 0.2s;
+        z-index: 1;
     }
 
     .form-control-custom {
@@ -177,18 +237,29 @@
         border-radius: 8px;
         padding: 0 16px 0 42px;
         font-size: 0.925rem;
+        font-weight: 600;
         color: #1e293b;
         box-sizing: border-box;
         transition: all 0.2s ease-in-out;
     }
 
+        .form-control-custom::placeholder {
+            color: #cbd5e1;
+        }
+
         .form-control-custom:focus {
             outline: none;
             border-color: #000099;
+            background-color: #f9fafb;
             box-shadow: 0 0 0 4px rgba(0, 0, 153, 0.08);
         }
 
-    /* Password Utility Elements button toggle mechanics */
+        .form-control-custom:disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
     .password-toggle-btn {
         position: absolute;
         right: 4px;
@@ -204,14 +275,20 @@
         border-radius: 6px;
         font-size: 1rem;
         transition: background-color 0.2s, color 0.2s;
+        padding: 0;
+        z-index: 2;
     }
 
-        .password-toggle-btn:hover {
+        .password-toggle-btn:hover:not(:disabled) {
             background-color: #f2f4f7;
             color: #344054;
         }
 
-    /* Secondary Action Rows & Checkboxes */
+        .password-toggle-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
     .auth-actions-row {
         display: flex;
         align-items: center;
@@ -224,19 +301,19 @@
         border: none;
         padding: 0;
         font-size: 0.825rem;
-        font-weight: 600;
-        color: #000099;
+        font-weight: 200;
+        color: #3C565B;
         cursor: pointer;
-        transition: color 0.15s;
+        transition: color 0.15s, text-decoration 0.15s;
         text-decoration: none;
+        display: inline;
     }
 
         .link-btn-inline:hover {
-            color: #344054;
+            color: #000099;
             text-decoration: underline;
         }
 
-    /* Custom Checkbox Design Execution */
     .checkbox-container-custom {
         display: flex;
         align-items: center;
@@ -257,18 +334,24 @@
             width: 0;
         }
 
+            .checkbox-container-custom input:disabled ~ .checkmark {
+                background-color: #f3f4f6;
+                border-color: #d1d5db;
+                cursor: not-allowed;
+            }
+
     .checkmark {
         position: absolute;
         left: 0;
         height: 18px;
         width: 18px;
         background-color: #ffffff;
-        border: 1px solid #cbd5e1;
+        border: 1.5px solid #cbd5e1;
         border-radius: 4px;
-        transition: all 0.15s;
+        transition: all 0.15s ease;
     }
 
-    .checkbox-container-custom:hover input ~ .checkmark {
+    .checkbox-container-custom:hover input:not(:disabled) ~ .checkmark {
         border-color: #000099;
         background-color: rgba(0, 0, 153, 0.02);
     }
@@ -282,8 +365,8 @@
         content: "";
         position: absolute;
         display: none;
-        left: 6px;
-        top: 2px;
+        left: 5px;
+        top: 1px;
         width: 4px;
         height: 9px;
         border: solid white;
@@ -295,7 +378,6 @@
         display: block;
     }
 
-    /* Primary Authentication Trigger Button */
     .auth-submit-btn {
         width: 100%;
         height: 46px;
@@ -311,20 +393,22 @@
         justify-content: center;
         transition: all 0.2s ease;
         box-shadow: 0 4px 12px rgba(0, 0, 153, 0.15);
+        padding: 0;
     }
 
-        .auth-submit-btn:hover {
+        .auth-submit-btn:hover:not(:disabled) {
             background-color: #000077;
             box-shadow: 0 6px 16px rgba(0, 0, 153, 0.25);
+            transform: translateY(-1px);
         }
 
         .auth-submit-btn:disabled {
             background-color: #94a3b8;
             box-shadow: none;
             cursor: not-allowed;
+            opacity: 0.8;
         }
 
-    /* Footer Card Structural Separator */
     .auth-card-footer {
         margin-top: 28px;
         padding-top: 20px;
@@ -332,9 +416,9 @@
         text-align: center;
         font-size: 0.825rem;
         color: #64748b;
+        line-height: 1.6;
     }
 
-    /* Validation Errors engine styles */
     .auth-error-msg {
         display: block;
         font-size: 0.75rem;
@@ -342,4 +426,62 @@
         margin-top: 4px;
         font-weight: 500;
     }
+
+    .mb-2 {
+        margin-bottom: 0.5rem;
+    }
+
+    .mb-0 {
+        margin-bottom: 0;
+    }
+
+    .mb-1 {
+        margin-bottom: 0.25rem;
+    }
+
+    .mt-1 {
+        margin-top: 0.25rem;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .font-weight-bold {
+        font-weight: 700;
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.125em;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    .spinner-border-sm {
+        width: 0.875rem;
+        height: 0.875rem;
+        border-width: 0.15em;
+    }
+
 </style>

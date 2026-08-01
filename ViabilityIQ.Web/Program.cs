@@ -1,47 +1,253 @@
 using Microsoft.AspNetCore.Components.Server;
+using Serilog;
 using ViabilityIQ.Application.ExtensionServices;
 using ViabilityIQ.Infrastructure.Extensions;
 using ViabilityIQ.Web.Components;
+using ViabilityIQ.Web.ErrorsAndLogging;
 using ViabilityIQ.Web.Extensions;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-            builder.Services.Configure<CircuitOptions>(options =>
+            try
             {
-                options.DetailedErrors = true;
-            });
+                Console.WriteLine("===== APPLICATION STARTUP =====");
+                Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Starting application...");
 
-            builder.Services.AddWebServices();                          //Located in the Web projects
-            builder.Services.AddInfrastructureServices();               //Located in the Infrastructure project
-            builder.Services.AddFinancialCalculationServices();         //======== Located in the Applications project ===
+                try
+                {
+                    Console.WriteLine("[STEP 1] Creating WebApplicationBuilder...");
+                    var builder = WebApplication.CreateBuilder(args);
+                    Console.WriteLine("[STEP 1] ✓ Success");
 
-            var app = builder.Build();
+                    // ============================================================================
+                    // CONFIGURE LOGGING (SERILOG) - MUST BE FIRST
+                    // ============================================================================
+                    Console.WriteLine("[STEP 2] Configuring Serilog...");
+                    try
+                    {
+                        LoggingConfiguration.ConfigureSerilog(builder, builder.Configuration);
+                        Console.WriteLine("[STEP 2] ✓ Success");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 2] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 2] Message: {ex.Message}");
+                        Console.WriteLine($"[STEP 2] StackTrace: {ex.StackTrace}");
+                        throw;
+                    }
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                    Log.Information("Serilog initialized successfully");
+
+                    // ============================================================================
+                    // ADD RAZOR COMPONENTS
+                    // ============================================================================
+                    Console.WriteLine("[STEP 3] Adding Razor components...");
+                    builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+                    builder.Services.Configure<CircuitOptions>(options =>
+                    {
+                        options.DetailedErrors = true;
+                    });
+                    Console.WriteLine("[STEP 3] ✓ Success");
+
+                    // ============================================================================
+                    // ADD ERROR HANDLING SERVICES
+                    // ============================================================================
+                    Console.WriteLine("[STEP 4] Adding error handling services...");
+                    builder.Services.AddErrorHandlingServices();
+                    Console.WriteLine("[STEP 4] ✓ Success");
+
+                    // ============================================================================
+                    // ADD WEB SERVICES (Includes ToastService, SessionService, etc.)
+                    // ============================================================================
+                    Console.WriteLine("[STEP 5] Adding web services...");
+                    try
+                    {
+                        builder.Services.AddWebServices();
+                        Console.WriteLine("[STEP 5] ✓ Success - ToastService registered as Scoped");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 5] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 5] Message: {ex.Message}");
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // ADD INFRASTRUCTURE SERVICES (Database, EF Core, etc.)
+                    // ============================================================================
+                    Console.WriteLine("[STEP 6] Adding infrastructure services...");
+                    try
+                    {
+                        builder.Services.AddInfrastructureServices();
+                        Console.WriteLine("[STEP 6] ✓ Success");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 6] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 6] Message: {ex.Message}");
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // ADD APPLICATION SERVICES (Business Logic)
+                    // ============================================================================
+                    Console.WriteLine("[STEP 7] Adding financial calculation services...");
+                    try
+                    {
+                        builder.Services.AddFinancialCalculationServices();
+                        Console.WriteLine("[STEP 7] ✓ Success");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 7] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 7] Message: {ex.Message}");
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // ADD APPLICATION SERVICES (Identity, Database, Configuration)
+                    // ============================================================================
+                    Console.WriteLine("[STEP 8] Adding application services...");
+                    try
+                    {
+                        builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
+                        Console.WriteLine("[STEP 8] ✓ Success");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 8] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 8] Message: {ex.Message}");
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // BUILD APPLICATION
+                    // ============================================================================
+                    Console.WriteLine("[STEP 9] Building application...");
+                    var app = builder.Build();
+                    Console.WriteLine("[STEP 9] ✓ Success");
+
+                    Log.Information("Application built successfully");
+
+                    // ============================================================================
+                    // CONFIGURE MIDDLEWARE PIPELINE
+                    // ============================================================================
+                    Console.WriteLine("[STEP 10] Configuring middleware pipeline...");
+
+                    // Add global error handling middleware FIRST (before everything else)
+                    app.UseGlobalErrorHandling();
+                    Console.WriteLine("[STEP 10.1] ✓ Global error handling middleware added");
+
+                    // Configure exception handling
+                    if (!app.Environment.IsDevelopment())
+                    {
+                        app.UseExceptionHandler("/error");
+                        app.UseHsts();
+                    }
+                    else
+                    {
+                        app.UseDeveloperExceptionPage();
+                    }
+
+                    Console.WriteLine("[STEP 10] ✓ Middleware configured");
+
+                    // ============================================================================
+                    // INITIALIZE DATABASE
+                    // ============================================================================
+                    Console.WriteLine("[STEP 11] Initializing database...");
+                    try
+                    {
+                        Log.Information("Initializing database...");
+                        await app.InitializeDatabaseAsync();
+                        Log.Information("Database initialized successfully");
+                        Console.WriteLine("[STEP 11] ✓ Database initialized");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Fatal(ex, "Fatal error during database initialization");
+                        Console.WriteLine($"[STEP 11] ✗ Database initialization failed");
+                        Console.WriteLine($"[STEP 11] Message: {ex.Message}");
+
+                        try
+                        {
+                            var toastService = app.Services.GetRequiredService<ToastService>();
+                            toastService.ShowError(
+                                "Failed to initialize database. Please check that your database server is running and the connection string is correct.",
+                                "Database Initialization Failed");
+                        }
+                        catch { }
+
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // CONFIGURE APPLICATION PIPELINE
+                    // ============================================================================
+                    Console.WriteLine("[STEP 12] Configuring application pipeline...");
+                    try
+                    {
+                        app.UseApplicationPipeline(app.Environment);
+                        Console.WriteLine("[STEP 12] ✓ Application pipeline configured");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 12] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 12] Message: {ex.Message}");
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // START APPLICATION
+                    // ============================================================================
+                    Console.WriteLine("[STEP 13] Starting application...");
+                    Log.Information("Application started successfully");
+                    await app.RunAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n===== EXCEPTION DETAILS =====");
+                    Console.WriteLine($"Type: {ex.GetType().FullName}");
+                    Console.WriteLine($"Message: {ex.Message}");
+                    Console.WriteLine($"\nStack Trace:\n{ex.StackTrace}");
+
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"\n===== INNER EXCEPTION =====");
+                        Console.WriteLine($"Type: {ex.InnerException.GetType().FullName}");
+                        Console.WriteLine($"Message: {ex.InnerException.Message}");
+                        Console.WriteLine($"\nStack Trace:\n{ex.InnerException.StackTrace}");
+                    }
+
+                    Log.Fatal(ex, "Application terminated unexpectedly");
+                    throw;
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n===== UNHANDLED FATAL ERROR =====");
+                Console.WriteLine($"Type: {ex.GetType().FullName}");
+                Console.WriteLine($"Message: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
 
-            app.UseHttpsRedirection();
+                try
+                {
+                    Log.Fatal(ex, "Application crashed during startup");
+                }
+                catch { }
 
-            app.UseStaticFiles();
-            app.UseAntiforgery();
-
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
-
-            app.Run();
+                Environment.Exit(1);
+            }
+            finally
+            {
+                Console.WriteLine("\n===== SHUTTING DOWN =====");
+                Log.CloseAndFlush();
+                Console.WriteLine("Application shut down");
+            }
         }
     }
 }

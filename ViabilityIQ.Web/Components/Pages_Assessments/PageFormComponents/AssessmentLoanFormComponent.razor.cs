@@ -20,6 +20,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public long AssessmentLoanId { get; set; }
+        [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
 
 
         private AssessmentLoan? Model { get; set; }

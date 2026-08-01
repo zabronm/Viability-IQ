@@ -46,8 +46,8 @@
 .sidebar-scroller {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 8px;
+    gap: 0px;
+    padding: 1px 6px;
     overflow-y: auto;
     flex: 1;
 }
@@ -76,17 +76,32 @@
 
 /* Base Nav Items Layout */
 .fa-nav-item {
-    display: flex;
+    /*display: flex;    
     align-items: center;
-    padding: 6px 12px;
+    padding: 0px 12px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
     color: #475569;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 5px;
     font-size: 0.88rem;
     font-weight: 500;
     transition: all 0.2s ease;
-    gap: 12px;
-    position: relative;
+    gap: 0px;
+    position: relative;*/
+
+    display: flex;
+    align-items: center;
+    height: 25px;
+    min-height: 25px;
+    padding: 0 10px;
+    margin: 0;
+    line-height: 1;
+    font-size: 0.82rem;
+    gap: 6px;
+    overflow: hidden;
 }
 
     .fa-nav-item:hover {
@@ -103,9 +118,9 @@
 .nav-icon-avatar-round {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
+    justify-content: center;    
+    width: 25px;
+    height: 25px;
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 50%;
@@ -127,6 +142,9 @@
 }
 
 .nav-text {
+    line-height: 1;
+    margin: 0;
+    padding: 0;
     white-space: nowrap;
     opacity: 1;
     transition: opacity 0.2s ease;

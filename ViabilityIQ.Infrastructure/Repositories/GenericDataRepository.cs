@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
@@ -12,23 +13,40 @@ namespace ViabilityIQ.Infrastructure.Repositories
 {
     public class GenericDataRepository<T>: IGenericDataRepository<T> where T : class
     {
+        #region Private Fields
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly ISessionService _sessionService;
+        #endregion
 
-        public GenericDataRepository(IDbConnectionFactory dbConnectionFactory, ISessionService sessionService)
+        #region Constructor
+        public GenericDataRepository(
+            IDbConnectionFactory dbConnectionFactory,
+            ISessionService sessionService)
         {
-            _dbConnectionFactory = dbConnectionFactory;
-            _sessionService = sessionService;
+            _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         }
+        #endregion
 
 
+        #region Public Methods        
+        /// Gets an entity by its ID        
         public async Task<T?> GetByIdAsync(long id)
         {
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.GetAsync<T>(id);
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                return await connection.GetAsync<T>(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Get By ID Error: {ex.Message}");
+                throw;
+            }
         }
 
-
+       
+        /// Gets all entities without filtering       
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             try
@@ -36,7 +54,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 using var connection = _dbConnectionFactory.CreateConnection();
                 var items = await connection.GetAllAsync<T>();
 
-                // If the entity implements ISortableEntity, sort it dynamically by its DisplayName!
+                // If the entity implements ISortableEntity, sort it dynamically by its DisplayName
                 if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
                 {
                     return items.Cast<ISortableEntity>()
@@ -49,12 +67,45 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Log exception uniformly here
                 Console.WriteLine($"Database Generic Read Error: {ex.Message}");
-                return Enumerable.Empty<T>();
+                throw;
             }
         }
 
+       
+        /// Gets all entities matching a predicate filter
+        /// Note: This performs client-side filtering since Dapper.Contrib doesn't support LINQ     
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
+        {
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                var allItems = await connection.GetAllAsync<T>();
+
+                // Compile the predicate and apply it client-side
+                var compiled = predicate.Compile();
+                var filteredItems = allItems.Where(compiled).ToList();
+
+                // If the entity implements ISortableEntity, sort it
+                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
+                {
+                    return filteredItems.Cast<ISortableEntity>()
+                                        .OrderBy(x => x.DisplayName)
+                                        .Cast<T>()
+                                        .ToList();
+                }
+
+                return filteredItems;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Generic Filter Error: {ex.Message}");
+                throw;
+            }
+        }
+
+      
+        /// Saves (inserts or updates) an entity      
         public async Task<bool> SaveAsync(T entity)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -66,6 +117,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 {
                     if (entity is IEntity identity && identity.Id == 0)
                     {
+                        // INSERT
                         auditable.CreatedDate = DateTime.UtcNow;
                         auditable.CreatedBy = _sessionService.UserId;
                         auditable.Active = true;
@@ -75,6 +127,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                     }
                     else
                     {
+                        // UPDATE
                         auditable.ModifiedDate = DateTime.UtcNow;
                         auditable.ModifiedBy = _sessionService.UserId;
 
@@ -87,14 +140,27 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Database Save Error: {ex.Message}");
                 throw;
             }
         }
 
+      
+        /// Deletes an entity      
         public async Task<bool> DeleteAsync(T entity)
         {
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.DeleteAsync(entity);
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                return await connection.DeleteAsync(entity);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Delete Error: {ex.Message}");
+                throw;
+            }
         }
+
+        #endregion
     }
 }

@@ -37,9 +37,9 @@
 
     public static class PageHeaderIcons
     {
-        /// <summary>
+        
         /// Global translation dictionary matching a PageType enum to its respective Bootstrap Icon class string.
-        /// </summary>
+        
         public static string GetIconClass(PageType pageType) => pageType switch
         {
             PageType.Dashboards => "bi bi-grid",

@@ -1,0 +1,590 @@
+﻿@page "/register"
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Application.Interfaces.IdentityInterfaces
+@layout MainLayout_Blank
+
+<div class="m-0 font-def p-2">
+    <div class="auth-card my-2 py-2">
+        <div class="auth-header">
+            <div class="auth-brand fs-2">
+                <span class="brand-main">Viability</span><span class="brand-iq fst-italic">.IQ</span>
+            </div>
+            <p class="auth-subtitle">Create your account to get started</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                <strong>Registration Failed</strong>
+                <p class="mb-0 mt-1">@ErrorMessage</p>
+                <button type="button" class="btn-close" @onclick="() => { ErrorMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>Registration Successful</strong>
+                <p class="mb-0 mt-1">@SuccessMessage</p>
+                <button type="button" class="btn-close" @onclick="() => { SuccessMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
+            </div>
+        }
+
+        <EditForm Model="@RegisterRequest" OnSubmit="HandleRegister" FormName="RegisterForm">
+            <DataAnnotationsValidator />
+
+            <!-- FIRST NAME & LAST NAME ROW -->
+            <div class="form-row-custom">
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">First Name</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-person icon-addon"></i>
+                        <InputText @bind-Value="RegisterRequest.FirstName"
+                                   @bind-Value:after="() => StateHasChanged()"
+                                   class="form-control-custom"
+                                   placeholder="John"
+                                   disabled="@IsSubmitting" />
+                    </div>
+                    <ValidationMessage For="@(() => RegisterRequest.FirstName)" class="auth-error-msg" />
+                </div>
+
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Last Name</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-person icon-addon"></i>
+                        <InputText @bind-Value="RegisterRequest.LastName"
+                                   @bind-Value:after="() => StateHasChanged()"
+                                   class="form-control-custom"
+                                   placeholder="Doe"
+                                   disabled="@IsSubmitting" />
+                    </div>
+                    <ValidationMessage For="@(() => RegisterRequest.LastName)" class="auth-error-msg" />
+                </div>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group-custom">
+                <label class="form-label-custom">Email Address</label>
+                <div class="input-icon-wrapper">
+                    <i class="bi bi-envelope icon-addon"></i>
+                    <InputText type="email"
+                               @bind-Value="RegisterRequest.Email"
+                               @bind-Value:after="() => StateHasChanged()"
+                               class="form-control-custom"
+                               placeholder="your@email.com"
+                               disabled="@IsSubmitting" />
+                </div>
+                <ValidationMessage For="@(() => RegisterRequest.Email)" class="auth-error-msg" />
+            </div>
+
+            <!-- PASSWORD & CONFIRM PASSWORD ROW -->
+            <div class="form-row-custom">
+                <!-- PASSWORD -->
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-lock icon-addon"></i>
+                        <InputText type="@(ShowPassword ? "text" : "password")"
+                                   @bind-Value="RegisterRequest.Password"
+                                   @bind-Value:after="() => StateHasChanged()"
+                                   class="form-control-custom"
+                                   placeholder="••••••••"
+                                   disabled="@IsSubmitting" />
+                        <button type="button"
+                                class="password-toggle-btn"
+                                @onclick="TogglePasswordVisibility"
+                                @onclick:stopPropagation="true"
+                                tabindex="-1"
+                                disabled="@IsSubmitting">
+                            <i class="bi @(ShowPassword ? "bi-eye-slash-fill" : "bi-eye-fill")"></i>
+                        </button>
+                    </div>
+
+                    <!-- LIVE PASSWORD REQUIREMENT FEEDBACK -->
+                    @if (!string.IsNullOrEmpty(RegisterRequest.Password))
+                    {
+                        var passwordError = GetPasswordValidationFeedback(RegisterRequest.Password);
+                        @if (!string.IsNullOrEmpty(passwordError))
+                        {
+                            <div class="alert alert-warning mt-2 py-1 px-3 mb-1" role="alert">
+                                <small><i class="bi bi-exclamation-triangle me-1"></i> @passwordError</small>
+                            </div>
+                        }
+                    }
+
+                    <ValidationMessage For="@(() => RegisterRequest.Password)" class="auth-error-msg" />
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Confirm Password</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-lock icon-addon"></i>
+                        <InputText type="@(ShowConfirmPassword ? "text" : "password")"
+                                   @bind-Value="RegisterRequest.ConfirmPassword"
+                                   @bind-Value:after="() => StateHasChanged()"
+                                   class="form-control-custom"
+                                   placeholder="••••••••"
+                                   disabled="@IsSubmitting" />
+                        <button type="button"
+                                class="password-toggle-btn"
+                                @onclick="ToggleConfirmPasswordVisibility"
+                                @onclick:stopPropagation="true"
+                                tabindex="-1"
+                                disabled="@IsSubmitting">
+                            <i class="bi @(ShowConfirmPassword ? "bi-eye-slash-fill" : "bi-eye-fill")"></i>
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(RegisterRequest.Password) &&
+                         !string.IsNullOrEmpty(RegisterRequest.ConfirmPassword) &&
+                         RegisterRequest.Password != RegisterRequest.ConfirmPassword)
+                    {
+                        <div class="alert alert-warning mt-2 py-1 px-3 mb-1" role="alert">
+                            <small><i class="bi bi-exclamation-triangle me-1"></i> Passwords do not match</small>
+                        </div>
+                    }
+
+                    <ValidationMessage For="@(() => RegisterRequest.ConfirmPassword)" class="auth-error-msg" />
+                </div>
+            </div>
+
+            <!-- TERMS CHECKBOX -->
+            <div class="auth-actions-row">
+                <label class="checkbox-container-custom">
+                    <InputCheckbox @bind-Value="AgreedToTerms" @bind-Value:after="() => StateHasChanged()" disabled="@IsSubmitting" />
+                    <span class="checkmark"></span>
+                    I agree to the Terms of Service
+                </label>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="btn btn-primary w-100" disabled="@(IsSubmitting || !IsFormValid())">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Creating Account...</span>
+                }
+                else
+                {
+                    <span>Create Account</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-card-footer">
+            <div>
+                Already have an account?
+                <a href="/login" class="link-btn-inline font-weight-bold">Sign In Here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .font-def {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .m-0 {
+        margin: 0;
+    }
+
+    .p-2 {
+        padding: 0.5rem;
+    }
+
+    .py-1 {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+
+    .py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .px-3 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .mt-2 {
+        margin-top: 0.5rem;
+    }
+
+    .fst-italic {
+        font-style: italic;
+    }
+
+    :global(body) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        margin: 0;
+        padding: 20px;
+    }
+
+    .auth-card {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 650px; /* Widened form layout */
+        border-radius: 16px;
+        border: 1px solid #d1dbe8;
+        box-shadow: 0 15px 35px rgba(0, 0, 102, 0.08), 0 5px 15px rgba(0, 0, 102, 0.05), 0 0 1px rgba(0, 0, 102, 0.1);
+        padding: 40px 36px;
+        box-sizing: border-box;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .auth-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 102, 0.12), 0 8px 20px rgba(0, 0, 102, 0.08);
+        }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .auth-brand {
+        font-weight: 800;
+        font-size: 1.65rem;
+        color: #0f172a;
+        letter-spacing: -0.03em;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .auth-subtitle {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: 1px solid;
+        margin-bottom: 20px;
+        font-size: 0.875rem;
+        padding: 12px 16px;
+    }
+
+    .alert-danger {
+        background-color: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+    }
+
+    .alert-warning {
+        background-color: #fef3c7;
+        border-color: #fde047;
+        color: #92400e;
+    }
+
+    .alert-dismissible {
+        padding-right: 2.5rem;
+        position: relative;
+    }
+
+    .btn-close {
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #991b1b;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        padding: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+    .form-row-custom {
+        display: flex;
+        gap: 16px;
+    }
+
+    .form-group-custom {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .flex-fill {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.825rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .icon-addon {
+        position: absolute;
+        left: 14px;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        height: 46px;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0 16px 0 42px;
+        font-size: 0.925rem;
+        font-weight: 600;
+        color: #1e293b;
+        box-sizing: border-box;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .form-control-custom::placeholder {
+            color: #cbd5e1;
+        }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #000099;
+            background-color: #f9fafb;
+            box-shadow: 0 0 0 4px rgba(0, 0, 153, 0.08);
+        }
+
+        .form-control-custom:disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+    .password-toggle-btn {
+        position: absolute;
+        right: 4px;
+        height: 38px;
+        width: 38px;
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s;
+        padding: 0;
+        z-index: 2;
+    }
+
+        .password-toggle-btn:hover:not(:disabled) {
+            background-color: #f2f4f7;
+            color: #344054;
+        }
+
+        .password-toggle-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+    .auth-actions-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .link-btn-inline {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 0.825rem;
+        font-weight: 600;
+        color: #000099;
+        cursor: pointer;
+        transition: color 0.15s, text-decoration 0.15s;
+        text-decoration: none;
+        display: inline;
+    }
+
+        .link-btn-inline:hover {
+            color: #000077;
+            text-decoration: underline;
+        }
+
+    .checkbox-container-custom {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding-left: 26px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #475569;
+        user-select: none;
+    }
+
+        .checkbox-container-custom input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+    .checkmark {
+        position: absolute;
+        left: 0;
+        height: 18px;
+        width: 18px;
+        background-color: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 4px;
+        transition: all 0.15s ease;
+    }
+
+    .checkbox-container-custom:hover input:not(:disabled) ~ .checkmark {
+        border-color: #000099;
+        background-color: rgba(0, 0, 153, 0.02);
+    }
+
+    .checkbox-container-custom input:checked ~ .checkmark {
+        background-color: #000099;
+        border-color: #000099;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 5px;
+        top: 1px;
+        width: 4px;
+        height: 9px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .checkbox-container-custom input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .auth-submit-btn {
+        width: 100%;
+        height: 46px;
+        background-color: #000099;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 153, 0.15);
+        padding: 0;
+    }
+
+        .auth-submit-btn:hover:not(:disabled) {
+            background-color: #000077;
+            box-shadow: 0 6px 16px rgba(0, 0, 153, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .auth-submit-btn:disabled {
+            background-color: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+    .auth-card-footer {
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: 0.825rem;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .auth-error-msg {
+        display: block;
+        font-size: 0.75rem;
+        color: #ef4444;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .mb-0 {
+        margin-bottom: 0;
+    }
+
+    .mb-1 {
+        margin-bottom: 0.25rem;
+    }
+
+    .mt-1 {
+        margin-top: 0.25rem;
+    }
+
+    .me-1 {
+        margin-right: 0.25rem;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+
+    .font-weight-bold {
+        font-weight: 700;
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.125em;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    .spinner-border-sm {
+        width: 0.875rem;
+        height: 0.875rem;
+        border-width: 0.15em;
+    }
+</style>

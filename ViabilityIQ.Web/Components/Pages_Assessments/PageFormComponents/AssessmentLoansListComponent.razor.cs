@@ -79,9 +79,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             await LoadAssessmentLoanAsync();
         }
 
-        /// <summary>
+        
         /// Evaluates numeric markup thresholds and returns explicit design presentation tokens
-        /// </summary>
+        
         private string GetMarkupBadgeClass(decimal markupPercent) => markupPercent switch
         {
             < 5.00m => "bg-danger text-white",

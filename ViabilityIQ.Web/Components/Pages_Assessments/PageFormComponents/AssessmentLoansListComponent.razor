@@ -41,16 +41,16 @@
                 @foreach (var loan in Loans)
                 {
                     <tr class="viq-td-style">
-                        <td class="text-center text-muted fw-semibold">
+                        <td class="text-center text-muted fw-semibold  small">
                             @rowCounter
                         </td>
-                        <td class="text-start text-dark fw-medium">
+                        <td class="text-start row-font">
                             @loan.LoanTypeName
                         </td>
-                        <td class="text-start text-dark fw-medium">
+                        <td class="text-start row-font">
                             @loan.BankName
                         </td>
-                        <td class="text-end">
+                        <td class="text-end  row-font">
                             <span class="py-1" style="min-width: 65px; font-size: inherit;">
                                 @loan.LoanBalanceAtAssessmentDate.ToString("N2")
                             </span>
@@ -60,12 +60,12 @@
                                 @loan.RepaymentPeriodMonths.ToString("N2")
                             </span>
                         </td> *@
-                        <td class="text-end">
+                        <td class="text-end row-font">
                             <span class="badge fw-normal px-1 py-1 @GetInterestBadgeClass(loan.InterestRatePerAnnum)" style="min-width: 65px; font-size: inherit;">
                                 @loan.InterestRatePerAnnum.ToString("N2")%
                             </span>
                         </td>
-                        <td class="text-end">
+                        <td class="text-end row-font"">
                             <span class="py-1" style="min-width: 65px; font-size: inherit;">
                                 @loan.ActualRepaymentAmount.ToString("N2")
                             </span>
@@ -82,7 +82,7 @@
                             }
                         </td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit Category"
+                            <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit loan details"
                                     @onclick="() => OnEditRequested.InvokeAsync(loan.AssessmentLoanId)">
                                 <i class="bi bi-vector-pen" style="font-size: 0.95rem;"></i>
                             </button>
@@ -130,4 +130,10 @@
         padding-bottom: 2px !important;
         border-bottom: 1px solid #dee2e6 !important;
     }
+
+    .row-font{
+        font-size: 0.60rem !important;
+        color: #36454F !important;
+    }
+
 </style>

@@ -179,7 +179,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                      MinimumRepaymentAmount, 
                      ActualRepaymentAmount, 
                      Active
-                     FROM vw_assessment_loan
+                     FROM vw_assessment_loans_list
                      WHERE AssessmentId = @AssessmentId";
 
                 return await connection.QueryAsync<AssessmentLoanDto>(

@@ -1,0 +1,108 @@
+﻿@page "/dashboard"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="row mb-4">
+    <div class="col">
+        <h1>Dashboard</h1>
+        <p class="text-muted">Welcome to your Viability-IQ dashboard, @(CurrentUser?.FirstName ?? "User")</p>
+    </div>
+</div>
+
+@if (CurrentUser == null)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> @CurrentUser.FirstName @CurrentUser.LastName</p>
+                    <p><strong>Email:</strong> @CurrentUser.Email</p>
+                    <p><strong>Phone:</strong> @CurrentUser.PhoneNumber</p>
+                    <p><strong>Department:</strong> @CurrentUser.Department</p>
+                    <p><strong>Job Title:</strong> @CurrentUser.JobTitle</p>
+                    <p><strong>Member Since:</strong> @CurrentUser.CreatedAt.ToString("MMM dd, yyyy")</p>
+                    @if (CurrentUser.LastLoginAt.HasValue)
+                    {
+                        <p><strong>Last Login:</strong> @CurrentUser.LastLoginAt.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                    }
+                    <a href="/profile/edit" class="btn btn-primary btn-sm mt-3">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Account Status:</strong>
+                        @if (CurrentUser.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inactive</span>
+                        }
+                    </p>
+                    <p>
+                        <strong>Email Confirmed:</strong>
+                        @if (CurrentUser.EmailConfirmed)
+                        {
+                            <span class="badge bg-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">No</span>
+                        }
+                    </p>
+                    <p><strong>Roles:</strong></p>
+                    <div>
+                        @if (UserRoles.Any())
+                        {
+                            @foreach (var role in UserRoles)
+                            {
+                                <span class="badge bg-info me-2">@role</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">No roles assigned</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/profile/edit" class="btn btn-primary me-2">Edit Profile</a>
+                    <a href="/change-password" class="btn btn-secondary me-2">Change Password</a>
+                    <button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
