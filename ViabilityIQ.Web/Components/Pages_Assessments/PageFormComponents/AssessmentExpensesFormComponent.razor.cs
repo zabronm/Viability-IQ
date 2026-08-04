@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,23 +12,38 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class AssessmentExpensesFormComponent : ComponentBase
     {
+        #region Injected Dependencies
+
         [Inject] private ISessionService sessionService { get; set; } = default!;
         [Inject] private ZabOffCanvasService? zabCanvasService { get; set; }
         [Inject] private IGenericDataRepository<AssessmentExpenses> DataRepository { get; set; } = default!;
+        [Inject] private IProjectionStateManager? projectionStateManager { get; set; }
+        [Inject] private ILogger<AssessmentExpensesFormComponent>? Logger { get; set; }
+
+        #endregion
+
+        #region Parameters
 
         [Parameter] public AssessmentExpenses? ExpenseContext { get; set; }
+
+        #endregion
+
+        #region Private Fields
 
         private AssessmentExpenses FormModel { get; set; } = new();
         private decimal[] MonthlyValues { get; set; } = new decimal[12];
         private decimal BulkAnnualValueTarget { get; set; }
-
         private bool IsSubmitting { get; set; } = false;
+
+        #endregion
+
+        #region Lifecycle Methods
 
         protected override void OnParametersSet()
         {
             long assessmentId = sessionService.AssessmentId ?? 0;
 
-            if (ExpenseContext != null)
+            if (ExpenseContext != null && ExpenseContext.AssessmentExpenseId > 0)
             {
                 // Clone existing record
                 FormModel = new AssessmentExpenses
@@ -36,7 +52,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     AssessmentExpenseId = ExpenseContext.AssessmentExpenseId,
                     Description = ExpenseContext.Description,
                     ExpenseTypeId = ExpenseContext.ExpenseTypeId,
+                    ExpenseItemId = ExpenseContext.ExpenseItemId,
                     blSendToCashBook = ExpenseContext.blSendToCashBook,
+                    blPercentageOfSalesUsed = ExpenseContext.blPercentageOfSalesUsed,
+                    PercentageOfSalesRate = ExpenseContext.PercentageOfSalesRate,
                     Month_1 = ExpenseContext.Month_1,
                     Month_2 = ExpenseContext.Month_2,
                     Month_3 = ExpenseContext.Month_3,
@@ -55,8 +74,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             else
             {
                 FormModel = new() { AssessmentId = assessmentId };
+                MonthlyValues = new decimal[12];
             }
         }
+
+        #endregion
+
+        #region Private Methods
 
         private void ApplyMonthlyAllocation()
         {
@@ -75,36 +99,54 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         private void ToggleSalesPercentage()
         {
-            // If we are checking the box, ensure the rate is reset to 0
             if (!FormModel.blPercentageOfSalesUsed)
             {
                 FormModel.PercentageOfSalesRate = 0;
             }
         }
 
-
         private async Task ExecuteSaveWorkflowAsync()
         {
-            //if (FormModel == null || IsSubmitting || string.IsNullOrWhiteSpace(FormModel.Description)) return;
             if (FormModel == null || IsSubmitting) return;
 
             try
             {
                 IsSubmitting = true;
-                FormModel.MonthlyValues = MonthlyValues; // Uses your class setter
+                FormModel.MonthlyValues = MonthlyValues;
+
+                Logger?.LogInformation(
+                    "Saving expense for assessment {AssessmentId}",
+                    FormModel.AssessmentId);
 
                 bool isExecutionSuccess = await DataRepository.SaveAsync(FormModel);
-                var result = SaveResult.SavedAndNew("Expense details archived successfully.");
 
-               await zabCanvasService!.PublishResultAsync(result);
+                if (isExecutionSuccess)
+                {
+                    var result = SaveResult.SavedAndNew("Expense details saved successfully.");
 
-                if (result.ClearForm) 
-                                ClearForm();
+                    // ✅ TRIGGER CASHFLOW RECALCULATION
+                    Logger?.LogInformation(
+                        "Invalidating cashflow after expense save for assessment {AssessmentId}",
+                        FormModel.AssessmentId);
 
+                    await projectionStateManager!.InvalidateDataAsync("expenses", FormModel.AssessmentId, FormModel.AssessmentId);
+
+                    await zabCanvasService!.PublishResultAsync(result);
+
+                    if (result.ClearForm)
+                        ClearForm();
+                }
+                else
+                {
+                    await zabCanvasService!.PublishResultAsync(
+                        new SaveResult { Success = false, Message = "Failed to save expense" });
+                }
             }
             catch (Exception ex)
             {
-                await zabCanvasService!.PublishResultAsync(new SaveResult { Success = false, Message = $"Error: {ex.Message}" });
+                Logger?.LogError(ex, "Error saving expense for assessment {AssessmentId}", FormModel.AssessmentId);
+                await zabCanvasService!.PublishResultAsync(
+                    new SaveResult { Success = false, Message = $"Error: {ex.Message}" });
             }
             finally
             {
@@ -124,7 +166,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             StateHasChanged();
         }
 
-
         private async Task CancelFormAsync() => await zabCanvasService!.HideAsync(SaveResult.Cancel());
+
+        #endregion
     }
 }

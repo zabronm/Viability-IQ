@@ -1,0 +1,102 @@
+﻿<div class="kpi-cards-container">
+    @if (IsLoading)
+    {
+        <div class="text-center py-1">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (KPIData == null)
+    {
+        <!-- Empty state - no KPIs to display -->
+    }
+    else
+    {
+        <div class="kpi-grid">
+            <!-- Total Sales -->
+            <div class="kpi-card kpi-card-primary">
+                <i class="kpi-icon bi bi-graph-up-arrow"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">TOTAL SALES</div>
+                    <div class="kpi-value">@KPIData.TotalSales.ToString("N0")</div>
+                    <div class="kpi-indicator">
+                        <i class="bi bi-arrow-up"></i>@FormatPercentage(KPIData.SalesGrowth)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opening Stock -->
+            <div class="kpi-card kpi-card-default">
+                <i class="kpi-icon bi bi-box-seam"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">OPENING STOCK</div>
+                    <div class="kpi-value">@KPIData.OpeningStock.ToString("N0")</div>
+                    <div class="kpi-indicator text-muted">Base position</div>
+                </div>
+            </div>
+
+            <!-- Closing Stock -->
+            <div class="kpi-card kpi-card-default">
+                <i class="kpi-icon bi bi-bag-check"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">CLOSING STOCK</div>
+                    <div class="kpi-value">@KPIData.ClosingStock.ToString("N0")</div>
+                    <div class="kpi-indicator" style="color: @(KPIData.ClosingStockVariance < 0 ? "#dc2626" : "#16a34a");">
+                        @(KPIData.ClosingStockVariance < 0 ? "↓" : "↑") @Math.Abs(KPIData.ClosingStockVariance).ToString("F1")%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses -->
+            <div class="kpi-card kpi-card-default">
+                <i class="kpi-icon bi bi-file-earmark-text"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">EXPENSES</div>
+                    <div class="kpi-value">@KPIData.TotalExpenses.ToString("N0")</div>
+                    <div class="kpi-indicator text-warning">In budget</div>
+                </div>
+            </div>
+
+            <!-- VAT (NET) -->
+            <div class="kpi-card kpi-card-default">
+                <i class="kpi-icon bi bi-receipt"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">VAT (NET)</div>
+                    <div class="kpi-value">@KPIData.VATNet.ToString("N0")</div>
+                    <div class="kpi-indicator text-muted">@KPIData.VATPct.ToString("F1")% Statutory</div>
+                </div>
+            </div>
+
+            <!-- Gross Profit - HIGHLIGHTED -->
+            <div class="kpi-card kpi-card-highlight">
+                <i class="kpi-icon bi bi-graph-up" style="color: #16a34a;"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">GROSS PROFIT</div>
+                    <div class="kpi-value" style="color: #16a34a;">@KPIData.GrossProfit.ToString("N0")</div>
+                    <div class="kpi-indicator" style="color: #16a34a;">@KPIData.GrossProfitMargin.ToString("F1")% Margin</div>
+                </div>
+            </div>
+
+            <!-- EBITDA - HIGHLIGHTED -->
+            <div class="kpi-card kpi-card-ebitda">
+                <i class="kpi-icon bi bi-speedometer2" style="color: #0284c7;"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">EBITDA</div>
+                    <div class="kpi-value" style="color: #0284c7;">@KPIData.EBITDA.ToString("N0")</div>
+                    <div class="kpi-indicator" style="color: #0284c7;">@KPIData.EBITDAMargin.ToString("F1")% Margin</div>
+                </div>
+            </div>
+
+            <!-- Net Profit -->
+            <div class="kpi-card kpi-card-primary">
+                <i class="kpi-icon bi bi-award"></i>
+                <div class="kpi-content">
+                    <div class="kpi-label">NET PROFIT</div>
+                    <div class="kpi-value" style="color: #16a34a;">@KPIData.NetProfit.ToString("N0")</div>
+                    <div class="kpi-indicator" style="color: #16a34a;">@KPIData.NetProfitMargin.ToString("F1")% Margin</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

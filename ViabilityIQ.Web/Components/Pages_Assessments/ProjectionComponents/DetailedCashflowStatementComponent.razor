@@ -1,0 +1,311 @@
+﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+<div class="detailed-cashflow-container mb-4">
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <!-- Card Header -->
+        <div class="card-header bg-gradient-navy text-white py-3 px-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-table me-2"></i>Detailed Cashflow Statement
+                    </h5>
+                    <small class="text-light">12-Month Projected Cashflow Analysis</small>
+                </div>
+                @if (IsLoading)
+                {
+                    <div class="spinner-border spinner-border-sm text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body p-0">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3">Calculating detailed cashflow statement...</p>
+                </div>
+            }
+            else if (MonthlyCashflows == null || !MonthlyCashflows.Any())
+            {
+                <div class="alert alert-warning m-3 mb-0" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>No Data Available</strong> - Enter sales, expenses, and income data to generate detailed cashflow.
+                </div>
+            }
+            else
+            {
+                <!-- Detailed Cashflow Table -->
+                <div class="table-responsive cashflow-table-wrapper">
+                    <table class="table table-borderless mb-0 detailed-cashflow-table">
+                        <thead>
+                            <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
+                                <th class="sticky-col ps-3 py-2 text-start text-uppercase text-xs" style="width: 180px; color: #0f172a; letter-spacing: 0.5px;">
+                                    <span class="text-start">Line Item <i class="bi bi-caret-down"></i></span><span class="text-end text-navy">Period <i class="bi bi-caret-right"></i></span>
+                                </th>
+                                @for (int m = 1; m <= 12; m++)
+                                {
+                                    <th class="text-end pe-2 py-2 text-uppercase text-xxs" style="width: 70px;">M@(m)</th>
+                                }
+                                <th class="sticky-right-col text-end pe-3 py-2 text-uppercase fw-bold text-xs" style="background-color: #d1d5db; color: #000080; width: 80px;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- SALES REVENUE SECTION -->
+                            <tr class="section-header bg-light-blue">
+                                <td class="sticky-col ps-3 py-2 fw-bold text-uppercase text-xs" style="color: #0f172a; letter-spacing: 1px;">
+                                    <i class="bi bi-arrow-down-circle me-2 text-success"></i>Total Sales Revenue
+                                </td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    <td class="text-end pe-2 py-2 font-monospace fw-bold text-navy text-xs">
+                                        @MonthlyCashflows[m].TotalSales.ToString("N0")
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-navy text-xs" style="background-color: #d1d5db;">
+                                    @MonthlyCashflows.Sum(c => c.TotalSales).ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- COST OF SALES SECTION -->
+                            <tr class="data-row bg-white">
+                                <td class="sticky-col ps-3 py-2 text-secondary text-xs">
+                                    <i class="bi bi-dash-circle me-1 text-danger"></i>(Less) Cost of Sales
+                                </td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    <td class="text-end pe-2 py-2 font-monospace text-danger text-xs">
+                                        (@MonthlyCashflows[m].CostOfSales.ToString("N0"))
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-danger text-xs" style="background-color: #d1d5db;">
+                                    (@MonthlyCashflows.Sum(c => c.CostOfSales).ToString("N0"))
+                                </td>
+                            </tr>
+
+                            <!-- GROSS PROFIT SECTION -->
+                            <tr class="section-divider" style="background-color: #f3f4f6; border-top: 1px solid #d1d5db; border-bottom: 1px solid #d1d5db;">
+                                <td class="sticky-col ps-3 py-2 fw-bold text-xs" style="color: #1e293b;">Gross Profit</td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    var grossProfit = MonthlyCashflows[m].TotalSales - MonthlyCashflows[m].CostOfSales;
+                                    <td class="text-end pe-2 py-2 font-monospace fw-bold text-xs"
+                                        style="color: @(grossProfit >= 0 ? "#16a34a" : "#dc2626");">
+                                        @grossProfit.ToString("N0")
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-xs"
+                                    style="background-color: #d1d5db; color: @(MonthlyCashflows.Sum(c => c.TotalSales - c.CostOfSales) >= 0 ? "#16a34a" : "#dc2626");">
+                                    @MonthlyCashflows.Sum(c => c.TotalSales - c.CostOfSales).ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- SUNDRY INCOME SECTION -->
+                            <tr class="data-row bg-light">
+                                <td class="sticky-col ps-3 py-2 text-secondary text-xs">
+                                    <i class="bi bi-plus-circle me-1 text-success"></i>(Add) Sundry Income
+                                </td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    <td class="text-end pe-2 py-2 font-monospace text-success text-xs">
+                                        @MonthlyCashflows[m].SundryIncome.ToString("N0")
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-success text-xs" style="background-color: #d1d5db;">
+                                    @MonthlyCashflows.Sum(c => c.SundryIncome).ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- GROSS INCOME SECTION -->
+                            <tr class="section-divider" style="background-color: #f3f4f6; border-top: 1px solid #d1d5db; border-bottom: 1px solid #d1d5db;">
+                                <td class="sticky-col ps-3 py-2 fw-bold text-xs" style="color: #1e293b;">= Gross Income</td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    var grossIncome = (MonthlyCashflows[m].TotalSales - MonthlyCashflows[m].CostOfSales) + MonthlyCashflows[m].SundryIncome;
+                                    <td class="text-end pe-2 py-2 font-monospace fw-bold text-xs"
+                                        style="color: @(grossIncome >= 0 ? "#16a34a" : "#dc2626");">
+                                        @grossIncome.ToString("N0")
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-xs"
+                                    style="background-color: #d1d5db; color: @(MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome) >= 0 ? "#16a34a" : "#dc2626");">
+                                    @MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome).ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- OPERATING EXPENSES SECTION -->
+                            <tr class="data-row bg-white">
+                                <td class="sticky-col ps-3 py-2 text-secondary text-xs">
+                                    <i class="bi bi-dash-circle me-1 text-danger"></i>(Less) Operating Expenses
+                                </td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    <td class="text-end pe-2 py-2 font-monospace text-danger text-xs">
+                                        (@MonthlyCashflows[m].OperatingExpenses.ToString("N0"))
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-danger text-xs" style="background-color: #d1d5db;">
+                                    (@MonthlyCashflows.Sum(c => c.OperatingExpenses).ToString("N0"))
+                                </td>
+                            </tr>
+
+                            <!-- EBITDA SECTION -->
+                            <tr class="ebitda-row" style="background: linear-gradient(90deg, #f0f4f8 0%, #f8fafc 100%); border-top: 1px solid #0f172a; border-bottom: 1px solid #0f172a;">
+                                <td class="sticky-col ps-3 py-2 fw-bold text-uppercase text-xs" style="color: #0f172a; letter-spacing: 1px;">
+                                    <i class="bi bi-graph-up me-2 text-primary"></i>= EBITDA
+                                </td>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    var ebitda = (MonthlyCashflows[m].TotalSales - MonthlyCashflows[m].CostOfSales) + MonthlyCashflows[m].SundryIncome - MonthlyCashflows[m].OperatingExpenses;
+                                    <td class="text-end pe-2 py-2 font-monospace fw-bold text-xs"
+                                        style="color: @(ebitda >= 0 ? "#16a34a" : "#dc2626");">
+                                        @ebitda.ToString("N0")
+                                    </td>
+                                }
+                                <td class="sticky-right-col text-end pe-3 py-2 font-monospace fw-bold text-xs"
+                                    style="background-color: #d1d5db; color: @(MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome - c.OperatingExpenses) >= 0 ? "#16a34a" : "#dc2626");">
+                                    @MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome - c.OperatingExpenses).ToString("N0")
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Enhanced KPI Cards -->
+                @* <div class="kpi-section p-4 bg-light-subtle">
+                    <h6 class="fw-bold text-dark mb-4 pb-3 border-bottom">
+                        <i class="bi bi-speedometer2 me-2 text-primary"></i>Key Performance Indicators
+                    </h6>
+
+                    <div class="row g-3">
+                        <!-- Total Sales KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-primary">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-cash-flow"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Total Sales Revenue</small>
+                                    <h5 class="kpi-value">
+                                        @MonthlyCashflows.Sum(c => c.TotalSales).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gross Profit KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-success">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Gross Profit</small>
+                                    <h5 class="kpi-value">
+                                        @MonthlyCashflows.Sum(c => c.TotalSales - c.CostOfSales).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gross Income KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-info">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-wallet2"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Gross Income</small>
+                                    <h5 class="kpi-value">
+                                        @MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Cost of Sales KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-danger">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-graph-down"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Cost of Sales</small>
+                                    <h5 class="kpi-value">
+                                        @MonthlyCashflows.Sum(c => c.CostOfSales).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Operating Expenses KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-warning">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Operating Expenses</small>
+                                    <h5 class="kpi-value">
+                                        @MonthlyCashflows.Sum(c => c.OperatingExpenses).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gross VAT KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-secondary">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Gross VAT</small>
+                                    <h5 class="kpi-value">
+                                        @MonthlyCashflows.Sum(c => c.GrossVAT).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EBITDA KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-ebitda">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-speedometer"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">EBITDA</small>
+                                    <h5 class="kpi-value" style="color: @(MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome - c.OperatingExpenses) >= 0 ? "#16a34a" : "#dc2626");">
+                                        @MonthlyCashflows.Sum(c => (c.TotalSales - c.CostOfSales) + c.SundryIncome - c.OperatingExpenses).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Profit KPI -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="kpi-card kpi-card-accent">
+                                <div class="kpi-icon">
+                                    <i class="bi bi-award"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <small class="kpi-title">Net Profit</small>
+                                    <h5 class="kpi-value" style="color: @(MonthlyCashflows.Sum(c => c.NetProfit) >= 0 ? "#16a34a" : "#dc2626");">
+                                        @MonthlyCashflows.Sum(c => c.NetProfit).ToString("N0")
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> *@
+            }
+        </div>
+    </div>
+</div>
+

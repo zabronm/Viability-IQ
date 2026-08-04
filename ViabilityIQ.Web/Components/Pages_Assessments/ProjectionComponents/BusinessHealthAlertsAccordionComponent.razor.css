@@ -1,0 +1,210 @@
+﻿.business-health-alerts-container {
+    font-size: 0.85rem;
+}
+
+/* Alert Header Wrapper - SOFTER COLORS */
+.alert-header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+    .alert-header-wrapper:hover {
+        filter: brightness(1.05);
+    }
+
+/* Expand/Collapse Button - MORE PROMINENT */
+.accordion-button-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 0.5rem;
+    margin-right: 1.5rem;
+}
+
+    .accordion-button-custom::after {
+        display: none !important;
+    }
+
+    .accordion-button-custom:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: scale(1.05);
+    }
+
+    .accordion-button-custom:not(.collapsed) {
+        background: rgba(255, 255, 255, 0.4);
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .accordion-button-custom i {
+        transition: transform 0.3s ease;
+        display: block;
+    }
+
+    .accordion-button-custom:not(.collapsed) i {
+        transform: rotate(180deg);
+    }
+
+/* Alert Content Wrapper */
+.alert-content-wrapper {
+    cursor: pointer;
+    user-select: none;
+}
+
+    .alert-content-wrapper:hover {
+        opacity: 0.95;
+    }
+
+/* Accordion Item */
+.business-health-accordion .accordion-item {
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .business-health-accordion .accordion-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+    }
+
+.accordion-body {
+    padding: 0;
+}
+
+/* Dismiss Button Styling */
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    transition: opacity 0.2s ease;
+}
+
+    .btn-close-white:hover {
+        opacity: 1 !important;
+    }
+
+.bg-light-subtle {
+    background-color: #f8fafc !important;
+}
+
+.guidance-content {
+    line-height: 1.8;
+    font-size: 0.9rem;
+}
+
+    .guidance-content div {
+        word-break: break-word;
+    }
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.text-xxs {
+    font-size: 0.65rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+}
+
+.rounded-3 {
+    border-radius: 0.75rem;
+}
+
+/* Alert Item Animations */
+.alert-item {
+    animation: slideIn 0.3s ease-out;
+}
+
+    .alert-item.dismissing {
+        animation: slideOut 0.3s ease-out forwards;
+    }
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .accordion-button-custom {
+        width: 2rem;
+        height: 2rem;
+        margin-right: 1rem;
+        margin-left: 0.25rem;
+    }
+
+        .accordion-button-custom i {
+            font-size: 1rem;
+        }
+
+    .alert-header-wrapper {
+        flex-wrap: wrap;
+    }
+}
+
+/* Guidance Cards */
+.guidance-card {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    background: #ffffff;
+}
+
+    .guidance-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        transform: translateY(-2px);
+    }
+
+    .guidance-card .card-header {
+        background-color: #f8fafc;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .guidance-card .card-body {
+        padding: 0.5rem;
+    }
+
+.guidance-item-content {
+    line-height: 1.2;
+}
+
+    .guidance-item-content .text-sm {
+        font-size: 0.85rem;
+    }
+
+    .guidance-item-content .text-muted {
+        color: #9ca3af;
+    }

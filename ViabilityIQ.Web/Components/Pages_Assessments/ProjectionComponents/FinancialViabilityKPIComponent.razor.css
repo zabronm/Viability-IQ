@@ -1,0 +1,379 @@
+﻿body {
+}
+
+
+.viability-content {
+    background-color: #fafafa;
+}
+
+/* Viability Cards */
+.viability-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+    .viability-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+        border-color: #d1d5db;
+    }
+
+.viability-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.viability-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: #6b7280;
+}
+
+.viability-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.viability-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    color: #1f2937;
+}
+
+.viability-footer {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+/* Card Variants */
+.viability-card-danger {
+    border-left-color: #dc2626;
+}
+
+    .viability-card-danger .viability-icon {
+        color: #dc2626;
+    }
+
+.viability-card-info {
+    border-left-color: #0284c7;
+    background: linear-gradient(135deg, #ecf7f8 0%, #ffffff 100%);
+}
+
+    .viability-card-info .viability-icon {
+        color: #0284c7;
+    }
+
+.viability-card-viability {
+    border-left-color: #7c3aed;
+    background: linear-gradient(135deg, #ede9fe 0%, #ffffff 100%);
+}
+
+    .viability-card-viability .viability-icon {
+        color: #7c3aed;
+    }
+
+/* Viability Table */
+.viability-table {
+    font-size: 0.85rem;
+}
+
+    .viability-table thead {
+        background-color: #f3f4f6;
+        border-bottom: 2px solid #d1d5db;
+    }
+
+    .viability-table tbody tr {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .viability-table tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.03);
+        }
+
+    .viability-table .badge {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+        font-weight: 600;
+    }
+
+.text-xs {
+    font-size: 0.65rem !important;
+}
+
+/* Assessment Box */
+.assessment-box {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+    .assessment-box p {
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .viability-value {
+        font-size: 1.3rem;
+    }
+
+    .score-circle {
+        width: 70px;
+        height: 70px;
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .viability-card {
+        padding: 1rem;
+    }
+
+    .viability-card-header {
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .viability-icon {
+        font-size: 1.25rem;
+    }
+
+    .viability-title {
+        font-size: 0.75rem;
+    }
+
+    .viability-value {
+        font-size: 1.1rem;
+    }
+
+    .viability-table {
+        font-size: 0.75rem;
+    }
+
+    .score-circle {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .viability-card {
+        padding: 0.75rem;
+    }
+
+    .viability-value {
+        font-size: 1rem;
+    }
+
+    .assessment-box {
+        padding: 1rem;
+    }
+
+    .score-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .viability-card {
+        page-break-inside: avoid;
+        box-shadow: none;
+    }
+
+    .viability-table {
+        page-break-inside: avoid;
+    }
+}
+
+.font-def {
+    font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.auth-card {
+    background-color: #ffffff;
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid #d1dbe8;
+    box-shadow: 0 15px 35px rgba(0, 0, 102, 0.08), 0 5px 15px rgba(0, 0, 102, 0.05), 0 0 1px rgba(0, 0, 102, 0.1);
+    padding: 30px 32px;
+    box-sizing: border-box;
+}
+
+.auth-brand {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    display: block;
+}
+
+.brand-main {
+    color: #0f172a;
+}
+
+.auth-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.financial-viability-kpi {
+    font-size: 0.95rem;
+}
+
+.viability-summary-table {
+    font-size: 0.9rem;
+    font-family: Arial, sans-serif;
+}
+
+.data-row {
+
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+    .data-row td {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;        
+    }
+
+    .data-row:hover {
+        background-color: rgba(124, 58, 237, 0.02) !important;
+    }
+
+.text-purple {
+    color: #7c3aed;
+}
+
+.text-navy {
+    color: #0f172a;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+}
+
+.score-circle-sm {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 3px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    margin: 0 auto;
+    background: #fff;
+}
+
+
+.financial-viability-kpi {
+    font-size: 0.95rem;
+}
+
+.viability-summary-table {
+    font-size: 0.9rem;
+}
+
+.section-header {
+    background-color: #f8fafc !important;
+    font-weight: 600;
+    border-top: 1px solid #e2e8f0;
+}
+
+    .section-header:first-child {
+        border-top: none;
+    }
+
+.data-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+    .data-row:hover {
+        background-color: rgba(124, 58, 237, 0.02) !important;
+    }
+
+.bg-light-purple {
+    background-color: #f3e8ff !important;
+}
+
+.bg-light-cyan {
+    background-color: #e0f2fe !important;
+}
+
+.bg-light-blue {
+    background-color: #f0f4ff !important;
+}
+
+.text-purple {
+    color: #7c3aed;
+}
+
+.text-navy {
+    color: #0f172a;
+}
+
+.text-xxs {
+    font-size: 0.65rem;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+}
+
+.score-circle-sm {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 3px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    margin: 0 auto;
+    background: #fff;
+}

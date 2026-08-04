@@ -1,0 +1,525 @@
+﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@* @using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Application.Interfaces
+@inject IBusinessHealthAlertService AlertService
+@inject IProjectionStateManager ProjectionStateManager
+@inject ILogger<BusinessHealthAlertsAccordionComponent> Logger
+ *@
+
+
+<div class="business-health-alerts-container mb-4">
+    @if (IsLoading)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-muted mt-3">Loading business health analysis...</p>
+            </div>
+        </div>
+    }
+    else if (!Alerts.Any())
+    {
+        <div class="alert alert-info border-0 shadow-sm alert-dismissible my-1" role="alert" stye="border-radius:6px;">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>No Alerts</strong> - Enter accurate financial data to generate quality business-health analytics.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    else
+    {
+        <div class="accordion accordion-flush business-health-accordion mt-2" id="alertsAccordion">
+            @foreach (var (alert, index) in Alerts.Select((a, i) => (a, i)))
+            {
+                <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden alert-item"
+                     id="alertItem@(index)"
+                     data-alert-id="@alert.AlertId">
+
+                    <!-- Accordion Header -->
+                    <h5 class="accordion-header" id="heading@(index)">
+                        <div class="alert-header-wrapper" style="background-color: @GetAlertHeaderColor(alert.Severity);">
+
+                            <!-- Expand/Collapse Button with Extra Spacing -->
+                            <button class="accordion-button accordion-button-custom collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse@(index)"
+                                    aria-expanded="false"
+                                    aria-controls="collapse@(index)"
+                                    style="color: white; border: none; padding: 0.75rem 0.5rem; margin-right: 1rem;">
+                                <i class="bi bi-chevron-down" style="font-size: 1.25rem; transition: transform 0.3s ease;"></i>
+                            </button>
+
+                            <!-- Alert Content -->
+                            <div class="alert-content-wrapper flex-grow-1 py-1 pe-3">
+                                <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                    <!-- Severity Badge Icon -->
+                                    @* <div style="font-size: 1.5rem; flex-shrink: 0;">
+                                        @GetAlertIcon(alert.Severity)
+                                    </div> *@
+
+                                    <!-- Alert Title and Message -->
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold text-white" style="font-size: 0.85rem;">
+                                            @alert.Title
+                                        </div>
+                                        <small class="text-white-50 ps-3" style="font-size: 0.85rem;">
+                                            @alert.Message
+                                        </small>
+                                    </div>
+
+                                    <!-- Category Badge -->
+                                    <span class="badge bg-light text-dark text-xxs px-3 py-2" style="white-space: nowrap; flex-shrink: 0;">
+                                        @alert.Category.ToString()
+                                    </span>
+
+                                    <!-- Metric Display -->
+                                    @if (!string.IsNullOrEmpty(alert.MetricLabel) && alert.MetricValue != 0)
+                                    {
+                                        <div class="text-end" style="flex-shrink: 0;">
+                                            <small class="text-white-50 d-block">@alert.MetricLabel</small>
+                                            <span class="text-white fw-bold font-monospace">@FormatMetricValue(alert)</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Dismiss Button -->
+                            @if (alert.IsDismissible)
+                            {
+                                <button type="button"
+                                        class="btn btn-close btn-close-white me-2"
+                                        aria-label="Dismiss alert"
+                                        @onclick="@((e) => DismissAlert(alert.AlertId, index))"
+                                        style="padding: 0.5rem; opacity: 0.8; flex-shrink: 0;"
+                                        title="Dismiss this alert">
+                                </button>
+                            }
+                        </div>
+                    </h5>
+
+                    <!-- Accordion Body - Detailed Guidance -->
+                    <div id="collapse@(index)"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="heading@(index)"
+                         data-bs-parent="#alertsAccordion">
+
+                        <div class="accordion-body p-0">
+                            <!-- Alert Message Section -->
+                            <div class="bg-light-subtle p-2 border-bottom">
+                                <h6 class="text-dark fw-bold mb-1">
+                                    <i class="bi bi-lightbulb me-2" style="color: @GetAlertColor(alert.Severity);"></i>
+                                    Alert Details
+                                </h6>
+                                <p class="text-secondary mb-0">
+                                    @alert.Message
+                                </p>
+                            </div>
+
+                            <!-- Recommendation Section -->
+                            @if (!string.IsNullOrEmpty(alert.Recommendation))
+                            {
+                                <div class="bg-white p-4 border-bottom">
+                                    <h6 class="text-dark fw-bold mb-2">
+                                        <i class="bi bi-check-circle me-2" style="color: #16a34a;"></i>
+                                        Recommended Action
+                                    </h6>
+                                    <p class="text-secondary mb-0">
+                                        @alert.Recommendation
+                                    </p>
+                                </div>
+                            }
+
+                            <!-- Detailed Guidance Section -->                           
+                            @if (alert.DetailedGuidance != null && alert.DetailedGuidance.Any())
+                            {
+                                <div class="bg-light py-2 px-4">
+                                    <h6 class="text-dark fw-bold mb-1">
+                                        <i class="bi bi-bookmark-check me-2" style="color: #0284c7;"></i>
+                                        Detailed Guidance
+                                    </h6>
+
+                                    <!-- Parse and organize guidance items into sections -->
+                                    @{
+                                        var guidanceItems = ParseGuidanceItems(alert.DetailedGuidance);
+                                    }
+
+                                    @if (guidanceItems.Any())
+                                    {
+                                        <div class="row g-3">
+                                            @foreach (var (item, itemIndex) in guidanceItems.Select((i, idx) => (i, idx)))
+                                            {
+                                                <div class="col-md-6 col-lg-6">
+                                                    <div class="card border-0 shadow-sm h-100 guidance-card">
+                                                        <!-- Card Header -->
+                                                        <div class="card-header bg-white border-bottom-0 pt-3 pb-2">
+                                                            <h6 class="card-title text-dark fw-bold mb-0" style="font-size: 0.80rem;">
+                                                                <i class="bi bi-check2-circle text-success me-2"></i>
+                                                                <span class="text-xs">@item.Title</span>
+                                                            </h6>
+                                                        </div>
+
+                                                        <!-- Card Body -->
+                                                        <div class="card-body py-2 px-3">
+                                                            @if (item.Lines.Any())
+                                                            {
+                                                                <div class="guidance-item-content">
+                                                                    @foreach (var line in item.Lines)
+                                                                    {
+                                                                        @if (string.IsNullOrWhiteSpace(line))
+                                                                        {
+                                                                            <div class="mb-2"></div>
+                                                                        }
+                                                                        else if (line.StartsWith("•") || line.StartsWith("-"))
+                                                                        {
+                                                                            <div class="ps-3 mb-2 text-secondary text-sm">
+                                                                                <i class="bi bi-dot me-2"></i>@line.TrimStart(new[] { '•', '-', ' ' })
+                                                                            </div>
+                                                                        }
+                                                                        else if (line.StartsWith("  "))
+                                                                        {
+                                                                            <div class="ps-4 mb-1 text-muted text-sm" style="font-size: 0.85rem;">
+                                                                                @line
+                                                                            </div>
+                                                                        }
+                                                                        else if (line.StartsWith("💡") || line.StartsWith("✓"))
+                                                                        {
+                                                                            <div class="fw-semibold mb-2 mt-2 text-secondary text-sm">
+                                                                                @line
+                                                                            </div>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="mb-1 text-secondary text-sm">
+                                                                                @line
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <!-- Fallback to original format if parsing fails -->
+                                        <div class="guidance-content text-secondary text-sm">
+                                            @foreach (var line in alert.DetailedGuidance)
+                                            {
+                                                @if (string.IsNullOrWhiteSpace(line))
+                                                {
+                                                    <div class="mb-2"></div>
+                                                }
+                                                else if (line.StartsWith("STEP") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.") || line.StartsWith("4."))
+                                                {
+                                                    <div class="fw-bold text-dark mt-3 mb-2" style="font-size: 0.85rem;">
+                                                        @line
+                                                    </div>
+                                                }
+                                                else if (line.StartsWith("•") || line.StartsWith("-"))
+                                                {
+                                                    <div class="ps-3 mb-1">
+                                                        @line
+                                                    </div>
+                                                }
+                                                else if (line.StartsWith("  "))
+                                                {
+                                                    <div class="ps-3 mb-1 text-muted" style="font-size: 0.85rem;">
+                                                        @line
+                                                    </div>
+                                                }
+                                                else if (line.StartsWith("💡") || line.StartsWith("✓"))
+                                                {
+                                                    <div class="fw-semibold mb-1 mt-2">
+                                                        @line
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="mb-1">
+                                                        @line
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Footer with Metric Details and Dismiss Button -->
+                            <div class="bg-white p-4 border-top d-flex justify-content-between align-items-center gap-3 flex-wrap mt-2">
+                                <div>
+                                    @if (!string.IsNullOrEmpty(alert.MetricLabel))
+                                    {
+                                        <small class="text-muted d-block">Metric</small>
+                                        <strong class="text-dark">@alert.MetricLabel</strong>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted d-block">Generated</small>
+                                        <small class="text-secondary font-monospace">
+                                            @alert.GeneratedAt.ToString("yyyy-MM-dd HH:mm")
+                                        </small>
+                                    }
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Current Value</small>
+                                    <strong class="text-dark font-monospace" style="font-size: 1.2rem;">
+                                        @FormatMetricValue(alert)
+                                    </strong>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Generated</small>
+                                    <small class="text-secondary font-monospace">
+                                        @alert.GeneratedAt.ToString("yyyy-MM-dd HH:mm")
+                                    </small>
+                                </div>
+                                @if (alert.IsDismissible)
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            @onclick="@((e) => DismissAlert(alert.AlertId, index))"
+                                            title="Dismiss this alert">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Dismiss
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Alert Summary Footer -->
+        @* <div class="mt-4 p-3 rounded-2 bg-light-subtle border-start border-4" style="border-color: #3b82f6;">
+            <div class="row g-3 text-center">
+                <div class="col-md-4">
+                    <div>
+                        <span class="badge bg-danger" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                            @Alerts.Count(a => a.Severity == AlertSeverityLevel.Critical)
+                        </span>
+                        <small class="d-block text-secondary mt-1">Critical Issues</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div>
+                        <span class="badge bg-warning" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                            @Alerts.Count(a => a.Severity == AlertSeverityLevel.Warning)
+                        </span>
+                        <small class="d-block text-secondary mt-1">Warnings</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div>
+                        <span class="badge bg-success" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                            @Alerts.Count(a => a.Severity == AlertSeverityLevel.Healthy)
+                        </span>
+                        <small class="d-block text-secondary mt-1">Healthy</small>
+                    </div>
+                </div>
+            </div>
+        </div> *@
+
+        <!-- Dismissed Alerts Info (if any) -->
+        @if (DismissedAlertIds.Any())
+        {
+            <div class="mt-3 p-3 rounded-2 bg-light border-start border-4" style="border-color: #6b7280;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="bi bi-info-circle me-2 text-muted"></i>
+                        <small class="text-muted">
+                            @DismissedAlertIds.Count dismissed alert@(DismissedAlertIds.Count > 1 ? "s" : "")
+                        </small>
+                    </div>
+                    <button type="button"
+                            class="btn btn-sm btn-link text-muted"
+                            @onclick="ResetAllAlerts"
+                            title="Show all alerts again">
+                        Show All
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@* <style>
+    .business-health-alerts-container {
+        font-size: 0.95rem;
+    }
+
+    /* Alert Header Wrapper */
+    .alert-header-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+        .alert-header-wrapper:hover {
+            filter: brightness(1.1);
+        }
+
+    /* Expand/Collapse Button - MORE PROMINENT */
+    .accordion-button-custom {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 0.5rem;
+        margin-right: 1.5rem;
+    }
+
+        .accordion-button-custom:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        .accordion-button-custom:not(.collapsed) {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .accordion-button-custom i {
+            transition: transform 0.3s ease;
+            display: block;
+        }
+
+        .accordion-button-custom:not(.collapsed) i {
+            transform: rotate(180deg);
+        }
+
+    /* Alert Content Wrapper */
+    .alert-content-wrapper {
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .alert-content-wrapper:hover {
+            opacity: 0.95;
+        }
+
+    /* Accordion Item */
+    .business-health-accordion .accordion-item {
+        border: none !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .business-health-accordion .accordion-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+        }
+
+    .accordion-body {
+        padding: 0;
+    }
+
+    /* Dismiss Button Styling */
+    .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        transition: opacity 0.2s ease;
+    }
+
+        .btn-close-white:hover {
+            opacity: 1 !important;
+        }
+
+    .bg-light-subtle {
+        background-color: #f8fafc !important;
+    }
+
+    .guidance-content {
+        line-height: 1.8;
+        font-size: 0.9rem;
+    }
+
+        .guidance-content div {
+            word-break: break-word;
+        }
+
+    .text-white-50 {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .text-xxs {
+        font-size: 0.65rem;
+    }
+
+    .text-sm {
+        font-size: 0.875rem;
+    }
+
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+    }
+
+    .rounded-3 {
+        border-radius: 0.75rem;
+    }
+
+    /* Alert Item Animations */
+    .alert-item {
+        animation: slideIn 0.3s ease-out;
+    }
+
+        .alert-item.dismissing {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .accordion-button-custom {
+            width: 2rem;
+            height: 2rem;
+            margin-right: 1rem;
+            margin-left: 0.25rem;
+        }
+
+            .accordion-button-custom i {
+                font-size: 1rem;
+            }
+
+        .alert-header-wrapper {
+            flex-wrap: wrap;
+        }
+    }
+</style> *@

@@ -70,8 +70,4 @@
     <ProjectReference Include="..\ViabilityIQ.Shared\ViabilityIQ.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Logs\" />
-  </ItemGroup>
-
 </Project>

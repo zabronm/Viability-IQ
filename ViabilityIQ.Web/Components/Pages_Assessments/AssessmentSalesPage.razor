@@ -2,16 +2,22 @@
 @layout MainLayout_Assessment
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 @using ViabilityIQ.Shared.UtilityServices
 
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Sales" PageTitle="Sales & Forecasts" CurrentPage="PageType.Sales" />
 
-
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
-        <div class="col-12 py-2">
+        <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
+        <div class="col-12 mt-0 pt-0">
+            @* <BusinessHealthAlertsComponent AssessmentId="@AssessmentId" MaxAlerts="3" /> *@
+            <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
+        </div>
+
+        <div class="col-12 py-1 mt-1">
             <div class="px-0 mb-3">
                 <div class="row g-2 align-items-center">
                     <div class="col-md-4">
@@ -66,14 +72,15 @@
                                     <!-- Applied hover effect class -->
                                     <td class="ps-2 text-black">
                                         <span title="@item.Description"
-                                              style="font-size:0.80rem !important;">                                           
-                                            @DisplayUtility.TruncateValue(item.Description,20)</span>
+                                              style="font-size:0.80rem !important;">
+                                            @DisplayUtility.TruncateValue(item.Description, 20)
+                                        </span>
                                         @if (item.IncludesVat)
                                         {
                                             <span class="badge bg-light text-secondary fw-light text-xs border ms-1" style="font-size: 0.60rem;">VAT</span>
                                         }
                                     </td>
-                                    <td class="px-2"><span class="badge bg-soft-blue text-navy-brand text-xs">@item.TypeName.ToString()</span></td>
+                                    <td class="px-2"><span class="badge bg-soft-blue text-navy-brand-plain text-xss">@item.TypeName.ToString()</span></td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         <td class="text-end font-monospace text-secondary">@item.MonthlyValues[i].ToString("N0")</td>
@@ -102,6 +109,75 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CASHFLOW SUMMARIES AND DETAIL & PROJECTIONS-->
+    <div class="row bg-white g-3 mt-1 mb-4 py-2 px-2" style="border-radius: 6px; border-color: #ffffff;">
+        <div class="fs-4">Cashflow Projections</div>
+        <div class="my-2">
+            <CashflowKPICardsComponent AssessmentId="@AssessmentId" />
+        </div>
+        <div class="accordion" id="accordionPanelsStayOpenExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button py-2 btn-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                        <i class="bi bi-cash-stack me-2 text-white"></i> Cashflow Summary
+                    </button>
+                </h2>
+                
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                        <div class="row w-100 g-4 mx-0 font-def">
+                            <!-- Card 1: Cashflow Summary -->
+                            <div class="col-md-5 px-2">
+                                <div class="auth-card h-100 py-3 px-3" style="max-width: 100%;">                                   
+                                    <div class="card-body p-0">
+                                        <CashflowSummaryDashboardComponent AssessmentId="@AssessmentId" />                                       
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Business Health Indicators -->
+                            <div class="col-md-7 px-2">
+                                <div class="auth-card h-100 py-3 px-3" style="max-width: 100%;">                                    
+                                    <div class="card-body p-0">
+                                        <FinancialViabilityKPIComponent AssessmentId="@AssessmentId" />                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="accordion-item mt-1">
+                <h2 class="accordion-header" >
+                    <button class="accordion-button collapsed btn-primary text-white py-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                        <i class="bi bi-cash-stack me-2 text-white"></i> Cashflow Details
+                    </button>
+                </h2>
+                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <DetailedCashflowStatementComponent AssessmentId="@AssessmentId" />         @* This is the cashflow details component *@
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item mt-1">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed btn-primary py-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                        <i class="bi bi-cash-stack me-2 text-navy"></i> Other Cashflow Analytics
+                    </button>
+                </h2>
+                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+
+                        Put charts and other analytics here
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>

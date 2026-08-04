@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Serilog.Core;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Application.Projections;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Shared.UtilityServices; // Added for Mapper
@@ -16,6 +18,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         [Inject] private ISessionService sessionService { get; set; } = default!;
         [Inject] private ZabOffCanvasService? zabCanvasService { get; set; }
         [Inject] private IGenericDataRepository<AssessmentSales> DataRepository { get; set; } = default!;
+        [Inject] private ILogger<IncomeSalesFormComponent> Logger { get; set; } = default!;     //This is the logging service for errors and warnings
+        [Inject] private IProjectionStateManager projectionStateManager { get; set; } = default!;
 
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public UnifiedIncomeViewModel? IncomeContext { get; set; }
@@ -49,13 +53,15 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     IncludeVAT = IncomeContext.IncludesVat ? 1 : 0
                 };
                 MonthlyValues = (decimal[])IncomeContext.MonthlyValues.Clone();
+                Logger.LogDebug($"Income context loaded for sales ID {FormModel.AssessmentSalesId}");
             }
             else
             {
                 FormModel = new()
                 {
                     AssessmentId = AssessmentId
-                };               
+                };
+                Logger.LogDebug("New sales form initialized for assessment {AssessmentId}", AssessmentId);
             }
         }
 
@@ -84,6 +90,24 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 bool isExecutionSuccess = await DataRepository.SaveAsync(FormModel);
                 if (isExecutionSuccess)
                 {
+                    //// ✅ INVALIDATE CASHFLOW AFTER SUCCESSFUL SAVE
+                    try
+                    {
+                        Logger.LogInformation($"Invalidating cashflow for assessment {AssessmentId} after sales save/update");
+                        await projectionStateManager.InvalidateDataAsync
+                            (
+                                dataType: "Sales", 
+                                entityId: FormModel.AssessmentSalesId, 
+                                assessmentId: AssessmentId
+                            );
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, $"Error invalidating cashflow for assessment {AssessmentId} after sales save/update");
+                        // Don't fail the save if cashflow invalidation fails
+                    }
+
+                    
                     executionFeedbackPackage = new()
                     {
                         Success = isExecutionSuccess,
@@ -100,6 +124,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
             catch (Exception ex)           
             {
+                Logger.LogError(ex, $"Error saving sales data for assessment {AssessmentId}");
                 await zabCanvasService!.PublishResultAsync(new SaveResult
                 {
                     Success = false,

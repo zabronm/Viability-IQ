@@ -5,24 +5,37 @@
 @using ViabilityIQ.Shared.UtilityServices
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
-@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="Loans" PageTitle="Loan Repayments" CurrentPage="PageType.Loans" />
 
-    <div class="row bg-white g-2 mt-1 p-1 content-rounded-frame">
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
+
+        <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
+        <div class="col-12">
+            <BusinessHealthAlertsComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
+        </div>
+
+        <!-- Legacy Alert Banner -->
         @if (blAlert == true)
         {
-            <div class="my-0">
+            <div class="col-12">
                 <ViqAlertComponent Severity="AlertSeverity"
                                    Heading="@AlertHeading"
                                    Message="@AlertMessage"
                                    AllowDismiss="true" />
             </div>
         }
-        <div class="col-12">
 
-            <!-- Top Action Row: Add Button, Loan Type Filter (DDlookup), and Search Box -->
+        <!-- ✅ CASHFLOW KPI DASHBOARD (SECOND) -->
+        <div class="col-12">
+            <CashflowKPICardsComponent AssessmentId="@AssessmentId" />
+        </div>
+
+        <!-- Top Action Row: Add Button, Loan Type Filter, and Search Box -->
+        <div class="col-12">
             <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                 <div>
                     <button type="button" class="btn btn-primary text-xs shadow-sm px-3" @onclick="() => OpenLoanFormAsync(0)">
@@ -31,15 +44,13 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <!-- 2) LoanType filter using DDlookup component positioned before search box -->
+                    <!-- Loan Type Filter -->
                     <div style="width: 220px;">
-                        <div style="width:220px;">
-                            <DDLookupComponent SourceKey="DDLookupEnums.AssessmentLoans"
-                                               FilterValue="@currentAssessmentId"
-                                               Value="SelectedLoanTypeId ?? 0L"
-                                               ValueChanged="@(val => SelectedLoanTypeId = val)"
-                                               Placeholder="Filter by loan" />
-                        </div>
+                        <DDLookupComponent SourceKey="DDLookupEnums.AssessmentLoans"
+                                           FilterValue="@AssessmentId"
+                                           Value="SelectedLoanTypeId ?? 0L"
+                                           ValueChanged="@(val => SelectedLoanTypeId = val)"
+                                           Placeholder="Filter by loan" />
                     </div>
 
                     <!-- Search Input Box -->
@@ -51,7 +62,10 @@
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Loan Repayments Table -->
+        <div class="col-12">
             <div class="table-responsive shadow-sm border border-secondary-subtle rounded mb-2">
                 <table class="table table-sm vertical-align-middle align-middle mb-0 matrix-grid-table">
                     <thead>
@@ -100,7 +114,6 @@
                                             <div class="d-flex align-items-center justify-content-end gap-1">
                                                 <span>@loan.MonthlyData[i].Expected.ToString("N0").Replace(",", " ")</span>
 
-                                                <!-- 3) First Repayment Month badge preserved -->
                                                 @if (loan.StartMonth == monthIdx)
                                                 {
                                                     <span class="badge bg-success text-white border border-white rounded-pill px-1 d-inline-flex align-items-center " title="First Repayment Month">
@@ -200,11 +213,9 @@
         </div>
     </div>
 </div>
-<ZabConfirmDialogComponent @ref="ConfirmDeleteDialog" />
 
+<ZabConfirmDialogComponent @ref="ConfirmDeleteDialog" />
 
 <footer class="py-2 bg-light mt-3">
     <BFooter />
 </footer>
-
-

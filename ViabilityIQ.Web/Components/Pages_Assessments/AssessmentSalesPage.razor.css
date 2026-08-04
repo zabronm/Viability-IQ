@@ -125,6 +125,11 @@
     color: #1a365d !important;
 }
 
+text-navy-brand-plain {
+    font-weight: normal;
+}
+
+
 /* Cashflow Specific Table Styling */
 .summary-cashflow-table th {
     background-color: #f1f5f9 !important;
@@ -195,7 +200,7 @@
     background-color: rgba(54, 139, 193, 0.12) !important;
     color: #1a365d !important;
     border: 1px solid rgba(54, 139, 193, 0.2);
-    font-weight: 600;
+    font-weight: normal;
     padding: 3px 6px;
     border-radius: 4px;
 }

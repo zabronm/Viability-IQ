@@ -1,0 +1,194 @@
+﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.UtilityServices
+
+<div class="financial-viability-kpi mb-4 font-def">
+    <div class="auth-card my-2 py-2" style="max-width: 100%;">
+        <!-- Card Header -->
+        <div class="auth-header mb-4" style="text-align: left; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="auth-brand fs-6 mb-1">
+                        <i class="bi bi-shield-check me-2" style="color: #7c3aed;"></i><span class="brand-main">Financial Viability Metrics</span>
+                    </div>
+                </div>
+                @if (IsLoading)
+                {
+                    <div class="spinner-border spinner-border-sm text-purple" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body p-0">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-purple" role="status" style="color: #7c3aed;"></div>
+                    <p class="text-secondary mt-3">Calculating financial viability metrics...</p>
+                </div>
+            }
+            else if (ViabilityData == null)
+            {
+                <div class="alert alert-warning m-3 mb-0" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>No Data Available</strong> - Enter financial data to calculate viability metrics.
+                </div>
+            }
+            else
+            {
+                <div class="viability-content p-2" style="background-color: #ffffff !important;">
+                    <!-- Vertical List Table Format -->
+                    <div class="table-responsive" style="background-color: #ffffff !important;">
+                        <table class="table table-borderless align-middle mb-0 viability-summary-table">
+                            <tbody>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Break-Even Sales <small class="text-muted">(Monthly: @((ViabilityData.BreakEvenSales / 12).ToString("N0")))</small>
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-danger">
+                                        @ViabilityData.BreakEvenSales.ToString("N0")
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Margin of Safety
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold" style="color: @GetMargOfSafetyColor(ViabilityData.MarginOfSafety);">
+                                        @ViabilityData.MarginOfSafety.ToString("F1")% <small class="fw-normal">(@GetMarginOfSafetyStatus(ViabilityData.MarginOfSafety))</small>
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        NPV (10% Discount)
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold " style="color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.NPV)">
+                                        @ViabilityData.NPV.ToString("N0") 
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Sensitivity Range <small class="text-muted">(&plusmn;@ViabilityData.SensitivityRange.ToString("F1")% Sales Variance)</small>
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-info">
+                                        @ViabilityData.SensitivityRange.ToString("F1")%
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Worst Case Profit <small class="text-muted">(-@ViabilityData.SensitivityRange.ToString("F1")% Scenario)</small>
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold" style="color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.WorstCaseProfit)">
+                                        @ViabilityData.WorstCaseProfit.ToString("N0")
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Current Ratio
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold" style="color: @GetCurrentRatioColor(ViabilityData.CurrentRatio);">
+                                        @ViabilityData.CurrentRatio.ToString("F2") <small class="fw-normal">(@GetCurrentRatioStatus(ViabilityData.CurrentRatio))</small>
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Interest Cover
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold" style="color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.InterestCover)">
+                                        @ViabilityData.InterestCover.ToString("F2")x <small class="fw-normal">(@(ViabilityData.InterestCover >= 2 ? "Adequate" : "Low"))</small>
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">
+                                        Viability Score
+                                    </td>
+                                    <td class="text-end pe-2 font-monospace fw-bold" style="color: @GetViabilityScoreColor(ViabilityData.ViabilityScore);">
+                                        @ViabilityData.ViabilityScore.ToString("F1")/100 <small class="fw-normal">(@GetViabilityScoreRating(ViabilityData.ViabilityScore))</small>
+                                    </td>
+                                </tr>
+
+                                <!-- This will be in the extended component of ratios -->
+                                @* <tr class="data-row">
+                                    <td class="ps-2 text-secondary">Fixed Costs (Annual)</td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-navy">@ViabilityData.FixedCosts.ToString("N0")</td>
+                                </tr>
+                                <tr class="data-row bg-light">
+                                    <td class="ps-2 text-secondary">Contribution Margin Ratio</td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-navy">
+                                        @ViabilityData.ContributionMarginRatio.ToString("F2")%
+                                        <span class="badge ms-2 text-white" style="background-color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.ContributionMarginRatio,30)">
+                                            @(ViabilityData.ContributionMarginRatio >= 30 ? "Good" : "Fair")
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">Payback Period</td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-navy">
+                                        @ViabilityData.PaybackPeriod.ToString("F1") Months
+                                        <span class="badge ms-2 text-white" style="background-color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.PaybackPeriod,12)">
+                                            @(ViabilityData.PaybackPeriod <= 12 ? "Acceptable" : "Extended")
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="data-row bg-light">
+                                    <td class="ps-2 text-secondary">Operating Leverage</td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-navy">
+                                        @ViabilityData.OperatingLeverage.ToString("F2")x
+                                        <span class="badge ms-2" style="background-color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.OperatingLeverage,15m)">
+                                            @(ViabilityData.OperatingLeverage >= 1.5m ? "High Leverage" : "Moderate Leverage")
+                                        </span>
+                                    </td>
+                                </tr>
+                                *@
+
+                                <tr class="data-row">
+                                    <td class="ps-2 text-secondary">Debt Service Coverage</td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-navy">
+                                        @ViabilityData.DebtServiceCoverage.ToString("F2")x
+                                        <span class="badge ms-2 text-white" style="background-color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.DebtServiceCoverage,  1.5m)">
+                                            @(ViabilityData.DebtServiceCoverage >= 1.5m ? "Strong" : "Weak")
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr class="data-row bg-light">
+                                    <td class="ps-2 text-secondary">Profit Volatility (Std Dev)</td>
+                                    <td class="text-end pe-2 font-monospace fw-bold text-navy">
+                                        @ViabilityData.ProfitVolatility.ToString("F1")%
+                                        <span class="badge ms-2" style="background-color: @DisplayUtility.GetDisplayColorByValue(ViabilityData.ProfitVolatility,15)">
+                                            @(ViabilityData.ProfitVolatility <= 15 ? "Stable" : "Variable")
+                                        </span>
+                                    </td>
+                                </tr> 
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Overall Assessment Box Footer -->
+                   @*  <div class="p-4 mt-3 rounded-3" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-left: 4px solid @GetViabilityScoreColor(ViabilityData.ViabilityScore);">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-exclamation-circle me-2 fs-6" style="color: @GetViabilityScoreColor(ViabilityData.ViabilityScore);"></i>
+                                    <h6 class="fw-bold mb-0" style="color: @GetViabilityScoreColor(ViabilityData.ViabilityScore);">
+                                        Overall Assessment: @GetViabilityScoreRating(ViabilityData.ViabilityScore)
+                                    </h6>
+                                </div>
+                                <p class="text-secondary mb-0 small" style="line-height: 1.5;">
+                                    @GetViabilityAssessment(ViabilityData)
+                                </p>
+                            </div>
+                            <div class="text-center">
+                                <div class="score-circle-sm" style="border-color: @GetViabilityScoreColor(ViabilityData.ViabilityScore); color: @GetViabilityScoreColor(ViabilityData.ViabilityScore);">
+                                    @ViabilityData.ViabilityScore.ToString("F0")
+                                </div>
+                                <small class="text-muted d-block mt-1">Score / 100</small>
+                            </div>
+                        </div>
+                    </div> *@
+                </div>
+            }
+        </div>
+    </div>
+</div>

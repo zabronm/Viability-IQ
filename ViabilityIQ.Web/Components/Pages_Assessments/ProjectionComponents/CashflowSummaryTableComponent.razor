@@ -1,0 +1,355 @@
+﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+
+<div class="cashflow-summary-container mb-4">
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <!-- Card Header -->
+        <div class="card-header bg-gradient-navy text-white py-3 px-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calculator-lg me-2"></i>12-Month Financial Summary
+                    </h5>
+                    <small class="text-light">Net Profit Before Tax Calculation</small>
+                </div>
+                @if (IsLoading)
+                {
+                    <div class="spinner-border spinner-border-sm text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body p-0">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3">Calculating financial summary...</p>
+                </div>
+            }
+            else if (Summary == null)
+            {
+                <div class="alert alert-warning m-3 mb-0" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>No Data Available</strong> - Enter sales, expenses, stock, and loan data to generate summary.
+                </div>
+            }
+            else
+            {
+                <!-- Summary Table -->
+                <div class="table-responsive">
+                    <table class="table table-borderless mb-0 cashflow-summary-table">
+                        <tbody>
+                            <!-- REVENUE SECTION -->
+                            <tr class="section-header bg-light-blue">
+                                <td class="fw-bold text-uppercase text-xxs ps-4 py-3" style="color: #0f172a; letter-spacing: 1px;">
+                                    <i class="bi bi-arrow-down-circle me-2 text-success"></i>REVENUE
+                                </td>
+                                <td class="text-end pe-4 py-3"></td>
+                            </tr>
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">Total Annual Sales Revenue</td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold text-navy">
+                                    @Summary.TotalAnnualIncome.ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- DIRECT COSTS SECTION -->
+                            <tr class="section-header bg-light-orange">
+                                <td class="fw-bold text-uppercase text-xxs ps-4 py-3" style="color: #7c2d12; letter-spacing: 1px;">
+                                    <i class="bi bi-dash-circle me-2 text-danger"></i>DIRECT COSTS
+                                </td>
+                                <td class="text-end pe-4 py-3"></td>
+                            </tr>
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">Total Annual Expenses</td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold text-danger">
+                                    (@Summary.TotalAnnualExpense.ToString("N0"))
+                                </td>
+                            </tr>
+
+                            <!-- GROSS PROFIT SECTION -->
+                            <tr class="section-divider" style="background-color: #f3f4f6; border-top: 2px solid #d1d5db; border-bottom: 2px solid #d1d5db;">
+                                <td class="ps-4 py-3 fw-bold" style="color: #1e293b;">Gross Profit / (Loss)</td>
+                                <td class="text-end pe-4 py-3 fw-bold font-monospace"
+                                    style="color: @(Summary.TotalAnnualNetCashflow >= 0 ? "#16a34a" : "#dc2626"); font-size: 1.1rem;">
+                                    @Summary.TotalAnnualNetCashflow.ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- PROFITABILITY METRICS SECTION -->
+                            <tr class="section-header bg-light-purple">
+                                <td class="fw-bold text-uppercase text-xxs ps-4 py-3" style="color: #581c87; letter-spacing: 1px;">
+                                    <i class="bi bi-graph-up me-2 text-primary"></i>PROFITABILITY METRICS
+                                </td>
+                                <td class="text-end pe-4 py-3"></td>
+                            </tr>
+
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">
+                                    Operating Margin Ratio
+                                    <i class="bi bi-info-circle text-muted ms-1" title="(Net Profit / Revenue) × 100"></i>
+                                </td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold"
+                                    style="color: @GetMarginColor(Summary.OperatingMarginRatio);">
+                                    @Summary.OperatingMarginRatio.ToString("F2")%
+                                </td>
+                            </tr>
+
+                            <tr class="data-row bg-light">
+                                <td class="ps-4 py-2 text-secondary">
+                                    Expense Ratio
+                                    <i class="bi bi-info-circle text-muted ms-1" title="(Total Expenses / Revenue) × 100"></i>
+                                </td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold"
+                                    style="color: @GetExpenseRatioColor(Summary.ExpenseRatio);">
+                                    @Summary.ExpenseRatio.ToString("F2")%
+                                </td>
+                            </tr>
+
+                            <!-- CASHFLOW HEALTH SECTION -->
+                            <tr class="section-header bg-light-cyan">
+                                <td class="fw-bold text-uppercase text-xxs ps-4 py-3" style="color: #0c4a6e; letter-spacing: 1px;">
+                                    <i class="bi bi-cash-coin me-2 text-info"></i>CASHFLOW HEALTH
+                                </td>
+                                <td class="text-end pe-4 py-3"></td>
+                            </tr>
+
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">Minimum Cash Balance</td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold"
+                                    style="color: @(Summary.MinimumCashBalance < 0 ? "#dc2626" : "#0284c7");">
+                                    @Summary.MinimumCashBalance.ToString("N0")
+                                </td>
+                            </tr>
+
+                            <tr class="data-row bg-light">
+                                <td class="ps-4 py-2 text-secondary">Maximum Cash Balance</td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold text-success">
+                                    @Summary.MaximumCashBalance.ToString("N0")
+                                </td>
+                            </tr>
+
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">Average Monthly Net Cashflow</td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold"
+                                    style="color: @(Summary.AverageMonthlyNetCashflow >= 0 ? "#16a34a" : "#dc2626");">
+                                    @Summary.AverageMonthlyNetCashflow.ToString("N0")
+                                </td>
+                            </tr>
+
+                            <!-- SUSTAINABILITY INDICATORS SECTION -->
+                            <tr class="section-header bg-light-red">
+                                <td class="fw-bold text-uppercase text-xxs ps-4 py-3" style="color: #7c2d12; letter-spacing: 1px;">
+                                    <i class="bi bi-heart-pulse me-2 text-danger"></i>SUSTAINABILITY INDICATORS
+                                </td>
+                                <td class="text-end pe-4 py-3"></td>
+                            </tr>
+
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">Months with Negative Cashflow</td>
+                                <td class="text-end pe-4 py-2">
+                                    <span class="badge" style="background-color: @GetNegativeMonthsColor(Summary.MonthsWithNegativeCashflow);">
+                                        @Summary.MonthsWithNegativeCashflow / 12
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="data-row bg-light">
+                                <td class="ps-4 py-2 text-secondary">Critical Months (Balance &lt; 0)</td>
+                                <td class="text-end pe-4 py-2">
+                                    <span class="badge" style="background-color: @GetCriticalMonthsColor(Summary.CriticalMonthsCount);">
+                                        @Summary.CriticalMonthsCount / 12
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">Cashflow Runway (Months)</td>
+                                <td class="text-end pe-4 py-2 font-monospace fw-bold text-primary">
+                                    @Summary.CashflowRunway.ToString("F1")
+                                </td>
+                            </tr>
+
+                            <!-- BUSINESS VIABILITY SECTION -->
+                            <tr class="section-header bg-light-green">
+                                <td class="fw-bold text-uppercase text-xxs ps-4 py-3" style="color: #15803d; letter-spacing: 1px;">
+                                    <i class="bi bi-check-circle me-2 text-success"></i>BUSINESS VIABILITY
+                                </td>
+                                <td class="text-end pe-4 py-3"></td>
+                            </tr>
+
+                            <tr class="data-row">
+                                <td class="ps-4 py-2 text-secondary">
+                                    Is Sustainable?
+                                    <i class="bi bi-info-circle text-muted ms-1" title="Based on multiple financial indicators"></i>
+                                </td>
+                                <td class="text-end pe-4 py-2">
+                                    @if (Summary.IsSustainable)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Yes - Sustainable
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-exclamation-circle me-1"></i>No - Not Sustainable
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+
+                            <tr class="data-row bg-light">
+                                <td class="ps-4 py-2 text-secondary">Health Status</td>
+                                <td class="text-end pe-4 py-2">
+                                    <span class="badge" style="background-color: @GetHealthStatusColor(Summary.HealthStatus);">
+                                        @GetHealthStatusText(Summary.HealthStatus)
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Footer -->
+                <div class="bg-light-subtle p-4 border-top">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <small class="text-muted d-block mb-2">Annual Net Profit</small>
+                                <h5 class="mb-0 font-monospace" style="color: @(Summary.TotalAnnualNetCashflow >= 0 ? "#16a34a" : "#dc2626");">
+                                    @Summary.TotalAnnualNetCashflow.ToString("N0")
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <small class="text-muted d-block mb-2">Profit Margin</small>
+                                <h5 class="mb-0 font-monospace" style="color: @GetMarginColor(Summary.OperatingMarginRatio);">
+                                    @Summary.OperatingMarginRatio.ToString("F2")%
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <small class="text-muted d-block mb-2">Sustainability</small>
+                                <h5 class="mb-0">
+                                    @if (Summary.IsSustainable)
+                                    {
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <span class="text-success">Viable</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-exclamation-circle text-danger"></i>
+                                        <span class="text-danger">At Risk</span>
+                                    }
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .cashflow-summary-container {
+        font-size: 0.95rem;
+    }
+
+    .cashflow-summary-table {
+        font-size: 0.9rem;
+    }
+
+    .section-header {
+        background-color: #f3f4f6 !important;
+        font-weight: 600;
+        border-top: 1px solid #e5e7eb;
+    }
+
+        .section-header:first-child {
+            border-top: none;
+        }
+
+    .data-row {
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s ease;
+    }
+
+        .data-row:hover {
+            background-color: rgba(59, 130, 246, 0.03) !important;
+        }
+
+    .section-divider {
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+
+    .bg-light-blue {
+        background-color: #eff6ff !important;
+    }
+
+    .bg-light-orange {
+        background-color: #fef3c7 !important;
+    }
+
+    .bg-light-purple {
+        background-color: #f3e8ff !important;
+    }
+
+    .bg-light-cyan {
+        background-color: #cffafe !important;
+    }
+
+    .bg-light-red {
+        background-color: #fee2e2 !important;
+    }
+
+    .bg-light-green {
+        background-color: #f0fdf4 !important;
+    }
+
+    .bg-light-subtle {
+        background-color: #fafafa !important;
+    }
+
+    .bg-gradient-navy {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .text-navy {
+        color: #0f172a;
+    }
+
+    .text-xxs {
+        font-size: 0.65rem;
+    }
+
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.5px;
+    }
+
+    /* Badge styling */
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+
+    /* Info icons */
+    .bi-info-circle {
+        font-size: 0.75rem;
+        opacity: 0.6;
+        cursor: help;
+    }
+</style>

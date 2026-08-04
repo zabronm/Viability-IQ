@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,19 +15,28 @@ using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
-    public partial class AssessmentLoanRepaymentsPage
+    public partial class AssessmentLoanRepaymentsPage : ComponentBase, IAsyncDisposable
     {
+        #region Injected Services
         [Inject] ToastService _Toast { get; set; } = default!;
         [Inject] ZabOffCanvasService zabCanvasService { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] MasterDataService? ViqCrudService { get; set; }
+        [Inject] IProjectionStateManager? projectionStateManager { get; set; }
+        [Inject] ILogger<AssessmentLoanRepaymentsPage>? Logger { get; set; }
+        #endregion
 
-        private long currentAssessmentId { get; set; }
+        #region Parameters
+        [Parameter] public long AssessmentId { get; set; }
+
+        #endregion
+
+        #region Private Fields
+
         private bool blAlert { get; set; } = false;
         private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
         private string AlertHeading { get; set; } = "Loan Notice:";
         private string AlertMessage { get; set; } = "Welcome to the loans module. Please note that calculations are done based on selected loan calculation method";
-
 
         private ZabConfirmDialogComponent? ConfirmDeleteDialog { get; set; } = default!;
         private string StatusMessage { get; set; } = "";
@@ -40,25 +49,57 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private List<LoanRepaymentRowViewModel> LoanProfilesDataset { get; set; } = new();
         private List<AssessmentLoanRepaymentDto> LoanTypeLookupList { get; set; } = new();
 
+        #endregion
+
+        #region Lifecycle Methods
+
         protected override async Task OnInitializedAsync()
         {
-            currentAssessmentId = currentAssessmentId == 0L ? currentAssessmentId : sessionService!.AssessmentId!.Value; 
-            await LoadLookupDataAsync();
-            await LoadLoanRepaymentsDataAsync();
+            try
+            {
+                AssessmentId = sessionService?.AssessmentId ?? 0;
+
+                Logger?.LogInformation(
+                    "AssessmentLoanRepaymentsPage initialized for assessment {AssessmentId}",
+                    AssessmentId);
+
+                await LoadLookupDataAsync();
+                await LoadLoanRepaymentsDataAsync();
+
+                // Subscribe to projection changes
+                if (projectionStateManager != null)
+                {
+                    projectionStateManager.ProjectionChanged += OnProjectionChanged;
+
+                    Logger?.LogDebug("AssessmentLoanRepaymentsPage subscribed to ProjectionChanged events");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Error initializing AssessmentLoanRepaymentsPage");
+                _Toast?.ShowError(ex.Message, sessionService?.AppTitle);
+            }
         }
+
+        #endregion
+
+        #region Private Methods
 
         private async Task LoadLookupDataAsync()
         {
             try
             {
-                // Load lookup data for the Loan Type filter dropdown component
+                Logger?.LogDebug("Loading loan type lookup data");
+
                 var list = await ViqCrudService!.GetListAsync<AssessmentLoanRepaymentDto>("vw_loantypes_lookup", new { }, "Name");
                 LoanTypeLookupList = list?.ToList() ?? new();
-
                 blAlert = true;
+
+                Logger?.LogDebug("Loaded {LoanCount} loan types", LoanTypeLookupList.Count);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger?.LogError(ex, "Error loading loan type lookup data");
                 LoanTypeLookupList = new();
             }
         }
@@ -70,7 +111,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 IsLoading = true;
                 StateHasChanged();
 
-                // 1) Read rows from the view mapped to AssessmentLoanRepaymentDto
+                Logger?.LogDebug("Loading loan repayments for assessment {AssessmentId}", AssessmentId);
+
                 var rawData = await ViqCrudService!.GetListAsync<AssessmentLoanRepaymentDto>(
                     "vw_assessment_loan_repayment_list",
                     new { AssessmentId = sessionService?.AssessmentId ?? 0, Active = true },
@@ -79,7 +121,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
                 if (rawData != null && rawData.Any())
                 {
-                    // Group rows by individual Loan (AssessmentLoanId)
                     LoanProfilesDataset = rawData
                         .GroupBy(x => x.AssessmentLoanId)
                         .Select(group =>
@@ -105,37 +146,30 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                                 });
                             }
 
-                            // Determine start month dynamically (first month where expected repayment > 0, defaults to 1 if none found)
-                            //int calculatedStartMonth = 1;
-                            //for (int m = 0; m < 12; m++)
-                            //{
-                            //    if (monthlyCells[m].Expected > 0)
-                            //    {
-                            //        calculatedStartMonth = m + 1;
-                            //        break;
-                            //    }
-                            //}
-                            
-
                             return new LoanRepaymentRowViewModel
                             {
                                 LoanId = group.Key,
                                 LoanTypeName = firstRow.LoanTypeName ?? "Unnamed Loan Profile",
                                 BankName = firstRow.BankName ?? "Unknown Institution",
-                                /*StartMonth = calculatedStartMonth*/
-                                 StartMonth = firstRow.StartMonth,       // no longer calculated, but specified by the user, 1 is assumed if null
+                                StartMonth = firstRow.StartMonth,
                                 MonthlyData = monthlyCells
                             };
                         }).ToList();
+
+                    Logger?.LogInformation(
+                        "Loaded {LoanCount} loan profiles for assessment {AssessmentId}",
+                        LoanProfilesDataset.Count, AssessmentId);
                 }
                 else
                 {
                     LoanProfilesDataset = new();
+                    Logger?.LogWarning("No loan profiles found for assessment {AssessmentId}", AssessmentId);
                 }
             }
             catch (Exception ex)
             {
-                _Toast.ShowError("Could not retrieve loan repayment schedules.", sessionService?.AppTitle ?? "Viability.IQ");
+                Logger?.LogError(ex, "Error loading loan repayments for assessment {AssessmentId}", AssessmentId);
+                _Toast?.ShowError("Could not retrieve loan repayment schedules.", sessionService?.AppTitle ?? "Viability.IQ");
                 LoanProfilesDataset = new();
             }
             finally
@@ -144,7 +178,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 StateHasChanged();
             }
         }
-
 
         private decimal GetMonthVal(AssessmentLoanRepaymentDto? row, int monthIndex)
         {
@@ -184,13 +217,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             var query = LoanProfilesDataset.AsEnumerable();
 
-            // Filter by Dropdown LoanType if selected (assuming LoanId maps or matches filter context)
             if (SelectedLoanTypeId.HasValue && SelectedLoanTypeId.Value > 0)
             {
                 query = query.Where(x => x.LoanId == SelectedLoanTypeId.Value);
             }
 
-            // Filter by Search Query string
             if (!string.IsNullOrWhiteSpace(SearchQuery))
             {
                 query = query.Where(x =>
@@ -201,11 +232,25 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             return query;
         }
 
+        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        {
+            if (e.AssessmentId == AssessmentId)
+            {
+                Logger?.LogInformation(
+                    "Projection changed event received for assessment {AssessmentId}, reloading loans",
+                    AssessmentId);
+
+                InvokeAsync(async () => await LoadLoanRepaymentsDataAsync());
+            }
+        }
+
         private async Task OpenLoanFormAsync(long assessmentLoanId)
         {
             try
             {
                 ActivePanelTitle = assessmentLoanId == 0 ? "Add Assessment Loan" : "Edit Assessment Loan";
+
+                Logger?.LogDebug("Opening loan form for AssessmentLoanId {AssessmentLoanId}", assessmentLoanId);
 
                 await zabCanvasService.ShowAsync(
                     new CanvasRequest
@@ -213,14 +258,18 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                         Title = ActivePanelTitle,
                         Width = 360,
                         ComponentType = typeof(AssessmentLoanFormComponent),
-                        Parameters = new { 
+                        Parameters = new
+                        {
                             AssessmentLoanId = assessmentLoanId,
-                            AssessmentId = currentAssessmentId         
+                            AssessmentId = AssessmentId
                         },
                         ResultCallback = HandleNewLoanSaveAsync
                     });
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Error opening loan form");
+            }
         }
 
         private async Task OpenRepaymentsFormAsync(long loanRepaymentId)
@@ -232,21 +281,26 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 var targetLoan = LoanProfilesDataset.FirstOrDefault(x => x.LoanId == loanRepaymentId);
                 string displayLoanName = targetLoan != null ? $"{targetLoan.LoanTypeName} ({targetLoan.BankName})" : "Loan Repayment Schedule";
 
+                Logger?.LogDebug("Opening repayment form for LoanId {LoanId}", loanRepaymentId);
+
                 await zabCanvasService.ShowAsync(
                     new CanvasRequest
                     {
                         Title = ActivePanelTitle,
                         Width = 550,
                         ComponentType = typeof(AssessmentLoanRepaymentFormComponent),
-                        Parameters = new 
-                        { 
+                        Parameters = new
+                        {
                             AssessmentLoanId = loanRepaymentId,
                             parLoanTypeName = displayLoanName,
                         },
                         ResultCallback = HandleLoanRepaymentResultAsync
                     });
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Error opening repayment form");
+            }
         }
 
         private async Task HandleDeleteLoanAndRepaymentsAsync(long loanRepaymentId)
@@ -255,47 +309,60 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             {
                 StatusMessage = "Awaiting user confirmation...";
 
-                bool isConfirmed = await ConfirmDeleteDialog!.ShowAsync( 
+                Logger?.LogDebug("Requesting confirmation to delete loan {LoanId}", loanRepaymentId);
+
+                bool isConfirmed = await ConfirmDeleteDialog!.ShowAsync(
                     title: "Delete Loan Permanently?",
-                    message: "Confirm you want to delete this loan and its schedules?", 
-                    confirmText: "Yes Delete", 
+                    message: "Confirm you want to delete this loan and its schedules?",
+                    confirmText: "Yes Delete",
                     cancelText: " No, Keep it"
                 );
 
                 if (!isConfirmed)
                 {
                     StatusMessage = "Deletion cancelled by user.";
+                    Logger?.LogInformation("Deletion cancelled for loan {LoanId}", loanRepaymentId);
                     return;
                 }
+
+                Logger?.LogInformation("Deleting loan {LoanId} for assessment {AssessmentId}", loanRepaymentId, AssessmentId);
 
                 var str_sql = "UPDATE tblAssessmentLoanRepayment SET [Active]=@parActive WHERE (AssessmentLoanId = @parAssessmentLoanId); " +
                               "UPDATE tblAssessmentLoan SET [Active]=@parActive WHERE (AssessmentLoanId = @parAssessmentLoanId);";
 
-                _= await ViqCrudService!.ExecuteCommandAsync(str_sql, new { parActive = false, parAssessmentLoanId = loanRepaymentId });
+                _ = await ViqCrudService!.ExecuteCommandAsync(str_sql, new { parActive = false, parAssessmentLoanId = loanRepaymentId });
 
-                _ = LoadLoanRepaymentsDataAsync();
+                await LoadLoanRepaymentsDataAsync();
 
-                _Toast.ShowSuccess("Loan/repayments deleted successfully.", sessionService!.AppTitle);
+                // ✅ TRIGGER CASHFLOW RECALCULATION
+                Logger?.LogInformation("Invalidating cashflow after loan deletion for assessment {AssessmentId}", AssessmentId);
+                await projectionStateManager!.InvalidateDataAsync("loans", AssessmentId, AssessmentId);
 
+                _Toast?.ShowSuccess("Loan/repayments deleted successfully.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
-                _Toast.ShowError($"Error deleting loan and repayments: {ex.Message}", sessionService!.AppTitle);
+                Logger?.LogError(ex, "Error deleting loan {LoanId}", loanRepaymentId);
+                _Toast?.ShowError($"Error deleting loan and repayments: {ex.Message}", sessionService!.AppTitle);
             }
         }
-        
-
 
         private async Task HandleNewLoanSaveAsync(SaveResult result)
         {
             if (result.Success)
             {
+                Logger?.LogInformation("Loan saved successfully for assessment {AssessmentId}", AssessmentId);
                 await LoadLoanRepaymentsDataAsync();
-                _Toast.ShowSuccess(result.Message, sessionService!.AppTitle);
+
+                // ✅ TRIGGER CASHFLOW RECALCULATION
+                Logger?.LogInformation("Invalidating cashflow after loan save for assessment {AssessmentId}", AssessmentId);
+                await projectionStateManager!.InvalidateDataAsync("loans", AssessmentId, AssessmentId);
+
+                _Toast?.ShowSuccess(result.Message, sessionService!.AppTitle);
             }
             else if (!result.Success && !result.Cancelled)
             {
-                _Toast.ShowError(result.Message, sessionService!.AppTitle);
+                _Toast?.ShowError(result.Message, sessionService!.AppTitle);
             }
         }
 
@@ -303,12 +370,18 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             if (result.Success)
             {
+                Logger?.LogInformation("Loan repayment schedule saved for assessment {AssessmentId}", AssessmentId);
                 await LoadLoanRepaymentsDataAsync();
-                _Toast.ShowSuccess(result.Message, sessionService!.AppTitle);
+
+                // ✅ TRIGGER CASHFLOW RECALCULATION
+                Logger?.LogInformation("Invalidating cashflow after repayment save for assessment {AssessmentId}", AssessmentId);
+                await projectionStateManager!.InvalidateDataAsync("loans", AssessmentId, AssessmentId);
+
+                _Toast?.ShowSuccess(result.Message, sessionService!.AppTitle);
             }
             else if (!result.Success && !result.Cancelled)
             {
-                _Toast.ShowError(result.Message, sessionService!.AppTitle);
+                _Toast?.ShowError(result.Message, sessionService!.AppTitle);
             }
         }
 
@@ -326,7 +399,33 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
             return LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(x => x.Total));
         }
+
+        #endregion
+
+        #region Disposal
+
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            try
+            {
+                if (projectionStateManager != null)
+                {
+                    projectionStateManager.ProjectionChanged -= OnProjectionChanged;
+                    Logger?.LogDebug("AssessmentLoanRepaymentsPage unsubscribed from ProjectionChanged events");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Error disposing AssessmentLoanRepaymentsPage");
+            }
+
+            await Task.CompletedTask;
+        }
+
+        #endregion
     }
+
+    #region View Models
 
     public class LoanRepaymentRowViewModel
     {
@@ -344,4 +443,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public decimal Extra { get; set; }
         public decimal Total => Expected + Interest + Extra;
     }
+
+    #endregion
 }

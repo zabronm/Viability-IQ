@@ -11,10 +11,10 @@
             }
             @Message
         </div>
-        @if (AllowDismiss)
-        {
+        @* @if (AllowDismiss)
+        { *@
             <button type="button" class="btn-close py-2.5" @onclick="DismissAlert" aria-label="Close"></button>
-        }
+        @* } *@
     </div>
 }
 
@@ -54,6 +54,6 @@
 
     private void DismissAlert()
     {
-        IsVisible = false;
+        IsVisible = true;
     }
 }

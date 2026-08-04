@@ -54,9 +54,12 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
                 foreach (var cashflow in cashflows)
                 {
+                    // Clear navigation property to prevent Dapper serialization error
+                    cashflow.Assessment = null;
+
                     // Check if record exists
                     var existingQuery = @"
-                        SELECT TOP 1 CashflowId 
+                        SELECT TOP 1 AssessmentCashflowId 
                         FROM tblAssessmentCashflow 
                         WHERE AssessmentId = @AssessmentId 
                         AND MonthNumber = @MonthNumber
@@ -70,7 +73,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                     if (existingId.HasValue)
                     {
                         // Update existing record
-                        cashflow.CashflowId = existingId.Value;
+                        cashflow.AssessmentCashflowId = existingId.Value;
                         await connection.UpdateAsync(cashflow);
                         _logger.LogDebug("Updated cashflow for assessment {AssessmentId}, month {Month}", cashflow.AssessmentId, cashflow.MonthNumber);
                     }
@@ -104,10 +107,13 @@ namespace ViabilityIQ.Infrastructure.Repositories
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
+                
+                // Clear navigation property to prevent Dapper serialization error
+                summary.Assessment = null;
 
                 // Check if summary exists
                 var existingQuery = @"
-                    SELECT TOP 1 SummaryId 
+                    SELECT TOP 1 CashflowSummaryId  
                     FROM tblCashflowSummary 
                     WHERE AssessmentId = @AssessmentId
                 ";
@@ -117,7 +123,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 if (existingId.HasValue)
                 {
                     // Update existing summary
-                    summary.SummaryId = existingId.Value;
+                    summary.CashflowSummaryId = existingId.Value;
                     summary.UpdatedAt = DateTime.UtcNow;
                     await connection.UpdateAsync(summary);
                     _logger.LogDebug("Updated cashflow summary for assessment {AssessmentId}", summary.AssessmentId);
@@ -146,7 +152,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 const string query = @"
                     SELECT 
-                        CashflowId,
+                        AssessmentCashflowId,
                         AssessmentId,
                         MonthNumber,
                         Year,
@@ -201,7 +207,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 const string query = @"
                     SELECT 
-                        SummaryId,
+                        CashflowSummaryId ,
                         AssessmentId,
                         TotalAnnualIncome,
                         TotalAnnualExpense,
@@ -254,7 +260,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 const string query = @"
                     SELECT TOP 1
-                        CashflowId,
+                        AssessmentCashflowId,
                         AssessmentId,
                         MonthNumber,
                         Year,

@@ -1,0 +1,344 @@
+﻿.detailed-cashflow-container {
+    font-size: 0.95rem;
+}
+
+/* Table Wrapper */
+.cashflow-table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.detailed-cashflow-table {
+    font-size: 0.75rem;
+    border-collapse: collapse;
+    min-width: 100%;
+}
+
+    .detailed-cashflow-table th {
+        background-color: #f3f4f6;
+        font-weight: 600;
+        border-bottom: 2px solid #d1d5db;
+        vertical-align: bottom;
+        white-space: nowrap;
+    }
+
+    .detailed-cashflow-table td {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 0.5rem 0.25rem;
+        vertical-align: middle;
+    }
+
+/* Text Sizes */
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+.text-xxs {
+    font-size: 0.65rem !important;
+}
+
+/* Sticky Column */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background-color: #ffffff;
+    border-right: 2px solid #e5e7eb;
+}
+
+    .sticky-col:hover {
+        background-color: #f8fafc;
+    }
+
+/* Sticky Right Column (Total) */
+.sticky-right-col {
+    position: sticky;
+    right: 0;
+    z-index: 10;
+    border-left: 2px solid #e5e7eb;
+}
+
+/* Section Headers */
+.section-header {
+    background-color: #eff6ff !important;
+    font-weight: 600;
+    border-top: 1px solid #e5e7eb;
+}
+
+    .section-header .sticky-col {
+        background-color: #eff6ff;
+    }
+
+/* Data Rows */
+.data-row {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+    .data-row:hover {
+        background-color: rgba(59, 130, 246, 0.03) !important;
+    }
+
+    .data-row.bg-light {
+        background-color: #f9fafb !important;
+    }
+
+        .data-row.bg-light .sticky-col {
+            background-color: #f9fafb;
+        }
+
+/* Section Divider */
+.section-divider {
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+    .section-divider .sticky-col {
+        background-color: #f3f4f6;
+    }
+
+/* EBITDA Row */
+.ebitda-row {
+    font-weight: 800;
+}
+
+    .ebitda-row .sticky-col {
+        background: linear-gradient(90deg, #f0f4f8 0%, #e0e7ff 100%);
+    }
+
+/* Colors */
+.bg-light-blue {
+    background-color: #eff6ff !important;
+}
+
+.bg-light-subtle {
+    background-color: #f8fafc !important;
+}
+
+.bg-success-subtle {
+    background-color: #f0fdf4 !important;
+}
+
+.text-navy {
+    color: #0f172a;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.3px;
+}
+
+/* KPI Section */
+.kpi-section {
+    border-top: 2px solid #e5e7eb;
+}
+
+/* KPI Cards */
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 4px solid #ccc;
+}
+
+    .kpi-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-3px);
+    }
+
+.kpi-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.kpi-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.kpi-title {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kpi-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* KPI Card Variants */
+.kpi-card-primary {
+    border-left-color: #3b82f6;
+}
+
+    .kpi-card-primary .kpi-icon {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .kpi-card-primary .kpi-title {
+        color: #1e40af;
+    }
+
+.kpi-card-success {
+    border-left-color: #16a34a;
+}
+
+    .kpi-card-success .kpi-icon {
+        background-color: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .kpi-card-success .kpi-title {
+        color: #15803d;
+    }
+
+    .kpi-card-success .kpi-value {
+        color: #16a34a;
+    }
+
+.kpi-card-info {
+    border-left-color: #0891b2;
+}
+
+    .kpi-card-info .kpi-icon {
+        background-color: #ecf0ff;
+        color: #0891b2;
+    }
+
+    .kpi-card-info .kpi-title {
+        color: #0e7490;
+    }
+
+.kpi-card-danger {
+    border-left-color: #dc2626;
+}
+
+    .kpi-card-danger .kpi-icon {
+        background-color: #fef2f2;
+        color: #dc2626;
+    }
+
+    .kpi-card-danger .kpi-title {
+        color: #b91c1c;
+    }
+
+    .kpi-card-danger .kpi-value {
+        color: #dc2626;
+    }
+
+.kpi-card-warning {
+    border-left-color: #f59e0b;
+}
+
+    .kpi-card-warning .kpi-icon {
+        background-color: #fffbeb;
+        color: #f59e0b;
+    }
+
+    .kpi-card-warning .kpi-title {
+        color: #d97706;
+    }
+
+.kpi-card-secondary {
+    border-left-color: #8b5cf6;
+}
+
+    .kpi-card-secondary .kpi-icon {
+        background-color: #faf5ff;
+        color: #8b5cf6;
+    }
+
+    .kpi-card-secondary .kpi-title {
+        color: #6d28d9;
+    }
+
+.kpi-card-ebitda {
+    border-left-color: #06b6d4;
+}
+
+    .kpi-card-ebitda .kpi-icon {
+        background-color: #ecf7f8;
+        color: #06b6d4;
+    }
+
+    .kpi-card-ebitda .kpi-title {
+        color: #0891b2;
+    }
+
+.kpi-card-accent {
+    border-left-color: #ec4899;
+}
+
+    .kpi-card-accent .kpi-icon {
+        background-color: #fdf2f8;
+        color: #ec4899;
+    }
+
+    .kpi-card-accent .kpi-title {
+        color: #be185d;
+    }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .detailed-cashflow-table {
+        font-size: 0.7rem;
+    }
+
+        .detailed-cashflow-table td,
+        .detailed-cashflow-table th {
+            padding: 0.4rem 0.2rem;
+        }
+
+    .kpi-value {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .detailed-cashflow-table {
+        font-size: 0.65rem;
+    }
+
+    .kpi-card {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .kpi-icon {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1rem;
+    }
+
+    .kpi-value {
+        font-size: 0.95rem;
+    }
+
+    .kpi-title {
+        font-size: 0.65rem;
+    }
+}

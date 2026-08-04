@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,36 +10,68 @@ using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Services;
 
-namespace ViabilityIQ.Web.Components.Pages_Assessments
+namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class AssessmentLoanRepaymentFormComponent : ComponentBase
     {
-        [Inject] IGenericDataRepository<AssessmentLoanRepayment>? DataRepository { get; set; }
+        #region Injected Dependencies
+
+        [Inject] private IGenericDataRepository<AssessmentLoanRepayment>? DataRepository { get; set; }
         [Inject] public ZabOffCanvasService zabCanvasService { get; set; } = default!;
-        [Inject] MasterDataService? ViqCrudService { get; set; }
-        [Inject] ISessionService? sessionService { get; set; }
+        [Inject] private MasterDataService? ViqCrudService { get; set; }
+        [Inject] private ISessionService? sessionService { get; set; }
+        [Inject] private IProjectionStateManager? projectionStateManager { get; set; }
+        [Inject] private ILogger<AssessmentLoanRepaymentFormComponent>? Logger { get; set; }
+
+        #endregion
+
+        #region Parameters
 
         [Parameter] public long AssessmentLoanId { get; set; }
-        [Parameter] public string parLoanTypeName { get; set; } = string.Empty; // Added parameter
-        [Parameter] public string BankName { get; set; } = string.Empty; // Added parameter
+        [Parameter] public string parLoanTypeName { get; set; } = string.Empty;
+        [Parameter] public string BankName { get; set; } = string.Empty;
 
+        #endregion
+
+        #region Private Fields
 
         private long AssessmentId { get; set; } = new();
         private decimal BulkExtraAmount { get; set; } = 0m;
+        private bool IsSubmitting { get; set; } = false;
 
         private RepaymentFormViewModel ActiveRepaymentModel { get; set; } = new()
         {
             MonthlyLines = Enumerable.Range(0, 12).Select(_ => new RepaymentMetricCell()).ToList()
         };
 
-        // Holds original row IDs for updating existing records instead of duplicating them
+        // Holds original row IDs for updating existing records
         private Dictionary<int, long> ExistingRepaymentIds { get; set; } = new();
+
+        #endregion
+
+        #region Lifecycle Methods
 
         protected override async Task OnParametersSetAsync()
         {
-            AssessmentId = sessionService!.AssessmentId!.Value;
-            await LoadIsolatedFormModelAsync();
+            try
+            {
+                AssessmentId = sessionService!.AssessmentId!.Value;
+
+                Logger?.LogDebug(
+                    "AssessmentLoanRepaymentFormComponent initialized for LoanId {AssessmentLoanId}", AssessmentLoanId);
+
+                await LoadIsolatedFormModelAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Error initializing AssessmentLoanRepaymentFormComponent");
+                throw;
+            }
         }
+
+        #endregion
+
+        #region Private Methods
 
         private async Task LoadIsolatedFormModelAsync()
         {
@@ -57,16 +90,17 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
                 if (AssessmentLoanId > 0 && ViqCrudService != null)
                 {
-                    // Fetch existing repayment entries matching the exact query pattern used in the parent page list
+                    Logger?.LogDebug("Loading existing repayment data for LoanId {AssessmentLoanId}", AssessmentLoanId);
+
+                    // Fetch existing repayment entries
                     var existingRecords = await ViqCrudService.GetListAsync<AssessmentLoanRepaymentDto>(
-                        "vw_assessment_loan_repayment_list",
-                        new { AssessmentId = AssessmentId, Active = true },
-                        "AssessmentLoanId"
+                                                    "vw_assessment_loan_repayment_list", 
+                                                    new { AssessmentId = AssessmentId, Active = true }, "AssessmentLoanId"
                     );
 
                     if (existingRecords != null && existingRecords.Any())
                     {
-                        // Filter specifically for the current AssessmentLoanId being edited
+                        // Filter for current LoanId
                         var loanRecords = existingRecords.Where(r => r.AssessmentLoanId == AssessmentLoanId).ToList();
 
                         if (loanRecords.Any())
@@ -90,6 +124,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                                 monthlyCells[i].Interest = GetValForMonth(interestRow, m);
                                 monthlyCells[i].Extra = GetValForMonth(extraRow, m);
                             }
+
+                            Logger?.LogDebug(
+                                "Loaded repayment data for LoanId {AssessmentLoanId}. Expected: {ExpectedId}, Interest: {InterestId}, Extra: {ExtraId}",
+                                AssessmentLoanId,
+                                ExistingRepaymentIds.ContainsKey(1) ? ExistingRepaymentIds[1] : 0,
+                                ExistingRepaymentIds.ContainsKey(2) ? ExistingRepaymentIds[2] : 0,
+                                ExistingRepaymentIds.ContainsKey(3) ? ExistingRepaymentIds[3] : 0);
                         }
                     }
                 }
@@ -106,9 +147,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     SendToCashbook = true,
                     MonthlyLines = monthlyCells
                 };
+
+                Logger?.LogInformation("Form model loaded for LoanId {AssessmentLoanId}. LoanType: {LoanTypeName}", AssessmentLoanId, loanTypeName);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger?.LogError(ex, "Error loading isolated form model for LoanId {AssessmentLoanId}", AssessmentLoanId);
+
                 ActiveRepaymentModel = new RepaymentFormViewModel
                 {
                     AssessmentLoanId = AssessmentLoanId,
@@ -124,6 +169,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             if (ActiveRepaymentModel?.MonthlyLines == null) return;
 
+            Logger?.LogDebug("Applying bulk extra allocation: {Amount}", BulkExtraAmount);
+
             foreach (var line in ActiveRepaymentModel.MonthlyLines)
             {
                 line.Extra = BulkExtraAmount;
@@ -132,6 +179,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void ClearBulkExtraAllocation()
         {
+            Logger?.LogDebug("Clearing bulk extra allocation");
+
             BulkExtraAmount = 0m;
             if (ActiveRepaymentModel?.MonthlyLines == null) return;
 
@@ -164,13 +213,25 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private async Task SubmitFormWorkflowAsync()
         {
+            if (IsSubmitting) return;
+
             try
             {
-                if (ViqCrudService == null || DataRepository == null) return;
+                IsSubmitting = true;
+
+                if (ViqCrudService == null || DataRepository == null)
+                {
+                    Logger?.LogError("Required services are null");
+                    return;
+                }
 
                 long assessmentId = AssessmentId > 0 ? AssessmentId : (sessionService?.AssessmentId ?? 0);
 
-                // Persist only MetricTypeId 3 (Extra/Balloon Repayments) modified by the user
+                Logger?.LogInformation(
+                    "Saving loan repayment for LoanId {AssessmentLoanId}, AssessmentId {AssessmentId}",
+                    ActiveRepaymentModel.AssessmentLoanId, assessmentId);
+
+                // Persist only MetricTypeId 3 (Extra/Balloon Repayments) modified by user
                 int[] metricTypesToSave = { 3 };
 
                 foreach (var metricTypeId in metricTypesToSave)
@@ -196,18 +257,43 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     repaymentEntity.MonthlyValues = values;
 
                     await DataRepository.SaveAsync(repaymentEntity);
+
+                    Logger?.LogDebug(
+                        "Saved repayment for MetricTypeId {MetricTypeId}, RepaymentId {RepaymentId}",
+                        metricTypeId, repaymentId);
                 }
+
+                // ✅ TRIGGER CASHFLOW RECALCULATION
+                Logger?.LogInformation(
+                    "Invalidating cashflow after repayment save for assessment {AssessmentId}",
+                    assessmentId);
+
+                await projectionStateManager!.InvalidateDataAsync("loans", assessmentId, assessmentId);
 
                 await zabCanvasService!.PublishResultAsync(SaveResult.SavedAndClose("Extra/Balloon repayments saved successfully."));
             }
             catch (Exception ex)
             {
-                await zabCanvasService!.PublishResultAsync(new SaveResult { Success = false, Message = $"Error: {ex.Message}" });
+                Logger?.LogError(ex, "Error submitting loan repayment form");
+                await zabCanvasService!.PublishResultAsync(
+                    new SaveResult { Success = false, Message = $"Error: {ex.Message}" });
+            }
+            finally
+            {
+                IsSubmitting = false;
             }
         }
 
-        private async Task CancelFormWorkflowAsync() => await zabCanvasService!.HideAsync(SaveResult.Cancel());
+        private async Task CancelFormWorkflowAsync()
+        {
+            Logger?.LogDebug("Cancelling loan repayment form");
+            await zabCanvasService!.HideAsync(SaveResult.Cancel());
+        }
+
+        #endregion
     }
+
+    #region View Models
 
     public class RepaymentFormViewModel
     {
@@ -217,4 +303,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public bool SendToCashbook { get; set; }
         public List<RepaymentMetricCell> MonthlyLines { get; set; } = new();
     }
+
+    #endregion
 }
