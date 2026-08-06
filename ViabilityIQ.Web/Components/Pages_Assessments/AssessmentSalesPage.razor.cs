@@ -25,17 +25,15 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         [Inject] ToastService? _Toast { get; set; }
         [Inject] IProjectionStateManager? projectionStateManager { get; set; }
         [Inject] ILogger<AssessmentSalesPage>? Logger { get; set; }
-
+       
         #endregion
 
         #region Parameters
-
         [Parameter] public long AssessmentId { get; set; }
-
         #endregion
 
         #region Private Fields
-
+        private ZabConfirmDialogComponent? ConfirmDeleteDialog { get; set; } = default!;
         private AssessmentFinancialsDto ConsolidatedAssessmentData { get; set; } = new();
         private List<UnifiedIncomeViewModel> IncomeStreams { get; set; } = new();
         private bool IsLoading { get; set; } = true;

@@ -4,13 +4,13 @@
 <div class="cashflow-summary-dashboard mb-4 font-def">
     <div class="auth-card my-2 py-2" style="max-width: 100%;">
         <!-- Card Header -->
-        <div class="auth-header mb-4" style="text-align: left; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+        <div class="auth-header mb-1" style="text-align: left; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <div class="auth-brand fs-6 mb-1">
                         <i class="bi bi-pie-chart me-2 text-navy"></i><span class="brand-main">Cashflow Summary</span>
                     </div>
-                    <p class="auth-subtitle">12-Month Projected Period Total</p>
+                    <p class="auth-subtitle">Assessment Projected Period Total</p>
                 </div>
                 @if (IsLoading)
                 {
@@ -22,7 +22,7 @@
         </div>
 
         <!-- Card Body -->
-        <div class="card-body p-0" style="background-color: #ffffff !important;">
+        <div class="card-body p-0 mb-4" style="background-color: #ffffff !important;">
             @if (IsLoading)
             {
                 <div class="text-center py-2">
@@ -41,7 +41,7 @@
             }
             else
             {
-                <div class="summary-content p-0" style="background-color: #ffffff !important;">                   
+                <div class="summary-content p-0 mt-0" style="background-color: #ffffff !important;">                   
                     <!-- Vertical List Table Format -->
                     <div class="table-responsive bg-white p-0" style="background-color: #ffffff !important;">
                         <table class="table table-hover table-borderless align-middle mb-0 cashflow-summary-table bg-white p-3">

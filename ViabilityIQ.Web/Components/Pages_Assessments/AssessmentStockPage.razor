@@ -9,14 +9,10 @@
 
     <div class="row bg-white g-3 mt-2 py-2 px-2" style="border-radius: 6px;">
 
+        
         <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12">
-            <BusinessHealthAlertsComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
-        </div>
-
-        <!-- ✅ CASHFLOW KPI DASHBOARD (SECOND) -->
-        <div class="col-12">
-            <CashflowKPICardsComponent AssessmentId="@AssessmentId" />
+        <div class="col-12 mt-0 pt-0">
+            <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
         </div>
 
         <!-- Search and Add Row -->
@@ -101,4 +97,14 @@
             </div>
         </div>
     </div>
+
+    @* This component is for the cashflow summaries and details, including projections. *@
+    <CashflowMainPagesComponent AssessmentId="@AssessmentId" />
+
 </div>
+
+<ZabConfirmDialogComponent @ref="ConfirmDeleteDialog" />
+
+<footer class="py-2 bg-light mt-3">
+    <BFooter />
+</footer>

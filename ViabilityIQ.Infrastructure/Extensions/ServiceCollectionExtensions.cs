@@ -12,19 +12,20 @@ namespace ViabilityIQ.Infrastructure.Extensions
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
             // Here you would add your infrastructure services, e.g. repositories, database contexts, etc.
-                        
+
             //services.AddMemoryCache();
             //services.AddScoped<IAppInitializerService, AppInitializerService>();
+            services.AddMemoryCache();
             services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
             services.AddScoped<MasterDataService>();
             services.AddScoped<IExcelEPPlusExportService, ExcelEPPlusExportService>();
             services.AddScoped<IEmailReportingService, EmailReportingService>();
             services.AddScoped<IPdfExportService, PdfExportService>();                                  //Pdf Printing using QuestPDF package
-            services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));      //Handles All CRUD using Dapper.Includ
-            services.AddMemoryCache();
+            services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));      //Handles All CRUD using Dapper.Includ          
             services.AddScoped<IDDLookupService, DDLookupService>();                                    //Generic DropDown lookup service
             services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));          //Generic Read only
             services.AddScoped<ICashflowRepository, CashflowRepository>();
+            services.AddScoped<IDebtorsCreditorsRepository, DebtorsCreditorsRepository>();
 
 
 

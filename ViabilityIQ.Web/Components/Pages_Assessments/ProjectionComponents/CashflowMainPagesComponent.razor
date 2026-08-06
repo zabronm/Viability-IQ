@@ -1,0 +1,93 @@
+﻿<!-- CASHFLOW SUMMARIES AND DETAIL & PROJECTIONS-->
+<div class="row bg-white g-3 mt-1 mb-4 py-2 px-2 shadow-sm rounded-3 border-0">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+            <h3 class="fw-extrabold text-marble-dark mb-1 fs-4">Cashflow Projections</h3>
+            <p class="text-muted small mb-0">Comprehensive financial forecasting, operational summaries, and real-time viability metrics.</p>
+        </div>
+        <div class="badge bg-light text-marble-dark px-3 py-2 rounded-pill border fw-semibold">
+            <i class="bi bi-shield-lock-fill text-success me-1"></i> Secure Assessment #@AssessmentId
+        </div>
+    </div>
+
+    <div class="my-2">
+        <CashflowKPICardsComponent AssessmentId="@AssessmentId" />
+    </div>
+
+    <div class="accordion custom-professional-accordion mt-3" id="accordionPanelsStayOpenExample">
+        <!-- Accordion Item 1 -->
+        <div class="accordion-item border-0 mb-3 shadow-sm overflow-hidden rounded-3">
+            <h2 class="accordion-header">
+                <button class="accordion-button py-3 px-4 fw-bold text-white bg-gradient-marble-1 shadow-none d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                    <i class="bi bi-pie-chart-fill me-3 fs-5 text-white-50"></i>
+                    <span class="flex-grow-1 text-white fw-bold fs-6 tracking-wide">Cashflow Summary & Business Health</span>
+                    <span class="badge bg-secondary text-white-50 fw-bold ms-2 me-2 px-2 py-1 fs-xxs">Active View</span>
+                </button>
+            </h2>
+
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                <div class="accordion-body bg-marble-light p-4">
+                    <div class="row w-100 g-4 mx-0 font-def">
+                        <!-- Card 1: Cashflow Summary -->
+                        <div class="col-xl-5 col-lg-6 px-0 pe-lg-2 mt-2 mt-lg-0">                            
+                                <div class="card-body p-0">
+                                    <CashflowSummaryDashboardComponent AssessmentId="@AssessmentId" />
+                                </div>
+                            @* </div> *@
+                        </div>
+
+                        <!-- Card 2: Business Health Indicators -->
+                        <div class="col-xl-7 col-lg-6 px-0 ps-lg-2 mt-2 mt-lg-0">                           
+                                <div class="card-body p-0">
+                                    <FinancialViabilityKPIComponent AssessmentId="@AssessmentId" />
+                                </div>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item 2 -->
+        <div class="accordion-item border-0 mb-3 shadow-sm overflow-hidden rounded-3">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-3 px-4 fw-bold text-white bg-gradient-marble-2 shadow-none d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                    <i class="bi bi-table me-3 fs-5 text-white-50"></i>
+                    <span class="flex-grow-1 text-white fw-bold fs-6 tracking-wide">Cashflow Statement Details</span>
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                <div class="accordion-body bg-marble-light p-4">
+                    <div class="bg-white p-3 rounded-3 shadow-sm border">
+                        <DetailedCashflowStatementComponent AssessmentId="@AssessmentId" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item 3 -->
+        <div class="accordion-item border-0 mb-3 shadow-sm overflow-hidden rounded-3">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-3 px-4 fw-bold text-white bg-gradient-marble-3 shadow-none d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                    <i class="bi bi-graph-up-arrow me-3 fs-5 text-white-50"></i>
+                    <span class="flex-grow-1 text-white fw-bold fs-6 tracking-wide">Other Cashflow Analytics & Charts</span>
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                <div class="accordion-body bg-marble-light p-4">
+                    <div class="bg-white p-5 rounded-3 shadow-sm border text-center text-muted">
+                        <i class="bi bi-bar-chart-line fs-1 text-secondary opacity-50 mb-3 d-block"></i>
+                        <h5 class="fw-bold text-dark">Analytics Engine Ready</h5>
+                        <p class="mb-0 small">Advanced interactive graphical charts and diagnostic indicators will load here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public long AssessmentId { get; set; }
+
+}

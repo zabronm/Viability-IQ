@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,10 +9,10 @@ using ViabilityIQ.Shared.DataModelsInterfaces;
 
 namespace ViabilityIQ.Shared.DataModels
 {
-    [Table("tblAssessmentWorkingCapitalProfile")]
+    [Table("tblAssessmentDebtorsCreditorsProfile")]
     public class DebtorsCreditorsProfile : IEntity, IAuditableEntity, ISortableEntity
     {
-        [Key] public long WorkingCapitalProfileId { get; set; }
+        [Dapper.Contrib.Extensions.Key] public long DebtorsCreditorsProfileId { get; set; }
         public bool EntryMode { get; set; }
         public long AssessmentId { get; set; }
         [Required]
@@ -30,6 +30,11 @@ namespace ViabilityIQ.Shared.DataModels
         public decimal CreditorsValue_120 { get; set; }
         public decimal CreditorsValue_120Plus { get; set; }
 
+
+        //=== Additional very important fields for Debtors and Creditors ===
+        public decimal BadDebtPercentage { get; set; } = 2m;
+        public int AveragePaymentDays { get; set; }
+        public bool IncludeVAT { get; set; }
 
         //DEBTORS SECTION - Debtors => Percentages
         [Required]
@@ -54,7 +59,7 @@ namespace ViabilityIQ.Shared.DataModels
         public bool Active { get; set; }
         public string? Remarks { get; set; }
                
-        long IEntity.Id => WorkingCapitalProfileId;
+        long IEntity.Id => DebtorsCreditorsProfileId;
         string ISortableEntity.DisplayName => AssessmentId.ToString();
     }
 }

@@ -15,11 +15,10 @@ namespace ViabilityIQ.Application.ExtensionServices
         public static IServiceCollection AddFinancialCalculationServices(this IServiceCollection services)
         {            
             services.AddSingleton<IFinancialCalculationsEngine, FinancialCalculationsEngine>();
-
             services.AddScoped<IProjectionStateManager, ProjectionStateManager>();
-            services.AddScoped<ICashflowEngine, CashflowEngine>();           
+            services.AddScoped<ICashflowEngine, CashflowEngine>();
+            services.AddScoped<IDebtorsCreditorsEngine, DebtorsCreditorsEngine>();  
 
-            
             return services;
         }
     }

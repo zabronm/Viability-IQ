@@ -11,13 +11,8 @@
     <div class="row bg-white g-3 mt-1 mb-1 py-0 px-2" style="border-radius: 6px;">
 
         <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12">
-            <BusinessHealthAlertsComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
-        </div>
-                
-        <!-- ✅ CASHFLOW KPI DASHBOARD (SECOND) -->
-        <div class="col-12">
-            <CashflowKPICardsComponent AssessmentId="@AssessmentId" />
+        <div class="col-12 mt-0 pt-0">          
+            <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
         </div>
 
         <!-- Expenses Data Entry Section -->
@@ -137,4 +132,8 @@
             </div>
         </div>
     </div>
+
+    @* Projection components below *@
+    <CashflowMainPagesComponent AssessmentId="@AssessmentId" />
+
 </div>

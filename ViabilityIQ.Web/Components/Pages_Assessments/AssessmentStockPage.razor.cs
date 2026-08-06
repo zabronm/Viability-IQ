@@ -37,7 +37,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         #endregion
 
         #region Private Fields
-
+        private ZabConfirmDialogComponent? ConfirmDeleteDialog { get; set; } = default!;
         private List<AssessmentStockDto> StockDataList = new();
         private List<UnifiedStockViewModel> FilteredStockList = new();
         private bool IsLoading = false;
