@@ -1,0 +1,184 @@
+﻿@page "/identity/user-settings"
+@using ViabilityIQ.Application.Dtos
+
+<div class="m-0 font-def p-2">
+    <div class="auth-card my-2 py-2">
+        <div class="auth-header">
+            <div class="auth-brand fs-2">
+                <span class="brand-main">Viability</span><span class="brand-iq fst-italic">.IQ</span>
+            </div>
+            <p class="auth-subtitle">Configure your application preferences, regional assignments, and subscription details</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                <strong>Update Failed</strong>
+                <p class="mb-0 mt-1">@ErrorMessage</p>
+                <button type="button" class="btn-close" @onclick="() => { ErrorMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>Success</strong>
+                <p class="mb-0 mt-1">@SuccessMessage</p>
+                <button type="button" class="btn-close" @onclick="() => { SuccessMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
+            </div>
+        }
+
+        <EditForm Model="@SettingsRequest" OnSubmit="HandleSettingsUpdate" FormName="UserSettingsForm">
+            <DataAnnotationsValidator />
+
+            <!-- SUBSCRIPTION & LICENSING DETAILS -->
+            <div class="settings-section-title mb-2">Subscription & Licensing</div>
+            <div class="form-row-custom">
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Subscription Package</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-box-seam icon-addon"></i>
+                        <InputSelect @bind-Value="SettingsRequest.SubscriptionPackage" class="form-control-custom" disabled="@IsSubmitting">
+                            <option value="Basic">Basic Plan</option>
+                            <option value="Standard">Standard Plan</option>
+                            <option value="Enterprise">Enterprise Plan</option>
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => SettingsRequest.SubscriptionPackage)" class="auth-error-msg" />
+                </div>
+
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Registration Date</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-calendar-check icon-addon"></i>
+                        <InputDate @bind-Value="SettingsRequest.RegistrationDate" class="form-control-custom" disabled="true" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row-custom">
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Expiry Date</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-calendar-x icon-addon"></i>
+                        <InputDate @bind-Value="SettingsRequest.ExpiryDate" class="form-control-custom" disabled="true" />
+                    </div>
+                    <small class="text-muted fs-xs">Contact administrator to renew or upgrade your subscription package.</small>
+                </div>
+                <div class="form-group-custom flex-fill"></div>
+            </div>
+
+            <!-- REGIONAL CONFIGURATION: PROVINCE & BRANCH DROPDOWNS -->
+            <div class="settings-section-title mt-2 mb-2">Regional Configuration</div>
+            <div class="form-row-custom">
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Province</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-map icon-addon"></i>
+                        <InputSelect @bind-Value="SettingsRequest.ProvinceId" @bind-Value:after="OnProvinceChanged" class="form-control-custom" disabled="@IsSubmitting">
+                            <option value="0">-- Select Province --</option>
+                            @foreach (var province in Provinces)
+                            {
+                                <option value="@province.Id">@province.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => SettingsRequest.ProvinceId)" class="auth-error-msg" />
+                </div>
+
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Branch</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-shop icon-addon"></i>
+                        <InputSelect @bind-Value="SettingsRequest.BranchId" class="form-control-custom" disabled="@(IsSubmitting || SettingsRequest.ProvinceId == 0)">
+                            <option value="0">-- Select Branch --</option>
+                            @foreach (var branch in FilteredBranches)
+                            {
+                                <option value="@branch.Id">@branch.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => SettingsRequest.BranchId)" class="auth-error-msg" />
+                </div>
+            </div>
+
+            <!-- INTERFACE PREFERENCES -->
+            <div class="settings-section-title mt-2 mb-2">Interface Preferences</div>
+            <div class="form-row-custom">
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Theme Mode</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-palette icon-addon"></i>
+                        <InputSelect @bind-Value="SettingsRequest.ThemeMode" class="form-control-custom" disabled="@IsSubmitting">
+                            <option value="light">Light Mode</option>
+                            <option value="dark">Dark Mode</option>
+                            <option value="system">System Default</option>
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => SettingsRequest.ThemeMode)" class="auth-error-msg" />
+                </div>
+
+                <div class="form-group-custom flex-fill">
+                    <label class="form-label-custom">Language</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-translate icon-addon"></i>
+                        <InputSelect @bind-Value="SettingsRequest.Language" class="form-control-custom" disabled="@IsSubmitting">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => SettingsRequest.Language)" class="auth-error-msg" />
+                </div>
+            </div>
+
+            <!-- NOTIFICATION PREFERENCES -->
+            <div class="settings-section-title mt-2 mb-2">Notification Channels</div>
+            <div class="form-row-custom mb-3">
+                <div class="form-group-custom flex-fill">
+                    <label class="checkbox-container-custom">
+                        <InputCheckbox @bind-Value="SettingsRequest.EnableEmailNotifications" disabled="@IsSubmitting" />
+                        <span class="checkmark"></span>
+                        Email Notifications
+                    </label>
+                </div>
+                <div class="form-group-custom flex-fill">
+                    <label class="checkbox-container-custom">
+                        <InputCheckbox @bind-Value="SettingsRequest.EnableSmsNotifications" disabled="@IsSubmitting" />
+                        <span class="checkmark"></span>
+                        SMS Alerts
+                    </label>
+                </div>
+                <div class="form-group-custom flex-fill">
+                    <label class="checkbox-container-custom">
+                        <InputCheckbox @bind-Value="SettingsRequest.EnablePhoneCallAlerts" disabled="@IsSubmitting" />
+                        <span class="checkmark"></span>
+                        Phone Call Alerts
+                    </label>
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="btn btn-primary w-100 mt-2" disabled="@(IsSubmitting || !IsFormValid())">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving Settings...</span>
+                }
+                else
+                {
+                    <span>Save Settings</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-card-footer">
+            <div>
+                <a href="/home" class="link-btn-inline font-weight-bold"><i class="bi bi-arrow-left me-1"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+

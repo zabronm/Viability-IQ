@@ -298,7 +298,7 @@
 }
 
 /* User Account Overlay Panels */
-.dropdown-container {
+/*.dropdown-container {
     position: relative;
 }
 
@@ -398,7 +398,7 @@
     height: 1px;
     background-color: #e2e8f0;
     margin: 8px 0;
-}
+}*/
 
 /* Switch Context Options Selection Panels */
 .chevron-rotate {

@@ -1,12 +1,13 @@
-
-/* Base Structural Mechanics */
+/* Base Layout Mechanics */
 .fa-layout-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    font-family: sans-serif, Arial, Helvetica, "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    /*overflow-y: auto;*/
+    overflow-y: hidden;
+    font-family: Arial, sans-serif, Helvetica, "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
 }
 
 .fa-top-bar {
@@ -23,272 +24,267 @@
 .fa-workspace-container {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    overflow: visible;
 }
 
-/* Refined Sidebar Surface (Matching Off-Blue/Whitish Main Content area) */
+/* Sidebar Core Panels */
 .fa-sidebar {
     width: 260px;
-    background-color: #f8fafc; /* Content Body matching off-blue/white */
+    background-color: #f8fafc;
     border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    overflow: visible;
 }
 
     .fa-sidebar.collapsed {
-        width: 68px;
+        width: 70px;
     }
 
 .sidebar-scroller {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    padding: 1px 6px;
     overflow-y: auto;
-    padding-top: 12px;
+    flex: 1;
 }
 
-/* Left and Right Pill Margin Layout Configuration */
-.fa-nav-item {
+.sidebar-footer-static {
     display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    border-top: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.fa-nav-heading {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    padding: 4px 12px 4px 12px;
+}
+
+.fa-sidebar.collapsed .fa-nav-heading {
+    display: none;
+}
+
+/* Base Nav Items Layout */
+.fa-nav-item {
+    /*display: flex;    
     align-items: center;
-    justify-content: flex-start;
-    height: 40px;
-    margin: 4px 12px; /* Leaves clean margins on left and right side */
-    padding: 0 10px;
-    border-radius: 8px;
+    padding: 0px 12px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
     color: #475569;
     text-decoration: none;
-    background: transparent;
-    border: none;
-    width: calc(100% - 24px);
+    border-radius: 5px;
+    font-size: 0.88rem;
+    font-weight: 500;
     transition: all 0.2s ease;
-    cursor: pointer;
-}
+    gap: 0px;
+    position: relative;*/
 
-/* Rounded Very Faint Avatar Background for Sidebar Icons */
-.nav-icon-avatar {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 25px;
     height: 25px;
-    min-width: 25px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 153, 0.05); /* Faint visual background circle */
-    color: #778899;
-    margin-right: 8px;
-    transition: all 0.2s ease;
+    min-height: 25px;
+    padding: 0 10px;
+    margin: 0;
+    line-height: 1;
+    font-size: 0.82rem;
+    gap: 6px;
+    overflow: hidden;
 }
 
-/* Rounded Very Faint Avatar Background for Sidebar Icons */
+    .fa-nav-item:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .fa-nav-item.active {
+        background-color: #e2e8f0;
+        color: #000099;
+        font-weight: 600;
+    }
+
 .nav-icon-avatar-round {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 25px;
     height: 25px;
-    min-width: 25px;
-    border-radius: 20%;
-    background-color: rgba(0, 0, 153, 0.05); /* Faint visual background circle */
-    color: #2B547E;
-    margin-right: 10px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    color: #64748b;
+    font-size: 1.1rem;
+    flex-shrink: 0;
     transition: all 0.2s ease;
 }
 
+.fa-nav-item:hover .nav-icon-avatar-round {
+    color: #000099;
+    border-color: #cbd5e1;
+}
 
-.fa-nav-item span {
-    font-size: 0.9rem;
-    font-weight: 500;
+.fa-nav-item.active .nav-icon-avatar-round {
+    background-color: #000099;
+    color: #ffffff;
+    border-color: #000099;
+}
+
+.nav-text {
+    line-height: 1;
+    margin: 0;
+    padding: 0;
     white-space: nowrap;
     opacity: 1;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.2s ease;
 }
 
-.fa-sidebar.collapsed .fa-nav-item span,
-.fa-sidebar.collapsed .fa-nav-heading,
-.fa-sidebar.collapsed .chevron,
-.fa-sidebar.collapsed .footer-sub-text {
-    display: none !important;
+.fa-sidebar.collapsed .nav-text {
+    display: none;
 }
 
-.fa-sidebar.collapsed .fa-nav-item {
-    justify-content: center;
-    padding: 0;
+/* ==========================================================================
+   VIABILITY.IQ SIDEBAR VISUAL DATA INPUT STATUS INDICATORS
+   ========================================================================== */
+.viq-indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: auto;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px #ffffff;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fa-sidebar.collapsed .nav-icon-avatar {
-    margin-right: 0;
+/* Warning Color Indicator: No customer entry detected yet */
+.status-warning {
+    background-color: #ffc107 !important; /* Premium Amber */
+    box-shadow: 0 0 6px rgba(255, 193, 7, 0.5);
 }
 
-
-.fa-nav-heading {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #94a3b8;
-    padding: 5px 22px 5px 22px;
-    font-weight: 700; 
-    border-top: solid #eeeeee 0.8px;
-    border-bottom: solid #eeeeee 0.8px;
+/* Success Color Indicator: Valid structural database row present */
+.status-success {
+    background-color: #198754 !important; /* Premium Emerald */
+    box-shadow: 0 0 6px rgba(25, 135, 84, 0.5);
 }
 
-/* Composite Collapsible Setup Items styling */
-.fa-composite-trigger {
-    justify-content: space-between;
+/* Float status flag out as a notification badge if container collapses */
+.fa-sidebar.collapsed .viq-indicator-dot {
+    position: absolute;
+    top: 6px;
+    right: 14px;
+    margin-left: 0;
+    transform: scale(1.1);
 }
 
-.chevron {
-    font-size: 0.75rem;
-    transition: transform 0.2s ease;
+.fa-nav-item:hover .viq-indicator-dot {
+    transform: scale(1.3);
 }
 
-.fa-composite-trigger.open .chevron {
-    transform: rotate(90deg);
+/* Footer Stack Details */
+.footer-item {
+    padding: 8px;
 }
 
-.fa-sub-menu {
-    list-style: none;
-    padding: 2px 0 6px 0;
-    margin: 0;
-}
-
-.fa-sub-link {
-    display: flex;
-    align-items: center;
-    height: 32px;
-    margin: 2px 12px 2px 24px;
-    padding: 0 12px;
-    color: #64748b;
-    text-decoration: none;
-    font-size: 0.85rem;
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-
-    .fa-sub-link i {
-        font-size: 0.35rem;
-        margin-right: 10px;
-        color: #cbd5e1;
-    }
-
-    .fa-sub-link:hover {
-        background-color: #f2f4f7; /* Marble hover logic on sub-items */
-        color: #344054;
-    }
-
-/* Static Footer Settings & Thicker Borders */
-.sidebar-footer-static {
-    padding: 8px 0;
-    background-color: transparent;
-}
-
-/* Increased Thickness of the Top Border on Bottom Items */
 .border-top-thick {
     border-top: 2px solid #e2e8f0 !important;
-    border-radius: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    width: 100% !important;
-    padding: 8px 16px !important;
-    height: auto !important;
+    border-radius: 0;
+    padding-top: 12px;
 }
 
 .footer-text-stack {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+.fa-sidebar.collapsed .footer-text-stack {
+    display: none;
 }
 
 .footer-main-text {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
+    color: #334155;
 }
 
 .footer-main-text-sm {
     font-size: 0.75rem;
-    font-weight: 400;
+    font-weight: 600;
+    color: #334155;
 }
-
 
 .footer-sub-text {
-    font-size: 0.65rem;
-    color: #94a3b8;
+    font-size: 0.7rem;
+    color: #64748b;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
-/* Surface Application Viewports */
-.fa-main-content-surface {
-    flex: 1;
-    background-color: #f8fafc;
-    overflow-y: auto;
-    transition: padding 0.25s ease;
-}
-
-.content-body-padding {
-    padding: 24px;
-}
-
-/* Top Bar Elements Styling definitions */
-.fa-brand-zone {
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: #0f172a;
-    letter-spacing: -0.02em;
-}
-
+/* Brand Branding & Identity Accents */
 .brand-main {
+    font-weight: 800;
     color: #1B8A6B;
+    letter-spacing: -0.5px;
 }
 
 .brand-iq {
     color: #D2691E;
+    font-weight: 700;
 }
 
 .fa-toggle-sidebar-btn {
     background: none;
     border: none;
-    font-size: 1.25rem;
-    color: #475569;
+    font-size: 1.5rem;
+    color: #64748b;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
 }
 
     .fa-toggle-sidebar-btn:hover {
-        background-color: #f1f5f9;
+        color: #000099;
     }
-
-.fa-context-pill {
-    background-color: #f1f5f9;
-    color: #334155;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-}
 
 .fa-top-bar-right {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
 }
 
 .marble-date-badge {
     font-size: 0.8rem;
+    font-weight: 600;
     color: #64748b;
-    font-weight: 500;
+    background-color: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 20px;
 }
 
 .action-icon-btn {
     background: none;
     border: none;
-    position: relative;
-    font-size: 1.15rem;
-    color: #475569;
+    font-size: 1.25rem;
+    color: #64748b;
     cursor: pointer;
+    position: relative;
 }
+
+    .action-icon-btn:hover {
+        color: #000099;
+    }
 
 .notification-indicator {
     position: absolute;
@@ -298,106 +294,14 @@
     height: 8px;
     background-color: #ef4444;
     border-radius: 50%;
+    border: 2px solid #ffffff;
 }
 
-/* Dropdown UI Cards styling architectures */
-.dropdown-container {
+/* User Account Overlay Panels */
+/*.dropdown-container {
     position: relative;
 }
 
-.btn-quick-access {
-    background-color: #eeeeee;
-    border: 1px solid #cbd5e1;
-    padding: 3px 6px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #334155;
-    cursor: pointer;
-}
-
-.style-chevron {
-    font-size: 0.7rem;
-    color: #94a3b8;
-}
-
-.dropdown-card-menu, .profile-card-dropdown {
-    position: absolute;
-    top: 45px;
-    left: 0;
-    width: 150px !important;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    display: none;
-    z-index: 500;
-}
-
-.profile-card-dropdown {
-    left: auto;
-    right: 0;
-    width: 260px;
-}
-
-    .dropdown-card-menu.show, .profile-card-dropdown.show {
-        display: block;
-    }
-
-.dropdown-card-header, .profile-card-header {
-    padding: 12px 16px;
-    background-color: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #64748b;
-}
-
-.quick-access-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    padding: 12px;
-}
-
-.quick-grid-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px;
-    border-radius: 28px;
-    text-decoration: none;
-    color: #ababab;
-    /* Change 'background' to 'all' or explicitly list your transitions to include the shadow */
-    transition: background-color 0.4s ease, box-shadow 0.4s ease, color 0.3s ease;
-}
-
-    .quick-grid-item:hover {
-        background-color: #f8fafc;
-        color: #344054; /* Optional: transitions text color to match your marble tone */
-        box-shadow: 0 4px 20px rgba(0, 0, 153, 0.15);
-    }
-
-.grid-icon-wrapper {
-    width: 32px;
-    height: 32px;
-    background-color: #e0e7ff;
-    color: #4f46e5;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 6px;
-    font-size: 1.1rem;
-}
-
-.quick-grid-item span {
-    font-size: 0.78rem;
-    font-weight: 500;
-}
-
-/* Account / Avatar configurations */
 .avatar-trigger-btn {
     background: none;
     border: none;
@@ -406,8 +310,8 @@
 }
 
 .avatar-circle {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background-color: #000099;
     color: #ffffff;
@@ -418,11 +322,29 @@
     font-size: 0.85rem;
 }
 
+.profile-card-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 240px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    display: none;
+    z-index: 1000;
+}
+
+    .profile-card-dropdown.show {
+        display: block;
+    }
+
 .profile-card-header {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .profile-avatar-large {
@@ -458,42 +380,215 @@
     padding: 8px 0;
 }
 
-.profile-section-title {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #94a3b8;
-    padding: 8px 16px 4px 16px;
-}
-
-.profile-menu-item {
+.profile-dropdown-item {
     display: flex;
     align-items: center;
-    gap: 10px;
     padding: 8px 16px;
-    color: #475569;
+    color: #334155;
     text-decoration: none;
     font-size: 0.85rem;
 }
 
-    .profile-menu-item:hover {
-        background-color: #f8fafc;
-        color: #1e293b;
+    .profile-dropdown-item:hover {
+        background-color: #f1f5f9;
+        color: #000099;
     }
 
 .dropdown-divider {
     height: 1px;
     background-color: #e2e8f0;
-    margin: 6px 0;
+    margin: 8px 0;
+}*/
+
+/* Switch Context Options Selection Panels */
+.chevron-rotate {
+    transition: transform 0.2s ease;
+    color: #64748b;
+    font-size: 0.8rem;
 }
 
-.logout-item {
-    color: #ef4444;
+.fa-sidebar.collapsed .chevron-rotate {
+    display: none;
 }
 
-    .logout-item:hover {
-        background-color: #fef2f2;
-        color: #ef4444;
+.chevron-rotate.rotated {
+    transform: rotate(180deg);
+}
+
+.setup-submenu-dropdown {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 8px;
+    width: calc(100% - 16px);
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    display: none;
+    padding: 4px 0;
+    z-index: 95;
+}
+
+.fa-sidebar.collapsed .setup-submenu-dropdown {
+    left: 74px;
+    bottom: 50px;
+    width: 180px;
+}
+
+.setup-submenu-dropdown.show {
+    display: block;
+}
+
+.setup-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+    .setup-dropdown-item:hover {
+        background-color: #f1f5f9;
+        color: #000099;
     }
 
+/* Workspace Canvas */
+.fa-main-content-surface {
+    flex: 1;
+    background-color: #f8fafc;
+    /*overflow-y: visible;*/
+    height: calc(100vh - 60px); /* Fill the exact remaining space below the 60px top bar */
+    overflow-y: auto;
+    /* --- ADD SCROLLBAR COLOR FOR FIREFOX --- */
+    scrollbar-width: auto;
+    scrollbar-color: #5E7D7E #F0FFFF; /* thumb color | track background color */
+}
 
+    /* --- ADD SCROLLBAR COLOR FOR CHROMIUM BROWSERS (CHROME, EDGE, SAFARI) --- */
+    .fa-main-content-surface::-webkit-scrollbar {
+        width: 8px; /* Set a clean, slim width for the scrollbar track */
+    }
+
+    .fa-main-content-surface::-webkit-scrollbar-track {
+        background: #f1f5f9; /* Subtle background track color to match your workspace */
+        border-radius: 4px;
+    }
+
+    .fa-main-content-surface::-webkit-scrollbar-thumb {
+        background-color: #4C787E; /* Your custom color */
+        border-radius: 4px; /* Round edges for a smooth look */
+        border: 2px solid #f1f5f9; /* Gives it a tiny bit of breathing room inside the track */
+    }
+
+        .fa-main-content-surface::-webkit-scrollbar-thumb:hover {
+            background-color: #3b5d62; /* Slightly darker shade on hover for user feedback */
+        }
+
+
+
+
+
+.content-body-padding {
+    padding: 24px;
+}
+
+/* ==========================================================================
+   (2) Enhanced Avatar & Sidebar Toggle Hover Transitions
+   ========================================================================== */
+.avatar-trigger-btn .avatar-circle,
+.fa-toggle-sidebar-btn .nav-icon-avatar-round {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover scales and slightly illuminates button boundaries */
+.avatar-trigger-btn:hover .avatar-circle {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 3px rgba(0, 0, 153, 0.15);
+    background-color: #0000bd; /* Slightly brighter blue response */
+}
+
+.fa-toggle-sidebar-btn:hover .nav-icon-avatar-round {
+    transform: scale(1.08);
+    background-color: #000099;
+    color: #ffffff;
+    border-color: #000099;
+}
+
+/* Base button properties clarification */
+.avatar-trigger-btn, .fa-toggle-sidebar-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+/* Dedicated background container logic for lightning shortcut bolt */
+.font-icon-avatar {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+    border: 1px solid #e2e8f0;
+}
+
+.avatar-trigger-btn:hover .font-icon-avatar {
+    background-color: #e0e7ff !important;
+    color: #000099 !important;
+    border-color: #c7d2fe;
+}
+
+/* (1) Shortcut Menu Container Adjustments */
+.shortcut-menu-dropdown {
+    width: 280px !important;
+}
+
+/* (3) Distinctive treatment for Top Level Home Link context */
+.home-nav-link {
+    border-bottom: 1px dashed #e2e8f0;
+    margin-bottom: 4px !important;
+    padding-bottom: 12px !important;
+}
+
+    .home-nav-link.active .nav-icon-avatar-round {
+        background-color: #475569 !important;
+        color: #ffffff !important;
+        border-color: #475569 !important;
+    }
+
+    .home-nav-link.active {
+        background-color: #f1f5f9 !important;
+        color: #475569 !important;
+    }
+
+/* Ensure the parent container establishes an isolated local positioning boundary */
+.d-flex.align-items-center.gap-2.ms-2.me-0 .dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Specific overlay configuration for the shortcut menu */
+.profile-card-dropdown.shortcut-menu-dropdown {
+    position: absolute;
+    /* Aligns the top edge of the dropdown directly to the bottom edge of the button wrapper */
+    top: 100%;
+    /* Aligns the left edge of the dropdown exactly with the left edge of the button wrapper */
+    left: 0 !important;
+    right: auto !important;
+    /* Hard reset on standard spacing to ensure it doesn't push main layout grids or flexing panels */
+    margin: 4px 0 0 0;
+    width: 280px !important;
+    /* Ensure it floats strictly over sidebars and main content panels without layout displacement */
+    z-index: 1200 !important;
+    /* Premium shadow depth to visually lift it off the content tracking surface */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure the main workspace row layout ignores any overflow calculations from this floating menu */
+.fa-workspace-container {
+    position: relative;
+    z-index: 1; /* Kept safely below 1200 */
+}

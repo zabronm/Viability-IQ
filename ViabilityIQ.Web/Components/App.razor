@@ -18,7 +18,18 @@
     <link rel="stylesheet" href="ViabilityIQ.Web.styles.css" />
     <link rel="stylesheet" href="/css/AssessmentSettings.css" />
 
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <!-- SVG Favicon (modern browsers) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any"> 
+
+    <!-- PNG Favicon (fallback, 32x32) -->
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
+
+    <!-- Apple Touch Icon (iOS) -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+
+    <!-- Web App Manifest (PWA) -->
+    <link rel="manifest" href="/site.webmanifest">
+        
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 

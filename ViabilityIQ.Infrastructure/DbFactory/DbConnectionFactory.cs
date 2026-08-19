@@ -11,9 +11,8 @@ public class DbConnectionFactory : IDbConnectionFactory
 
     public IDbConnection CreateConnection()
     {
-        var connection = new SqlConnection(_configuration!.GetConnectionString("ViabilityIQ_Connection"));
-        //var connection = new SqlConnection(_configuration!.GetConnectionString("ConxnSMARTNET"));      //This is the live connection on SmartNET
-                
+        var connection = new SqlConnection(_configuration!.GetConnectionString("ViabilityIQ_Connection"));       
+        //var connection = new SqlConnection(_configuration!.GetConnectionString("Viability_SMARTNET"));      //This is the live connection on SmartNET     
         return connection;
     }
 }

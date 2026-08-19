@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+	<!-- Rounded square background -->
+	<rect width="512" height="512" rx="110" fill="#ffffff" />
+
+	<!-- Optimized VIQ Monogram: Green V, Orange IQ -->
+	<!-- Increased font size and adjusted positioning for better visibility -->
+	<text x="256" y="380" font-family="Arial, Segoe UI, Roboto, Helvetica, sans-serif" font-weight="900" font-size="300" letter-spacing="-8" text-anchor="middle" dominant-baseline="middle">
+		<tspan fill="#0e8553">V</tspan>
+		<tspan fill="#d66827">IQ</tspan>
+	</text>
+</svg>

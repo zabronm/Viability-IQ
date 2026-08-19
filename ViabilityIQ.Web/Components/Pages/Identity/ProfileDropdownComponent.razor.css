@@ -1,0 +1,189 @@
+﻿/* Container holds high priority so it punches through the backdrop */
+.dropdown-container {
+    position: relative;
+    z-index: 100000;
+}
+
+/* Full-screen viewport backdrop blankets the sidebar, top bar, and workspace */
+.dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    background: rgba(30, 41, 59, 0.4); /* Dark charcoal/grey dimming tone */
+}
+
+.avatar-trigger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .avatar-trigger-btn:hover {
+        transform: scale(1.08);
+    }
+
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #000099;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .avatar-circle i {
+        font-size: 1.3rem;
+        color: #ffffff;
+    }
+
+.avatar-trigger-btn:hover .avatar-circle {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 3px rgba(0, 0, 153, 0.15);
+    background-color: #0000bd;
+}
+
+.profile-card-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 280px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    display: none;
+    z-index: 100001;
+    animation: slideDown 0.2s ease-out;
+}
+
+    .profile-card-dropdown.show {
+        display: block;
+    }
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.profile-avatar-large {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #000099;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+    .profile-avatar-large i {
+        font-size: 1.8rem;
+        color: #ffffff;
+    }
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.profile-name {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-role {
+    font-size: 0.72rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+.profile-card-body {
+    padding: 8px 0;
+}
+
+.profile-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    color: #334155;
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+    .profile-dropdown-item:hover {
+        background-color: #f1f5f9;
+        color: #000099;
+        padding-left: 20px;
+    }
+
+    .profile-dropdown-item i {
+        width: 16px;
+        text-align: center;
+    }
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 8px 0;
+}
+
+@media (max-width: 768px) {
+    .profile-card-dropdown {
+        width: 240px;
+    }
+
+    .profile-name {
+        font-size: 0.85rem;
+    }
+
+    .profile-role {
+        font-size: 0.65rem;
+    }
+}

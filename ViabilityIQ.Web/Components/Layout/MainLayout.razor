@@ -2,28 +2,17 @@
 @using ViabilityIQ.Web.Components.Shared
 @inherits LayoutComponentBase
 
-
 <div class="fa-layout-wrapper">
-    @* <TopBarComponent isAssessmentPage=false /> *@
-
     <header class="fa-top-bar">
         <div class="fa-brand-zone">
             <span class="brand-main fs-2">Viability</span><span class="brand-iq  fs-2 fst-italic">.IQ</span>
         </div>
 
         <div class="ms-5 me-0">
-            @* <button class="fa-toggle-sidebar-btn pe-0" @onclick="ToggleSidebar">
-                <span class="nav-icon-avatar-round"><i class="bi bi-list"></i></span>
-            </button> *@
             <button class="fa-toggle-sidebar-btn pe-0 me-0" @onclick="ToggleSidebar">
                 <span class="nav-icon-avatar-round"><i class="bi bi-list"></i></span>
             </button>
         </div>
-
-        @if (isAssessmentPage)
-        {
-            <!-- Assessment page specific content can go here -->
-        }
 
         <div class="fa-top-bar-right">
             <span class="marble-date-badge">
@@ -35,39 +24,13 @@
                 <span class="notification-indicator"></span>
             </button>
 
-            <div class="dropdown-container">
-                <button class="avatar-trigger-btn" @onclick="ToggleProfileMenu" @onfocusout="CloseProfileMenu">
-                    <div class="avatar-circle">ZM</div>
-                </button>
-                <div class="profile-card-dropdown @(isProfileOpen ? "show" : "")">
-                    <div class="profile-card-header">
-                        <div class="profile-avatar-large">ZM</div>
-                        <div class="profile-info">
-                            <h4 class="profile-name">Zabron Muyambo</h4>
-                            <span class="profile-role">Lead Developer</span>
-                        </div>
-                    </div>
-                    <div class="profile-card-body">
-                        <a href="profile" class="profile-dropdown-item">
-                            <i class="bi bi-person me-2"></i> My Profile
-                        </a>
-                        <a href="/register" class="profile-dropdown-item">
-                            <i class="bi bi-gear me-2"></i> Account Settings
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="/logout" class="profile-dropdown-item text-danger">
-                            <i class="bi bi-box-arrow-right me-2"></i> Sign Out
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <ProfileDropdownComponent />
         </div>
     </header>
 
     <div class="fa-workspace-container">
         <aside class="fa-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
             <div class="sidebar-scroller">
-
                 <NavLink class="fa-nav-item" href="/home" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-grid"></i></div>
                     <span class="strong">Dashboards | Home</span>
@@ -103,7 +66,7 @@
                 <NavLink class="fa-nav-item " href="/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
                     <span class="strong">Settings</span>&nbsp;<i class="bi bi-caret-right"></i>
-                </NavLink>                
+                </NavLink>
             </div>
 
             <div class="sidebar-footer-static">
@@ -132,30 +95,8 @@
     </div>
 </div>
 
-
 @code {
-    private bool isAssessmentPage = false;
     private bool isSidebarCollapsed = false;
-    private bool isSetupOpen = false;
-    private bool isQuickAccessOpen = false;
-    private bool isProfileOpen = false;
-
     private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
-    private void ToggleSetupMenu() => isSetupOpen = !isSetupOpen;
-
-    private void ToggleQuickAccess() => isQuickAccessOpen = !isQuickAccessOpen;
-    private void ToggleProfileMenu() => isProfileOpen = !isProfileOpen;
-
-    private async Task CloseQuickAccess()
-    {
-        await Task.Delay(150);
-        isQuickAccessOpen = false;
-    }
-
-    private async Task CloseProfileMenu()
-    {
-        await Task.Delay(150);
-        isProfileOpen = false;
-    }
 }
 <ToastComponent />

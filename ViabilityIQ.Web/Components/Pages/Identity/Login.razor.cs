@@ -116,7 +116,8 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                         ClearLoginForm();
 
                         await Task.Delay(500);
-                        Navigation.NavigateTo("/home", replace: true);
+                        Navigation.NavigateTo("/home", forceLoad: true); // Add forceLoad: true here
+                        //Navigation.NavigateTo("/home", replace: true);
                     }
                     catch (Exception ex)
                     {

@@ -202,9 +202,58 @@ namespace ViabilityIQ.Web
                     }
 
                     // ============================================================================
+                    // CONFIGURE FOR DEPLOYMENT (PUBLISHING)                                          //Added this when deploying to the SMART ASP.NET site
+                    // ============================================================================
+                    Console.WriteLine("[STEP 13] Configuring for deployment...");
+                    try
+                    {
+                        app.ConfigureForDeployment();
+                        Console.WriteLine("[STEP 13] ✓ Deployment configuration complete");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 13] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 13] Message: {ex.Message}");
+                        throw;
+                    }
+
+                    // ============================================================================
+                    // PRINT DEPLOYMENT CHECKLIST
+                    // ============================================================================
+                    Console.WriteLine("[STEP 14] Printing deployment checklist...");
+                    try
+                    {
+                        app.PrintDeploymentChecklist();
+                        Console.WriteLine("[STEP 14] ✓ Deployment checklist printed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 14] ⚠ Could not print checklist: {ex.Message}");
+                        Log.Warning(ex, "Failed to print deployment checklist");
+                    }
+
+                    // ============================================================================
+                    // GENERATE DEPLOYMENT REPORT
+                    // ============================================================================
+                    Console.WriteLine("[STEP 15] Generating deployment report...");
+                    try
+                    {
+                        app.GenerateDeploymentReport();
+                        Console.WriteLine("[STEP 15] ✓ Deployment report generated");
+                        Log.Information("Deployment report generated successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 15] ⚠ Could not generate report: {ex.Message}");
+                        Log.Warning(ex, "Failed to generate deployment report");
+                    }
+
+
+
+                    // ============================================================================
                     // START APPLICATION
                     // ============================================================================
-                    Console.WriteLine("[STEP 13] Starting application...");
+                    Console.WriteLine("[STEP 16] Starting application...");
                     Log.Information("Application started successfully");
                     await app.RunAsync();
                 }

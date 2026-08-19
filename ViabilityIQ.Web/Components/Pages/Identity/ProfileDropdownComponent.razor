@@ -1,0 +1,313 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Routing
+@using ViabilityIQ.Shared.DataModels.SecurityDataModels
+@using ViabilityIQ.Web.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@implements IDisposable
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject ILogger<ProfileDropdownComponent> Logger
+
+<!-- Full-screen backdrop covering the entire viewport when open -->
+@if (isProfileOpen)
+{
+    <div class="dropdown-backdrop" @onclick="CloseProfileMenuImmediately"></div>
+}
+
+<div class="dropdown-container">
+    <!-- Profile Button (Avatar with User Icon) -->
+    <button class="avatar-trigger-btn"
+            @onclick="ToggleProfileMenu"
+            title="@CurrentUserName"
+            type="button">
+        <div class="avatar-circle">
+            @if (!string.IsNullOrEmpty(UserInitials) && UserInitials != "N/A")
+            {
+                <span>@UserInitials</span>
+            }
+            else
+            {
+                <i class="bi bi-person-check-fill"></i>
+            }
+        </div>
+    </button>
+
+    <!-- Profile Dropdown Menu -->
+    @if (IsAuthenticated)
+    {
+        <div class="profile-card-dropdown @(isProfileOpen ? "show" : "")">
+            <!-- Profile Header -->
+            <div class="profile-card-header">
+                <div class="profile-avatar-large">
+                    @if (!string.IsNullOrEmpty(UserInitials) && UserInitials != "N/A")
+                    {
+                        <span>@UserInitials</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-check-fill"></i>
+                    }
+                </div>
+                <div class="profile-info">
+                    <h4 class="profile-name">@CurrentUserName</h4>
+                    <span class="profile-role">@UserRole</span>
+                </div>
+            </div>
+
+            <!-- Profile Body - Menu Items -->
+            <div class="profile-card-body">
+                <a href="/identity/register" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
+                    <i class="bi bi-person me-2"></i> My Profile
+                </a>
+                <a href="/identity/UserSettings" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
+                    <i class="bi bi-gear me-2"></i> Account Settings
+                </a>
+                <a href="/identity/ChangePassword" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
+                    <i class="bi bi-key me-2"></i> Change Password
+                </a>
+                <div class="dropdown-divider"></div>
+                <button class="profile-dropdown-item w-100 text-start border-0 bg-transparent" @onclick="LogoutAsync" type="button">
+                    <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    private bool isProfileOpen = false;
+    private bool IsAuthenticated = false;
+    private ApplicationUser? CurrentUser;
+
+    private string UserInitials = "N/A";
+    private string CurrentUserName = "Loading...";
+    private string UserRole = "User";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Logger.LogInformation("[ProfileDropdownComponent] ===== COMPONENT INITIALIZING =====");
+
+        NavigationManager.LocationChanged += OnLocationChanged;
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+        await LoadUserDataAsync();
+    }
+
+    private async void OnAuthenticationStateChanged(Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> task)
+    {
+        Logger.LogInformation("[ProfileDropdownComponent] AuthenticationStateChanged event fired");
+        await LoadUserDataAsync();
+        StateHasChanged();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (isProfileOpen)
+        {
+            isProfileOpen = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadUserDataAsync()
+    {
+        try
+        {
+            Logger.LogInformation("[ProfileDropdownComponent] ===== LOADING USER DATA =====");
+
+            // Get authentication state
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            Logger.LogInformation("[ProfileDropdownComponent] Auth state retrieved");
+            Logger.LogInformation("[ProfileDropdownComponent] IsAuthenticated: {IsAuthenticated}", user?.Identity?.IsAuthenticated);
+            Logger.LogInformation("[ProfileDropdownComponent] Identity Type: {IdentityType}", user?.Identity?.AuthenticationType);
+            Logger.LogInformation("[ProfileDropdownComponent] Claims count: {ClaimCount}", user?.Claims.Count() ?? 0);
+
+            // List all claims for debugging
+            if (user?.Claims.Any() == true)
+            {
+                foreach (var claim in user.Claims)
+                {
+                    Logger.LogInformation("[ProfileDropdownComponent] Claim - {ClaimType}: {ClaimValue}", claim.Type, claim.Value);
+                }
+            }
+
+            // Set authentication state
+            IsAuthenticated = user?.Identity?.IsAuthenticated ?? false;
+            Logger.LogInformation("[ProfileDropdownComponent] IsAuthenticated set to: {IsAuthenticated}", IsAuthenticated);
+
+            if (IsAuthenticated)
+            {
+                Logger.LogInformation("[ProfileDropdownComponent] ✓ User is authenticated! Loading user details...");
+
+                // Get email from claims
+                var email = user.FindFirst(ClaimTypes.Email)?.Value;
+                var firstName = user.FindFirst("FirstName")?.Value;
+                var lastName = user.FindFirst("LastName")?.Value;
+                var fullName = user.FindFirst(ClaimTypes.Name)?.Value;
+
+                Logger.LogInformation("[ProfileDropdownComponent] Email from claims: {Email}", email);
+                Logger.LogInformation("[ProfileDropdownComponent] FirstName from claims: {FirstName}", firstName);
+                Logger.LogInformation("[ProfileDropdownComponent] LastName from claims: {LastName}", lastName);
+                Logger.LogInformation("[ProfileDropdownComponent] FullName from claims: {FullName}", fullName);
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    try
+                    {
+                        // Load user from database
+                        CurrentUser = await UserManager.FindByEmailAsync(email);
+
+                        if (CurrentUser != null)
+                        {
+                            Logger.LogInformation("[ProfileDropdownComponent] ✓ User found in database: {UserName}", CurrentUser.UserName);
+
+                            // Set display name
+                            CurrentUserName = $"{CurrentUser.FirstName} {CurrentUser.LastName}".Trim();
+                            if (string.IsNullOrEmpty(CurrentUserName))
+                            {
+                                CurrentUserName = CurrentUser.UserName ?? email;
+                            }
+
+                            // Get initials
+                            UserInitials = GetUserInitials(CurrentUserName);
+                            Logger.LogInformation("[ProfileDropdownComponent] User initials: {Initials}", UserInitials);
+
+                            // Get user role
+                            UserRole = await GetUserRoleAsync(CurrentUser);
+                            Logger.LogInformation("[ProfileDropdownComponent] User role: {Role}", UserRole);
+
+                            Logger.LogInformation("[ProfileDropdownComponent] ✓✓✓ USER DATA LOADED SUCCESSFULLY ✓✓✓");
+                        }
+                        else
+                        {
+                            Logger.LogWarning("[ProfileDropdownComponent] ❌ User NOT found in database for email: {Email}", email);
+                            CurrentUserName = email;
+                            UserInitials = GetUserInitials(email);
+                        }
+                    }
+                    catch (Exception dbEx)
+                    {
+                        Logger.LogError(dbEx, "[ProfileDropdownComponent] ❌ ERROR querying database for user");
+                        CurrentUserName = email;
+                        UserInitials = GetUserInitials(email);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(fullName))
+                {
+                    Logger.LogInformation("[ProfileDropdownComponent] Using name from claims: {FullName}", fullName);
+                    CurrentUserName = fullName;
+                    UserInitials = GetUserInitials(fullName);
+                }
+                else
+                {
+                    Logger.LogWarning("[ProfileDropdownComponent] ⚠ No email or name found in claims");
+                    CurrentUserName = "User";
+                    UserInitials = "N/A";
+                }
+            }
+            else
+            {
+                Logger.LogWarning("[ProfileDropdownComponent] ❌ User is NOT authenticated - returning anonymous state");
+                CurrentUserName = "Not Logged In";
+                UserInitials = "N/A";
+                UserRole = "Guest";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "[ProfileDropdownComponent] ❌ EXCEPTION in LoadUserDataAsync");
+            Logger.LogError("[ProfileDropdownComponent] Exception Type: {ExceptionType}", ex.GetType().Name);
+            Logger.LogError("[ProfileDropdownComponent] Exception Message: {Message}", ex.Message);
+            Logger.LogError("[ProfileDropdownComponent] Stack Trace: {StackTrace}", ex.StackTrace);
+
+            IsAuthenticated = false;
+            CurrentUserName = "Error";
+            UserInitials = "ERR";
+        }
+
+        StateHasChanged();
+        Logger.LogInformation("[ProfileDropdownComponent] ===== LOAD USER DATA COMPLETE =====");
+    }
+
+    private string GetUserInitials(string? userName)
+    {
+        if (string.IsNullOrEmpty(userName)) return "N/A";
+        var parts = userName.Split(new[] { ' ', '.', '@' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        return userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : userName[0].ToString().ToUpper();
+    }
+
+    private async Task<string> GetUserRoleAsync(ApplicationUser user)
+    {
+        try
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            if (roles.Count > 0)
+            {
+                Logger.LogInformation("[ProfileDropdownComponent] User roles: {Roles}", string.Join(", ", roles));
+                return roles[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "[ProfileDropdownComponent] Error loading user roles");
+        }
+        return "User";
+    }
+
+    private void ToggleProfileMenu()
+    {
+        Logger.LogInformation("[ProfileDropdownComponent] Toggle menu - Current: {Current}, New: {New}", isProfileOpen, !isProfileOpen);
+        isProfileOpen = !isProfileOpen;
+        StateHasChanged();
+    }
+
+    private void CloseProfileMenuImmediately()
+    {
+        isProfileOpen = false;
+        StateHasChanged();
+    }
+
+    private async Task LogoutAsync()
+    {
+        try
+        {
+            Logger.LogInformation("[ProfileDropdownComponent] ===== LOGOUT INITIATED =====");
+
+            CloseProfileMenuImmediately();
+
+            Logger.LogInformation("[ProfileDropdownComponent] Calling SignInManager.SignOutAsync()...");
+            await SignInManager.SignOutAsync();
+            Logger.LogInformation("[ProfileDropdownComponent] ✓ SignOutAsync completed");
+
+            Logger.LogInformation("[ProfileDropdownComponent] Calling AuthenticationStateProvider.NotifyUserLogout()...");
+            AuthenticationStateProvider.NotifyUserLogout();
+            Logger.LogInformation("[ProfileDropdownComponent] ✓ NotifyUserLogout completed");
+
+            Logger.LogInformation("[ProfileDropdownComponent] Redirecting to home...");
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "[ProfileDropdownComponent] ❌ ERROR during logout");
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        try
+        {
+            AuthenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+        }
+        catch { }
+    }
+}

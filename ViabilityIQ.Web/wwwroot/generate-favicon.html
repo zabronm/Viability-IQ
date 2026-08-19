@@ -1,0 +1,42 @@
+﻿HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VIQ Favicon Generator</title>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; background: #f4f4f4;">
+<h3>VIQ Favicon PNG Generator</h3>
+<canvas id="canvas" width="512" height="512" style="border: 1px solid #ccc; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px;"></canvas>
+<br>
+<button id="downloadBtn" style="padding: 12px 24px; font-size: 16px; background: #0e8553; color: white; border: none; border-radius: 6px; cursor: pointer;">Download favicon.png</button>
+
+<script>const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Draw background with rounded corners
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.roundRect(0, 0, 512, 512, 110);
+        ctx.fill();
+
+        // Draw Text (V in Green, IQ in Orange)
+        ctx.font = "800 250px 'Arial, Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+        ctx.textBaseline = "middle";
+
+        // V
+        ctx.fillStyle = "#0e8553";
+        ctx.fillText("V", 45, 270);
+
+        // IQ
+        ctx.fillStyle = "#d66827";
+        ctx.fillText("IQ", 215, 270);
+
+        // Handle Download
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const link = document.createElement('a');
+            link.download = 'favicon.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });</script>
+</body>
+</html>
