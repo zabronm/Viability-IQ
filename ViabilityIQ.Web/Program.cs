@@ -54,6 +54,15 @@ namespace ViabilityIQ.Web
                     });
                     Console.WriteLine("[STEP 3] ✓ Success");
 
+
+                    // ============================================================================
+                    // ADD CONTROLLERS (For API Endpoints)
+                    // ============================================================================
+                    Console.WriteLine("[STEP 3.5] Adding controllers...");
+                    builder.Services.AddControllers();
+                    Console.WriteLine("[STEP 3.5] ✓ Controllers added");
+
+
                     // ============================================================================
                     // ADD ERROR HANDLING SERVICES
                     // ============================================================================
@@ -115,7 +124,8 @@ namespace ViabilityIQ.Web
                     Console.WriteLine("[STEP 8] Adding application services...");
                     try
                     {
-                        builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
+                        //builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
+                        builder.Services.AddAllApplicationServices(builder.Configuration, builder.Environment);
                         Console.WriteLine("[STEP 8] ✓ Success");
                     }
                     catch (Exception ex)
@@ -198,6 +208,23 @@ namespace ViabilityIQ.Web
                     {
                         Console.WriteLine($"[STEP 12] ✗ FAILED: {ex.GetType().Name}");
                         Console.WriteLine($"[STEP 12] Message: {ex.Message}");
+                        throw;
+                    }
+
+
+                    // ============================================================================
+                    // MAP API CONTROLLERS (For API Endpoints) - ✅ ADD THIS
+                    // ============================================================================
+                    Console.WriteLine("[STEP 12.5] Mapping API controllers...");
+                    try
+                    {
+                        app.MapControllers();
+                        Console.WriteLine("[STEP 12.5] ✓ API controllers mapped");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[STEP 12.5] ✗ FAILED: {ex.GetType().Name}");
+                        Console.WriteLine($"[STEP 12.5] Message: {ex.Message}");
                         throw;
                     }
 

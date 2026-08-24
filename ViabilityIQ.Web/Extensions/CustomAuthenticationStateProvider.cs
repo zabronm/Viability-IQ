@@ -5,10 +5,10 @@ using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
 namespace ViabilityIQ.Web.Extensions
 {
-    /// <summary>
+    
     /// Custom Authentication State Provider for Blazor Server
     /// Integrates with ASP.NET Core Identity to read the actual authentication state from HttpContext
-    /// </summary>
+    
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         #region Private Fields
@@ -35,10 +35,10 @@ namespace ViabilityIQ.Web.Extensions
 
         #region Public Methods
 
-        /// <summary>
+        
         /// Gets the current authentication state from HttpContext
         /// This reads from ASP.NET Core's built-in authentication system
-        /// </summary>
+        
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             try
@@ -93,10 +93,10 @@ namespace ViabilityIQ.Web.Extensions
             }
         }
 
-        /// <summary>
+        
         /// Notifies authentication state has changed
         /// Call this after successful login to refresh authentication state
-        /// </summary>
+        
         public async Task NotifyUserAuthenticationAsync(ApplicationUser user)
         {
             try
@@ -123,9 +123,9 @@ namespace ViabilityIQ.Web.Extensions
             }
         }
 
-        /// <summary>
+        
         /// Notifies user has logged out
-        /// </summary>
+        
         public void NotifyUserLogout()
         {
             try

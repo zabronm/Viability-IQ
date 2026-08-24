@@ -13,7 +13,142 @@
     <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">    
         <div class="col-xl-10 col-lg-9 col-12">
             <!-- place VAT components here-->
-            
+            <div class="vat-page-container">
+                <div class="vat-header">
+                    <div class="vat-title-section">
+                        <h2 class="vat-page-title">VAT Projections & Schedule</h2>
+                        <p class="vat-page-subtitle">Assessment ID: #ASSESS-2026-9042 | 12-Month Tax Modeling</p>
+                    </div>
+                    <div class="vat-actions">
+                        <button class="btn-vat-secondary" @onclick="ExportReport">
+                            <i class="bi bi-download"></i> Export Report
+                        </button>
+                        <button class="btn-vat-primary" @onclick="SaveChanges">
+                            <i class="bi bi-check2-all"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="vat-table-card">
+                    <div class="table-responsive">
+                        <table class="table vat-schedule-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-line-item">Line Item</th>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <th class="text-end">M@i</th>
+                                    }
+                                    <th class="text-end">Total</th>
+                                    <th class="text-center col-action">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Base Engine Projections -->
+                                <tr>
+                                    <td class="fw-semibold text-dark">Gross Sales (Revenue)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-muted">@Sales[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@Sales.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-dark">Taxable Purchases</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-muted">@Purchases[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@Purchases.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-dark">Operating Expenses</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-muted">@Expenses[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@Expenses.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+
+                                <tr class="table-divider-row"><td colspan="15"></td></tr>
+
+                                <!-- Calculated VAT -->
+                                <tr>
+                                    <td class="text-secondary">Output VAT (Calculated)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-secondary">@CalcOutput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end text-secondary">@CalcOutput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Input VAT (Calculated)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-secondary">@CalcInput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end text-secondary">@CalcInput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-secondary">Net VAT Payable (Calc)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-bold text-secondary">@CalcNet[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-secondary">@CalcNet.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+
+                                <tr class="table-section-header">
+                                    <td colspan="15">ADJUSTED VAT SCHEDULE (FOR PAYMENT & CASHFLOW)</td>
+                                </tr>
+
+                                <!-- Adjusted VAT Rows -->
+                                <tr>
+                                    <td class="fw-semibold text-marble">Adjusted Output VAT</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-semibold text-dark">@AdjOutput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@AdjOutput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-marble">Adjusted Input VAT</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-semibold text-dark">@AdjInput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@AdjInput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr class="table-highlight-row">
+                                    <td class="fw-bold text-marble">Net Payable (Adjusted)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-bold text-marble">@AdjNet[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-marble">@AdjNet.Sum().ToString("N0")</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-marble" @onclick="OpenAdjustmentOffCanvas">
+                                            <i class="bi bi-sliders"></i> Adjust VAT
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+
         </div>
         <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
 
@@ -26,3 +161,6 @@
     <footer class="py-2 bg-light mt-3">
         <BFooter />
     </footer>
+
+<!-- OffCanvas Component Integration -->
+<VatAdjustmentComponent @ref="adjustmentOffCanvas" OnSave="HandleAdjustmentsSaved" />

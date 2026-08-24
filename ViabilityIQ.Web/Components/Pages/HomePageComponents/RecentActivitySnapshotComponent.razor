@@ -1,0 +1,75 @@
+﻿<div class="recent-activity-section">
+    <div class="activity-header">
+        <div class="activity-title-section">
+            <h3 class="activity-title">
+                <i class="bi bi-clock-history activity-title-icon"></i>
+                Recent Activity
+            </h3>
+            <p class="activity-subtitle">Latest actions and updates across the system</p>
+        </div>
+
+        <div class="activity-filters">
+            <button class="filter-option @(GetFilterClass(1))" @onclick="() => SelectFilter(1)" title="Last 24 hours">
+                Last 24 hours
+            </button>
+            <button class="filter-option @(GetFilterClass(2))" @onclick="() => SelectFilter(2)" title="Last 7 days">
+                Last 7 days
+            </button>
+            <button class="filter-option @(GetFilterClass(3))" @onclick="() => SelectFilter(3)" title="Last 30 days">
+                Last 30 days
+            </button>
+            <button class="filter-option @(GetFilterClass(4))" @onclick="() => SelectFilter(4)" title="All activities">
+                All
+            </button>
+        </div>
+    </div>
+
+    <div class="activity-table-wrapper">
+        @if (Activities == null || Activities.Count == 0)
+        {
+            <div class="no-activities">
+                <i class="bi bi-inbox activity-empty-icon"></i>
+                <p>No activities found</p>
+            </div>
+        }
+        else
+        {
+            <table class="activity-table">
+                <tbody>
+                    @foreach (var activity in Activities)
+                    {
+                        <tr class="activity-row">
+                            <td class="col-actor">
+                                <div class="actor-info">
+                                    <div class="actor-avatar">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div class="actor-details">
+                                        <span class="actor-name">@activity.ActorName</span>
+                                        <span class="activity-time">@FormatActivityTime(activity.CreatedDate)</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-action">
+                                <span class="activity-action-badge @GetActivityActionClass(activity.ActivityType)">
+                                    @GetActivityActionDisplay(activity.ActivityType)
+                                </span>
+                            </td>
+                            <td class="col-object">
+                                <span class="activity-object">@activity.ObjectName</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="activity-footer">
+        <a href="/activity-log" class="view-all-link">
+            <i class="bi bi-list-ul"></i>
+            View All Activities
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,200 @@
+﻿/* Quick Actions Section Container */
+.quick-actions-section {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    flex: 1 1 auto;
+}
+
+/* Actions Header */
+.actions-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.actions-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e3a5f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.actions-title-icon {
+    font-size: 1.25rem;
+    color: #ffc107;
+}
+
+.actions-subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+/* Actions Container */
+.actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Action Button Base - Reduced font sizes to fit tighter column widths */
+.action-button {
+    background-color: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-align: left;
+}
+
+    .action-button:hover {
+        transform: translateX(2px);
+    }
+
+    /* Primary Actions - Updated to marble color #29465B with gradient fade */
+    .action-button.action-primary {
+        background: linear-gradient(135deg, #29465B 0%, #1a2e3d 100%);
+        color: #ffffff;
+        border-color: #29465B;
+    }
+
+        .action-button.action-primary:hover {
+            background: linear-gradient(135deg, #1f3544 0%, #12202a 100%);
+            border-color: #12202a;
+            box-shadow: 0 4px 10px rgba(41, 70, 91, 0.25);
+        }
+
+        .action-button.action-primary:active {
+            transform: translateX(1px);
+        }
+
+    /* Secondary Actions - Subtle marble tint with smooth interactive highlights */
+    .action-button.action-secondary {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        color: #29465B;
+        border-color: #cbd5e1;
+    }
+
+        .action-button.action-secondary:hover {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            color: #1a2e3d;
+            border-color: #94a3b8;
+            box-shadow: 0 2px 6px rgba(41, 70, 91, 0.1);
+        }
+
+        .action-button.action-secondary:active {
+            transform: translateX(1px);
+        }
+
+/* Action Icon Wrapper */
+.action-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.action-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+/* Action Text */
+.action-text {
+    flex: 1;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Action Arrow */
+.action-arrow {
+    font-size: 0.75rem;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    margin-left: auto;
+}
+
+.action-button.action-secondary:hover .action-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+}
+
+/* Divider */
+.actions-divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 4px 0;
+}
+
+/* Secondary Actions Group */
+.actions-secondary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
+
+/* Disabled State */
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .quick-actions-section {
+        padding: 16px;
+    }
+
+    .actions-title {
+        font-size: 1rem;
+    }
+
+    .action-button {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+
+    .action-icon {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-actions-section {
+        padding: 12px;
+    }
+
+    .action-button {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+    }
+
+    .action-arrow {
+        display: none;
+    }
+}
+
+```[cite: 12]

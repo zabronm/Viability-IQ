@@ -216,9 +216,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
         #endregion
     }
 
-    /// <summary>
+    
     /// Cashflow Summary Data Model
-    /// </summary>
+    
     public class CashflowSummaryData
     {
         public decimal TotalSales { get; set; }

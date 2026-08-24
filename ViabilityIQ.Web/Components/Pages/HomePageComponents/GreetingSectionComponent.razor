@@ -1,0 +1,17 @@
+﻿@using ViabilityIQ.Shared.DataModels.SecurityDataModels
+
+<div class="greeting-section my-0 py-1">
+    <div class="greeting-content">
+        <h1 class="greeting-title">
+            Welcome back, <span class="greeting-name">@CurrentUser?.FirstName</span>! 👋
+        </h1>
+        <p class="greeting-subtitle">
+            <span class="last-seen-label">Last seen:</span>
+            <span class="last-seen-time">@FormatLastLoginDate(LastLoginDate)</span>
+            <span class="branch-separator">|</span>
+            <span class="branch-label">Your Branch:</span>
+            <span class="branch-name">@CurrentBranch</span>
+        </p>
+    </div>
+</div>
+

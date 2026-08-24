@@ -1,0 +1,68 @@
+﻿<div class="recent-assessments-section">
+    <div class="assessments-header">
+        <h3 class="assessments-title">
+            <i class="bi bi-file-check assessments-title-icon"></i>
+            Recent Assessments
+        </h3>
+        <p class="assessments-subtitle">Latest assessments for businesses</p>
+    </div>
+
+    @if (Assessments == null || Assessments.Count == 0)
+    {
+        <div class="no-assessments">
+            <i class="bi bi-inbox assessments-empty-icon"></i>
+            <p>No recent assessments</p>
+        </div>
+    }
+    else
+    {
+        <div class="assessments-list">
+            @foreach (var assessment in Assessments)
+            {
+                <div class="assessment-card">
+                    <div class="assessment-card-header">
+                        <div class="assessment-info">
+                            <h4 class="assessment-name">@assessment.Name</h4>
+                            <p class="assessment-business">
+                                <i class="bi bi-building"></i>
+                                @assessment.BusinessName
+                            </p>
+                        </div>
+                        <span class="assessment-status @GetStatusClass(assessment.Status)">
+                            @assessment.Status
+                        </span>
+                    </div>
+
+                    <div class="assessment-card-body">
+                        <div class="assessment-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @assessment.ProgressPercentage%"></div>
+                            </div>
+                            <span class="progress-text">@assessment.ProgressPercentage%</span>
+                        </div>
+
+                        <div class="assessment-meta">
+                            <span class="meta-item">
+                                <i class="bi bi-calendar"></i>
+                                Modified: @assessment.ModifiedDate.ToString("MMM d, yyyy")
+                            </span>
+                            @if (assessment.DueDate.HasValue)
+                            {
+                                <span class="meta-item">
+                                    <i class="bi bi-clock"></i>
+                                    Due: @assessment.DueDate.Value.ToString("MMM d, yyyy")
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="assessment-card-actions">
+                        <a href="@assessment.ViewUrl" class="assessment-btn view-btn">View</a>
+                        <a href="@assessment.EditUrl" class="assessment-btn edit-btn">Edit</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

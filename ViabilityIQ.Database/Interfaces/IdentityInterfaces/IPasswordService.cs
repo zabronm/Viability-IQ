@@ -14,18 +14,18 @@ namespace ViabilityIQ.Application.Interfaces.IdentityInterfaces
 
         
         /// Resets the user's password using a valid reset token        
-        Task<PasswordResetResult> ResetPasswordAsync(string userId, string token, string newPassword);
+        Task<PasswordResetResult> ResetPasswordAsync(long userId, string token, string newPassword);
 
         
         /// Generates an email confirmation token        
-        Task<EmailConfirmationResult> GenerateEmailConfirmationTokenAsync(string userId);
+        Task<EmailConfirmationResult> GenerateEmailConfirmationTokenAsync(long userId);
 
         
         /// Confirms the user's email address        
-        Task<EmailConfirmationResult> ConfirmEmailAsync(string userId, string token);
+        Task<EmailConfirmationResult> ConfirmEmailAsync(long userId, string token);
 
         
         /// Changes the password for an authenticated user        
-        Task<PasswordChangeResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
+        Task<PasswordChangeResult> ChangePasswordAsync(long userId, string currentPassword, string newPassword);
     }
 }

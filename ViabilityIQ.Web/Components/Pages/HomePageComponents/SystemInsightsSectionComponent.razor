@@ -1,0 +1,167 @@
+﻿@using ViabilityIQ.Web.Models.Dashboard
+
+<div class="insights-section">
+    <div class="insights-header">
+        <h3 class="insights-title">
+            <i class="bi bi-graph-up insights-title-icon"></i>
+            System Insights & Analytics
+        </h3>
+        <p class="insights-subtitle">Performance metrics and trends</p>
+    </div>
+
+    @if (Insights == null)
+    {
+        <div class="insights-loading">
+            <div class="spinner-small"></div>
+            <p>Loading insights...</p>
+        </div>
+    }
+    else
+    {
+        <div class="insights-grid">
+            <!-- Completion Rate Metric -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <h4 class="metric-title">Completion Rate</h4>
+                    <button class="export-btn" @onclick="() => HandleExport(1, 1)" title="Export as Excel">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="metric-body">
+                    <div class="metric-value-section">
+                        <span class="metric-value">@Insights.CompletionRatePercent%</span>
+                        <span class="metric-trend @(Insights.CompletionRateTrend > 0 ? "trend-up" : "trend-down")">
+                            <i class="bi @(Insights.CompletionRateTrend > 0 ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                            @Math.Abs(Insights.CompletionRateTrend)% vs last month
+                        </span>
+                    </div>
+                    <div class="metric-detail">
+                        <span class="detail-label">Target: 90%</span>
+                        <span class="detail-value @(Insights.CompletionRatePercent >= 90 ? "detail-success" : "detail-warning")">
+                            @(Insights.CompletionRatePercent >= 90 ? "On Track" : "Below Target")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Completion Time Metric -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <h4 class="metric-title">Avg Completion Time</h4>
+                    <button class="export-btn" @onclick="() => HandleExport(2, 1)" title="Export as Excel">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="metric-body">
+                    <div class="metric-value-section">
+                        <span class="metric-value">@Insights.AverageCompletionDays days</span>
+                        <span class="metric-trend @(Insights.CompletionTimeTrend < 0 ? "trend-up" : "trend-down")">
+                            <i class="bi @(Insights.CompletionTimeTrend < 0 ? "bi-arrow-down" : "bi-arrow-up")"></i>
+                            @Math.Abs(Insights.CompletionTimeTrend) days @(Insights.CompletionTimeTrend < 0 ? "faster" : "slower")
+                        </span>
+                    </div>
+                    <div class="metric-detail">
+                        <span class="detail-label">Last Month: @Insights.PreviousCompletionDays days</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Distribution Chart -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <h4 class="metric-title">Assessments by Status</h4>
+                    <div class="export-buttons-group">
+                        <button class="export-btn" @onclick="() => HandleExport(3, 1)" title="Export as Excel">
+                            <i class="bi bi-file-earmark-excel"></i>
+                        </button>
+                        <button class="export-btn" @onclick="() => HandleExport(3, 2)" title="Export as PDF">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="metric-body">
+                    <div class="distribution-container">
+                        <div class="pie-chart-section">
+                            <div class="pie-chart-placeholder">
+                                <svg class="pie-chart" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="20"></circle>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#0066cc" stroke-width="20"
+                                            stroke-dasharray="@(Insights.ActivePercentage * 2.83) 282.7"
+                                            stroke-dashoffset="0" stroke-linecap="round"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="distribution-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #0066cc;"></span>
+                                <span class="legend-text">Active: @Insights.ActiveCount (@Insights.ActivePercentage%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #28a745;"></span>
+                                <span class="legend-text">Completed: @Insights.CompletedCount (@Insights.CompletedPercentage%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #ffc107;"></span>
+                                <span class="legend-text">Pending: @Insights.PendingCount (@Insights.PendingPercentage%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #6c757d;"></span>
+                                <span class="legend-text">Other: @Insights.OtherCount (@Insights.OtherPercentage%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performers Leaderboard -->
+            <div class="metric-card">
+                <div class="metric-header">
+                    <h4 class="metric-title">Top Performers This Month</h4>
+                    <div class="export-buttons-group">
+                        <button class="export-btn" @onclick="() => HandleExport(4, 1)" title="Export as Excel">
+                            <i class="bi bi-file-earmark-excel"></i>
+                        </button>
+                        <button class="export-btn" @onclick="() => HandleExport(4, 2)" title="Export as PDF">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="metric-body">
+                    <div class="leaderboard">
+                        @if (Insights.TopPerformers != null && Insights.TopPerformers.Count > 0)
+                        {
+                            @foreach (var (performer, index) in Insights.TopPerformers.Select((x, i) => (x, i)))
+                            {
+                                <div class="leaderboard-item">
+                                    <div class="leaderboard-rank">
+                                        <span class="rank-badge rank-@(index + 1)">@(index + 1)</span>
+                                    </div>
+                                    <div class="leaderboard-info">
+                                        <div class="performer-name">@performer.Name</div>
+                                        <div class="performer-detail">@performer.CompletedCount assessments completed</div>
+                                    </div>
+                                    <div class="leaderboard-score">
+                                        <span class="score-value">@performer.CompletedCount</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="no-performers">No performance data available</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Full Analytics Link -->
+        <div class="insights-footer">
+            <a href="/analytics" class="view-analytics-link">
+                <i class="bi bi-graph-up"></i>
+                View Full Analytics Dashboard
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    }
+</div>

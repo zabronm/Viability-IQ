@@ -190,9 +190,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             }
         }
 
-        /// <summary>
+        
         /// Calculate NPV with 10% discount rate
-        /// </summary>
+        
         private decimal CalculateNPVFromList(List<CashflowMonthlyDto> cashflows, decimal discountRate)
         {
             decimal npv = 0;
@@ -208,9 +208,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             return npv;
         }
 
-        /// <summary>
+        
         /// Calculate payback period in months
-        /// </summary>
+        
         private decimal CalculatePaybackPeriodFromList(List<CashflowMonthlyDto> cashflows)
         {
             decimal cumulativeProfit = 0;
@@ -231,9 +231,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             return cashflows.Count; // Full period if not paid back
         }
 
-        /// <summary>
+        
         /// Calculate overall viability score (0-100)
-        /// </summary>
+        
         private decimal CalculateViabilityScore(
             decimal marginOfSafety, decimal npv, decimal worstCaseProfit,
             decimal currentRatio, decimal interestCover, decimal profitVolatility,
@@ -284,9 +284,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             }
         }
 
-        /// <summary>
+        
         /// Get margin of safety status text
-        /// </summary>
+        
         private string GetMarginOfSafetyStatus(decimal margin)
         {
             return margin switch
@@ -300,9 +300,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Get color code for margin of safety
-        /// </summary>
+        
         private string GetMargOfSafetyColor(decimal margin)
         {
             return margin switch
@@ -316,9 +316,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Get color code for current ratio
-        /// </summary>
+        
         private string GetCurrentRatioColor(decimal ratio)
         {
             return ratio switch
@@ -331,9 +331,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Get current ratio status text
-        /// </summary>
+        
         private string GetCurrentRatioStatus(decimal ratio)
         {
             return ratio switch
@@ -346,9 +346,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Get color code for viability score
-        /// </summary>
+        
         private string GetViabilityScoreColor(decimal score)
         {
             return score switch
@@ -362,9 +362,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Get viability score rating text
-        /// </summary>
+        
         private string GetViabilityScoreRating(decimal score)
         {
             return score switch
@@ -378,9 +378,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Generate viability assessment narrative
-        /// </summary>
+        
         private string GetViabilityAssessment(FinancialViabilityData data)
         {
             var factors = new List<string>();
@@ -436,84 +436,84 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
         #endregion
     }
 
-    /// <summary>
+    
     /// Financial Viability Data Model
     /// Contains all calculated metrics for financial viability assessment
-    /// </summary>
+    
     public class FinancialViabilityData
     {
-        /// <summary>
+        
         /// Sales level at which profit equals zero
-        /// </summary>
+        
         public decimal BreakEvenSales { get; set; }
 
-        /// <summary>
+        
         /// Percentage by which sales can decline before reaching break-even
-        /// </summary>
+        
         public decimal MarginOfSafety { get; set; }
 
-        /// <summary>
+        
         /// Net Present Value of cash flows at 10% discount rate
-        /// </summary>
+        
         public decimal NPV { get; set; }
 
-        /// <summary>
+        
         /// Percentage range used for sensitivity analysis
-        /// </summary>
+        
         public decimal SensitivityRange { get; set; }
 
-        /// <summary>
+        
         /// Profit in worst case scenario (sales reduced by sensitivity range)
-        /// </summary>
+        
         public decimal WorstCaseProfit { get; set; }
 
-        /// <summary>
+        
         /// Ratio of current assets to current liabilities
         /// Measures short-term liquidity
-        /// </summary>
+        
         public decimal CurrentRatio { get; set; }
 
-        /// <summary>
+        
         /// Times interest can be covered by EBITDA
         /// Measures ability to service debt
-        /// </summary>
+        
         public decimal InterestCover { get; set; }
 
-        /// <summary>
+        
         /// Overall viability score (0-100)
         /// Composite measure of financial health
-        /// </summary>
+        
         public decimal ViabilityScore { get; set; }
 
-        /// <summary>
+        
         /// Annual fixed operating costs
-        /// </summary>
+        
         public decimal FixedCosts { get; set; }
 
-        /// <summary>
+        
         /// Contribution margin as percentage of sales
-        /// </summary>
+        
         public decimal ContributionMarginRatio { get; set; }
 
-        /// <summary>
+        
         /// Number of months to recover initial investment
-        /// </summary>
+        
         public decimal PaybackPeriod { get; set; }
 
-        /// <summary>
+        
         /// Degree to which EBIT changes with sales changes
-        /// </summary>
+        
         public decimal OperatingLeverage { get; set; }
 
-        /// <summary>
+        
         /// Ratio of EBITDA to debt service obligations
-        /// </summary>
+        
         public decimal DebtServiceCoverage { get; set; }
 
-        /// <summary>
+        
         /// Standard deviation of monthly profits as percentage of average
         /// Measures profit stability
-        /// </summary>
+        
         public decimal ProfitVolatility { get; set; }
     }
 }

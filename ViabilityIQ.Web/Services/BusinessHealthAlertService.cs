@@ -10,9 +10,9 @@ using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Web.Services
 {
-    /// <summary>
+    
     /// Analyzes cashflow data and generates intelligent business health alerts
-    /// </summary>
+    
     public class BusinessHealthAlertService : IBusinessHealthAlertService
     {
         #region Private Fields
@@ -51,9 +51,9 @@ namespace ViabilityIQ.Web.Services
 
         #region Public Methods
 
-        /// <summary>
+        
         /// Checks if assessment has any financial data
-        /// </summary>
+        
         public async Task<bool> HasDataAsync(long assessmentId)
         {
             try
@@ -74,9 +74,9 @@ namespace ViabilityIQ.Web.Services
             }
         }
 
-        /// <summary>
+        
         /// Generates all business health alerts for an assessment
-        /// </summary>
+        
         public async Task<List<BusinessHealthAlert>> GenerateAlertsAsync(long assessmentId, CashflowSummaryDto summary)
         {
             try
@@ -552,9 +552,9 @@ namespace ViabilityIQ.Web.Services
             }
         }
 
-        /// <summary>
+        
         /// Gets latest alerts (max 3, prioritized by severity)
-        /// </summary>
+        
         public async Task<List<BusinessHealthAlert>> GetLatestAlertsAsync(long assessmentId, int maxAlerts = 3)
         {
             try
@@ -586,9 +586,9 @@ namespace ViabilityIQ.Web.Services
 
         #region Private Methods
 
-        /// <summary>
+        
         /// Creates the default onboarding alert for new assessments with no data
-        /// </summary>
+        
         private BusinessHealthAlert GetOnboardingAlert(long assessmentId)
         {
             return new BusinessHealthAlert

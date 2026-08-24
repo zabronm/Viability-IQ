@@ -1,0 +1,76 @@
+﻿<div class="custom-offcanvas-backdrop @(_isOpen ? "show" : "d-none")" @onclick="Close"></div>
+
+<div class="custom-offcanvas @(_isOpen ? "open" : "")">
+    <div class="offcanvas-header">
+        <div>
+            <h5 class="offcanvas-title">Bulk VAT Adjustments & Overrides</h5>
+            <small class="text-muted">Assessment ID: #ASSESS-2026-9042</small>
+        </div>
+        <button type="button" class="btn-close" @onclick="Close"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div class="alert alert-info py-2 px-3 mb-3 text-xs">
+            <i class="bi bi-info-circle-fill me-1"></i> Adjustments entered here override calculated values for payment and cashflow modeling without altering base engine figures.
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Global Reason Code</label>
+            <select class="form-select form-select-sm">
+                <option selected>Select Default Reason (e.g., Apportionment Ratio / Bad Debts)</option>
+                <option value="bad_debt">Bad Debt Relief</option>
+                <option value="apportionment">Apportionment Adjustment</option>
+                <option value="capital_goods">Capital Goods Correction</option>
+                <option value="rounding">Manual Rounding</option>
+            </select>
+        </div>
+
+        <div class="table-responsive border rounded mb-3" style="max-height: 350px; overflow-y: auto;">
+            <table class="table table-sm table-bordered mb-0 text-xs">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th>Month</th>
+                        <th>Output VAT Adj (+/-)</th>
+                        <th>Input VAT Adj (+/-)</th>
+                        <th>Month Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        int index = i;
+                        <tr>
+                            <td class="fw-semibold align-middle">Month @(index + 1)</td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm text-end" @bind="outputAdjustments[index]" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm text-end" @bind="inputAdjustments[index]" />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" placeholder="Optional note..." @bind="monthNotes[index]" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals Row Summary -->
+        <div class="p-2 bg-light border rounded mb-3 d-flex justify-content-between align-items-center text-xs fw-bold text-marble">
+            <span>TOTALS:</span>
+            <span>Output: R @outputAdjustments.Sum().ToString("N2")</span>
+            <span>Input: R @inputAdjustments.Sum().ToString("N2")</span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Mandatory Audit Justification</label>
+            <textarea class="form-control form-control-sm" rows="3" placeholder="Provide detailed explanation for financial review and tax compliance verification..."></textarea>
+        </div>
+    </div>
+
+    <div class="offcanvas-footer">
+        <button type="button" class="btn btn-sm btn-secondary" @onclick="Close">Cancel</button>
+        <button type="button" class="btn btn-sm btn-vat-primary" @onclick="Save">Save All 12-Month Updates</button>
+    </div>
+</div>

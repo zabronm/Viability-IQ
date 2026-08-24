@@ -80,9 +80,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
 
         #region Calculated Properties
 
-        /// <summary>
+        
         /// Creditors 0-30 days is always the remainder from 100%
-        /// </summary>
+        
         private decimal CalculatedCreditors0To30
         {
             get
@@ -100,9 +100,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }
         }
 
-        /// <summary>
+        
         /// Calculated Creditors 0-30 Value value based on percentage
-        /// </summary>
+        
         private decimal CalculatedCreditors0To30Value
         {
             get
@@ -121,9 +121,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }
         }
 
-        /// <summary>
+        
         /// Debtors 0-30 days is always the remainder from 100%
-        /// </summary>
+        
         private decimal CalculatedDebtors0To30
         {
             get
@@ -141,9 +141,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }
         }
 
-        /// <summary>
+        
         /// Calculated Debtors 0-30 Value value based on percentage
-        /// </summary>
+        
         private decimal CalculatedDebtors0To30Value
         {
             get
@@ -162,9 +162,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }
         }
 
-        /// <summary>
+        
         /// Total all creditors percentages
-        /// </summary>
+        
         private decimal TotalCreditorsPercentage
         {
             get
@@ -180,9 +180,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }
         }
 
-        /// <summary>
+        
         /// Total all creditors values
-        /// </summary>
+        
         private decimal TotalCreditorsValue
         {
             get
@@ -198,9 +198,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }
         }
 
-        /// <summary>
+        
         /// Total all debtors percentages
-        /// </summary>
+        
         private decimal TotalDebtorsPercentage
         {
             get
@@ -216,9 +216,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             }                                
         }
 
-        /// <summary>
+        
         /// Total all debtors values
-        /// </summary>
+        
         private decimal TotalDebtorsValue
         {
             get
@@ -238,9 +238,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
 
         #region Event Handlers
 
-        /// <summary>
+        
         /// Handle entry mode toggle
-        /// </summary>
+        
         private async Task HandleEntryModeChange(ChangeEventArgs e)
         {
             if (debtorsCreditorsModel == null)
@@ -251,10 +251,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             await Task.CompletedTask;
         }
 
-        /// <summary>
+        
         /// Handle creditors percentage changes
         /// Auto-update the 0-30 day percentage to keep total at 100%
-        /// </summary>
+        
         private async Task HandleCreditorsPercentageChange()
         {
             if (debtorsCreditorsModel == null)
@@ -273,9 +273,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             await Task.CompletedTask;
         }
 
-        /// <summary>
+        
         /// Handle creditors Value value changes
-        /// </summary>
+        
         private async Task HandleCreditorsValueChange()
         {
             if (debtorsCreditorsModel == null)
@@ -291,10 +291,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             await Task.CompletedTask;
         }
 
-        /// <summary>
+        
         /// Handle debtors percentage changes
         /// Auto-update the 0-30 day percentage to keep total at 100%
-        /// </summary>
+        
         private async Task HandleDebtorsPercentageChange()
         {
             if (debtorsCreditorsModel == null)
@@ -313,9 +313,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.Settin
             await Task.CompletedTask;
         }
 
-        /// <summary>
+        
         /// Handle debtors Value value changes
-        /// </summary>
+        
         private async Task HandleDebtorsValueChange()
         {
             if (debtorsCreditorsModel == null)

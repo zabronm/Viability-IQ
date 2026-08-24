@@ -1,0 +1,90 @@
+﻿
+<div class="kpi-widgets-section">
+    <div class="kpi-header">
+        <h5 class="kpi-title">
+            <i class="bi bi-speedometer2"></i>
+            Key Performance Metrics
+        </h5>
+        <p class="kpi-subtitle">Track your assessment metrics</p>
+    </div>
+
+    @if (KPIMetrics == null)
+    {
+        <div class="kpi-loading">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading metrics...</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-2 mb-3">
+            <!-- Active Assessments -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <KPICardComponent0 Label="Active Assessments"
+                                   Value="@KPIMetrics.ActiveAssessments"
+                                   Subtext="in progress"
+                                   TrendPercent="@KPIMetrics.ActiveAssessmentsChange"
+                                   FooterText="vs last month"
+                                   KPIType="ActiveAssessments"
+                                   OnClick="HandleDrill" />
+            </div>
+
+            <!-- Completed Assessments -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <KPICardComponent0 Label="Completed"
+                                   Value="@KPIMetrics.CompletedAssessments"
+                                   Subtext="this month"
+                                   TrendPercent="@KPIMetrics.CompletedAssessmentsChange"
+                                   FooterText="vs last month"
+                                   KPIType="CompletedAssessments"
+                                   OnClick="HandleDrill" />
+            </div>
+
+            <!-- Pending Reviews -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <KPICardComponent0 Label="Pending Reviews"
+                                   Value="@KPIMetrics.PendingReviews"
+                                   Subtext="awaiting approval"
+                                   TrendPercent="@KPIMetrics.PendingReviewsChange"
+                                   FooterText="vs yesterday"
+                                   KPIType="PendingReviews"
+                                   OnClick="HandleDrill" />
+            </div>
+
+            <!-- Your Workload -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <KPICardComponent0 Label="Your Workload"
+                                   Value="@KPIMetrics.YourWorkload"
+                                   Subtext="assigned to you"
+                                   TrendPercent="@KPIMetrics.YourWorkloadChange"
+                                   FooterText="this month"
+                                   KPIType="YourWorkload"
+                                   OnClick="HandleDrill" />
+            </div>
+
+            <!-- Total Client Base -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <KPICardComponent0 Label="Client Base"
+                                   Value="@KPIMetrics.TotalClientBase"
+                                   Subtext="businesses"
+                                   TrendPercent="@KPIMetrics.TotalClientBaseChange"
+                                   FooterText="YoY growth"
+                                   KPIType="TotalClientBase"
+                                   OnClick="HandleDrill" />
+            </div>
+
+            <!-- Branch Assessments -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <KPICardComponent0 Label="Branch Assessments"
+                                   Value="@KPIMetrics.BranchAssessments"
+                                   Subtext="this month"
+                                   TrendPercent="@KPIMetrics.BranchAssessmentsChange"
+                                   FooterText="vs last month"
+                                   KPIType="BranchAssessments"
+                                   OnClick="HandleDrill" />
+            </div>
+        </div>
+    }
+</div>

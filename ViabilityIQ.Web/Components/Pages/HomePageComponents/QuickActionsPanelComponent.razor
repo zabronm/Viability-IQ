@@ -1,0 +1,44 @@
+﻿<div class="quick-actions-section">
+    <div class="actions-header">
+        <h3 class="actions-title">
+            <i class="bi bi-lightning-fill actions-title-icon"></i>
+            Quick Actions
+        </h3>
+        <p class="actions-subtitle">Fast shortcuts to common tasks</p>
+    </div>
+
+    <div class="actions-container">
+        <button class="action-button action-primary" @onclick="() => HandleActionClick(1)" title="Create a new assessment">
+            <span class="action-icon-wrapper">
+                <i class="bi bi-plus-circle action-icon"></i>
+            </span>
+            <span class="action-text">New Assessment</span>
+        </button>
+
+        <button class="action-button action-primary" @onclick="() => HandleActionClick(2)" title="Add a new business entity">
+            <span class="action-icon-wrapper">
+                <i class="bi bi-plus-circle action-icon"></i>
+            </span>
+            <span class="action-text">New Business</span>
+        </button>
+
+        <button class="action-button action-primary" @onclick="() => HandleActionClick(3)" title="Register a new client">
+            <span class="action-icon-wrapper">
+                <i class="bi bi-plus-circle action-icon"></i>
+            </span>
+            <span class="action-text">New Client</span>
+        </button>
+    </div>
+
+    <div class="actions-divider"></div>
+
+    <div class="actions-secondary">
+        <button class="action-button action-secondary" @onclick="() => HandleActionClick(4)" title="Open settings">
+            <span class="action-icon-wrapper">
+                <i class="bi bi-gear action-icon"></i>
+            </span>
+            <span class="action-text">Settings</span>
+            <i class="bi bi-arrow-right action-arrow"></i>
+        </button>
+    </div>
+</div>

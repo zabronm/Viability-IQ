@@ -33,6 +33,7 @@
         LoanTypes,
         IncomeTypes,
         ExpenseTypes,
+        Home,
     }
 
     public static class PageHeaderIcons
@@ -42,6 +43,7 @@
         
         public static string GetIconClass(PageType pageType) => pageType switch
         {
+            PageType.Home => "bi bi-house-door-fill",
             PageType.Dashboards => "bi bi-grid",
             PageType.Settings => "bi bi-gear",
             PageType.Users => "bi bi-people-fill",

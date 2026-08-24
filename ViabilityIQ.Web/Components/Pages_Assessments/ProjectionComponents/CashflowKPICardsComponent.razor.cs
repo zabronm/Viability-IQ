@@ -175,9 +175,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
         #endregion
     }
 
-    /// <summary>
+    
     /// KPI Data Model
-    /// </summary>
+    
     public class CashflowKPIData
     {
         public decimal TotalSales { get; set; }

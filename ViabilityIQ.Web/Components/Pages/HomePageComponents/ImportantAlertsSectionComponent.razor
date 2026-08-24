@@ -1,0 +1,120 @@
+﻿<div class="alerts-section">
+    <div class="alerts-header">
+        <h3 class="alerts-title">
+            <i class="bi bi-exclamation-triangle alerts-title-icon"></i>
+            Important Alerts & Deadlines
+        </h3>
+        <p class="alerts-subtitle">Stay on top of urgent items</p>
+    </div>
+
+    <!-- Urgent Assessments Due Today -->
+    @if (Alerts?.UrgentAssessments != null && Alerts.UrgentAssessments.Count > 0)
+    {
+        <div class="alert-subsection urgent-section">
+            <div class="subsection-header">
+                <i class="bi bi-exclamation-circle urgent-icon"></i>
+                <h4 class="subsection-title">URGENT: Assessments Due Today</h4>
+                <span class="urgent-badge">@Alerts.UrgentAssessments.Count</span>
+            </div>
+
+            <div class="alert-items">
+                @foreach (var item in Alerts.UrgentAssessments)
+                {
+                    <div class="alert-item urgent-item">
+                        <div class="alert-item-content">
+                            <div class="alert-item-title">@item.AssessmentName</div>
+                            <div class="alert-item-detail">
+                                <i class="bi bi-hourglass-split"></i>
+                                <span>Due: @FormatCountdown(item.DueDate)</span>
+                            </div>
+                        </div>
+                        <div class="alert-item-actions">
+                            <button class="alert-action-btn done-btn" @onclick="() => HandleMarkDone(item.Id, 1)" title="Mark as done">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                            <button class="alert-action-btn dismiss-btn" @onclick="() => HandleDismissAlert(item.Id, 1)" title="Dismiss alert">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Due This Week -->
+    @if (Alerts?.DueThisWeek != null && Alerts.DueThisWeek.Count > 0)
+    {
+        <div class="alert-subsection upcoming-section">
+            <div class="subsection-header">
+                <i class="bi bi-calendar-event upcoming-icon"></i>
+                <h4 class="subsection-title">Due This Week</h4>
+                <span class="count-badge">@Alerts.DueThisWeek.Count</span>
+            </div>
+
+            <div class="alert-items">
+                @foreach (var item in Alerts.DueThisWeek.Take(3))
+                {
+                    <div class="alert-item upcoming-item">
+                        <div class="alert-item-content">
+                            <div class="alert-item-title">@item.AssessmentName</div>
+                            <div class="alert-item-detail">
+                                <i class="bi bi-calendar"></i>
+                                <span>Due: @item.DueDate.ToString("ddd, MMM d")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- System Announcements -->
+    @if (Announcements != null && Announcements.Count > 0)
+    {
+        <div class="alert-subsection announcements-section">
+            <div class="subsection-header">
+                <i class="bi bi-megaphone announcements-icon"></i>
+                <h4 class="subsection-title">System Announcements</h4>
+            </div>
+
+            <div class="alert-items">
+                @foreach (var announcement in Announcements.Take(2))
+                {
+                    <div class="alert-item announcement-item">
+                        <div class="alert-item-content">
+                            <div class="alert-item-title">@announcement.Title</div>
+                            <div class="alert-item-detail">@announcement.Message</div>
+                        </div>
+                        <button class="alert-action-btn dismiss-btn" @onclick="() => HandleDismissAlert(announcement.Id.ToString(), 2)" title="Dismiss announcement">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- No Alerts State -->
+    @if ((Alerts == null || (Alerts.UrgentAssessments?.Count == 0 && Alerts.DueThisWeek?.Count == 0))
+        && (Announcements == null || Announcements.Count == 0))
+    {
+        <div class="no-alerts">
+            <i class="bi bi-check-all no-alerts-icon"></i>
+            <p>No urgent alerts or announcements</p>
+            <span class="no-alerts-subtitle">You're all caught up!</span>
+        </div>
+    }
+
+    <!-- Footer Link -->
+    @if ((Alerts?.UrgentAssessments?.Count > 0 || Alerts?.DueThisWeek?.Count > 0) || (Announcements?.Count > 0))
+    {
+        <div class="alerts-footer">
+            <a href="/alerts" class="more-alerts-link">
+                <i class="bi bi-bell"></i>
+                View All Alerts
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    }
+</div>

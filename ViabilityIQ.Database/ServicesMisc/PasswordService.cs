@@ -38,9 +38,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Password Reset
 
-        
+        /// <summary>
         /// Initiates password reset process by generating a reset token
-        
+        /// </summary>
         public async Task<PasswordResetResult> GeneratePasswordResetTokenAsync(string email)
         {
             var result = new PasswordResetResult();
@@ -86,10 +86,10 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        
+        /// <summary>
         /// Resets user password using reset token
-        
-        public async Task<PasswordResetResult> ResetPasswordAsync(string userId, string token, string newPassword)
+        /// </summary>
+        public async Task<PasswordResetResult> ResetPasswordAsync(long userId, string token, string newPassword)
         {
             var result = new PasswordResetResult();
 
@@ -97,10 +97,11 @@ namespace ViabilityIQ.Application.ServicesMisc
             {
                 _logger.LogInformation("Password reset attempt for user ID: {UserId}", userId);
 
-                if (string.IsNullOrWhiteSpace(userId))
+                // ✅ Validate long userId properly
+                if (userId <= 0)
                 {
                     result.Success = false;
-                    result.Messages.Add("User ID is required");
+                    result.Messages.Add("User ID is invalid");
                     return result;
                 }
 
@@ -118,7 +119,10 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                var user = await _userManager.FindByIdAsync(userId);
+                // ✅ Convert long to string for FindByIdAsync
+                string userIdString = userId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
+
                 if (user == null)
                 {
                     result.Success = false;
@@ -158,10 +162,10 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Email Confirmation
 
-        
+        /// <summary>
         /// Generates email confirmation token
-        
-        public async Task<EmailConfirmationResult> GenerateEmailConfirmationTokenAsync(string userId)
+        /// </summary>
+        public async Task<EmailConfirmationResult> GenerateEmailConfirmationTokenAsync(long userId)
         {
             var result = new EmailConfirmationResult();
 
@@ -169,14 +173,18 @@ namespace ViabilityIQ.Application.ServicesMisc
             {
                 _logger.LogInformation("Email confirmation token requested for user ID: {UserId}", userId);
 
-                if (string.IsNullOrWhiteSpace(userId))
+                // ✅ Validate long userId properly
+                if (userId <= 0)
                 {
                     result.Success = false;
-                    result.Messages.Add("User ID is required");
+                    result.Messages.Add("User ID is invalid");
                     return result;
                 }
 
-                var user = await _userManager.FindByIdAsync(userId);
+                // ✅ Convert long to string for FindByIdAsync
+                string userIdString = userId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
+
                 if (user == null)
                 {
                     result.Success = false;
@@ -205,10 +213,10 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        
+        /// <summary>
         /// Confirms user email address
-        
-        public async Task<EmailConfirmationResult> ConfirmEmailAsync(string userId, string token)
+        /// </summary>
+        public async Task<EmailConfirmationResult> ConfirmEmailAsync(long userId, string token)
         {
             var result = new EmailConfirmationResult();
 
@@ -216,10 +224,11 @@ namespace ViabilityIQ.Application.ServicesMisc
             {
                 _logger.LogInformation("Email confirmation attempt for user ID: {UserId}", userId);
 
-                if (string.IsNullOrWhiteSpace(userId))
+                // ✅ Validate long userId properly
+                if (userId <= 0)
                 {
                     result.Success = false;
-                    result.Messages.Add("User ID is required");
+                    result.Messages.Add("User ID is invalid");
                     return result;
                 }
 
@@ -230,7 +239,10 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                var user = await _userManager.FindByIdAsync(userId);
+                // ✅ Convert long to string for FindByIdAsync
+                string userIdString = userId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
+
                 if (user == null)
                 {
                     result.Success = false;
@@ -278,10 +290,10 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Change Password
 
-        
+        /// <summary>
         /// Changes password for authenticated user
-        
-        public async Task<PasswordChangeResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        /// </summary>
+        public async Task<PasswordChangeResult> ChangePasswordAsync(long userId, string currentPassword, string newPassword)
         {
             var result = new PasswordChangeResult();
 
@@ -289,10 +301,11 @@ namespace ViabilityIQ.Application.ServicesMisc
             {
                 _logger.LogInformation("Password change requested for user ID: {UserId}", userId);
 
-                if (string.IsNullOrWhiteSpace(userId))
+                // ✅ Validate long userId properly
+                if (userId <= 0)
                 {
                     result.Success = false;
-                    result.Messages.Add("User ID is required");
+                    result.Messages.Add("User ID is invalid");
                     return result;
                 }
 
@@ -310,7 +323,10 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                var user = await _userManager.FindByIdAsync(userId);
+                // ✅ Convert long to string for FindByIdAsync
+                string userIdString = userId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
+
                 if (user == null)
                 {
                     result.Success = false;

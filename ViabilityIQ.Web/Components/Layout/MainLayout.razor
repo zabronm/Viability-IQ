@@ -32,45 +32,46 @@
         <aside class="fa-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
             <div class="sidebar-scroller">
                 <NavLink class="fa-nav-item" href="/home" Match="NavLinkMatch.All">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-grid"></i></div>
-                    <span class="strong">Dashboards | Home</span>
+                    <div class="nav-icon-avatar-round"><i class="bi bi-house-door-fill"></i></div>
+                    <span class="strong">Home</span>
                 </NavLink>
 
                 <div class="fa-nav-heading">Main Operations</div>
 
-                <NavLink class="fa-nav-item" href="/settings/assessments">
+                <NavLink class="fa-nav-item bd-bottom" href="/settings/assessments">
                     <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
                     <span class="strong">My Assessments</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/settings/businesses">
+                <NavLink class="fa-nav-item bd-bottom" href="/settings/businesses">
                     <div class="nav-icon-avatar-round"><i class="bi bi-buildings"></i></div>
                     <span class="strong">Businesses</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/settings/client-contacts">
+                <NavLink class="fa-nav-item bd-bottom" href="/settings/client-contacts">
                     <div class="nav-icon-avatar-round"><i class="bi bi-people"></i></div>
                     <span class="strong">Client Contacts</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/notifications">
+                <NavLink class="fa-nav-item bd-bottom" href="/settings/notifications">
                     <div class="nav-icon-avatar-round"><i class="bi bi-bell-fill"></i></div>
                     <span class="strong">Notifications</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/settings/reports">
+                <NavLink class="fa-nav-item bd-bottom" href="/settings/reports">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
                     <span class="strong">Reports</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item " href="/settings">
+                <NavLink class="fa-nav-item bd-bottom " href="/settings/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
                     <span class="strong">Settings</span>&nbsp;<i class="bi bi-caret-right"></i>
                 </NavLink>
+                <hr style="width: 1px; border-color: #64748b;" />
             </div>
 
             <div class="sidebar-footer-static">
-                <NavLink class="fa-nav-item footer-item border-top-thick" href="global/support">
+                <NavLink class="fa-nav-item footer-item " href="global/support">
                     <div class="nav-icon-avatar-round"><i class="bi bi-question-circle-fill"></i></div>
                     <div class="footer-text-stack">
                         <span class="footer-main-text">Get Help</span>
@@ -78,12 +79,12 @@
                     </div>
                 </NavLink>
 
-                <NavLink class="fa-nav-item footer-item border-top-thick" href="global/suggestions">
+                @* <NavLink class="fa-nav-item footer-item border-top-thick" href="global/suggestions">
                     <div class="nav-icon-avatar-round"><i class="bi bi-person-raised-hand"></i></div>
                     <div class="footer-text-stack">
                         <span class="footer-main-text">Send Suggestion</span>
                     </div>
-                </NavLink>
+                </NavLink> *@
             </div>
         </aside>
 

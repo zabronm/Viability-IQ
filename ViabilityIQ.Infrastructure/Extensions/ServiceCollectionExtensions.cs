@@ -1,9 +1,12 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
 using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Application.Interfaces.HomePageInterfaces;
+using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Infrastructure.Reporting;
 using ViabilityIQ.Infrastructure.Repositories;
+using ViabilityIQ.Infrastructure.Repositories.HomePageRepositories;
 
 namespace ViabilityIQ.Infrastructure.Extensions
 {
@@ -27,6 +30,17 @@ namespace ViabilityIQ.Infrastructure.Extensions
             services.AddScoped<ICashflowRepository, CashflowRepository>();
             services.AddScoped<IDebtorsCreditorsRepository, DebtorsCreditorsRepository>();
 
+            //serices related to home page components
+            services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+            services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+            services.AddScoped<IKPIRepository, KPIRepository>();
+            services.AddScoped<IAlertRepository, AlertRepository>();
+            services.AddScoped<IAlertDismissalService, AlertDismissalService>();
+            services.AddScoped<IExportService, ExportService>();
+            services.AddScoped<IAssessmentRepository, AssessmentRepository>();
+            services.AddScoped<IDashboardDataService, DashboardDataService>();
+            services.AddScoped<IInsightsRepository, InsightsRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
 
             //services.AddScoped<IDocumentUploadService,MicrosoftSharePointDocumentService>();        //if using Microsoft SharePoint to store files

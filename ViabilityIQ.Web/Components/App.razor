@@ -36,7 +36,7 @@
 <body>
         <!-- CRITICAL: CascadingAuthenticationState wrapper for authentication to work -->
     <CascadingAuthenticationState>
-        <Routes @rendermode="InteractiveServer" />
+        <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)"  />
     </CascadingAuthenticationState>
     
 

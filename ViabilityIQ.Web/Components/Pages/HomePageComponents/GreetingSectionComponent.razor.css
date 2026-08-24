@@ -1,0 +1,98 @@
+﻿/* Greeting Section Container */
+.greeting-section {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+/* Greeting Content Layout */
+.greeting-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* First Line - Title */
+.greeting-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e3a5f;
+    line-height: 1.0;
+    letter-spacing: -0.5px;
+}
+
+.greeting-name {
+    color: #000099;
+    font-weight: 800;
+}
+
+/* Second Line - Subtitle */
+.greeting-subtitle {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.last-seen-label {
+    font-weight: 600;
+    color: #475569;
+}
+
+.last-seen-time {
+    color: #000099;
+    font-weight: 600;
+}
+
+.branch-separator {
+    color: #cbd5e1;
+    margin: 0 2px;
+}
+
+.branch-label {
+    font-weight: 600;
+    color: #475569;
+}
+
+.branch-name {
+    color: #1B8A6B;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .greeting-section {
+        padding: 12px;
+    }
+
+    .greeting-title {
+        font-size: 1rem;
+    }
+
+    .greeting-subtitle {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .greeting-section {
+        padding: 8px;
+    }
+
+    .greeting-title {
+        font-size: 0.95rem;
+    }
+
+    .greeting-subtitle {
+        font-size: 0.65rem;
+        gap: 2px;
+    }
+
+    .branch-separator {
+        margin: 0 1px;
+    }
+}

@@ -159,9 +159,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
         #endregion
     }
 
-    /// <summary>
+    
     /// Model for monthly cashflow detail line item
-    /// </summary>
+    
     public class MonthlyCashflowDetail
     {
         public int Month { get; set; }

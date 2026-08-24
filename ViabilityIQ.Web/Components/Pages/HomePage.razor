@@ -3,88 +3,73 @@
 @using ViabilityIQ.Web.Components.CommonComponents
 @inject NavigationManager Nav0
 
+<div class="p-0 position-relative home-page-container">
+    <PageTitle>Viability.IQ</PageTitle>
 
-<div class="p-0">
-    <PageHeading _pageTitle="Home" CurrentPage="PageType.Dashboards" _pageHeading="Dashboards" />
-
-    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
-        <div class="app-workspace-shell">
-
-            <!-- TOP SUMMARY STRIP -->
-            <section class="summary-strip">
-
-                <div class="summary-card">
-                    <div class="summary-label">Assessments ToDate</div>
-                    <div class="summary-value">000035</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="summary-label">Totals at Center</div>
-                    <div class="summary-value">1,500</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="summary-label">Total Worth</div>
-                    <div class="summary-value money">R 1,225,000.00</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="summary-label">Average Vialbility Index</div>
-                    <div class="summary-value phase compliance">60%</div>
-                </div>
-
-                <div class="summary-card">
-                    <div class="summary-label">Under Review</div>
-                    <div class="summary-value status">000015</div>
-                </div>
-
-            </section>
-
-            <!-- MAIN WORKSPACE -->
-            <section class="workspace-grid">
-
-                <!-- CENTER MAIN WORK -->
-                <main class="work-center">
-
-                    @* <div class="work-card hero-card">
-                        <div class="card-title blue">
-                            Compliance Workspace
-                        </div>
-
-                        <p class="card-text">
-                            Placeholder for diligence, contracting,
-                            marketing and financing tabs.
-                        </p>
-
-                        <div class="placeholder-tabs">
-                            <button>Diligence</button>
-                            <button>Contracting</button>
-                            <button>Marketing</button>
-                            <button>Financing</button>
-                        </div>
-                    </div>
-
-                    <div class="work-card">
-                        <div class="card-title amber">
-                            Workflow Notes
-                        </div>
-
-                        <p class="card-text">
-                            Notes / adjudication comments area.
-                        </p>
-                    </div> *@
-
-                </main>
-
-                <!-- RIGHT SNAPSHOT -->
-                <aside class="right-panel">
-                    &nbsp;             
-                </aside>
-
-            </section>
-
+    <div class="greeting-section my-0 py-1">
+        <div class="greeting-content">
+            <h1 class="greeting-title">
+                Welcome back, <span class="greeting-name">@CurrentUser?.FirstName</span>! 👋
+            </h1>
+            <p class="greeting-subtitle">
+                <span class="last-seen-label">Last seen:</span>
+                <span class="last-seen-time">@FormatLastLoginDate(LastLoginDate)</span>
+                <span class="branch-separator">|</span>
+                <span class="branch-label">Your Branch:</span>
+                <span class="branch-name">@CurrentBranch</span>
+            </p>
         </div>
+    </div>
+
+
+    <main class="p-3 bg-white mt-2 mb-4 main-content-box">
+
+        <!-- Loading State -->
+        @if (IsLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="loading-text">Loading your dashboard...</p>
+            </div>
+        }
+        else
+        {
+            <!-- KPI Widgets Section -->
+            <div class="p-0 mt-0">
+                <KPIWidgetsSectionComponent KPIMetrics="KPIData" OnKPIDrill="HandleKPIDrill" />
+            </div>
+
+            <!-- Row Two: Recent Activity (col-5) + Important Alerts (col-5) + Quick Actions (col-2) -->
+            <div class="row-two-container">
+                <div class="recent-activity-column dashboard-component-wrapper">
+                    <RecentActivitySnapshotComponent Activities="RecentActivities" OnRefresh="RefreshDashboard" />
+                </div>
+                <div class="alerts-column dashboard-component-wrapper">
+                    <ImportantAlertsSectionComponent Alerts="AlertsData" Announcements="SystemAnnouncements"
+                                                     OnDismiss="HandleAlertDismissal" />
+                </div>
+                <div class="quick-actions-column dashboard-component-wrapper">
+                    <QuickActionsPanelComponent OnActionClick="HandleQuickAction" />
+                </div>
+            </div>
+
+            <!-- Recent Assessments Section -->
+            <div class="dashboard-component-wrapper">
+                <RecentAssessmentsSnapshotComponent Assessments="RecentAssessments" />
+            </div>
+
+            <!-- Full-Width System Insights Section -->
+            <div class="full-width-insight-container">
+                <div class="insights-column-full dashboard-component-wrapper">
+                    <SystemInsightsSectionComponent Insights="InsightsData" OnExport="HandleExport" />
+                </div>
+            </div>
+        }
+
     </main>
+
     <footer class="py-4 bg-light mt-auto">
         <BFooter />
     </footer>

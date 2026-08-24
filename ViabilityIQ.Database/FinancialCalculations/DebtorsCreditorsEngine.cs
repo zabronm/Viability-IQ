@@ -21,9 +21,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             _logger = logger;
         }
 
-        /// <summary>
+        
         /// Set/Update debtors configuration
-        /// </summary>
+        
         public async Task SetConfigurationAsync(long assessmentId, DebtorsConfigurationDto dto)
         {
             try
@@ -55,9 +55,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// Get debtors configuration
-        /// </summary>
+        
         public async Task<DebtorsConfigurationDto> GetConfigurationAsync(long assessmentId)
         {
             try
@@ -86,10 +86,10 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// CORE LOGIC: Generate payment schedules from AssessmentSales data
         /// This reads sales and distributes across months based on collection profile
-        /// </summary>
+        
         public async Task GeneratePaymentSchedulesFromSalesAsync(long assessmentId)
         {
             try
@@ -234,9 +234,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// Get complete collection table for UI display
-        /// </summary>
+        
         public async Task<DebtorsCollectionTableDto> GetCollectionTableAsync(long assessmentId)
         {
             try
@@ -303,9 +303,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// Get monthly debtors aging breakdown
-        /// </summary>
+        
         public async Task<List<DebtorsAgingSummaryDto>> GetAgingSummaryAsync(long assessmentId)
         {
             try
@@ -359,9 +359,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// Calculate Days Sales Outstanding (DSO)
-        /// </summary>
+        
         public async Task<decimal> CalculateDaysSalesOutstandingAsync(long assessmentId)
         {
             try
@@ -393,9 +393,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// Calculate total outstanding debtors
-        /// </summary>
+        
         public async Task<decimal> CalculateTotalOutstandingAsync(long assessmentId)
         {
             try
@@ -415,9 +415,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
         }
 
-        /// <summary>
+        
         /// Calculate total estimated bad debt
-        /// </summary>
+        
         public async Task<decimal> CalculateTotalBadDebtAsync(long assessmentId)
         {
             try

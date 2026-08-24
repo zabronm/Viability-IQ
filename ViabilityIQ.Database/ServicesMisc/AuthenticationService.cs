@@ -1,18 +1,25 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using Dapper;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
+
 namespace ViabilityIQ.Application.ServicesMisc
-{
-    
+{    
     /// Authentication service for handling user login, registration, and authorization
     /// Designed to work seamlessly with Blazor Server authentication
     
@@ -25,35 +32,44 @@ namespace ViabilityIQ.Application.ServicesMisc
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
         private readonly ILogger<AuthenticationService> _logger;
+        private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserRepository _userRepository;  // ✅ Dapper-based repository      
 
         #endregion
 
         #region Constructor
 
-        
+        /// <summary>
         /// Initializes a new instance of the AuthenticationService
-        
+        /// </summary>
         public AuthenticationService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             RoleManager<ApplicationRole> roleManager,
             AuthenticationStateProvider authenticationStateProvider,
-            ILogger<AuthenticationService> logger)
+            ILogger<AuthenticationService> logger,
+            HttpClient httpClient,
+            IHttpContextAccessor httpContextAccessor,
+            IUserRepository userRepository)  // ✅ Inject the repository
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _authenticationStateProvider = authenticationStateProvider ?? throw new ArgumentNullException(nameof(authenticationStateProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));  // ✅ Inject the repository
         }
 
         #endregion
 
         #region Registration
 
-        
+        /// <summary>
         /// Registers a new user with the provided credentials
-        
+        /// </summary>
         /// <param name="request">Registration request containing user details</param>
         /// <returns>Authentication result with success status and messages</returns>
         public async Task<AuthResult> RegisterAsync(RegisterRequest request)
@@ -107,7 +123,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                _logger.LogInformation("User created successfully: {Email}", request.Email);
+                _logger.LogInformation("User created successfully: {Email}, UserId: {UserId}", request.Email, user.Id);
 
                 // Assign default "User" role
                 var roleAssignResult = await _userManager.AddToRoleAsync(user, "User");
@@ -120,7 +136,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                 }
 
                 result.Success = true;
-                result.UserId = user.Id;
+                result.UserId = user.Id;  // ✅ Direct assignment (user.Id is long)
                 result.Email = user.Email;
                 result.FirstName = user.FirstName;
                 result.Messages.Add("Registration successful. Please log in.");
@@ -141,11 +157,11 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Login
 
-        
+        /// <summary>
         /// Authenticates a user with email and password
-        /// NOTE: This method validates credentials but DOES NOT set cookies/auth state
-        /// The Login.razor component must call NotifyUserAuthenticationAsync() after successful login
-        
+        /// Calls the API endpoint to set the authentication cookie
+        /// NOTE: Auth state notification is handled by the caller (Login.razor.cs)
+        /// </summary>
         /// <param name="request">Login request containing credentials</param>
         /// <returns>Authentication result with success status and user information</returns>
         public async Task<AuthResult> LoginAsync(LoginRequest request)
@@ -156,7 +172,6 @@ namespace ViabilityIQ.Application.ServicesMisc
             {
                 _logger.LogInformation("Login attempt for email: {Email}", request?.Email);
 
-                // Validate request
                 if (request == null)
                 {
                     result.Success = false;
@@ -164,7 +179,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                // Find user by email
+                // ✅ IMPORTANT: Await each operation fully before starting the next one
                 var user = await _userManager.FindByEmailAsync(request.Email);
                 if (user == null)
                 {
@@ -174,7 +189,6 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                // Check if account is active
                 if (!user.IsActive)
                 {
                     result.Success = false;
@@ -183,8 +197,9 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                // Check if account is locked out BEFORE attempting password validation
-                if (await _userManager.IsLockedOutAsync(user))
+                // ✅ Await before next operation
+                var isLockedOut = await _userManager.IsLockedOutAsync(user);
+                if (isLockedOut)
                 {
                     result.Success = false;
                     result.Messages.Add("Account is locked due to multiple failed login attempts. Please try again later.");
@@ -192,40 +207,82 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return result;
                 }
 
-                // Validate password WITHOUT setting cookies/auth state
-                // This is the key difference for Blazor Server - we separate validation from authentication
+                // ✅ Await before next operation
                 var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-
                 if (!passwordValid)
                 {
-                    // Increment failed login attempts for lockout
+                    // ✅ Await this operation
                     await _userManager.AccessFailedAsync(user);
-
                     result.Success = false;
                     result.Messages.Add("Invalid email or password");
                     _logger.LogWarning("Login failed: Invalid password for email: {Email}", request.Email);
                     return result;
                 }
 
-                // Password is valid - reset failed attempts
+                // ✅ Await before next operation
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                // Update last login timestamp
+                if (user.BranchId == null)
+                {
+                    user.BranchId = 1;
+                    _logger.LogInformation("Setting default BranchId for user: {Email}", request.Email);
+                }
+
                 user.LastLoginAt = DateTime.UtcNow;
+
+                // ✅ Await this operation
                 await _userManager.UpdateAsync(user);
 
-                result.Success = true;
-                result.UserId = user.Id;
-                result.Email = user.Email;
-                result.FirstName = user.FirstName;
-                result.Messages.Add("Login successful");
+                // ✅ Call the API endpoint to set the authentication cookie
+                try
+                {
+                    _logger.LogInformation("Calling SignIn API endpoint for email: {Email}", request.Email);
 
-                _logger.LogInformation("Login successful for email: {Email}", request.Email);
-                return result;
+                    var request_obj = _httpContextAccessor.HttpContext?.Request;
+                    var baseUrl = $"{request_obj?.Scheme}://{request_obj?.Host}";
+                    var apiUrl = $"{baseUrl}/api/auth/signin";
 
-                // NOTE: Authentication state is NOT set here
-                // The Login component must call CustomAuthenticationStateProvider.NotifyUserAuthenticationAsync()
-                // This prevents "Headers are read-only" errors in Blazor Server
+                    _logger.LogInformation("API URL: {ApiUrl}", apiUrl);
+
+                    var response = await _httpClient.PostAsJsonAsync(apiUrl, request);
+
+                    _logger.LogInformation("API Response Status: {StatusCode}", response.StatusCode);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        result.Success = false;
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        result.Messages.Add($"Sign in failed: {response.StatusCode}");
+                        _logger.LogError("SignIn API error: Status={StatusCode}, Content={Content}", response.StatusCode, errorContent);
+                        return result;
+                    }
+
+                    var jsonContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation("✓ SignIn API succeeded - Authentication cookie set");
+
+                    result.Success = true;
+                    result.UserId = user.Id;
+                    result.Email = user.Email;
+                    result.FirstName = user.FirstName;
+                    result.Messages.Add("Login successful");
+
+                    _logger.LogInformation("✓✓✓ Login and authentication successful for email: {Email}", request.Email);
+                    return result;
+                }
+                catch (HttpRequestException ex)
+                {
+                    result.Success = false;
+                    result.Messages.Add($"Connection error: {ex.Message}");
+                    _logger.LogError(ex, "HttpRequestException during SignIn API call");
+                    return result;
+                }
+                catch (Exception signInEx)
+                {
+                    result.Success = false;
+                    result.Messages.Add($"Sign in error: {signInEx.Message}");
+                    _logger.LogError(signInEx, "Exception during SignIn API call for email: {Email}", request.Email);
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -240,9 +297,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Logout
 
-        
+        /// <summary>
         /// Logs out the current user
-        
+        /// </summary>
         /// <param name="user">The user principal to log out</param>
         public async Task LogoutAsync(ClaimsPrincipal user)
         {
@@ -263,9 +320,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Authentication State
 
-        
+        /// <summary>
         /// Checks if the current user is authenticated
-        
+        /// </summary>
         /// <returns>True if user is authenticated, false otherwise</returns>
         public async Task<bool> IsUserAuthenticatedAsync()
         {
@@ -283,9 +340,10 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        
+        /// <summary>
         /// Gets the current authenticated user
-        
+        /// NOTE: UserId from claims is string, pass directly to FindByIdAsync
+        /// </summary>
         /// <param name="user">The user principal</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
         public async Task<ApplicationUser> GetCurrentUserAsync(ClaimsPrincipal user)
@@ -298,15 +356,25 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return null;
                 }
 
-                var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
+                var userIdString = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdString))
                 {
                     _logger.LogDebug("GetCurrentUserAsync: No NameIdentifier claim found");
                     return null;
                 }
 
-                var appUser = await _userManager.FindByIdAsync(userId);
-                _logger.LogDebug("GetCurrentUserAsync: Found user {Email}", appUser?.Email);
+                // ✅ IMPORTANT: Await the operation and don't start another until this completes
+                var appUser = await _userManager.FindByIdAsync(userIdString);
+
+                if (appUser != null)
+                {
+                    _logger.LogDebug("GetCurrentUserAsync: Found user {Email} with UserId {UserId}", appUser.Email, userIdString);
+                }
+                else
+                {
+                    _logger.LogDebug("GetCurrentUserAsync: User not found with UserId {UserId}", userIdString);
+                }
+
                 return appUser;
             }
             catch (Exception ex)
@@ -320,9 +388,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Claims and Roles
 
-        
+        /// <summary>
         /// Gets a specific claim value for the current user
-        
+        /// </summary>
         /// <param name="claimType">The type of claim to retrieve</param>
         /// <returns>Claim value if found, empty string otherwise</returns>
         public async Task<string> GetUserClaimAsync(string claimType)
@@ -341,9 +409,9 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        
+        /// <summary>
         /// Checks if the user has a specific role
-        
+        /// </summary>
         /// <param name="user">The user principal</param>
         /// <param name="role">The role to check</param>
         /// <returns>True if user has the role, false otherwise</returns>
@@ -385,9 +453,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region User Management
 
-        
+        /// <summary>
         /// Gets a user by email address
-        
+        /// </summary>
         /// <param name="email">The email address</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
         public async Task<ApplicationUser> GetUserByEmailAsync(string email)
@@ -401,7 +469,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                 }
 
                 var user = await _userManager.FindByEmailAsync(email);
-                _logger.LogDebug("GetUserByEmailAsync: Found user for email {Email}", email);
+                _logger.LogDebug("GetUserByEmailAsync: Found user for email {Email} with UserId {UserId}", email, user?.Id);
                 return user;
             }
             catch (Exception ex)
@@ -411,22 +479,108 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        
-        /// Gets a user by user ID
-        
-        /// <param name="userId">The user ID</param>
-        /// <returns>ApplicationUser if found, null otherwise</returns>
-        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+
+
+        #region User Management - NEW DAPPER METHODS
+
+        /// <summary>
+        /// Gets a user by email using Dapper (avoids DbContext concurrency)
+        /// ✅ USE THIS METHOD INSTEAD OF GetUserByEmailAsync when you have DbContext conflicts
+        /// </summary>
+        public async Task<ApplicationUser> GetUserByEmailDapperAsync(string email)
         {
             try
             {
-                if (string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(email))
                 {
-                    _logger.LogDebug("GetUserByIdAsync: UserId is null or empty");
+                    _logger.LogDebug("GetUserByEmailDapperAsync: Email is null or empty");
                     return null;
                 }
 
-                var user = await _userManager.FindByIdAsync(userId);
+                _logger.LogInformation("GetUserByEmailDapperAsync: Looking up user by email (Dapper): {Email}", email);
+
+                // ✅ Use Dapper repository instead of UserManager
+                var user = await _userRepository.GetUserByEmailAsync(email);
+
+                if (user != null)
+                {
+                    _logger.LogInformation("GetUserByEmailDapperAsync: Found user {Email} with UserId {UserId}", email, user.Id);
+                }
+                else
+                {
+                    _logger.LogWarning("GetUserByEmailDapperAsync: User not found for email: {Email}", email);
+                }
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetUserByEmailDapperAsync: Error getting user by email: {Email}", email);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets a user by ID using Dapper (avoids DbContext concurrency)
+        /// ✅ USE THIS METHOD INSTEAD OF GetUserByIdAsync when you have DbContext conflicts
+        /// </summary>
+        public async Task<ApplicationUser> GetUserByIdDapperAsync(long userId)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    _logger.LogDebug("GetUserByIdDapperAsync: UserId is invalid: {UserId}", userId);
+                    return null;
+                }
+
+                _logger.LogInformation("GetUserByIdDapperAsync: Looking up user by ID (Dapper): {UserId}", userId);
+
+                // ✅ Use Dapper repository instead of UserManager
+                var user = await _userRepository.GetUserByIdAsync(userId);
+
+                if (user != null)
+                {
+                    _logger.LogInformation("GetUserByIdDapperAsync: Found user {Email} with UserId {UserId}", user.Email, userId);
+                }
+                else
+                {
+                    _logger.LogWarning("GetUserByIdDapperAsync: User not found for ID: {UserId}", userId);
+                }
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetUserByIdDapperAsync: Error getting user by ID: {UserId}", userId);
+                return null;
+            }
+        }
+
+        #endregion
+    
+
+
+        /// <summary>
+        /// Gets a user by user ID
+        /// NOTE: userId is long, but FindByIdAsync expects string, so we convert it
+        /// </summary>
+        /// <param name="userId">The user ID (long)</param>
+        /// <returns>ApplicationUser if found, null otherwise</returns>
+        public async Task<ApplicationUser> GetUserByIdAsync(long userId)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    _logger.LogDebug("GetUserByIdAsync: UserId is invalid: {UserId}", userId);
+                    return null;
+                }
+
+                // ✅ Convert long to string for FindByIdAsync
+                string userIdString = userId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
+
                 _logger.LogDebug("GetUserByIdAsync: Found user with ID {UserId}", userId);
                 return user;
             }

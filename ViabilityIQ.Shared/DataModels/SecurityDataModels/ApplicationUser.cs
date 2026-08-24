@@ -11,8 +11,8 @@ namespace ViabilityIQ.Shared.DataModels.SecurityDataModels
     {
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
-        public long ProvinceId { get; set; }
-        public long BranchId { get; set; }
+        public long? ProvinceId { get; set; }
+        public long? BranchId { get; set; }
         public string Department { get; set; } = "";
         public string JobTitle { get; set; } = "";
         public string PhoneNumberPersonal { get; set; } = "";

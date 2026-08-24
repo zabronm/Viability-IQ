@@ -1,0 +1,154 @@
+﻿/* Compact, Professional KPI Card with Marble Left Border Accent */
+.kpi-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #E0E5E5;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    height: 100%;
+    min-height: 115px;
+}
+
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 153, 0.08);
+        border: 1px solid #29465B;
+        border-left: 4px solid #29465B;
+    }
+
+/* Header & Title */
+.kpi-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    border-bottom: solid 1px #EBF4FA;
+}
+
+.kpi-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+/* Icon Styling */
+.kpi-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.kpi-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+    color: #566D7E !important;
+}
+
+/* Theme Icon Background Colors */
+.kpi-color-blue .kpi-icon-container {
+    background-color: #eff6ff;
+    color: #0066cc;
+}
+
+.kpi-color-green .kpi-icon-container {
+    background-color: #ecfdf5;
+    color: #059669;
+}
+
+.kpi-color-orange .kpi-icon-container {
+    background-color: #fff7ed;
+    color: #d97706;
+}
+
+.kpi-color-purple .kpi-icon-container {
+    background-color: #f5f3ff;
+    color: #7c3aed;
+}
+
+.kpi-color-teal .kpi-icon-container {
+    background-color: #f0fdfa;
+    color: #0d9488;
+}
+
+.kpi-color-indigo .kpi-icon-container {
+    background-color: #eef2ff;
+    color: #4f46e5;
+}
+
+/* Body & Value */
+.kpi-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpi-value {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    letter-spacing: -0.5px;
+}
+
+.kpi-subtext {
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Trend & Footer Section */
+.kpi-trend-section {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+    font-size: 0.65rem;
+}
+
+.kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+    .kpi-trend.positive {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .kpi-trend.negative {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .kpi-trend.neutral {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+
+.kpi-footer-text {
+    color: #94a3b8;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

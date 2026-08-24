@@ -23,6 +23,11 @@
     <Compile Remove="Components\Pages_Assessments\CommonComponents\ConsolidatedRevenueAnalysisComponent.razor.cs" />
     <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor.cs" />
     <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor.cs" />
+    <Compile Remove="Extensions\AuthenticationServiceExtension.cs" />
+    <Compile Remove="Extensions\DatabaseServiceExtension.cs" />
+    <Compile Remove="Extensions\IdentityCoreExtension.cs" />
+    <Compile Remove="Extensions\IdentityServiceExtension.cs" />
+    <Compile Remove="Extensions\ServiceIdentityCollectionExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>

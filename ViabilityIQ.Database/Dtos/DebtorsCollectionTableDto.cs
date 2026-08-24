@@ -22,9 +22,9 @@ namespace ViabilityIQ.Application.Dtos
 
 
 
-    /// <summary>
+    
     /// One row in the collection table (represents one AssessmentSales entry)
-    /// </summary>
+    
     public class DebtorSalesRowDto
     {
         public long AssessmentSalesId { get; set; }

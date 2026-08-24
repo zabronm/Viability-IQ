@@ -1,0 +1,78 @@
+﻿<div class="kpi-card kpi-color-@ColorTheme" @onclick="HandleClick">
+    <div class="kpi-card-header">
+        <div class="kpi-header-left">
+            <span class="kpi-label">@Label</span>
+        </div>
+        <div class="kpi-icon-container">
+            <i class="bi @GetResolvedIconClass() kpi-icon"></i>
+        </div>
+    </div>
+
+    <div class="kpi-card-body">
+        <div class="kpi-value-section">
+            <div class="kpi-value">@Value</div>
+            <div class="kpi-subtext">@Subtext</div>
+        </div>
+
+        <div class="kpi-trend-section">
+            @if (TrendPercent != 0)
+            {
+                <span class="kpi-trend @GetTrendClass()">
+                    <i class="bi @GetTrendIcon() trend-icon"></i>
+                    <span class="trend-text">@Math.Abs(TrendPercent)%</span>
+                </span>
+                <span class="kpi-footer-text">@FooterText</span>
+            }
+            else
+            {
+                <span class="kpi-footer-text">@FooterText</span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; }
+    [Parameter] public int Value { get; set; }
+    [Parameter] public string Subtext { get; set; }
+    [Parameter] public int TrendPercent { get; set; }
+    [Parameter] public string FooterText { get; set; } = "vs last month";
+    [Parameter] public string KPIType { get; set; }
+    [Parameter] public string IconClass { get; set; } = "";
+    [Parameter] public string ColorTheme { get; set; } = "blue";
+    [Parameter] public EventCallback<string> OnClick { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(KPIType);
+        }
+    }
+
+    private string GetResolvedIconClass()
+    {
+        if (!string.IsNullOrEmpty(IconClass))
+            return IconClass;
+
+        var key = (KPIType ?? Label ?? "").ToLowerInvariant();
+
+        if (key.Contains("active") || key.Contains("client") || key.Contains("business"))
+            return "bi-buildings";
+        if (key.Contains("progress") || key.Contains("ongoing"))
+            return "bi-hourglass-split";
+        if (key.Contains("pending") || key.Contains("review") || key.Contains("wait"))
+            return "bi-exclamation-circle";
+        if (key.Contains("complete") || key.Contains("done") || key.Contains("success"))
+            return "bi-check-circle-fill";
+        if (key.Contains("workload") || key.Contains("assigned") || key.Contains("user"))
+            return "bi-person-badge";
+        if (key.Contains("branch") || key.Contains("portfolio") || key.Contains("metric"))
+            return "bi-pie-chart-fill";
+
+        return "bi-graph-up";
+    }
+
+    private string GetTrendClass() => TrendPercent > 0 ? "positive" : TrendPercent < 0 ? "negative" : "neutral";
+    private string GetTrendIcon() => TrendPercent > 0 ? "bi-arrow-up-right" : TrendPercent < 0 ? "bi-arrow-down-right" : "bi-dash";
+}

@@ -3,16 +3,16 @@ using Serilog;
 
 namespace ViabilityIQ.Web.Extensions
 {
-    /// <summary>
+    
     /// Publishing and deployment-related extensions
     /// Handles configuration validation, security setup, and reporting for production/staging
-    /// </summary>
+    
     public static class PublishingExtensions
     {
-        /// <summary>
+        
         /// Configure application for production/staging deployment
         /// Validates all required configuration and applies security settings
-        /// </summary>
+        
         public static void ConfigureForDeployment(this WebApplication app)
         {
             Console.WriteLine("\n[DEPLOYMENT] Configuring for deployment...");
@@ -49,10 +49,10 @@ namespace ViabilityIQ.Web.Extensions
             }
         }
 
-        /// <summary>
+        
         /// Print deployment checklist to console
         /// Shows if all required settings are configured
-        /// </summary>
+        
         public static void PrintDeploymentChecklist(this WebApplication app)
         {
             var config = app.Services.GetRequiredService<IConfiguration>();
@@ -90,10 +90,10 @@ namespace ViabilityIQ.Web.Extensions
             Log.Information("Deployment checklist: {@Checklist}", checks);
         }
 
-        /// <summary>
+        
         /// Generate detailed deployment report
         /// Shows environment, configuration sources, security, database, authentication, and logging settings
-        /// </summary>
+        
         public static void GenerateDeploymentReport(this WebApplication app)
         {
             var config = app.Services.GetRequiredService<IConfiguration>();
@@ -142,9 +142,9 @@ namespace ViabilityIQ.Web.Extensions
             });
         }
 
-        /// <summary>
+        
         /// Log deployment environment information
-        /// </summary>
+        
         private static void LogDeploymentEnvironment(WebApplication app, IConfiguration config)
         {
             Console.WriteLine("[DEPLOYMENT] Environment Information:");
@@ -174,10 +174,10 @@ namespace ViabilityIQ.Web.Extensions
             });
         }
 
-        /// <summary>
+        
         /// Validate deployment configuration
         /// Throws exceptions if critical settings are missing
-        /// </summary>
+        
         private static void ValidateDeploymentConfiguration(IConfiguration config, IWebHostEnvironment environment)
         {
             Console.WriteLine("[DEPLOYMENT] Validating configuration...");
@@ -227,9 +227,9 @@ namespace ViabilityIQ.Web.Extensions
             Console.WriteLine("[DEPLOYMENT] ✓ Configuration validation passed");
         }
 
-        /// <summary>
+        
         /// Configure security headers and HTTPS for production
-        /// </summary>
+        
         private static void ConfigureProductionSecurity(WebApplication app)
         {
             Console.WriteLine("[DEPLOYMENT] Configuring production security...");
@@ -265,9 +265,9 @@ namespace ViabilityIQ.Web.Extensions
             Log.Information("Production security configured - HSTS and security headers enabled");
         }
 
-        /// <summary>
+        
         /// Configure security for staging environment
-        /// </summary>
+        
         private static void ConfigureStagingSecurity(WebApplication app)
         {
             Console.WriteLine("[DEPLOYMENT] Configuring staging security...");
@@ -295,9 +295,9 @@ namespace ViabilityIQ.Web.Extensions
             Log.Information("Staging security configured");
         }
 
-        /// <summary>
+        
         /// Mask connection string for safe logging
-        /// </summary>
+        
         private static string MaskConnectionString(string? connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))

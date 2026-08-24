@@ -112,10 +112,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             }
         }
 
-        /// <summary>
+        
         /// Returns color based on operating margin
         /// Green: >= 15%, Orange: 5-14%, Red: < 5%
-        /// </summary>
+        
         private string GetMarginColor(decimal margin)
         {
             return margin switch
@@ -126,10 +126,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Returns color based on expense ratio
         /// Green: <= 70%, Orange: 71-85%, Red: > 85%
-        /// </summary>
+        
         private string GetExpenseRatioColor(decimal ratio)
         {
             return ratio switch
@@ -140,10 +140,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Returns color based on negative months count
         /// Green: 0, Yellow: 1-2, Orange: 3-4, Red: >= 5
-        /// </summary>
+        
         private string GetNegativeMonthsColor(int months)
         {
             return months switch
@@ -155,10 +155,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Returns color based on critical months count
         /// Green: 0, Yellow: 1, Orange: 2, Red: >= 3
-        /// </summary>
+        
         private string GetCriticalMonthsColor(int months)
         {
             return months switch
@@ -170,9 +170,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             };
         }
 
-        /// <summary>
+        
         /// Returns color and text based on health status
-        /// </summary>
+        
         private string GetHealthStatusColor(CashflowHealthStatus status)
         {
             return status switch

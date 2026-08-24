@@ -50,6 +50,8 @@
     padding: 1px 6px;
     overflow-y: auto;
     flex: 1;
+    border-bottom: solid 1px #64748b;
+}
 }
 
 .sidebar-footer-static {
@@ -74,24 +76,9 @@
     display: none;
 }
 
-/* Base Nav Items Layout */
-.fa-nav-item {
-    /*display: flex;    
-    align-items: center;
-    padding: 0px 12px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    color: #475569;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    gap: 0px;
-    position: relative;*/
 
+/* Base Nav Items Layout */
+.fa-nav-item {    
     display: flex;
     align-items: center;
     height: 25px;
@@ -100,8 +87,9 @@
     margin: 0;
     line-height: 1;
     font-size: 0.82rem;
-    gap: 6px;
+    gap: 6px;    
     overflow: hidden;
+    box-sizing: border-box;
 }
 
     .fa-nav-item:hover {
@@ -115,14 +103,18 @@
         font-weight: 600;
     }
 
+    a.fa-nav-item.bd-bottom {
+        border-bottom: 1px solid #64748b !important;
+    }
+
 .nav-icon-avatar-round {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 25px;
     height: 25px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: #f4ede6;
+    border: 1px solid #dedede;
     border-radius: 50%;
     color: #64748b;
     font-size: 1.1rem;
@@ -137,7 +129,7 @@
 
 .fa-nav-item.active .nav-icon-avatar-round {
     background-color: #000099;
-    color: #ffffff;
+    color: #f4ede6;
     border-color: #000099;
 }
 

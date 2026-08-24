@@ -56,9 +56,9 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 8px;
-    border-top: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    padding: 12px 8px;
+    border-top: 1px solid #566d7e;
+    background-color: #D4E1ED;      /* #f8fafc;*/
 }
 
 .fa-nav-heading {
@@ -76,27 +76,11 @@
 
 /* Base Nav Items Layout */
 .fa-nav-item {
-    /*display: flex;    
-    align-items: center;
-    padding: 0px 12px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    color: #475569;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    gap: 0px;
-    position: relative;*/
-
     display: flex;
     align-items: center;
-    height: 25px;
-    min-height: 25px;
-    padding: 0 10px;
+    height: 22px;
+    min-height: 22px;
+    padding: 0 8px;
     margin: 0;
     line-height: 1;
     font-size: 0.82rem;
@@ -118,14 +102,14 @@
 .nav-icon-avatar-round {
     display: flex;
     align-items: center;
-    justify-content: center;    
-    width: 25px;
+    justify-content: center;
+    width: 20px;
     height: 25px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: #f4ede6;
+    border: 1px solid #dedede;  /* #e2e8f0;*/
     border-radius: 50%;
     color: #64748b;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     flex-shrink: 0;
     transition: all 0.2s ease;
 }
@@ -297,108 +281,17 @@
     border: 2px solid #ffffff;
 }
 
-/* User Account Overlay Panels */
-/*.dropdown-container {
-    position: relative;
+.fa-nav-item.footer-item {
+    height: auto !important;
+    min-height: 42px !important;
+    padding: 6px 8px !important;
 }
 
-.avatar-trigger-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
+/* Ensure the icon inside the footer stays properly centered */
+.footer-item .nav-icon-avatar-round {
+    width: 24px !important;
+    height: 24px !important;
 }
-
-.avatar-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: #000099;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
-.profile-card-dropdown {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    width: 240px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-    display: none;
-    z-index: 1000;
-}
-
-    .profile-card-dropdown.show {
-        display: block;
-    }
-
-.profile-card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.profile-avatar-large {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: #e0e7ff;
-    color: #000099;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-}
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.profile-name {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.profile-role {
-    font-size: 0.72rem;
-    color: #64748b;
-}
-
-.profile-card-body {
-    padding: 8px 0;
-}
-
-.profile-dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 16px;
-    color: #334155;
-    text-decoration: none;
-    font-size: 0.85rem;
-}
-
-    .profile-dropdown-item:hover {
-        background-color: #f1f5f9;
-        color: #000099;
-    }
-
-.dropdown-divider {
-    height: 1px;
-    background-color: #e2e8f0;
-    margin: 8px 0;
-}*/
 
 /* Switch Context Options Selection Panels */
 .chevron-rotate {
@@ -420,8 +313,8 @@
     bottom: calc(100% + 4px);
     left: 8px;
     width: calc(100% - 16px);
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: #d4e1ed;
+    border: 1px solid #566d7e;
     border-radius: 8px;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
     display: none;
@@ -452,6 +345,7 @@
     .setup-dropdown-item:hover {
         background-color: #f1f5f9;
         color: #000099;
+        font-weight: bold;
     }
 
 /* Workspace Canvas */
