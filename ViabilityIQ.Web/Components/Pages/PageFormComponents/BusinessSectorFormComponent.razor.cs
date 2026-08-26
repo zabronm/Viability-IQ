@@ -4,14 +4,16 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class BusinessSectorFormComponent
     {
         [Inject] private IGenericDataRepository<BusinessSector> sectorRepository { get; set; } = default!;
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
+
         [Parameter] public long BusinessSectorId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
 
         private BusinessSector sectorModel = new();
         private bool isProcessingData = false;
@@ -54,12 +56,12 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 // Synchronize toggle visual states straight to model metadata properties
                 sectorModel.Active = isRowActive;
 
-                // FIX: Invoking the unified data stream 'SaveAsync' as defined in GenericDataRepository
+                // ✅ Invoking the unified data stream 'SaveAsync' as defined in GenericDataRepository
                 bool operationSuccess = await sectorRepository.SaveAsync(sectorModel);
 
                 if (operationSuccess)
                 {
-                    finalResult.Success = true;                    
+                    finalResult.Success = true;
                     finalResult.ClosePanel = true;
                     finalResult.Message = BusinessSectorId == 0
                         ? "New business sector classification logged successfully."
@@ -70,15 +72,16 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     throw new Exception("Error encountered while committing. Please retry.");
                 }
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             catch (Exception ex)
             {
-                finalResult.Success = false;               
+                finalResult.Success = false;
                 finalResult.ClosePanel = false;
                 finalResult.Message = $"Pipeline Transaction Fault Intercepted: {ex.Message}";
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             finally
             {

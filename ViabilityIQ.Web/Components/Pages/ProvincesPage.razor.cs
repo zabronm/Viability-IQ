@@ -10,6 +10,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages
@@ -17,34 +18,29 @@ namespace ViabilityIQ.Web.Components.Pages
     public partial class ProvincesPage
     {
         [Inject] IReadOnlyRepository<ProvinceDto, long>? ProvinceRepository { get; set; }
-        [Inject] private IGenericDataRepository<Province> clientGenRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<Province> provinceGenRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] private OffCanvasStateService OffcanvasService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
         private List<ProvinceDto> provincesList = new();
         private List<ZabDataTableAdvanced<ProvinceDto>.ColumnDefinition<ProvinceDto>> tableColumns = new();
-
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Manage Province Account Record";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
             _ = LoadGridDatasetAsync();
 
-            // ALIGNED: Corrected property mappings for column expressions
             tableColumns = new List<ZabDataTableAdvanced<ProvinceDto>.ColumnDefinition<ProvinceDto>>
             {
                 new() { Title = "Province Name", Value = x => x.ProvinceName },
                 new() { Title = "Short Name", Value = x => x.ShortName ?? "" },
                 new() { Title = "Manager", Value = x => x.Manager ?? "" },
                 new() { Title = "Telephone", Value = x => x.Telephone ?? "" },
-                new() { Title = "Mobile", Value = x => x.Mobile ?? "" }, // Maps clean description or tracking ID               
+                new() { Title = "Mobile", Value = x => x.Mobile ?? "" },
                 new() { Title = "Email", Value = x => x.Email ?? "" },
                 new() {
                     Title = "Status",
@@ -53,6 +49,8 @@ namespace ViabilityIQ.Web.Components.Pages
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
+
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -74,26 +72,30 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add New Province/Funder" : "Modify Province Details";
+            var formTitle = extractedRecordId == 0 ? "Add New Province" : "Modify Province Details";
 
-            if (canvasShell != null)
+            await OffcanvasService.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 500,
+                ComponentType = typeof(ProvinceFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ProvinceId", extractedRecordId }
+                },
+                ResultCallback = ProcessExecutionFeedback
+            });
         }
 
-        // ALIGNED: Unified deletion input to use ProvinceDto matching the TItem grid specifier type safely
         private async Task DeleteSelectedProvince(ProvinceDto targetProvinceDto)
         {
-            // Map DTO to domain model context schema block for generic repo execution target
             var targetProvince = new Province
             {
                 ProvinceId = targetProvinceDto.ProvinceId,
                 ProvinceName = targetProvinceDto.ProvinceName
             };
 
-            var success = await clientGenRepository!.DeleteAsync(targetProvince);
+            var success = await provinceGenRepository!.DeleteAsync(targetProvince);
             if (success)
             {
                 _Toast!.ShowSuccess("Record discarded successfully.", sessionService!.AppTitle);
@@ -101,7 +103,7 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
@@ -112,16 +114,10 @@ namespace ViabilityIQ.Web.Components.Pages
                 _Toast!.ShowError(_result.Message, sessionService!.AppTitle);
             }
 
-            if (_result.ClosePanel && canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-
             await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
-        // PDF EXPORT EXECUTOR ALIGNED (Takes List<ProvinceDto> from component handler pipeline now)
         private async Task ExecutePrintFormatProcess(List<ProvinceDto> targetedDataset)
         {
             try
@@ -129,7 +125,7 @@ namespace ViabilityIQ.Web.Components.Pages
                 loadingStateActive = true;
                 StateHasChanged();
 
-                var PrintDataSet = targetedDataset.Select(item => new provinceListPrintDto
+                var PrintDataSet = targetedDataset.Select(item => new ProvinceListPrintDto
                 {
                     ProvinceName = item.ProvinceName,
                     ShortName = item.ShortName,
@@ -144,7 +140,7 @@ namespace ViabilityIQ.Web.Components.Pages
                 string targetFileName = $"Province_List_Summary_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
 
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", targetFileName, Convert.ToBase64String(pdfReportBytes));
-                _Toast!.ShowSuccess("PDF downloaded, check your downloads directory..", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("PDF downloaded, check your downloads directory.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -157,7 +153,6 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        // EXCEL EXPORT EXECUTOR ALIGNED
         private async Task ExecuteExcelExportProcess(List<ProvinceDto> targetedDataset)
         {
             try
@@ -181,12 +176,10 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        // EMAIL DISTRIBUTION EXECUTOR ALIGNED
         private async Task ExecuteEmailDistributionProcess(List<ProvinceDto> targetedDataset)
         {
             try
             {
-                // Uncoment and add your EmailService configuration calls mapping ProvinceDto records 
                 await Task.CompletedTask;
             }
             catch (Exception ex)
@@ -200,7 +193,7 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private class provinceListPrintDto
+        private class ProvinceListPrintDto
         {
             [DisplayName("Province Name")]
             public string? ProvinceName { get; set; }

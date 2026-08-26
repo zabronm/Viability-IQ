@@ -1,20 +1,23 @@
-﻿
-
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
-using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class ProductServicePage
+    public partial class ProductServicePage : IAsyncDisposable
     {
         [Inject] private IGenericDataRepository<ProductService> productRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
@@ -22,9 +25,8 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
-        //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-      
         // Alert
         //---------------------------------------------------------
         private bool blAlert = true;
@@ -32,28 +34,24 @@ namespace ViabilityIQ.Web.Components.Pages
         private string AlertHeading = "Products/Services";
         private string AlertMessage = "Register your main products/services here, which will be inherited by your assessments in sales.";
 
-
         private List<ProductService> productList = new();
         private List<ZabDataTableAdvanced<ProductService>.ColumnDefinition<ProductService>> tableColumns = new();
 
-        // State Machine parameters for modal canvas controls
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Product Details ..";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<ProductService>.ColumnDefinition<ProductService>>
             {
                 new() { Title = "Product Name", Value = x => x.ProductName },
                 new() { Title = "Other Name/s", Value = x => x.OtherName },
-                new() { Title = "Category", Value = x => x.ProductCategoryId },
-                new() { Title = "Markup(%)", Value = x => x.MarkupPercentage },
-                //new() { Title = "Remarks/Details", Value = x => x.Remarks ?? "N/A" },
+                new() { Title = "Category", Value = x => x.ProductCategoryId.ToString() },
+                new() { Title = "Markup(%)", Value = x => x.MarkupPercentage.ToString() },
                 new() {
                     Title = "Status",
                     Value = x => x.Active == true ? "Active" : "Inactive",
@@ -63,80 +61,77 @@ namespace ViabilityIQ.Web.Components.Pages
             };
         }
 
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
+        }
+
         private async Task LoadGridDatasetAsync()
         {
             loadingStateActive = true;
-            StateHasChanged(); // Instantly show overlay spinner block
+            StateHasChanged();
 
             try
             {
-                // = await MasterData!.GetAllBanksAsync();
-                //banksList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Bank>();
-
-                var resultSet = (await productRepository.GetAllAsync());
+                var resultSet = await productRepository.GetAllAsync();
                 productList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ProductService>();
-
             }
             finally
             {
                 loadingStateActive = false;
-                StateHasChanged(); // Remove overlay mask automatically
+                StateHasChanged();
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add Product/Service " : "Modify Product/Service ";
+            string formTitle = extractedRecordId == 0 ? "Add Product/Service" : "Modify Product/Service";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 500,
+                ComponentType = typeof(ProductServiceFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ProductServiceId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
-        private async Task RefreshWorkspaceGridData()
+        private async Task DeleteSelectedProduct(ProductService targetProduct)
         {
-            if (canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-            await LoadGridDatasetAsync();
-        }
-
-        private async Task DeleteSelectedBank(ProductService targetCategory)
-        {
-            var success = await productRepository!.DeleteAsync(targetCategory);
+            var success = await productRepository.DeleteAsync(targetProduct);
             if (success)
             {
+                _Toast!.ShowSuccess("Product/Service removed successfully.", sessionService!.AppTitle);
                 await LoadGridDatasetAsync();
+            }
+            else
+            {
+                _Toast!.ShowError("Failed to delete product/service.", sessionService!.AppTitle);
             }
         }
 
-
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }
 
-            if (_result.ClosePanel)
-            {
-                if (canvasShell != null) await canvasShell!.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
-
-        //PDF EXPORT 
-        //private async Task ExecutePrintFormatProcess(List<ProductService> targetedDataset)
         private async Task ExecutePrintFormatProcess(List<ProductService> targetedDataset)
         {
             try
@@ -144,30 +139,19 @@ namespace ViabilityIQ.Web.Components.Pages
                 loadingStateActive = true;
                 StateHasChanged();
 
-                //MOVE DATA TO FORMATTTED DTO
-                var PrintDataSet = targetedDataset.Select(item => new ProductServiceDto
+                var PrintDataSet = targetedDataset.Select(item => new ProductServicePrintDto
                 {
                     ProductServiceName = item.ProductName,
                     OtherName = item.OtherName,
-                    ProductServiceId = item.ProductId,
                     MarkupPercentage = item.MarkupPercentage,
-                    ProductOrService = item.ProductOrService,
-                    //ProductServiceId = item.ProductServiceId,
-                    //ProductServiceName = item.ProductServiceId,
-
+                    ProductOrService = item.ProductOrService
                 }).ToList();
 
+                byte[] pdfReportBytes = await PdfService.GenerateReportDataPdfAsync(PrintDataSet, "Product/Service Summary");
+                string targetFileName = $"Product_Service_Master_Ledger_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
 
-                // 1. Render the structured ledger to binary bytes array
-                byte[] pdfReportBytes = await PdfService.GenerateReportDataPdfAsync(PrintDataSet, "Product Category Summary");
-
-                // 2. Set file naming structures
-                string targetFileName = $"Product_Category_Master Ledger_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-                // 3. Hand off the base64 text variant stream directly down to the browser storage downloads link engine
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", targetFileName, Convert.ToBase64String(pdfReportBytes));
-
-                _Toast!.ShowSuccess("PDF document spooled to your downloads directory..", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("PDF document spooled to your downloads directory.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -180,39 +164,17 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-
-
-
-
-
-
-
-        //private async Task ExecutePrintFormatProcess(List<Bank> targetedDataset)
-        //{
-        //    _Toast!.ShowInfo($"Preparing {targetedDataset.Count} records for system print spool...", sessionService!.AppTitle);
-
-        //    // For elegant layout printing, you can trigger standard window print.
-        //    // CSS @media print rules in your app stylesheet can strip away sidebars/nav panels automatically.
-        //    await JS.InvokeVoidAsync("window.print");
-        //}
-
-        
-        /// 2. Action: Export current active listing straight into a downloadable Excel Binary stream
-        
         private async Task ExecuteExcelExportProcess(List<ProductService> targetedDataset)
         {
             try
             {
                 loadingStateActive = true;
 
-                // Pass to your application reporting tool layer (e.g., using ClosedXML or EPPlus)
-                byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Registered Banks List");
+                byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Product/Service Master Records");
+                string fileName = $"Product_Service_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
-                // Use a standard JavaScript save file utility to trigger an instant download stream
-                string fileName = $"Bank_Funder_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", fileName, Convert.ToBase64String(excelBytes));
-
-                _Toast.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -221,49 +183,46 @@ namespace ViabilityIQ.Web.Components.Pages
             finally
             {
                 loadingStateActive = false;
+                StateHasChanged();
             }
         }
 
-        
-        /// 3. Action: Email document attachments down to targeted distribution users
-        
         private async Task ExecuteEmailDistributionProcess(List<ProductService> targetedDataset)
         {
             try
             {
-                //loadingStateActive = true;
-
-                //// Automatically compile dataset into an excel/pdf asset attachment wrapper
-                //byte[] attachmentReportBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Email Distribution Extract");
-
-                //var emailPayload = new EmailReportRequest
-                //{
-                //    RecipientAddress = "zabronm@yahoo.co.za",
-                //    SubjectTitle = $"System Extract: Current Active Funder Registrations ({targetedDataset.Count} Rows)",
-                //    MessageBodyText = "<p>Please find attached the master data record matrix for all registered banking/funding configurations currently loaded on the system environment data space.</p>",
-                //    AttachmentBytes = attachmentReportBytes,
-                //    AttachmentName = "MasterData_Funder_Report.xlsx"
-                //};
-
-                //bool sendStatus = await EmailService.SendSystemReportWithAttachmentAsync(emailPayload);
-
-                //if (sendStatus)
-                //    _Toast!.ShowSuccess("List email sent successfully.");
-                //else
-                //    _Toast!.ShowWarning("Errors encountered while processing email.", sessionService!.AppTitle);
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                _Toast!.ShowError($"Email Transmission Engine Intercepted Error: {ex.Message}", sessionService!.AppTitle);
+                _Toast!.ShowError($"Email Transmission Error: {ex.Message}", sessionService!.AppTitle);
             }
             finally
             {
                 loadingStateActive = false;
+                StateHasChanged();
             }
         }
 
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
+        }
 
-
+        public class ProductServicePrintDto
+        {
+            [DisplayName("Product Name")]
+            public string? ProductServiceName { get; set; }
+            [DisplayName("Other Name/s")]
+            public string? OtherName { get; set; }
+            [DisplayName("Markup %")]
+            public decimal? MarkupPercentage { get; set; }
+            [DisplayName("Type")]
+            public bool ProductOrService { get; set; }
+        }
     }
 }
-

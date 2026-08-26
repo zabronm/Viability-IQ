@@ -33,23 +33,6 @@
 
         </div>
     </main>
-
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle">
-        @if (canvasOpenStatus)
-    {
-        <LoanTypeFormComponent LoanTypeId="@activeRecordId" OnSavedSuccess="RefreshWorkspaceGridData" />
-    }
-    </ZabOffCanvas>
-
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle">
-    @if (canvasOpenStatus)
-    {
-            <LoanTypeFormComponent LoanTypeId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
-    }
-</ZabOffCanvas>
-
-
-
     <footer class="py-4 bg-light mt-auto">
         <BFooter />
     </footer>

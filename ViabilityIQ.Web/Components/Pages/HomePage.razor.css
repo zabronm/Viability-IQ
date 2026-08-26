@@ -1,4 +1,12 @@
-﻿.home-page-container {
+﻿/* Forcefully remove focus outlines from any element inside the home page */
+.home-page-container *,
+.home-page-container *:focus,
+.home-page-container *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.home-page-container {
     outline: none;
     box-shadow: none;
 }
@@ -62,7 +70,7 @@
     color: #000099;
 }
 
-/* Row Two Container - Recent Activity (5) + Alerts (5) + Quick Actions (2) */
+/* Row Two Container - Ensure uniform column padding so shadows aren't clipped */
 .row-two-container {
     display: grid;
     grid-template-columns: 5fr 5fr 2fr;
@@ -122,22 +130,36 @@
     padding: 12px;
 }
 
-/* Component wrappers for rows 2, 3, 4 with borders, nice bottom shadow, and hover transitions */
+
+.kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 153, 0.08);
+        border: 1px solid #29465B;
+        border-left: 4px solid #29465B;
+    }
+
+/* Component wrappers for rows 2, 3, 4 with borders, nice bluish shadow, and hover transitions */
 .dashboard-component-wrapper {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    box-shadow: 0 14px 28px -4px rgba(59, 130, 246, 0.35), 0 10px 12px -5px rgba(59, 130, 246, 0.20), 0 0 0 2px rgba(59, 130, 246, 0.15);
+    /*box-shadow: 0 10px 25px -5px rgba(0, 0, 153, 0.18), 0 8px 10px -6px rgba(0, 102, 204, 0.12);*/
+    /*transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;*/
+    transition: transform 0.5s ease-in-out, box-shadow 0.6s ease-in-out, border 0.4s ease-in-out;
+    will-change: transform, box-shadow;
     height: 100%;
     width: 100%;
 }
 
     .dashboard-component-wrapper:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-        border-color: #cbd5e1;
+        transform: translateY(-4px);
+        box-shadow: 0 14px 28px -4px rgba(59, 130, 246, 0.35), 0 10px 12px -5px rgba(59, 130, 246, 0.20), 0 0 0 2px rgba(59, 130, 246, 0.15);
+        /*box-shadow: 0 14px 28px -4px rgba(0, 0, 153, 0.25), 0 10px 12px -5px rgba(0, 102, 204, 0.15);*/
+        border: 1px solid #29465B;
+        border-left: 3px solid #29465B;
     }
+
 
 /* Responsive Design */
 @media (max-width: 1400px) {

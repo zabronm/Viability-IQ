@@ -9,20 +9,21 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
-
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class ExpenseTypePage
+    public partial class ExpenseTypePage : IAsyncDisposable
     {
-        [Inject] private IGenericDataRepository<ExpenseType> sectorRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<ExpenseType> expenseTypeRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
-       
+
         // Alert
         //---------------------------------------------------------
         private bool blAlert = true;
@@ -33,17 +34,16 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<ExpenseType> expenseTypeList = new();
         private List<ZabDataTableAdvanced<ExpenseType>.ColumnDefinition<ExpenseType>> tableColumns = new();
 
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Expense Type";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
-            tableColumns = new List<ZabDataTableAdvanced<ExpenseType>.ColumnDefinition< ExpenseType>>
+            tableColumns = new List<ZabDataTableAdvanced<ExpenseType>.ColumnDefinition<ExpenseType>>
             {
                 new() { Title = "Expense Type", Value = x => x.ExpenseTypeName ?? "" },
                 new() { Title = "Remarks / Notes", Value = x => x.Remarks ?? "" },
@@ -55,7 +55,13 @@ namespace ViabilityIQ.Web.Components.Pages
                 }
             };
 
-           await  Task.CompletedTask;
+            await Task.CompletedTask;
+        }
+
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -65,8 +71,8 @@ namespace ViabilityIQ.Web.Components.Pages
 
             try
             {
-                var resultSet = await sectorRepository.GetAllAsync();
-                expenseTypeList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List< ExpenseType>();
+                var resultSet = await expenseTypeRepository.GetAllAsync();
+                expenseTypeList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ExpenseType>();
             }
             finally
             {
@@ -75,45 +81,51 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add client type" : "Modify client type";
+            string formTitle = extractedRecordId == 0 ? "Add Expense Type" : "Modify Expense Type";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 300,
+                ComponentType = typeof(ExpenseTypeFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ExpenseTypeId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
-
-        private async Task DeleteSelectedSector( ExpenseType targetModel)
+        private async Task DeleteSelectedExpenseType(ExpenseType targetModel)
         {
-            var success = await sectorRepository.DeleteAsync(targetModel);
+            var success = await expenseTypeRepository.DeleteAsync(targetModel);
             if (success)
             {
-                _Toast!.ShowSuccess("Expense type removed.", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("Expense type removed successfully.", sessionService!.AppTitle);
                 await LoadGridDatasetAsync();
+            }
+            else
+            {
+                _Toast!.ShowError("Failed to delete expense type.", sessionService!.AppTitle);
             }
         }
 
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Error encountered:");
             }
 
-            if (_result.ClosePanel && canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
@@ -124,9 +136,9 @@ namespace ViabilityIQ.Web.Components.Pages
                 loadingStateActive = true;
                 StateHasChanged();
 
-                var printDataSet = targetedDataset.Select(item => new ClientPrintDto
+                var printDataSet = targetedDataset.Select(item => new ExpenseTypePrintDto
                 {
-                    ExpenseTypeName    = item.ExpenseTypeName,
+                    ExpenseTypeName = item.ExpenseTypeName,
                     Remarks = item.Remarks,
                     Status = item.Active == true ? "Active" : "Inactive"
                 }).ToList();
@@ -170,15 +182,36 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteEmailDistributionProcess(List< ExpenseType> targetedDataset)
+        private async Task ExecuteEmailDistributionProcess(List<ExpenseType> targetedDataset)
         {
-            await Task.CompletedTask;
+            try
+            {
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _Toast!.ShowError($"Email Transmission Error: {ex.Message}", sessionService!.AppTitle);
+            }
+            finally
+            {
+                loadingStateActive = false;
+                StateHasChanged();
+            }
         }
 
-        public class ClientPrintDto
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
+        }
+
+        public class ExpenseTypePrintDto
         {
             [DisplayName("Expense Type")]
-            public string?ExpenseTypeName { get; set; }
+            public string? ExpenseTypeName { get; set; }
             public string? Remarks { get; set; }
             [DisplayName("Status")]
             public string? Status { get; set; }

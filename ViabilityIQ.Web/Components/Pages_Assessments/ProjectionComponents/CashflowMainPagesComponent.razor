@@ -15,32 +15,33 @@
     </div>
 
     <div class="accordion custom-professional-accordion mt-3" id="accordionPanelsStayOpenExample">
-        <!-- Accordion Item 1 -->
+        <!-- Accordion Item 1 (Now Collapsed by Default) -->
         <div class="accordion-item border-0 mb-3 shadow-sm overflow-hidden rounded-3">
             <h2 class="accordion-header">
-                <button class="accordion-button py-3 px-4 fw-bold text-white bg-gradient-marble-1 shadow-none d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                <!-- Added 'collapsed' class and changed aria-expanded to "false" -->
+                <button class="accordion-button collapsed py-3 px-4 fw-bold text-white bg-gradient-marble-1 shadow-none d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
                     <i class="bi bi-pie-chart-fill me-3 fs-5 text-white-50"></i>
                     <span class="flex-grow-1 text-white fw-bold fs-6 tracking-wide">Cashflow Summary & Business Health</span>
                     <span class="badge bg-secondary text-white-50 fw-bold ms-2 me-2 px-2 py-1 fs-xxs">Active View</span>
                 </button>
             </h2>
 
-            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+            <!-- Removed 'show' class so it starts collapsed -->
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
                 <div class="accordion-body bg-marble-light p-4">
                     <div class="row w-100 g-4 mx-0 font-def">
                         <!-- Card 1: Cashflow Summary -->
-                        <div class="col-xl-5 col-lg-6 px-0 pe-lg-2 mt-2 mt-lg-0">                            
-                                <div class="card-body p-0">
-                                    <CashflowSummaryDashboardComponent AssessmentId="@AssessmentId" />
-                                </div>
-                            @* </div> *@
+                        <div class="col-xl-5 col-lg-6 px-0 pe-lg-2 mt-2 mt-lg-0">
+                            <div class="card-body p-0">
+                                <CashflowSummaryDashboardComponent AssessmentId="@AssessmentId" />
+                            </div>
                         </div>
 
                         <!-- Card 2: Business Health Indicators -->
-                        <div class="col-xl-7 col-lg-6 px-0 ps-lg-2 mt-2 mt-lg-0">                           
-                                <div class="card-body p-0">
-                                    <FinancialViabilityKPIComponent AssessmentId="@AssessmentId" />
-                                </div>                            
+                        <div class="col-xl-7 col-lg-6 px-0 ps-lg-2 mt-2 mt-lg-0">
+                            <div class="card-body p-0">
+                                <FinancialViabilityKPIComponent AssessmentId="@AssessmentId" />
+                            </div>
                         </div>
                     </div>
                 </div>

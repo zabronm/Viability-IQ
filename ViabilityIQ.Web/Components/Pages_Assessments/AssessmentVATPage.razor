@@ -6,12 +6,13 @@
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="VAT" PageTitle="Value Added Tax(VAT)" CurrentPage="PageType.VAT" />
 
-    <div class="row bg-white g-3 mt-1" style="border-radius: 6px;">    
-        <div class="col-xl-10 col-lg-9 col-12">
+    <div class="row bg-white g-3 mt-1 mb-2" style="border-radius: 6px;">    
+        <div class="w-100">
             <!-- place VAT components here-->
             <div class="vat-page-container">
                 <div class="vat-header">
@@ -146,16 +147,16 @@
                 </div>
             </div>
 
-
-
-
         </div>
-        <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
+        @* <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
 
             <RightSummary01 />
 
-        </div>
+        </div> *@
     </div>
+
+    <CashflowMainPagesComponent AssessmentId="@AssessmentId" />    
+
 </div>
 
     <footer class="py-2 bg-light mt-3">

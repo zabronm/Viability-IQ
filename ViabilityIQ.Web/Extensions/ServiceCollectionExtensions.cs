@@ -10,6 +10,7 @@ namespace ViabilityIQ.Web.Extensions
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<ToastService>();
             services.AddScoped<ZabOffCanvasService>();
+            services.AddScoped<OffCanvasStateService>();
             services.AddScoped<IBusinessHealthAlertService, BusinessHealthAlertService>();
             return services;
         }

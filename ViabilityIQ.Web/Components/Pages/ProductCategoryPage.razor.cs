@@ -1,5 +1,4 @@
 ﻿
-
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Data;
@@ -69,7 +68,7 @@ namespace ViabilityIQ.Web.Components.Pages
             StateHasChanged(); // Instantly show overlay spinner block
 
             try
-            {              
+            {
                 var resultSet = (await productCategoryRepository.GetAllAsync());
                 productCategoryList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ProductCategoryDto>();
 
@@ -186,9 +185,9 @@ namespace ViabilityIQ.Web.Components.Pages
         //    await JS.InvokeVoidAsync("window.print");
         //}
 
-        
+
         /// 2. Action: Export current active listing straight into a downloadable Excel Binary stream
-        
+
         private async Task ExecuteExcelExportProcess(List<ProductCategoryDto> targetedDataset)
         {
             try
@@ -214,9 +213,9 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        
+
         /// 3. Action: Email document attachments down to targeted distribution users
-        
+
         private async Task ExecuteEmailDistributionProcess(List<ProductCategoryDto> targetedDataset)
         {
             try
@@ -256,4 +255,3 @@ namespace ViabilityIQ.Web.Components.Pages
 
     }
 }
-

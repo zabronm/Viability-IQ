@@ -27,15 +27,6 @@
                                   OnEmailList="ExecuteEmailDistributionProcess" />
         </div>
     </main>
-
-    @* ALIGNED: Merged duplicate canvas segments into a single entry block *@
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500">
-        @if (canvasOpenStatus)
-        {
-            <ProvinceFormComponent ProvinceId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
-        }
-    </ZabOffCanvas>
-
     <footer class="py-4 bg-light mt-auto">
         <BFooter />
     </footer>

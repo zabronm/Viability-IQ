@@ -9,20 +9,20 @@
         <FormLoadingComponent LoadingMessage="Synchronizing Expense Types ..." />
     }
 
-    <EditForm Model="@incomeTypeModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="@expenseTypeModel" OnValidSubmit="HandleFormSubmissionAsync">
         <DataAnnotationsValidator />
         <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
 
         <div class="mb-3">
             <label for="TypeName" class="form-label-custom">Revenue Stream <span class="text-danger">*</span></label>
-            <InputText id="TypeName" class="form-control-compact" @bind-Value="incomeTypeModel.ExpenseTypeName" placeholder="e.g. Individual, corporation, NPO" />
-            <ValidationMessage For="@(() => incomeTypeModel.ExpenseTypeName)" class="text-danger small mt-1" />
+            <InputText id="TypeName" class="form-control-compact" @bind-Value="expenseTypeModel.ExpenseTypeName" placeholder="e.g. Individual, corporation, NPO" />
+            <ValidationMessage For="@(() => expenseTypeModel.ExpenseTypeName)" class="text-danger small mt-1" />
         </div>
 
         <div class="col-12 mb-4">
             <label for="remarks" class="form-label-custom">Internal Notes & Descriptions</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="incomeTypeModel.Remarks" placeholder="Define sector scope parameters..." />
-            <ValidationMessage For="@(() => incomeTypeModel.Remarks)" class="text-danger small mt-1" />
+            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="expenseTypeModel.Remarks" placeholder="Define sector scope parameters..." />
+            <ValidationMessage For="@(() => expenseTypeModel.Remarks)" class="text-danger small mt-1" />
         </div>
 
         <div class="col-12 mb-4 d-flex align-items-center justify-content-start">

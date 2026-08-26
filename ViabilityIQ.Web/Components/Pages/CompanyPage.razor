@@ -20,7 +20,7 @@
                                   IsLoading="@loadingStateActive"
                                   ShowAdd="true"
                                   ShowDelete="true"
-                                  OnDelete="DeleteSelectedBank"
+                                  OnDelete="DeleteSelectedCompany"
                                   GetRowId="@(x => x.CompanyId)"
                                   OnAddRecordId="HandleFormExecution"
                                   OnEditRecordId="HandleFormExecution"
@@ -29,23 +29,6 @@
                                   OnEmailList="ExecuteEmailDistributionProcess" />
         </div>
     </main>
-
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500" >
-        @if (canvasOpenStatus)
-    {
-        <CompanyFormComponent  CompanyId="@activeRecordId" OnSavedSuccess="RefreshWorkspaceGridData" />
-    }
-    </ZabOffCanvas>
-
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="500">
-    @if (canvasOpenStatus)
-    {
-            <CompanyFormComponent CompanyId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
-    }
-</ZabOffCanvas>
-
-
-
     <footer class="py-4 bg-light mt-auto">
         <BFooter />
     </footer>

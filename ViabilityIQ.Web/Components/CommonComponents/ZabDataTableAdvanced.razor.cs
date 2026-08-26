@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.CommonComponents
 {
@@ -13,6 +14,9 @@ namespace ViabilityIQ.Web.Components.CommonComponents
         [Inject] ISessionService? ZabSession { get; set; }
         [Inject] protected IJSRuntime JSRuntime { get; set; } = default!;
         [Inject] NavigationManager Nav { get; set; } = default!;
+        [Inject] OffCanvasStateService OffcanvasService { get; set; } = default!;
+
+        [Parameter] public Type? FormComponent { get; set; }                //This will accept the form component to be opened when add/edit button is clicked
 
         // Configuration Parameter Flags
         [Parameter] public bool ShowDelete { get; set; } = false;
@@ -172,14 +176,34 @@ namespace ViabilityIQ.Web.Components.CommonComponents
             if (OnDelete.HasDelegate) await OnDelete.InvokeAsync(item);
         }
 
+
         // Operational Execution Instances (Moved out of ColumnDefinition nested class)
         private async Task OnAddClick()
         {
+            //if (OnAddRecordId.HasDelegate)
+            //{
+            //    await OnAddRecordId.InvokeAsync(0);
+            //}
             if (OnAddRecordId.HasDelegate)
             {
+                // This fires your ClientPage's HandleFormExecution(0) method
                 await OnAddRecordId.InvokeAsync(0);
             }
+            else if (FormComponent != null)
+            {
+                // Fallback if no explicit callback is bound
+                await OffcanvasService.ShowAsync(
+                    new CanvasRequest
+                    {
+                        Title = $"Add {ItemName}",
+                        Width = 550,
+                        ComponentType = FormComponent,
+                        Parameters = new Dictionary<string, object?> { { "ClientId", 0L } }
+                    });
+            }
         }
+
+
 
         private async Task OnEditClick(object rawId)
         {

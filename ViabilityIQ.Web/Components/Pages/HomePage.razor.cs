@@ -124,17 +124,17 @@ namespace ViabilityIQ.Web.Components.Pages
         #endregion
 
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-                // Blur any focused element on first render
-                await Task.Delay(100);
-                // This prevents the focus outline from showing
-            }
+        //protected override async Task OnAfterRenderAsync(bool firstRender)
+        //{
+        //    if (firstRender)
+        //    {
+        //        // Blur any focused element on first render
+        //        await Task.Delay(100);
+        //        // This prevents the focus outline from showing
+        //    }
 
-            await base.OnAfterRenderAsync(firstRender);
-        }
+        //    await base.OnAfterRenderAsync(firstRender);
+        //}
 
 
 

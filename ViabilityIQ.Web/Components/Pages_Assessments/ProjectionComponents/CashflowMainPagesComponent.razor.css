@@ -334,8 +334,9 @@ text-navy-brand-plain {
         transform: scale(1.1);
     }
 
+/* Reduce vertical space between accordion items */
 .custom-professional-accordion .accordion-item {
-    border: 1px solid #d2dce3 !important;
+    margin-bottom: 8px !important; /* Reduced from default spacing */
 }
 
 .text-marble-dark {
@@ -350,5 +351,24 @@ text-navy-brand-plain {
     font-size: 0.7rem !important;
 }
 
-</style
+/* Enhanced, highly pronounced accordion hover effects */
+.custom-professional-accordion .accordion-button {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+    /* Pronounced hover state for collapsed buttons */
+    .custom-professional-accordion .accordion-button.collapsed:hover {
+        filter: brightness(1.25);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+        z-index: 2;
+    }
+
+    /* Pronounced hover state for expanded buttons */
+    .custom-professional-accordion .accordion-button:not(.collapsed):hover {
+        filter: brightness(1.15);
+        transform: translateY(-2px);
+        box-shadow: inset 0 -1px 0 rgba(0,0,0,.125), 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+        z-index: 2;
+    }
 

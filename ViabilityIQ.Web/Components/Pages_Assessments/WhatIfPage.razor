@@ -6,6 +6,7 @@
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Layout
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 
 <div class="p-0 position-relative dashboard-workspace container-fluid">
     <PageHeading_Assessment _pageTitle="What-If Analysis" PageTitle="Dashboards & Scenarios" CurrentPage="PageType.Dashboards" />
@@ -21,7 +22,7 @@
             </div>
         }
         <div class="col-xl-10 col-lg-9 col-12">
-
+            <div class="w-100" style="border-bottom: 2px solid #566D7E">
             <section class="metrics-ribbon-grid">
                 <div class="kpi-card border-left-standard standard-shadow">
                     <div class="kpi-card-body">
@@ -74,7 +75,7 @@
 
             <section class="dashboard-charts-matrix-grid mt-3 mb-5">
 
-                <div class="viq-elevated-card pronounced-shadow">
+                <div class="viq-elevated-card area-rect pronounced-shadow">
                     <div class="viq-card-header-dark-ice dark-header">
                         <div class="chart-title-block">
                             <i class="bi bi-activity text-white me-2"></i>
@@ -106,7 +107,7 @@
                     </div>
                 </div>
 
-                <div class="viq-elevated-card pronounced-shadow">
+                <div class="viq-elevated-card area-rect pronounced-shadow">
                     <div class="viq-card-header-dark-ice dark-header">
                         <div class="chart-title-block">
                             <i class="bi bi-calendar3 text-white me-2"></i>
@@ -130,7 +131,7 @@
                     </div>
                 </div>
 
-                <div class="viq-elevated-card pronounced-shadow">
+                <div class="viq-elevated-card area-rect pronounced-shadow">
                     <div class="viq-card-header-dark-ice dark-header">
                         <div class="chart-title-block">
                             <i class="bi bi-cash-stack text-info me-2"></i>
@@ -149,7 +150,7 @@
                     </div>
                 </div>
 
-                <div class="viq-elevated-card pronounced-shadow">
+                <div class="viq-elevated-card area-rect pronounced-shadow">
                     <div class="viq-card-header-dark-ice dark-header">
                         <div class="chart-title-block">
                             <i class="bi bi-shield-check text-info me-2"></i>
@@ -185,14 +186,19 @@
                 </div>
 
             </section>
+            </div>
+            <div class="w-100">
+                <!-- MAIN CASHFLOW COMPONENT-->
+                <CashflowMainPagesComponent AssessmentId="@AssessmentId"/>
+            </div>
         </div>
 
-        <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
-
-            <RightSummary01 />
-
+        <div class="col-xl-2 area-rect col-lg-3 col-12 documentation-sidebar">
+            <RightSummary01  />
         </div>
     </div>
+
+   
 </div>
 
     <footer class="py-2 bg-light mt-3">

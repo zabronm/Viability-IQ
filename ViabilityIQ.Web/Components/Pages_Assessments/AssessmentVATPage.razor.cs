@@ -1,14 +1,29 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
+using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
+using ViabilityIQ.Web.Services;
+
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
     public partial class AssessmentVATPage
     {
-        [Parameter] public long AssessmentId { get; set; }
+        [Inject] MasterDataService? ViqCrudService { get; set; }
+        [Inject] ISessionService? sessionService { get; set; }
+        [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
+        [Inject] ToastService? _Toast { get; set; }
+        [Inject] IProjectionStateManager? projectionStateManager { get; set; }
+        [Inject] ILogger<AssessmentSalesPage>? Logger { get; set; }
+
+
+        #region Parameters
+        [Parameter] public long AssessmentId { get; set; } = 1;    
         [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
+        #endregion
 
         private VatAdjustmentComponent? adjustmentOffCanvas;
 
@@ -25,6 +40,39 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal[] AdjOutput => CalcOutput.Select((val, idx) => idx == 1 ? val + 500m : val).ToArray();
         private decimal[] AdjInput => CalcInput.Select((val, idx) => idx == 2 ? val - 250m : val).ToArray();
         private decimal[] AdjNet => AdjOutput.Zip(AdjInput, (o, i) => o - i).ToArray();
+
+        private bool IsLoading { get; set; } = true;
+        private bool blAlert { get; set; } = true;
+        private ViqAlertComponent.AlertSeverity AlertSeverity { get; set; } = ViqAlertComponent.AlertSeverity.Warning;
+        private string AlertHeading { get; set; } = "SALES:";
+        private string AlertMessage { get; set; } = "Supply income/revenue details in this section.";
+
+
+        protected override async Task OnInitializedAsync()
+        {
+            try
+            {
+                AssessmentId = sessionService.AssessmentId ?? 0;
+
+                Logger.LogInformation(
+                    "AssessmentSalesPage initialized for assessment {AssessmentId}",
+                    AssessmentId);
+
+                //await LoadAndMapSalesData();
+                //await CreateSummaries();
+                IsLoading = false;
+
+                // Subscribe to projection changes
+                projectionStateManager.ProjectionChanged += OnProjectionChanged;
+
+                Logger.LogDebug("AssessmentSalesPage subscribed to ProjectionChanged events");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error initializing AssessmentSalesPage");
+                IsLoading = false;
+            }
+        }
 
 
         private async Task HandleSubmitData()
@@ -68,6 +116,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private void ExportReport() { }
         private void SaveChanges() { }
 
+        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        {
+            if (e.AssessmentId == AssessmentId && e.DataType == "VAT")
+            {
+                Logger.LogInformation(
+                    "VAT Adjusted, refreshing data for assessment {AssessmentId}",
+                    AssessmentId);
 
+                //InvokeAsync(async () => await LoadAndMapSalesData());
+            }
+        }
     }
 }

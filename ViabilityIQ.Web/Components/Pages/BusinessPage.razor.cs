@@ -10,15 +10,18 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class BusinessPage
+    public partial class BusinessPage : IAsyncDisposable
     {
         [Inject] private IGenericDataRepository<BusinessDto> businessRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<Business> coreBusinessRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] OffCanvasStateService? OffcanvasService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
@@ -26,26 +29,21 @@ namespace ViabilityIQ.Web.Components.Pages
         //---------------------------------------------------------
         // Alert
         //---------------------------------------------------------
-
         private bool blAlert = true;
-
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
-
         private string AlertHeading = "Businesses";
-
         private string AlertMessage = "Register a business before it can be assessed. Supply all relevant details that will assist the assessment to be more accurate.";
 
         private List<BusinessDto> businessList = new();
         private List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>> tableColumns = new();
 
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Business";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>>
@@ -53,8 +51,8 @@ namespace ViabilityIQ.Web.Components.Pages
                 new() { Title = "Business Name", Value = x => x.BusinessName ?? "" },
                 new() { Title = "Sector", Value = x => x.BusinessSectorName ?? "" },
                 new() { Title = "Owner", Value = x => x.Client ?? "" },
-                new() { Title = "Reg?", Value = x => x.Registered==true? "Yes": "No" },
-                new() { Title = "VAT Reg?", Value = x => x.VATRegistered==true? "Yes": "No" },
+                new() { Title = "Reg?", Value = x => x.Registered == true ? "Yes" : "No" },
+                new() { Title = "VAT Reg?", Value = x => x.VATRegistered == true ? "Yes" : "No" },
                 new() { Title = "Province", Value = x => x.ProvinceName ?? "" },
                 new() { Title = "Website", Value = x => x.Website ?? "" },
                 new() {
@@ -65,6 +63,12 @@ namespace ViabilityIQ.Web.Components.Pages
                 }
             };
 
+            await Task.CompletedTask;
+        }
+
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
             await Task.CompletedTask;
         }
 
@@ -85,45 +89,51 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Open Business form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add Business Details" : "Modify Business Details";
+            string formTitle = extractedRecordId == 0 ? "Add Business Details" : "Modify Business Details";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
+                Title = formTitle,
+                Width = 550,
+                ComponentType = typeof(BusinessFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "BusinessId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
+        }
+
+        private async Task DeleteSelectedBusiness(BusinessDto targetDto)
+        {
+            var trackingPayload = new Business { BusinessId = targetDto.BusinessId };
+            var success = await coreBusinessRepository.DeleteAsync(trackingPayload);
+            if (success)
+            {
+                _Toast!.ShowSuccess("Business record has been deleted from system.", sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
         }
 
-        // FIXED: Changed incoming signature from Core Business Entity to match BusinessDto requirements 
-        private async Task DeleteSelectedBusiness(BusinessDto targetDto)
-        {
-            // Implementation mapping goes here when tracking records for deletion 
-            await Task.CompletedTask;
-        }
-
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }
 
-            if (_result.ClosePanel && canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
-        // FIXED: Changed argument type parameter signature from List<Business> to List<BusinessDto>
         private async Task ExecutePrintFormatProcess(List<BusinessDto> targetedDataset)
         {
             try
@@ -134,9 +144,8 @@ namespace ViabilityIQ.Web.Components.Pages
                 var PrintDataSet = targetedDataset.Select(item => new businessPrintDto
                 {
                     BusinessName = item.BusinessName,
-                    BusinessOwner = item.Client,                    
+                    BusinessOwner = item.Client,
                     Province = item.ProvinceName,
-
                     Telephone = item.Telephone,
                     Mobile = item.Mobile,
                     Email = item.Email,
@@ -160,7 +169,6 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        // FIXED: Changed argument type parameter signature from List<Business> to List<BusinessDto>
         private async Task ExecuteExcelExportProcess(List<BusinessDto> targetedDataset)
         {
             try
@@ -184,10 +192,18 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        // FIXED: Changed argument type parameter signature from List<Business> to List<BusinessDto>
         private async Task ExecuteEmailDistributionProcess(List<BusinessDto> targetedDataset)
         {
             await Task.CompletedTask;
+        }
+
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
         }
 
         public class businessPrintDto

@@ -1,55 +1,53 @@
-﻿
-
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
-using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
-using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class LoanTypesPage
+    public partial class LoanTypesPage : IAsyncDisposable
     {
         [Inject] private IGenericDataRepository<LoanType> LoanTypeRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
-        [Inject] MasterDataService? MasterData { get; set; }
-
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
-        //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
         // Alert
         //---------------------------------------------------------
         private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Loan Types";
-        private string AlertMessage = "Register types of typical loans here. Each loan type will have different implications like interest rates and regulations ";
+        private string AlertMessage = "Register types of typical loans here. Each loan type will have different implications like interest rates and regulations.";
 
         private List<LoanType> loanTypesList = new();
         private List<ZabDataTableAdvanced<LoanType>.ColumnDefinition<LoanType>> tableColumns = new();
 
-        // State Machine parameters for modal canvas controls
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Manage Loan Type Record";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<LoanType>.ColumnDefinition<LoanType>>
             {
-                new() { Title = "Loan Type Name", Value = x => x.LoanTypeName  },
-                new() { Title = "Other Name/s", Value = x => x.ShortName  },
+                new() { Title = "Loan Type Name", Value = x => x.LoanTypeName },
+                new() { Title = "Other Name/s", Value = x => x.ShortName },
                 new() { Title = "Remarks/Details", Value = x => x.Remarks ?? "N/A" },
                 new() {
                     Title = "Status",
@@ -62,81 +60,77 @@ namespace ViabilityIQ.Web.Components.Pages
             await Task.CompletedTask;
         }
 
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
+        }
+
         private async Task LoadGridDatasetAsync()
         {
             loadingStateActive = true;
-            StateHasChanged(); // Instantly show overlay spinner block
+            StateHasChanged();
 
             try
             {
-                // = await MasterData!.GetAllBanksAsync();
-                //banksList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Bank>();
-
-                var resultSet  = (await LoanTypeRepository.GetAllAsync());
+                var resultSet = await LoanTypeRepository.GetAllAsync();
                 loanTypesList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<LoanType>();
-
             }
             finally
             {
                 loadingStateActive = false;
-                StateHasChanged(); // Remove overlay mask automatically
+                StateHasChanged();
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add New Loan Type" : "Modify Loan Type Details";
+            string formTitle = extractedRecordId == 0 ? "Add New Loan Type" : "Modify Loan Type Details";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
-        }
-
-        private async Task RefreshWorkspaceGridData()
-        {
-            if (canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-            await LoadGridDatasetAsync();
+                Title = formTitle,
+                Width = 400,
+                ComponentType = typeof(LoanTypeFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "LoanTypeId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
         private async Task DeleteSelectedLoanType(LoanType targetLoanType)
         {
-            var success = await MasterData!.DeleteLoanTypeAsync(targetLoanType);
+            var success = await LoanTypeRepository.DeleteAsync(targetLoanType);
             if (success)
             {
+                _Toast!.ShowSuccess("Loan type removed successfully.", sessionService!.AppTitle);
                 await LoadGridDatasetAsync();
-            }       
+            }
+            else
+            {
+                _Toast!.ShowError("Failed to delete loan type.", sessionService!.AppTitle);
+            }
         }
 
-
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }
 
-            if (_result.ClosePanel)
-            {
-                if (canvasShell != null) await canvasShell!.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
-
-
-
-        //PDF EXPORT 
         private async Task ExecutePrintFormatProcess(List<LoanType> targetedDataset)
         {
             try
@@ -144,11 +138,7 @@ namespace ViabilityIQ.Web.Components.Pages
                 loadingStateActive = true;
                 StateHasChanged();
 
-                loadingStateActive = true;
-                StateHasChanged();
-
-                //MOVE DATA TO FORMATTTED DTO
-                var PrintDataSet = targetedDataset.Select(item => new LoanTypeDto
+                var PrintDataSet = targetedDataset.Select(item => new LoanTypePrintDto
                 {
                     LoanTypeName = item.LoanTypeName,
                     ShortName = item.ShortName,
@@ -156,17 +146,11 @@ namespace ViabilityIQ.Web.Components.Pages
                     Remarks = item.Remarks
                 }).ToList();
 
-
-                // 1. Render the structured ledger to binary bytes array
                 byte[] pdfReportBytes = await PdfService.GenerateReportDataPdfAsync(PrintDataSet, "Registered Loan Types Ledger Summary");
+                string targetFileName = $"Loan_Type_Master_Ledger_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
 
-                // 2. Set file naming structures
-                string targetFileName = $"Loan_Type_Master Ledger_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-                // 3. Hand off the base64 text variant stream directly down to the browser storage downloads link engine
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", targetFileName, Convert.ToBase64String(pdfReportBytes));
-
-                _Toast!.ShowSuccess("PDF document spooled to your downloads directory..", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("PDF document spooled to your downloads directory.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -179,24 +163,17 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-
-        
-        /// 2. Action: Export current active listing straight into a downloadable Excel Binary stream
-        
         private async Task ExecuteExcelExportProcess(List<LoanType> targetedDataset)
         {
             try
             {
                 loadingStateActive = true;
 
-                // Pass to your application reporting tool layer (e.g., using ClosedXML or EPPlus)
                 byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Registered Loan Type List");
-
-                // Use a standard JavaScript save file utility to trigger an instant download stream
                 string fileName = $"Loan_Type_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-                await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", fileName, Convert.ToBase64String(excelBytes));
 
-                _Toast.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
+                await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", fileName, Convert.ToBase64String(excelBytes));
+                _Toast!.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -205,48 +182,45 @@ namespace ViabilityIQ.Web.Components.Pages
             finally
             {
                 loadingStateActive = false;
+                StateHasChanged();
             }
         }
 
-        
-        /// 3. Action: Email document attachments down to targeted distribution users
-        
         private async Task ExecuteEmailDistributionProcess(List<LoanType> targetedDataset)
         {
             try
             {
-                //loadingStateActive = true;
-
-                //// Automatically compile dataset into an excel/pdf asset attachment wrapper
-                //byte[] attachmentReportBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Email Distribution Extract");
-
-                //var emailPayload = new EmailReportRequest
-                //{
-                //    RecipientAddress = "zabronm@yahoo.co.za",
-                //    SubjectTitle = $"System Extract: Current Active Funder Registrations ({targetedDataset.Count} Rows)",
-                //    MessageBodyText = "<p>Please find attached the master data record matrix for all registered banking/funding configurations currently loaded on the system environment data space.</p>",
-                //    AttachmentBytes = attachmentReportBytes,
-                //    AttachmentName = "MasterData_Funder_Report.xlsx"
-                //};
-
-                //bool sendStatus = await EmailService.SendSystemReportWithAttachmentAsync(emailPayload);
-
-                //if (sendStatus)
-                //    _Toast!.ShowSuccess("List email sent successfully.");
-                //else
-                //    _Toast!.ShowWarning("Errors encountered while processing email.", sessionService!.AppTitle);
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                _Toast!.ShowError($"Email Transmission Engine Intercepted Error: {ex.Message}", sessionService!.AppTitle);
+                _Toast!.ShowError($"Email Transmission Error: {ex.Message}", sessionService!.AppTitle);
             }
             finally
             {
                 loadingStateActive = false;
+                StateHasChanged();
             }
         }
 
-       
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
+        }
+
+        public class LoanTypePrintDto
+        {
+            [DisplayName("Loan Type Name")]
+            public string? LoanTypeName { get; set; }
+            [DisplayName("Other Name/s")]
+            public string? ShortName { get; set; }
+            public string? Remarks { get; set; }
+            [DisplayName("Status")]
+            public bool Active { get; set; }
+        }
     }
 }
-

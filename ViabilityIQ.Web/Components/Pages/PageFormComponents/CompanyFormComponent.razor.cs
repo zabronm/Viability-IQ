@@ -3,20 +3,19 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class CompanyFormComponent
     {
-        //[Inject] private MasterDataService? MasterData { get; set; }
         [Inject] private IGenericDataRepository<Company>? companyRepository { get; set; }
-        [Parameter] public long CompanyId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-       
-        private Company companyModel = new();        // Main working model instance bound to forms
-       
-        private bool isProcessingData = false;               // Track state variables cleanly
+        [Parameter] public long CompanyId { get; set; } = 0;
+
+        private Company companyModel = new();
+        private bool isProcessingData = false;
         private bool isRowActive = true;
 
         protected override async Task OnParametersSetAsync()
@@ -30,7 +29,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             {
                 companyModel = new()
                 {
-                    Active = true                    
+                    Active = true
                 };
                 isRowActive = true;
             }
@@ -39,7 +38,6 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 isProcessingData = true;
                 try
                 {
-                    //var existingRecord = await MasterData!.GetBankByIdAsync(BankId);
                     var existingRecord = await companyRepository!.GetByIdAsync(CompanyId);
                     if (existingRecord != null)
                     {
@@ -63,32 +61,21 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             {
                 companyModel.Active = isRowActive;
 
-                // Fire singular service endpoint to decide Insert vs Update dynamically
-                //bool executionOutcome = await MasterData!.SaveBankAsync(bankModel);
-
                 bool executionOutcome = await companyRepository!.SaveAsync(companyModel);
                 if (executionOutcome)
                 {
                     var saveResult = new SaveResult()
                     {
                         Success = true,
-                        RefreshGrid = true
+                        RefreshGrid = true,
+                        ClosePanel = true,
+                        Message = CompanyId == 0
+                            ? $"{companyModel.CompanyName} added successfully"
+                            : $"{companyModel.CompanyName} updated successfully"
                     };
 
-                    if (CompanyId == 0)
-                    {
-                        saveResult.ClearForm = true;
-                        saveResult.ClosePanel = false;                        
-                        saveResult.Message = $"{companyModel.CompanyName} added successfully";
-                    }
-                    else
-                    {
-                        saveResult.ClearForm = true;
-                        saveResult.ClosePanel = true;                       
-                        saveResult.Message = $"{companyModel.CompanyName} updated successfully";
-                    }
-
-                    await OnSavedSuccess.InvokeAsync(saveResult);
+                    // ✅ Use service to publish result
+                    await OffcanvasService!.PublishResultAsync(saveResult);
                 }
                 else
                 {
@@ -96,10 +83,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     {
                         Success = false,
                         ClosePanel = false,
-                        ClearForm = false,
-                        RefreshGrid = false,
-                        Message = $"Error encountered while saving category.",
-                    }; 
+                        Message = "Error encountered while saving company.",
+                    };
+
+                    await OffcanvasService!.PublishResultAsync(saveResult);
                 }
             }
             catch (Exception ex)
@@ -107,10 +94,11 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 var saveResult = new SaveResult()
                 {
                     Success = false,
-                    RefreshGrid = false,
                     ClosePanel = false,
-                    Message = $"Critical validation channel anomaly: {ex.Message}",
-                };               
+                    Message = $"Critical error: {ex.Message}",
+                };
+
+                await OffcanvasService!.PublishResultAsync(saveResult);
             }
             finally
             {
@@ -119,5 +107,4 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
         }
     }
-
 }

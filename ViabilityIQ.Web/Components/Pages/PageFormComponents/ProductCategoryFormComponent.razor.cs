@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System;
+using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
-using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class ProductCategoryFormComponent
     {
-        //[Inject] private MasterDataService? MasterData { get; set; }
         [Inject] private IGenericDataRepository<ProductCategory>? categoryRepository { get; set; }
-        [Parameter] public long ProductCategoryId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-       
-        private ProductCategory productCategoryModel = new();        // Main working model instance bound to forms
-       
-        private bool isProcessingData = false;               // Track state variables cleanly
+        [Parameter] public long ProductCategoryId { get; set; } = 0;
+
+        private ProductCategory productCategoryModel = new();
+        private bool isProcessingData = false;
         private bool isRowActive = true;
 
         protected override async Task OnParametersSetAsync()
@@ -34,7 +34,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     UOM = string.Empty,
                     MarkupPercentage = 0,
                     Remarks = string.Empty,
-                    Active = true                    
+                    Active = true
                 };
                 isRowActive = true;
             }
@@ -43,7 +43,6 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 isProcessingData = true;
                 try
                 {
-                    //var existingRecord = await MasterData!.GetBankByIdAsync(BankId);
                     var existingRecord = await categoryRepository!.GetByIdAsync(ProductCategoryId);
                     if (existingRecord != null)
                     {
@@ -63,58 +62,40 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             isProcessingData = true;
             StateHasChanged();
 
+            var saveResult = new SaveResult();
+
             try
             {
                 productCategoryModel.Active = isRowActive;
 
-                // Fire singular service endpoint to decide Insert vs Update dynamically
-                //bool executionOutcome = await MasterData!.SaveBankAsync(bankModel);
-
                 bool executionOutcome = await categoryRepository!.SaveAsync(productCategoryModel);
                 if (executionOutcome)
                 {
-                    var saveResult = new SaveResult()
-                    {
-                        Success = true,
-                        RefreshGrid = true
-                    };
-
-                    if (ProductCategoryId == 0)
-                    {
-                        saveResult.ClearForm = true;
-                        saveResult.ClosePanel = false;                        
-                        saveResult.Message = $"{productCategoryModel.ProductCategoryName} added successfully";
-                    }
-                    else
-                    {
-                        saveResult.ClearForm = true;
-                        saveResult.ClosePanel = true;                       
-                        saveResult.Message = $"{productCategoryModel.ProductCategoryName} updated successfully";
-                    }
-
-                    await OnSavedSuccess.InvokeAsync(saveResult);
+                    saveResult.Success = true;
+                    saveResult.RefreshGrid = true;
+                    saveResult.ClosePanel = true;
+                    saveResult.Message = ProductCategoryId == 0
+                        ? $"{productCategoryModel.ProductCategoryName} added successfully"
+                        : $"{productCategoryModel.ProductCategoryName} updated successfully";
                 }
                 else
                 {
-                    var saveResult = new SaveResult()
-                    {
-                        Success = false,
-                        ClosePanel = false,
-                        ClearForm = false,
-                        RefreshGrid = false,
-                        Message = $"Error encountered while saving category.",
-                    }; 
+                    saveResult.Success = false;
+                    saveResult.ClosePanel = false;
+                    saveResult.Message = "Error encountered while saving category.";
                 }
+
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(saveResult);
             }
             catch (Exception ex)
             {
-                var saveResult = new SaveResult()
-                {
-                    Success = false,
-                    RefreshGrid = false,
-                    ClosePanel = false,
-                    Message = $"Critical validation channel anomaly: {ex.Message}",
-                };               
+                saveResult.Success = false;
+                saveResult.ClosePanel = false;
+                saveResult.Message = $"Error: {ex.Message}";
+
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(saveResult);
             }
             finally
             {
@@ -123,5 +104,4 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
         }
     }
-
 }

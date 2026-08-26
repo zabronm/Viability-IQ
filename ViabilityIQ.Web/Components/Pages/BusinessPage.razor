@@ -33,14 +33,6 @@
         </div>
     </main>
 
-    <!-- FIXED: Removed duplicate canvas instance block to fix dual binding compilation errors -->
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="550">
-        @if (canvasOpenStatus)
-        {
-            <BusinessFormComponent BusinessId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
-        }
-    </ZabOffCanvas>
-
     <footer class="py-4 bg-light mt-auto">
         <BFooter />
     </footer>

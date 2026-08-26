@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.ComponentModel;
 using System.Data;
@@ -11,19 +9,21 @@ using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class CompanyPage
-    {        [Inject] private IGenericDataRepository<Company>  companyRepository { get; set; } = default!;
+    public partial class CompanyPage : IAsyncDisposable
+    {
+        [Inject] private IGenericDataRepository<Company> companyRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
-        //[Inject] private IEmailReportingService EmailService { get; set; } = default!;      
 
         //---------------------------------------------------------
         // Alert
@@ -33,19 +33,16 @@ namespace ViabilityIQ.Web.Components.Pages
         private string AlertHeading = "Company Register";
         private string AlertMessage = "Register your company details here. All users will be registered under your company tenant; All reports will be based on information from this section.";
 
-
-        private List<Company>  companyList = new();
+        private List<Company> companyList = new();
         private List<ZabDataTableAdvanced<Company>.ColumnDefinition<Company>> tableColumns = new();
 
-        // State Machine parameters for modal canvas controls
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Company";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<Company>.ColumnDefinition<Company>>
@@ -64,80 +61,77 @@ namespace ViabilityIQ.Web.Components.Pages
             };
         }
 
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
+        }
+
         private async Task LoadGridDatasetAsync()
         {
             loadingStateActive = true;
-            StateHasChanged(); // Instantly show overlay spinner block
+            StateHasChanged();
 
             try
             {
-                // = await MasterData!.GetAllBanksAsync();
-                //banksList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Bank>();
-
-                var resultSet = (await  companyRepository.GetAllAsync());
-                 companyList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Company>();
-
+                var resultSet = await companyRepository.GetAllAsync();
+                companyList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Company>();
             }
             finally
             {
                 loadingStateActive = false;
-                StateHasChanged(); // Remove overlay mask automatically
+                StateHasChanged();
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add Company Details" : "Modify Company Details";
+            string formTitle = extractedRecordId == 0 ? "Add Company Details" : "Modify Company Details";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 500,
+                ComponentType = typeof(CompanyFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "CompanyId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
-        private async Task RefreshWorkspaceGridData()
+        private async Task DeleteSelectedCompany(Company targetCompany)
         {
-            if (canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-            await LoadGridDatasetAsync();
-        }
-
-        private async Task DeleteSelectedBank(Company targetCategory)
-        {
-            var success = await  companyRepository!.DeleteAsync(targetCategory);
+            var success = await companyRepository!.DeleteAsync(targetCompany);
             if (success)
             {
+                _Toast!.ShowSuccess("Company record deleted successfully.", sessionService!.AppTitle);
                 await LoadGridDatasetAsync();
+            }
+            else
+            {
+                _Toast!.ShowError("Failed to delete company record.", sessionService!.AppTitle);
             }
         }
 
-
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }
 
-            if (_result.ClosePanel)
-            {
-                if (canvasShell != null) await canvasShell!.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
-
-        //PDF EXPORT 
-        //private async Task ExecutePrintFormatProcess(List<Company> targetedDataset)
         private async Task ExecutePrintFormatProcess(List<Company> targetedDataset)
         {
             try
@@ -145,7 +139,6 @@ namespace ViabilityIQ.Web.Components.Pages
                 loadingStateActive = true;
                 StateHasChanged();
 
-                //MOVE DATA TO FORMATTTED DTO
                 var PrintDataSet = targetedDataset.Select(item => new companyPrintDto
                 {
                     CustomerCode = item.CompanyCustomerCode,
@@ -157,17 +150,11 @@ namespace ViabilityIQ.Web.Components.Pages
                     Active = item.Active,
                 }).ToList();
 
-
-                // 1. Render the structured ledger to binary bytes array
                 byte[] pdfReportBytes = await PdfService.GenerateReportDataPdfAsync(PrintDataSet, "Company Summary");
+                string targetFileName = $"Company_Register_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
 
-                // 2. Set file naming structures
-                string targetFileName = $"Product_Category_Master Ledger_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-                // 3. Hand off the base64 text variant stream directly down to the browser storage downloads link engine
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", targetFileName, Convert.ToBase64String(pdfReportBytes));
-
-                _Toast!.ShowSuccess("PDF document spooled to your downloads directory..", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("PDF document spooled to your downloads directory.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -180,39 +167,17 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-
-
-
-
-
-
-
-        //private async Task ExecutePrintFormatProcess(List<Bank> targetedDataset)
-        //{
-        //    _Toast!.ShowInfo($"Preparing {targetedDataset.Count} records for system print spool...", sessionService!.AppTitle);
-
-        //    // For elegant layout printing, you can trigger standard window print.
-        //    // CSS @media print rules in your app stylesheet can strip away sidebars/nav panels automatically.
-        //    await JS.InvokeVoidAsync("window.print");
-        //}
-
-        
-        /// 2. Action: Export current active listing straight into a downloadable Excel Binary stream
-        
         private async Task ExecuteExcelExportProcess(List<Company> targetedDataset)
         {
             try
             {
                 loadingStateActive = true;
 
-                // Pass to your application reporting tool layer (e.g., using ClosedXML or EPPlus)
-                byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Registered Banks List");
+                byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Company Register");
+                string fileName = $"Company_Register_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
-                // Use a standard JavaScript save file utility to trigger an instant download stream
-                string fileName = $"Bank_Funder_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", fileName, Convert.ToBase64String(excelBytes));
-
-                _Toast.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("Excel spreadsheet compilation completed successfully.", sessionService!.AppTitle);
             }
             catch (Exception ex)
             {
@@ -221,36 +186,15 @@ namespace ViabilityIQ.Web.Components.Pages
             finally
             {
                 loadingStateActive = false;
+                StateHasChanged();
             }
         }
 
-        
-        /// 3. Action: Email document attachments down to targeted distribution users
-        
         private async Task ExecuteEmailDistributionProcess(List<Company> targetedDataset)
         {
             try
             {
-                //loadingStateActive = true;
-
-                //// Automatically compile dataset into an excel/pdf asset attachment wrapper
-                //byte[] attachmentReportBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Email Distribution Extract");
-
-                //var emailPayload = new EmailReportRequest
-                //{
-                //    RecipientAddress = "zabronm@yahoo.co.za",
-                //    SubjectTitle = $"System Extract: Current Active Funder Registrations ({targetedDataset.Count} Rows)",
-                //    MessageBodyText = "<p>Please find attached the master data record matrix for all registered banking/funding configurations currently loaded on the system environment data space.</p>",
-                //    AttachmentBytes = attachmentReportBytes,
-                //    AttachmentName = "MasterData_Funder_Report.xlsx"
-                //};
-
-                //bool sendStatus = await EmailService.SendSystemReportWithAttachmentAsync(emailPayload);
-
-                //if (sendStatus)
-                //    _Toast!.ShowSuccess("List email sent successfully.");
-                //else
-                //    _Toast!.ShowWarning("Errors encountered while processing email.", sessionService!.AppTitle);
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {
@@ -259,11 +203,20 @@ namespace ViabilityIQ.Web.Components.Pages
             finally
             {
                 loadingStateActive = false;
+                StateHasChanged();
             }
         }
 
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
+        }
 
-        public class companyPrintDto()
+        public class companyPrintDto
         {
             [DisplayName("Company Name")]
             public string? CompanyName { get; set; }
@@ -276,8 +229,5 @@ namespace ViabilityIQ.Web.Components.Pages
             public string? Email { get; set; }
             public bool Active { get; set; }
         }
-
-
     }
 }
-

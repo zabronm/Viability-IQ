@@ -9,22 +9,22 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
-
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class ClientTypePage
+    public partial class ClientTypePage : IAsyncDisposable
     {
-        [Inject] private IGenericDataRepository<ClientType> sectorRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<ClientType> clientTypeRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
-       
+
         // Alert
-        //---------------------------------------------------------
         private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Client Types/Categories";
@@ -33,17 +33,16 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<ClientType> clientTypeList = new();
         private List<ZabDataTableAdvanced<ClientType>.ColumnDefinition<ClientType>> tableColumns = new();
 
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Client Type";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
-            tableColumns = new List<ZabDataTableAdvanced<ClientType>.ColumnDefinition< ClientType>>
+            tableColumns = new List<ZabDataTableAdvanced<ClientType>.ColumnDefinition<ClientType>>
             {
                 new() { Title = "Client Type", Value = x => x.ClientTypeName ?? "" },
                 new() { Title = "Remarks / Notes", Value = x => x.Remarks ?? "" },
@@ -55,7 +54,13 @@ namespace ViabilityIQ.Web.Components.Pages
                 }
             };
 
-           await  Task.CompletedTask;
+            await Task.CompletedTask;
+        }
+
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -65,8 +70,8 @@ namespace ViabilityIQ.Web.Components.Pages
 
             try
             {
-                var resultSet = await sectorRepository.GetAllAsync();
-                clientTypeList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List< ClientType>();
+                var resultSet = await clientTypeRepository.GetAllAsync();
+                clientTypeList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ClientType>();
             }
             finally
             {
@@ -75,20 +80,27 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add client type" : "Modify client type";
+            string formTitle = extractedRecordId == 0 ? "Add client type" : "Modify client type";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 400,
+                ComponentType = typeof(ClientTypeFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ClientTypeId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
-        private async Task DeleteSelectedSector( ClientType targetModel)
+        private async Task DeleteSelectedSector(ClientType targetModel)
         {
-            var success = await sectorRepository.DeleteAsync(targetModel);
+            var success = await clientTypeRepository.DeleteAsync(targetModel);
             if (success)
             {
                 _Toast!.ShowSuccess("Client type removed.", sessionService!.AppTitle);
@@ -96,23 +108,19 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
-                _Toast!.ShowError(_result.Message, "Error encountered:");
+                _Toast!.ShowError(_result.Message, "Error encountered");
             }
 
-            if (_result.ClosePanel && canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
@@ -125,7 +133,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
                 var printDataSet = targetedDataset.Select(item => new ClientPrintDto
                 {
-                    ClientTypeName    = item.ClientTypeName,
+                    ClientTypeName = item.ClientTypeName,
                     Remarks = item.Remarks,
                     Status = item.Active == true ? "Active" : "Inactive"
                 }).ToList();
@@ -147,7 +155,7 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteExcelExportProcess(List< ClientType> targetedDataset)
+        private async Task ExecuteExcelExportProcess(List<ClientType> targetedDataset)
         {
             try
             {
@@ -169,15 +177,24 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteEmailDistributionProcess(List< ClientType> targetedDataset)
+        private async Task ExecuteEmailDistributionProcess(List<ClientType> targetedDataset)
         {
             await Task.CompletedTask;
+        }
+
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
         }
 
         public class ClientPrintDto
         {
             [DisplayName("Client Type")]
-            public string?ClientTypeName { get; set; }
+            public string? ClientTypeName { get; set; }
             public string? Remarks { get; set; }
             [DisplayName("Status")]
             public string? Status { get; set; }

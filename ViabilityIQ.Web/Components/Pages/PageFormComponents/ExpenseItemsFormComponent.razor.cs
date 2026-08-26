@@ -4,15 +4,16 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class ExpenseItemsFormComponent
     {
         [Inject] private IGenericDataRepository<ExpenseItems> expenseRepository { get; set; } = default!;
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
         [Parameter] public long ExpenseItemId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
 
         private ExpenseItems expenseModel = new();
         private bool isProcessingData = false;
@@ -59,7 +60,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
                 if (operationSuccess)
                 {
-                    finalResult.Success = true;                    
+                    finalResult.Success = true;
                     finalResult.ClosePanel = true;
                     finalResult.Message = ExpenseItemId == 0
                         ? "New expenditure tracker code logged successfully."
@@ -67,20 +68,21 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 }
                 else
                 {
-                    finalResult.Success = false;                   
+                    finalResult.Success = false;
                     finalResult.ClosePanel = false;
                     finalResult.Message = "The persistence context engine returned false. Commit rejected.";
                 }
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             catch (Exception ex)
             {
-                finalResult.Success = false;                
+                finalResult.Success = false;
                 finalResult.ClosePanel = false;
                 finalResult.Message = $"Data Persistence Layer Exception intercepted: {ex.Message}";
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             finally
             {

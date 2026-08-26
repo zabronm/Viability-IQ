@@ -8,13 +8,15 @@ using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class BanksPage
+    public partial class BanksPage: IAsyncDisposable
     {
+        [Inject] OffCanvasStateService? OffCanvasService { get; set; } = default;
         [Inject] private IGenericDataRepository<Bank> BankRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
@@ -45,6 +47,9 @@ namespace ViabilityIQ.Web.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            //subscribe to OffCanvasStateService
+            OffCanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<Bank>.ColumnDefinition<Bank>>
@@ -60,6 +65,14 @@ namespace ViabilityIQ.Web.Components.Pages
                 }
             };
         }
+
+
+        //Handle Canvas Show event
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
+        }
+
 
         private async Task LoadGridDatasetAsync()
         {
@@ -82,16 +95,26 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        //Handle form execution
         private async Task HandleFormExecution(long extractedRecordId)
         {
             activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add New Bank/Funder" : "Modify Bank Details";
-
-            if (canvasShell != null)
-            {
-                await canvasShell.OpenAsync(formTitle);
-            }
+            formTitle = extractedRecordId == 0 ? "Add New Bank/Funder" : "Modify Bank/Funder Details";
+            await OffCanvasService!.ShowAsync(
+                new CanvasRequest
+                {
+                    Title = formTitle,
+                    Width = 400,
+                    ComponentType = typeof(BankFormComponent),
+                    Parameters = new Dictionary<string, object>
+                     {
+             { "BankId", extractedRecordId}
+                     },
+                    ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+                });
         }
+
+
 
         private async Task RefreshWorkspaceGridData()
         {
@@ -112,11 +135,13 @@ namespace ViabilityIQ.Web.Components.Pages
         }
 
 
+        //When form sends an execution signal from offcanvass 
         async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
@@ -127,11 +152,9 @@ namespace ViabilityIQ.Web.Components.Pages
             {
                 if (canvasShell != null) await canvasShell!.CloseAsync();
             }
-
-            await LoadGridDatasetAsync();
+                       
             StateHasChanged();
         }
-
 
 
 
@@ -178,11 +201,6 @@ namespace ViabilityIQ.Web.Components.Pages
                 StateHasChanged();
             }
         }
-
-
-
-
-
 
 
 
@@ -258,6 +276,16 @@ namespace ViabilityIQ.Web.Components.Pages
             finally
             {
                 loadingStateActive = false;
+            }
+        }
+
+
+        //Cleanup subscriptions to the offcanvas service
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffCanvasService != null)
+            {
+                OffCanvasService.OnShow -= HandleCanvasShow;
             }
         }
 

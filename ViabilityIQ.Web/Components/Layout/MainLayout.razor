@@ -1,5 +1,6 @@
 ﻿@using ViabilityIQ.Web.Components.Pages.Identity
 @using ViabilityIQ.Web.Components.Shared
+@using ViabilityIQ.Web.Services
 @inherits LayoutComponentBase
 
 <div class="fa-layout-wrapper">
@@ -96,8 +97,13 @@
     </div>
 </div>
 
-@code {
-    private bool isSidebarCollapsed = false;
-    private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
-}
 <ToastComponent />
+
+
+@* GLOBAL ROOT-LEVEL OFF-CANVAS INSTANCE WITH TWO-WAY STATE BINDING *@
+<ZabOffCanvas @bind-IsOpen="isCanvasOpen" HeaderTitle="@currentTitle" dWidth="@currentWidth">
+    @if (dynamicComponentType != null)
+    {
+        <DynamicComponent Type="@dynamicComponentType" Parameters="@dynamicParameters" />
+    }
+</ZabOffCanvas>

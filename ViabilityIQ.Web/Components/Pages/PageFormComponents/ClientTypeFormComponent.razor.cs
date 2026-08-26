@@ -4,16 +4,18 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class ClientTypeFormComponent
     {
-        [Inject] private IGenericDataRepository< ClientType> sectorRepository { get; set; } = default!;
-        [Parameter] public long ClientTypeId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
+        [Inject] private IGenericDataRepository<ClientType> clientTypeRepository { get; set; } = default!;
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-        private  ClientType clientTypeModel = new();
+        [Parameter] public long ClientTypeId { get; set; } = 0;
+
+        private ClientType clientTypeModel = new();
         private bool isProcessingData = false;
         private bool isRowActive = true;
 
@@ -24,7 +26,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 isProcessingData = true;
                 try
                 {
-                    var record = await sectorRepository.GetByIdAsync(ClientTypeId);
+                    var record = await clientTypeRepository.GetByIdAsync(ClientTypeId);
                     if (record != null)
                     {
                         clientTypeModel = record;
@@ -39,7 +41,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             else
             {
                 // Initialize fresh tracking footprint for new additions
-                clientTypeModel = new  ClientType();
+                clientTypeModel = new ClientType();
                 isRowActive = true;
             }
         }
@@ -54,12 +56,12 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 // Synchronize toggle visual states straight to model metadata properties
                 clientTypeModel.Active = isRowActive;
 
-                // FIX: Invoking the unified data stream 'SaveAsync' as defined in GenericDataRepository
-                bool operationSuccess = await sectorRepository.SaveAsync(clientTypeModel);
+                // ✅ Invoking the unified data stream 'SaveAsync' as defined in GenericDataRepository
+                bool operationSuccess = await clientTypeRepository.SaveAsync(clientTypeModel);
 
                 if (operationSuccess)
                 {
-                    finalResult.Success = true;                    
+                    finalResult.Success = true;
                     finalResult.ClosePanel = true;
                     finalResult.Message = ClientTypeId == 0
                         ? "New client type registered successfully."
@@ -70,15 +72,16 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     throw new Exception("Error encountered while committing. Please retry.");
                 }
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             catch (Exception ex)
             {
-                finalResult.Success = false;               
+                finalResult.Success = false;
                 finalResult.ClosePanel = false;
                 finalResult.Message = $"Error encountered: {ex.Message}";
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             finally
             {

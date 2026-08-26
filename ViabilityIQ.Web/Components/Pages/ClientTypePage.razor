@@ -29,14 +29,7 @@
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />
         </div>
-    </main>
-
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
-        @if (canvasOpenStatus)
-        {
-            <ClientTypeFormComponent ClientTypeId="@activeRecordId" OnSavedSuccess="@(res =>ProcessExecutionFeedback(res))" />
-        }
-    </ZabOffCanvas>
+    </main>  
 
     <footer class="py-4 bg-light mt-auto">
         <BFooter />

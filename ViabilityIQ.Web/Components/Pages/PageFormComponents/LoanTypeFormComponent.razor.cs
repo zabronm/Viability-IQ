@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class LoanTypeFormComponent
     {
         [Inject] private MasterDataService? MasterData { get; set; }
-
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
         [Parameter] public long LoanTypeId { get; set; } = 0;
         [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
 
@@ -33,7 +35,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     LoanTypeName = string.Empty,
                     ShortName = string.Empty,
                     Remarks = string.Empty,
-                    Active = true                    
+                    Active = true
                 };
                 isRowActive = true;
             }
@@ -61,6 +63,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             isProcessingData = true;
             StateHasChanged();
 
+            var saveResult = new SaveResult();
+
             try
             {
                 loanTypeModel.Active = isRowActive;
@@ -70,23 +74,31 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
                 if (executionOutcome)
                 {
-                    var saveResult = new SaveResult()
-                    {
-                        Success = true,
-                        RefreshGrid = true,
-                        ClosePanel = true,
-                        ClearForm = true,
-                        Message = LoanTypeId == 0 ?
-                         $"{loanTypeModel.LoanTypeName} added successfully" :
-                         $"{loanTypeModel.LoanTypeName} updated successfully"
-                    };
-
-                    await OnSavedSuccess.InvokeAsync(saveResult);
+                    saveResult.Success = true;
+                    saveResult.RefreshGrid = true;
+                    saveResult.ClosePanel = true;
+                    saveResult.Message = LoanTypeId == 0
+                        ? $"{loanTypeModel.LoanTypeName} added successfully"
+                        : $"{loanTypeModel.LoanTypeName} updated successfully";
                 }
+                else
+                {
+                    saveResult.Success = false;
+                    saveResult.ClosePanel = false;
+                    saveResult.Message = "Error encountered while saving loan type.";
+                }
+
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(saveResult);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Critical validation channel anomaly: {ex.Message}");
+                saveResult.Success = false;
+                saveResult.ClosePanel = false;
+                saveResult.Message = $"Error: {ex.Message}";
+
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(saveResult);
             }
             finally
             {

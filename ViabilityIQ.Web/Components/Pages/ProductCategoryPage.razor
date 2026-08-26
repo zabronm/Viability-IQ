@@ -38,12 +38,12 @@
     }
     </ZabOffCanvas>
 
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle">
+    @* <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle">
     @if (canvasOpenStatus)
     {
             <ProductCategoryFormComponent ProductCategoryId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res))" />
     }
-</ZabOffCanvas>
+    </ZabOffCanvas> *@
 
 
 

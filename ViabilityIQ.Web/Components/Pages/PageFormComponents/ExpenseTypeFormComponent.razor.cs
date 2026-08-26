@@ -4,31 +4,38 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class ExpenseTypeFormComponent
     {
-        [Inject] private IGenericDataRepository<ExpenseType> incomeTypeRepository { get; set; } = default!;
-        [Parameter] public long ExpenseTypeId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
+        [Inject] private IGenericDataRepository<ExpenseType> expenseTypeRepository { get; set; } = default!;
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-        private  ExpenseType incomeTypeModel = new();
+        [Parameter] public long ExpenseTypeId { get; set; } = 0;
+
+        private ExpenseType expenseTypeModel = new();
         private bool isProcessingData = false;
         private bool isRowActive = true;
 
         protected override async Task OnParametersSetAsync()
+        {
+            await InitializeFormLifecycleAsync();
+        }
+
+        private async Task InitializeFormLifecycleAsync()
         {
             if (ExpenseTypeId != 0)
             {
                 isProcessingData = true;
                 try
                 {
-                    var record = await incomeTypeRepository.GetByIdAsync(ExpenseTypeId);
+                    var record = await expenseTypeRepository.GetByIdAsync(ExpenseTypeId);
                     if (record != null)
                     {
-                        incomeTypeModel = record;
-                        isRowActive = incomeTypeModel.Active;
+                        expenseTypeModel = record;
+                        isRowActive = expenseTypeModel.Active;
                     }
                 }
                 finally
@@ -39,7 +46,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             else
             {
                 // Initialize fresh tracking footprint for new additions
-                incomeTypeModel = new  ExpenseType();
+                expenseTypeModel = new ExpenseType();
                 isRowActive = true;
             }
         }
@@ -52,14 +59,14 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             try
             {
                 // Synchronize toggle visual states straight to model metadata properties
-                incomeTypeModel.Active = isRowActive;
+                expenseTypeModel.Active = isRowActive;
 
                 // FIX: Invoking the unified data stream 'SaveAsync' as defined in GenericDataRepository
-                bool operationSuccess = await incomeTypeRepository.SaveAsync(incomeTypeModel);
+                bool operationSuccess = await expenseTypeRepository.SaveAsync(expenseTypeModel);
 
                 if (operationSuccess)
                 {
-                    finalResult.Success = true;                    
+                    finalResult.Success = true;
                     finalResult.ClosePanel = true;
                     finalResult.Message = ExpenseTypeId == 0
                         ? "New expense type registered successfully."
@@ -70,15 +77,17 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     throw new Exception("Error encountered while committing. Please retry.");
                 }
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             catch (Exception ex)
             {
-                finalResult.Success = false;               
+                finalResult.Success = false;
                 finalResult.ClosePanel = false;
                 finalResult.Message = $"Error encountered: {ex.Message}";
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             finally
             {

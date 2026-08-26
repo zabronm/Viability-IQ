@@ -1,23 +1,21 @@
 ﻿using Microsoft.AspNetCore.Components;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
-using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class ProvinceFormComponent
     {
-        //[Inject] private MasterDataService? MasterData { get; set; }
         [Inject] private IGenericDataRepository<Province>? provinceRepository { get; set; }
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;
+
         [Parameter] public long ProvinceId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
 
-
-        private Province provinceModel = new();        // Main working model instance bound to forms
-
-        private bool isProcessingData = false;               // Track state variables cleanly
+        private Province provinceModel = new();
+        private bool isProcessingData = false;
         private bool isRowActive = true;
 
         protected override async Task OnParametersSetAsync()
@@ -40,7 +38,6 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 isProcessingData = true;
                 try
                 {
-                    //var existingRecord = await MasterData!.GetBankByIdAsync(BankId);
                     var existingRecord = await provinceRepository!.GetByIdAsync(ProvinceId);
                     if (existingRecord != null)
                     {
@@ -64,32 +61,20 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             {
                 provinceModel.Active = isRowActive;
 
-                // Fire singular service endpoint to decide Insert vs Update dynamically
-                //bool executionOutcome = await MasterData!.SaveBankAsync(bankModel);
-
                 bool executionOutcome = await provinceRepository!.SaveAsync(provinceModel);
                 if (executionOutcome)
                 {
                     var saveResult = new SaveResult()
                     {
                         Success = true,
-                        RefreshGrid = true
+                        RefreshGrid = true,
+                        ClosePanel = true,
+                        Message = ProvinceId == 0
+                            ? $"{provinceModel.ProvinceName} added successfully"
+                            : $"{provinceModel.ProvinceName} updated successfully"
                     };
 
-                    if (ProvinceId == 0)
-                    {
-                        saveResult.ClearForm = true;
-                        saveResult.ClosePanel = false;
-                        saveResult.Message = $"{provinceModel.ProvinceName} added successfully";
-                    }
-                    else
-                    {
-                        saveResult.ClearForm = true;
-                        saveResult.ClosePanel = true;
-                        saveResult.Message = $"{provinceModel.ProvinceName} updated successfully";
-                    }
-
-                    await OnSavedSuccess.InvokeAsync(saveResult);
+                    await OffcanvasService!.PublishResultAsync(saveResult);
                 }
                 else
                 {
@@ -97,10 +82,9 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     {
                         Success = false,
                         ClosePanel = false,
-                        ClearForm = false,
-                        RefreshGrid = false,
-                        Message = $"Error encountered while saving province.",
+                        Message = "Error encountered while saving province."
                     };
+                    await OffcanvasService!.PublishResultAsync(saveResult);
                 }
             }
             catch (Exception ex)
@@ -108,10 +92,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 var saveResult = new SaveResult()
                 {
                     Success = false,
-                    RefreshGrid = false,
                     ClosePanel = false,
-                    Message = $"Critical validation channel anomaly: {ex.Message}",
+                    Message = $"Error: {ex.Message}"
                 };
+                await OffcanvasService!.PublishResultAsync(saveResult);
             }
             finally
             {
@@ -120,5 +104,4 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
         }
     }
-
 }

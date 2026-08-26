@@ -2,15 +2,16 @@
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class BankFormComponent
-    {
+    {       
         [Inject] private MasterDataService? MasterData { get; set; }
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-        [Parameter] public long BankId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
+        [Parameter] public long BankId { get; set; } = 0;       
 
         // Main working model instance bound to forms
         private Bank bankModel = new();
@@ -81,7 +82,18 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                          $"{bankModel.BankName} updated successfully"
                     };
 
-                    await OnSavedSuccess.InvokeAsync(saveResult);
+                    //await OnSavedSuccess.InvokeAsync(saveResult);
+                    await OffcanvasService!.PublishResultAsync(saveResult);
+                }
+                else
+                {
+                    var saveResult = new SaveResult()
+                    {
+                        Success = false,
+                        ClosePanel = false,
+                        Message = "Error encountered while saving bank."
+                    };
+                    await OffcanvasService!.PublishResultAsync(saveResult);
                 }
             }
             catch (Exception ex)

@@ -1,7 +1,7 @@
 ﻿.offcanvas {
     position: fixed;
     bottom: 0;
-    z-index: 1045;
+    z-index: 9999 !important; /* Increased to sit above the top bar */
     display: flex;
     flex-direction: column;
     max-width: 100%;
@@ -36,7 +36,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1040;
+    z-index: 9998 !important; /* Sits directly beneath the offcanvas, but above top bar */
     width: 100vw;
     height: 100vh;
     background-color: #000;

@@ -9,15 +9,17 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class ExpenseItemsPage
+    public partial class ExpenseItemsPage : IAsyncDisposable
     {
         [Inject] private IGenericDataRepository<ExpenseItems> expenseRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
@@ -25,14 +27,13 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<ExpenseItems> expenseItemsList = new();
         private List<ZabDataTableAdvanced<ExpenseItems>.ColumnDefinition<ExpenseItems>> tableColumns = new();
 
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Expense Item";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<ExpenseItems>.ColumnDefinition<ExpenseItems>>
@@ -46,6 +47,12 @@ namespace ViabilityIQ.Web.Components.Pages
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
+        }
+
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -65,15 +72,22 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add Expense Item" : "Modify Expense Item";
+            string formTitle = extractedRecordId == 0 ? "Add Expense Item" : "Modify Expense Item";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 400,
+                ComponentType = typeof(ExpenseItemsFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ExpenseItemId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
         private async Task DeleteSelectedExpenseItem(ExpenseItems targetModel)
@@ -86,23 +100,19 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Operational Error");
             }
 
-            if (_result.ClosePanel && canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
@@ -159,9 +169,19 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+
         private async Task ExecuteEmailDistributionProcess(List<ExpenseItems> targetedDataset)
         {
             await Task.CompletedTask;
+        }
+
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
         }
 
         public class ExpensePrintDto

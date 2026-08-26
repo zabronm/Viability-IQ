@@ -12,7 +12,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
     {
         #region Parameters        
         /// List of recent assessments to display (top 5)        
-        [Parameter]        public List<AssessmentModel> Assessments { get; set; }
+        [Parameter]  public List<AssessmentModel> Assessments { get; set; }
 
         #endregion
 

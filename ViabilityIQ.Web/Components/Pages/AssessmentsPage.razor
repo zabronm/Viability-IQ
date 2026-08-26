@@ -33,21 +33,6 @@
         </div>
     </main>
 
-    <ZabOffCanvas @ref="canvasShell" @bind-IsOpen="canvasOpenStatus" HeaderTitle="@formTitle" dWidth="400">
-        @if (canvasOpenStatus)
-        {
-            <AssessmentsFormComponent AssessmentId="@activeRecordId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res, 1))" />
-        }
-    </ZabOffCanvas>
-
-    <ZabOffCanvas @ref="businessCanvasShell" @bind-IsOpen="businessCanvasOpen" HeaderTitle="Business Profile Overview" dWidth="500">
-        <BusinessFormComponent BusinessId="@activeBusinessId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res, 2))" />
-    </ZabOffCanvas>
-
-    <ZabOffCanvas @ref="clientCanvasShell" @bind-IsOpen="clientCanvasOpen" HeaderTitle="Client Representative Profile File" dWidth="500">
-        <ClientFormComponent ClientId="@activeClientId" OnSavedSuccess="@(res => ProcessExecutionFeedback(res, 3))" />
-    </ZabOffCanvas>
-
     <footer class="py-4 bg-light mt-auto">
         <BFooter />
     </footer>

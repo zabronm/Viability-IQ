@@ -10,17 +10,19 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class AssessmentsPage
+    public partial class AssessmentsPage : IAsyncDisposable
     {
         [Inject] private IGenericDataRepository<AssessmentDto> assessmentDtoRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<Assessment> coreAssessmentRepository { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] OffCanvasStateService? OffcanvasService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
@@ -28,24 +30,13 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<AssessmentDto> assessmentsList = new();
         private List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>> tableColumns = new();
 
-        // Canvas Drawer State Parameters
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Assessment";
-        private long activeRecordId = 0;
-
-        private ZabOffCanvas? businessCanvasShell;
-        private bool businessCanvasOpen = false;
-        private long activeBusinessId = 0;
-
-        private ZabOffCanvas? clientCanvasShell;
-        private bool clientCanvasOpen = false;
-        private long activeClientId = 0;
-
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>>
@@ -103,6 +94,12 @@ namespace ViabilityIQ.Web.Components.Pages
             };
         }
 
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
+        }
+
         private async Task LoadGridDatasetAsync()
         {
             loadingStateActive = true;
@@ -127,8 +124,6 @@ namespace ViabilityIQ.Web.Components.Pages
 
             try
             {
-                //_Toast!.ShowInfo($"Configuring workspace environment for case {selectedRecord.CaseNumber}...", sessionService!.AppTitle);
-
                 if (sessionService != null)
                 {
                     sessionService.SetActiveAssessment(
@@ -139,15 +134,14 @@ namespace ViabilityIQ.Web.Components.Pages
                          clientId: selectedRecord.ClientId,
                          clientName: selectedRecord.BusinessOwner,
                          assessmentType: selectedRecord.AssessmentTypeName,
-
-                         HasExpensesData: true,        // selectedRecord.HasExpensesData,
-                         HasSalesData: true,           // selectedRecord.HasSalesData,
-                         HasStockData: false,           // selectedRecord.HasStockData,
-                         HasReportsData: false,          // selectedRecord.HasReportsData,
-                         HasReviewsData: false,           // selectedRecord.HasReviewsData,
+                         HasExpensesData: true,
+                         HasSalesData: true,
+                         HasStockData: false,
+                         HasReportsData: false,
+                         HasReviewsData: false,
                          HasReviews: false,
-                         HasDebtorsCreditorsData: true,     //for testing only
-                         HasLoansData: true                 //for testing only
+                         HasDebtorsCreditorsData: true,
+                         HasLoansData: true
                     );
                 }
 
@@ -159,49 +153,58 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Open Business form via service
         private async Task OpenBusinessDrawerForm(long businessId)
         {
             if (businessId == 0) return;
 
-            // Assign identity context before modifying visibility parameters
-            activeBusinessId = businessId;
-            businessCanvasOpen = true;
-            StateHasChanged();
-
-            if (businessCanvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await businessCanvasShell.OpenAsync("Business Registry Summary View");
-                StateHasChanged();
-            }
+                Title = "Business Registry Summary View",
+                Width = 500,
+                ComponentType = typeof(BusinessFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "BusinessId", businessId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result, 2)
+            });
         }
 
+        // ✅ Open Client form via service
         private async Task OpenClientDrawerForm(long clientId)
         {
             if (clientId == 0) return;
 
-            // Assign identity context before modifying visibility parameters
-            activeClientId = clientId;
-            clientCanvasOpen = true;
-            StateHasChanged();
-
-            if (clientCanvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await clientCanvasShell.OpenAsync("Client Profile Detail File");
-                StateHasChanged();
-            }
+                Title = "Client Profile Detail File",
+                Width = 500,
+                ComponentType = typeof(ClientFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ClientId", clientId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result, 3)
+            });
         }
 
+        // ✅ Open Assessment form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Initiate New Assessment Case" : "Modify Assessment Settings";
-            canvasOpenStatus = true;
-            StateHasChanged();
+            string formTitle = extractedRecordId == 0 ? "Initiate New Assessment Case" : "Modify Assessment Settings";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 400,
+                ComponentType = typeof(AssessmentsFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "AssessmentId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result, 1)
+            });
         }
 
         private async Task DeleteSelectedAssessment(AssessmentDto targetDto)
@@ -215,21 +218,19 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Called when form completes
         private async Task ProcessExecutionFeedback(SaveResult _result, int panelIndex = 1)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
-
-            if (_result.ClosePanel)
+            else
             {
-                if (panelIndex == 1 && canvasShell != null) await canvasShell.CloseAsync();
-                if (panelIndex == 2 && businessCanvasShell != null) await businessCanvasShell.CloseAsync();
-                if (panelIndex == 3 && clientCanvasShell != null) await clientCanvasShell.CloseAsync();
+                _Toast!.ShowError(_result.Message, sessionService!.AppTitle);
             }
 
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
@@ -245,19 +246,12 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private string GetStatusBadgeClass(long statusId) => statusId switch
         {
-            //1 => "badge-secondary",
-            //2 => "badge-info",
-            //3 => "badge-warning",
-            //4 => "badge-approved",
-            //5 => "badge-rejected",
-            //_ => "badge-light"
             1 => "bg-secondary text-white small",
             2 => "bg-info text-black small",
             3 => "bg-warning text-black small",
             4 => "bg-success text-black small",
             5 => "bg-danger text-black small",
             _ => "bg-light text-black small",
-
         };
 
         private async Task ExecutePrintFormatProcess(List<AssessmentDto> targetedDataset)
@@ -293,5 +287,14 @@ namespace ViabilityIQ.Web.Components.Pages
         }
 
         private async Task ExecuteEmailDistributionProcess(List<AssessmentDto> targetedDataset) => await Task.CompletedTask;
+
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
+        }
     }
 }

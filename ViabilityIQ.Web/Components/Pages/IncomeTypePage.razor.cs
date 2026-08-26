@@ -9,12 +9,12 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
-
 
 namespace ViabilityIQ.Web.Components.Pages
 {
-    public partial class IncomeTypePage
+    public partial class IncomeTypePage : IAsyncDisposable
     {
         [Inject] private IGenericDataRepository<IncomeType> sectorRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
@@ -22,7 +22,8 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
-       
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
+
         // Alert
         //---------------------------------------------------------
         private bool blAlert = true;
@@ -33,17 +34,16 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<IncomeType> incomeTypeList = new();
         private List<ZabDataTableAdvanced<IncomeType>.ColumnDefinition<IncomeType>> tableColumns = new();
 
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Income Type";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
+            // ✅ Subscribe to OffCanvas callbacks
+            OffcanvasService!.OnShow += HandleCanvasShow;
+
             _ = LoadGridDatasetAsync();
 
-            tableColumns = new List<ZabDataTableAdvanced<IncomeType>.ColumnDefinition< IncomeType>>
+            tableColumns = new List<ZabDataTableAdvanced<IncomeType>.ColumnDefinition<IncomeType>>
             {
                 new() { Title = "Income Type", Value = x => x.IncomeTypeName ?? "" },
                 new() { Title = "Remarks / Notes", Value = x => x.Remarks ?? "" },
@@ -55,7 +55,13 @@ namespace ViabilityIQ.Web.Components.Pages
                 }
             };
 
-           await  Task.CompletedTask;
+            await Task.CompletedTask;
+        }
+
+        // ✅ Handle when canvas opens
+        private async Task HandleCanvasShow(CanvasRequest request)
+        {
+            await Task.CompletedTask;
         }
 
         private async Task LoadGridDatasetAsync()
@@ -66,7 +72,7 @@ namespace ViabilityIQ.Web.Components.Pages
             try
             {
                 var resultSet = await sectorRepository.GetAllAsync();
-                incomeTypeList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List< IncomeType>();
+                incomeTypeList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<IncomeType>();
             }
             finally
             {
@@ -75,45 +81,51 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add client type" : "Modify client type";
+            string formTitle = extractedRecordId == 0 ? "Add Income Type" : "Modify Income Type";
 
-            if (canvasShell != null)
+            await OffcanvasService!.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
+                Title = formTitle,
+                Width = 300,
+                ComponentType = typeof(IncomeTypeFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { "IncomeTypeId", extractedRecordId }
+                },
+                ResultCallback = async (result) => await ProcessExecutionFeedback(result)
+            });
         }
 
-
-        private async Task DeleteSelectedSector( IncomeType targetModel)
+        private async Task DeleteSelectedSector(IncomeType targetModel)
         {
             var success = await sectorRepository.DeleteAsync(targetModel);
             if (success)
             {
-                _Toast!.ShowSuccess("Income type removed.", sessionService!.AppTitle);
+                _Toast!.ShowSuccess("Income type removed successfully.", sessionService!.AppTitle);
                 await LoadGridDatasetAsync();
+            }
+            else
+            {
+                _Toast!.ShowError("Failed to delete income type.", sessionService!.AppTitle);
             }
         }
 
-        async Task ProcessExecutionFeedback(SaveResult _result)
+        // ✅ Called when form completes
+        private async Task ProcessExecutionFeedback(SaveResult _result)
         {
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
             else
             {
                 _Toast!.ShowError(_result.Message, "Error encountered:");
             }
 
-            if (_result.ClosePanel && canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
             StateHasChanged();
         }
 
@@ -124,9 +136,9 @@ namespace ViabilityIQ.Web.Components.Pages
                 loadingStateActive = true;
                 StateHasChanged();
 
-                var printDataSet = targetedDataset.Select(item => new ClientPrintDto
+                var printDataSet = targetedDataset.Select(item => new IncomeTypePrintDto
                 {
-                    IncomeTypeName    = item.IncomeTypeName,
+                    IncomeTypeName = item.IncomeTypeName,
                     Remarks = item.Remarks,
                     Status = item.Active == true ? "Active" : "Inactive"
                 }).ToList();
@@ -148,7 +160,7 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteExcelExportProcess(List< IncomeType> targetedDataset)
+        private async Task ExecuteExcelExportProcess(List<IncomeType> targetedDataset)
         {
             try
             {
@@ -170,15 +182,36 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteEmailDistributionProcess(List< IncomeType> targetedDataset)
+        private async Task ExecuteEmailDistributionProcess(List<IncomeType> targetedDataset)
         {
-            await Task.CompletedTask;
+            try
+            {
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _Toast!.ShowError($"Email Transmission Error: {ex.Message}", sessionService!.AppTitle);
+            }
+            finally
+            {
+                loadingStateActive = false;
+                StateHasChanged();
+            }
         }
 
-        public class ClientPrintDto
+        // ✅ Cleanup subscriptions
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (OffcanvasService != null)
+            {
+                OffcanvasService.OnShow -= HandleCanvasShow;
+            }
+        }
+
+        public class IncomeTypePrintDto
         {
             [DisplayName("Income Type")]
-            public string?IncomeTypeName { get; set; }
+            public string? IncomeTypeName { get; set; }
             public string? Remarks { get; set; }
             [DisplayName("Status")]
             public string? Status { get; set; }

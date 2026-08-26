@@ -4,20 +4,27 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class IncomeTypeFormComponent
     {
-        [Inject] private IGenericDataRepository< IncomeType> incomeTypeRepository { get; set; } = default!;
-        [Parameter] public long IncomeTypeId { get; set; } = 0;
-        [Parameter] public EventCallback<SaveResult> OnSavedSuccess { get; set; }
+        [Inject] private IGenericDataRepository<IncomeType> incomeTypeRepository { get; set; } = default!;
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
-        private  IncomeType incomeTypeModel = new();
+        [Parameter] public long IncomeTypeId { get; set; } = 0;
+
+        private IncomeType incomeTypeModel = new();
         private bool isProcessingData = false;
         private bool isRowActive = true;
 
         protected override async Task OnParametersSetAsync()
+        {
+            await InitializeFormLifecycleAsync();
+        }
+
+        private async Task InitializeFormLifecycleAsync()
         {
             if (IncomeTypeId != 0)
             {
@@ -39,7 +46,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             else
             {
                 // Initialize fresh tracking footprint for new additions
-                incomeTypeModel = new  IncomeType();
+                incomeTypeModel = new IncomeType();
                 isRowActive = true;
             }
         }
@@ -59,7 +66,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
                 if (operationSuccess)
                 {
-                    finalResult.Success = true;                    
+                    finalResult.Success = true;
                     finalResult.ClosePanel = true;
                     finalResult.Message = IncomeTypeId == 0
                         ? "New income type registered successfully."
@@ -70,15 +77,17 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     throw new Exception("Error encountered while committing. Please retry.");
                 }
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             catch (Exception ex)
             {
-                finalResult.Success = false;               
+                finalResult.Success = false;
                 finalResult.ClosePanel = false;
                 finalResult.Message = $"Error encountered: {ex.Message}";
 
-                await OnSavedSuccess.InvokeAsync(finalResult);
+                // ✅ Use service to publish result
+                await OffcanvasService!.PublishResultAsync(finalResult);
             }
             finally
             {

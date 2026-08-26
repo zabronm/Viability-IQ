@@ -1,8 +1,8 @@
 ﻿/* Compact, Professional KPI Card with Marble Left Border Accent */
 .kpi-card {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #E0E5E5;
+    border: 1px solid #C2DFFF; /*#e2e8f0;*/
+    border-left: 4px solid #C2DFFF;
     border-radius: 12px;
     padding: 12px 14px;
     display: flex;
