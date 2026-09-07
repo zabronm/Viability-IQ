@@ -25,7 +25,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         [Inject] ToastService? _Toast { get; set; }
         [Inject] IProjectionStateManager? projectionStateManager { get; set; }
         [Inject] ILogger<AssessmentSalesPage>? Logger { get; set; }
-       
+
         #endregion
 
         #region Parameters
@@ -47,11 +47,28 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private long SelectedFilterId { get; set; } = 0;
         private decimal GrandTotalRevenue => FilteredIncomeStreams?.Sum(c => c.MonthlyValues.Sum()) ?? 0;
 
-        private IEnumerable<UnifiedIncomeViewModel> FilteredIncomeStreams =>
-            IncomeStreams.Where(x =>
-                (string.IsNullOrWhiteSpace(SearchQuery) ||
-                 x.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) &&
-                (SelectedFilterId == 0 || (long)x.TypeId == SelectedFilterId));
+        // Sorting State
+        private string currentSortColumn = "Description";
+        private bool isAscending = true;
+
+        private IEnumerable<UnifiedIncomeViewModel> FilteredIncomeStreams
+        {
+            get
+            {
+                var query = IncomeStreams.Where(x =>
+                    (string.IsNullOrWhiteSpace(SearchQuery) ||
+                     x.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) &&
+                    (SelectedFilterId == 0 || (long)x.TypeId == SelectedFilterId));
+
+                query = currentSortColumn switch
+                {
+                    "IncomeType" => isAscending ? query.OrderBy(x => x.TypeName) : query.OrderByDescending(x => x.TypeName),
+                    _ => isAscending ? query.OrderBy(x => x.Description) : query.OrderByDescending(x => x.Description)
+                };
+
+                return query;
+            }
+        }
 
         #endregion
 
@@ -81,6 +98,29 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 Logger.LogError(ex, "Error initializing AssessmentSalesPage");
                 IsLoading = false;
             }
+        }
+
+        #endregion
+
+        #region Sorting Helper Methods
+
+        private void SortTable(string columnName)
+        {
+            if (currentSortColumn == columnName)
+            {
+                isAscending = !isAscending;
+            }
+            else
+            {
+                currentSortColumn = columnName;
+                isAscending = true;
+            }
+        }
+
+        private string GetSortIcon(string columnName)
+        {
+            if (currentSortColumn != columnName) return "bi bi-arrow-down-up text-muted opacity-50";
+            return isAscending ? "bi bi-arrow-up text-primary" : "bi bi-arrow-down text-primary";
         }
 
         #endregion

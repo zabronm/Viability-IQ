@@ -12,14 +12,14 @@ namespace ViabilityIQ.Application.Interfaces.HomePageInterfaces
     
     public interface IKPIRepository
     {
-        /// <summary>
+       
         /// Get KPI metrics for a specific user
-        /// </summary>
+       
         Task<KPIMetricsModel> GetKPIMetricsAsync(long userId);
 
-        /// <summary>
+       
         /// Get KPI metrics for a specific branch
-        /// </summary>
+       
         Task<KPIMetricsModel> GetBranchKPIMetricsAsync(int branchId);
     }
 }

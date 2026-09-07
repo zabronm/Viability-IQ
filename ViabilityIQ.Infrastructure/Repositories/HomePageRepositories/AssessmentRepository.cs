@@ -26,10 +26,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _logger = logger;
         }
 
-        /// <summary>
+       
         /// Get recent assessments for a user (latest modified first)
         /// Joins with tblBusiness to get BusinessName
-        /// </summary>
+       
         public async Task<List<AssessmentModel>> GetRecentAssessmentsAsync(long userId, int count = 5)
         {
             try
@@ -71,9 +71,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get assessments filtered by status
-        /// </summary>
+       
         public async Task<List<AssessmentModel>> GetAssessmentsByStatusAsync(long userId, string status, int count = 10)
         {
             try
@@ -115,9 +115,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get a single assessment by ID
-        /// </summary>
+       
         public async Task<AssessmentModel> GetAssessmentByIdAsync(long assessmentId)
         {
             try

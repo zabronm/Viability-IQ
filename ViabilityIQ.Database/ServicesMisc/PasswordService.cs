@@ -38,9 +38,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Password Reset
 
-        /// <summary>
+       
         /// Initiates password reset process by generating a reset token
-        /// </summary>
+       
         public async Task<PasswordResetResult> GeneratePasswordResetTokenAsync(string email)
         {
             var result = new PasswordResetResult();
@@ -86,9 +86,9 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        /// <summary>
+       
         /// Resets user password using reset token
-        /// </summary>
+       
         public async Task<PasswordResetResult> ResetPasswordAsync(long userId, string token, string newPassword)
         {
             var result = new PasswordResetResult();
@@ -162,9 +162,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Email Confirmation
 
-        /// <summary>
+       
         /// Generates email confirmation token
-        /// </summary>
+       
         public async Task<EmailConfirmationResult> GenerateEmailConfirmationTokenAsync(long userId)
         {
             var result = new EmailConfirmationResult();
@@ -213,9 +213,9 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        /// <summary>
+       
         /// Confirms user email address
-        /// </summary>
+       
         public async Task<EmailConfirmationResult> ConfirmEmailAsync(long userId, string token)
         {
             var result = new EmailConfirmationResult();
@@ -290,9 +290,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Change Password
 
-        /// <summary>
+       
         /// Changes password for authenticated user
-        /// </summary>
+       
         public async Task<PasswordChangeResult> ChangePasswordAsync(long userId, string currentPassword, string newPassword)
         {
             var result = new PasswordChangeResult();

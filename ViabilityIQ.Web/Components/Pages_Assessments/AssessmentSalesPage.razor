@@ -12,45 +12,59 @@
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
         <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12 mt-0 pt-0">            
+        <div class="col-12 mt-0 pt-0">
             <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
         </div>
 
         <div class="col-12 py-1 mt-1">
             <div class="px-0 mb-3">
                 <div class="row g-2 align-items-center">
-                    <div class="col-md-4">
-                        <button class="btn btn-primary btn-sm text-xs" @onclick="() => AddIncomeStream()">
+                    <div class="col-md-4 d-flex gap-2">
+                        <button class="btn btn-primary btn-sm text-xs shadow-sm" @onclick="() => AddIncomeStream()">
                             <i class="bi bi-plus-circle me-1"></i>&nbsp;Add Revenue Stream
                         </button>
                     </div>
-                    <div class="col-md-8 d-flex gap-2 justify-content-end">
+                    <div class="col-md-8 d-flex gap-2 justify-content-end align-items-center">
                         <!-- (1) Implementation of DDLookupComponent -->
-                        <div style="width: 25%; font-weight: normal!important;">
+                        <div style="width: 220px; font-weight: normal!important;">
                             <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
                                                @bind-Value="SelectedFilterId"
                                                Placeholder="All Revenue Sources" />
                         </div>
-                        <input type="text" class="form-control form-control-sm" style="width: 30%;" placeholder="Search..." @bind="SearchQuery" @bind:event="oninput" />
+                        <!-- Search Box with Lens Icon -->
+                        <div class="input-group input-group-sm shadow-sm" style="width: 250px;">
+                            <span class="input-group-text bg-white text-muted border-end-0">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control form-control-sm border-start-0 ps-0"
+                                   placeholder="Search sales..."
+                                   @bind="SearchQuery"
+                                   @bind:event="oninput" />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- (5) Table border-radius applied via wrapper -->
-            <div class="table-responsive shadow-sm border border-secondary-subtle" style="border-radius: 6px; overflow: hidden;">
-                <table class="table table-sm table-hover mb-0">
-                    <!-- Table Header with restored font sizes -->
+            <!-- (5) Marble Border Applied via Wrapper -->
+            <div class="table-responsive marble-border shadow-sm mb-2" style="border-radius: 8px; overflow: hidden;">
+                <table class="table table-sm table-hover mb-0 align-middle">
+                    <!-- Table Header with Sortable Columns -->
                     <thead class="text-xxs">
-                        <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                            <th class="sticky-col ps-2 text-xxs text-uppercase">Revenue Channels <i class="bi bi-caret-down-fill text-secondary"></i></th>
-                            <th class="text-start text-uppercase px-2">Income Type</th>
+                        <tr class="bg-light text-muted fw-bold border-bottom align-middle">
+                            <th class="sticky-col ps-3 text-xxs text-uppercase sortable-header py-2" @onclick='() => SortTable("Description")'>
+                                Revenue Channels <i class="@GetSortIcon("Description") ms-1"></i>
+                            </th>
+                            <th class="text-start text-uppercase px-2 text-xxs sortable-header py-2" @onclick='() => SortTable("IncomeType")'>
+                                Income Type <i class="@GetSortIcon("IncomeType") ms-1"></i>
+                            </th>
                             @for (int m = 1; m <= 12; m++)
                             {
-                                <th class="text-end text-uppercase">M@(m)</th>
+                                <th class="text-end text-uppercase text-xxs py-2">M@(m)</th>
                             }
                             <!-- (2) Marble background for Total column -->
-                            <th class="text-end text-uppercase" style="background-color: #d1d5db; color: #000080;">Total Revenue</th>
-                            <th class="text-center"></th>
+                            <th class="text-end text-uppercase text-xxs py-2" style="background-color: #cbd5e1; color: #0f172a;">Total Revenue</th>
+                            <th class="text-center text-uppercase text-xxs py-2" style="background-color: #e2e8f0; color: #0f172a; width: 50px;"></th>
                         </tr>
                     </thead>
                     <tbody class="grid-font-standard">
@@ -69,40 +83,41 @@
                             {
                                 <tr class="hover-light-blue">
                                     <!-- Applied hover effect class -->
-                                    <td class="ps-2 text-black">
+                                    <td class="ps-3 text-black">
                                         <span title="@item.Description"
                                               style="font-size:0.80rem !important;">
                                             @DisplayUtility.TruncateValue(item.Description, 20)
                                         </span>
                                         @if (item.IncludesVat)
                                         {
-                                            <span class="badge bg-light text-secondary fw-light text-xs border ms-1" style="font-size: 0.60rem;">VAT</span>
+                                            <span class="badge bg-light text-secondary fw-light text-xs border ms-1 shadow-sm" style="font-size: 0.60rem;">VAT</span>
                                         }
                                     </td>
-                                    <td class="px-2"><span class="badge bg-soft-blue text-navy-brand-plain text-xss">@item.TypeName.ToString()</span></td>
+                                    <td class="px-2"><span class="badge bg-soft-blue text-navy-brand-plain text-xss shadow-sm">@item.TypeName.ToString()</span></td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         <td class="text-end font-monospace text-secondary">@item.MonthlyValues[i].ToString("N0")</td>
                                     }
                                     <!-- (2) Marble background -->
-                                    <td class="text-end font-monospace fw-bold" style="background-color: #d1d5db; color: #000080;">@item.MonthlyValues.Sum().ToString("N0")</td>
+                                    <td class="text-end font-monospace fw-bold text-dark" style="background-color: #e2e8f0;">@item.MonthlyValues.Sum().ToString("N0")</td>
                                     <td class="text-center">
-                                        <button class="btn-action-operation btn-edit-accent"
-                                                @onclick="() => OpenIncomeFormPanel(item)">
+                                        <button class="btn-action-operation btn-edit-accent shadow-sm"
+                                                @onclick="() => OpenIncomeFormPanel(item)"
+                                                title="Edit Revenue Stream">
                                             <i class="bi bi-vector-pen text-navy"></i>
                                         </button>
                                     </td>
                                 </tr>
                             }
 
-                            <!-- (4) Grand Total Row with dark blue theme -->
-                            <tr style="background-color: #d1d5db; color: #000080; font-weight: bold;">
-                                <td colspan="2" class="ps-2 text-uppercase text-xxs">Grand Total Inflows:</td>
+                            <!-- (4) Grand Total Row with dark styling -->
+                            <tr style="background-color: #cbd5e1; color: #0f172a; font-weight: bold; border-top: 2px solid #94a3b8;">
+                                <td colspan="2" class="ps-3 text-uppercase text-xxs fw-bold">Grand Total Inflows:</td>
                                 @for (int i = 0; i < 12; i++)
                                 {
-                                    <td class="text-end font-monospace">@FilteredIncomeStreams.Sum(c => c.MonthlyValues[i]).ToString("N0")</td>
+                                    <td class="text-end font-monospace text-dark">@FilteredIncomeStreams.Sum(c => c.MonthlyValues[i]).ToString("N0")</td>
                                 }
-                                <td class="text-end font-monospace">@GrandTotalRevenue.ToString("N0")</td>
+                                <td class="text-end font-monospace text-dark">@GrandTotalRevenue.ToString("N0")</td>
                                 <td></td>
                             </tr>
                         }
@@ -114,8 +129,8 @@
     </div>
 
     @* This component is for the cashflow summaries and details, including projections. *@
-    <CashflowMainPagesComponent AssessmentId="@AssessmentId" />     
-    
+    <CashflowMainPagesComponent AssessmentId="@AssessmentId" />
+
 </div>
 
                     

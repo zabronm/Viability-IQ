@@ -41,9 +41,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _insightsRepository = insightsRepository;
         }
 
-        /// <summary>
+       
         /// Get KPI metrics for the current user
-        /// </summary>
+       
         public async Task<KPIMetricsModel> GetKPIMetricsAsync(long userId)
         {
             try
@@ -57,9 +57,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get recent activities for the current user
-        /// </summary>
+       
         public async Task<List<ActivityLogModel>> GetRecentActivitiesAsync(long userId, int count = 3, string filterType = "all")
         {
             try
@@ -73,9 +73,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get recent assessments for the current user
-        /// </summary>
+       
         public async Task<List<AssessmentModel>> GetRecentAssessmentsAsync(long userId, int count = 5)
         {
             try
@@ -89,9 +89,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get alert data (urgent and upcoming assessments)
-        /// </summary>
+       
         public async Task<AlertsModel> GetAlertsAsync(long userId)
         {
             try
@@ -105,9 +105,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get active system announcements (excluding dismissed ones for user)
-        /// </summary>
+       
         public async Task<List<SystemAnnouncementModel>> GetSystemAnnouncementsAsync(long userId)
         {
             try
@@ -121,9 +121,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get insights and analytics data
-        /// </summary>
+       
         public async Task<InsightsModel> GetInsightsAsync(long userId)
         {
             try

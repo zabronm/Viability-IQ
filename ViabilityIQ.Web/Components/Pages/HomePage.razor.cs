@@ -34,67 +34,67 @@ namespace ViabilityIQ.Web.Components.Pages
 
         #region Properties
 
-        /// <summary>
+       
         /// Currently authenticated user
-        /// </summary>
+       
         public ApplicationUser CurrentUser { get; set; }
 
-        /// <summary>
+       
         /// Current branch name
-        /// </summary>
+       
         public string CurrentBranch { get; set; } = "Default Branch";
 
-        /// <summary>
+       
         /// Last login date/time for the user
-        /// </summary>
+       
         public DateTime LastLoginDate { get; set; }
 
-        /// <summary>
+       
         /// Loading state flag
-        /// </summary>
+       
         public bool IsLoading { get; set; } = true;
 
         #endregion
 
         #region Dashboard Data Properties
 
-        /// <summary>
+       
         /// KPI metrics (Active, Completed, Pending, etc.)
-        /// </summary>
+       
         public KPIMetricsModel KPIData { get; set; }
 
-        /// <summary>
+       
         /// Recent activities log
-        /// </summary>
+       
         public List<ActivityLogModel> RecentActivities { get; set; } = new List<ActivityLogModel>();
 
-        /// <summary>
+       
         /// Recent assessments
-        /// </summary>
+       
         public List<AssessmentModel> RecentAssessments { get; set; } = new List<AssessmentModel>();
 
-        /// <summary>
+       
         /// Urgent and upcoming assessment alerts
-        /// </summary>
+       
         public AlertsModel AlertsData { get; set; }
 
-        /// <summary>
+       
         /// System announcements
-        /// </summary>
+       
         public List<SystemAnnouncementModel> SystemAnnouncements { get; set; } = new List<SystemAnnouncementModel>();
 
-        /// <summary>
+       
         /// Insights and analytics data
-        /// </summary>
+       
         public InsightsModel InsightsData { get; set; }
 
         #endregion
 
         #region Lifecycle Methods
 
-        /// <summary>
+       
         /// Component initialization - Load user and dashboard data
-        /// </summary>
+       
         protected override async Task OnInitializedAsync()
         {
             try
@@ -142,9 +142,9 @@ namespace ViabilityIQ.Web.Components.Pages
 
         #region Data Loading Methods
 
-        /// <summary>
+       
         /// Load current user from authentication state
-        /// </summary>
+       
         private async Task LoadUserData()
         {
             try
@@ -203,9 +203,9 @@ namespace ViabilityIQ.Web.Components.Pages
         }
 
 
-        /// <summary>
+       
         /// Load all dashboard data for the current user
-        /// </summary>
+       
         private async Task LoadDashboardData()
         {
             try
@@ -304,9 +304,9 @@ namespace ViabilityIQ.Web.Components.Pages
         }
 
 
-        /// <summary>
+       
         /// Refresh dashboard data - called when user refreshes or filters change
-        /// </summary>
+       
         private async Task RefreshDashboard()
         {
             try
@@ -326,10 +326,10 @@ namespace ViabilityIQ.Web.Components.Pages
 
         #region Event Handlers
 
-        /// <summary>
+       
         /// Handle KPI card drill-down click
         /// Navigate to detailed view of specific KPI
-        /// </summary>
+       
         private void HandleKPIDrill(string kpiType)
         {
             Logger.LogInformation("HandleKPIDrill: {KPIType}", kpiType);
@@ -360,10 +360,10 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        /// <summary>
+       
         /// Handle quick action button click
         /// Action IDs: 1=NewAssessment, 2=NewBusiness, 3=NewClient, 4=ViewActivityLog
-        /// </summary>
+       
         private void HandleQuickAction(int actionId)
         {
             Logger.LogInformation("HandleQuickAction: {ActionId}", actionId);
@@ -388,9 +388,9 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        /// <summary>
+       
         /// Handle recent activity filter refresh
-        /// </summary>
+       
         private async Task HandleRecentActivitiesRefresh()
         {
             try
@@ -415,9 +415,9 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        /// <summary>
+       
         /// Handle alert dismissal
-        /// </summary>
+       
         private async Task HandleAlertDismissal((string alertId, int actionTypeId) dismissalData)
         {
             try
@@ -448,9 +448,9 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        /// <summary>
+       
         /// Handle export data request
-        /// </summary>
+       
         private async Task HandleExport((int exportTypeId, int formatId) exportData)
         {
             try

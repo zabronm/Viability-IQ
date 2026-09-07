@@ -1,0 +1,38 @@
+﻿@page "/settings/asset-categories"
+
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Web.Components.Pages.PageFormComponents
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+<div class="p-0 position-relative">
+    <PageHeading _pageTitle="Asset Categories" CurrentPage="PageType.Assets" _pageHeading="Asset Categories" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
+        <div class="app-workspace-shell">
+
+            <ZabDataTableAdvanced TItem="AssetCategory"
+                                  Items="@categoriesList"
+                                  ItemName="Asset Category"
+                                  Columns="@tableColumns"
+                                  IsLoading="@loadingStateActive"
+                                  ShowAdd="true"
+                                  ShowDelete="false"
+                                  OnDelete="DeleteSelectedCategory"
+                                  GetRowId="@(x => x.AssetCategoryId)"
+                                  OnAddRecordId="HandleFormExecution"
+                                  OnEditRecordId="HandleFormExecution"
+                                  OnPrintList="ExecutePrintFormatProcess"
+                                  OnExportExcelList="ExecuteExcelExportProcess"
+                                  OnEmailList="ExecuteEmailDistributionProcess" />
+
+        </div>
+    </main>
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

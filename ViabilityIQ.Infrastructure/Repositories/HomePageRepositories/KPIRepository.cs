@@ -29,11 +29,11 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _logger = logger;
         }
 
-        /// <summary>
+       
         /// Get KPI metrics for a specific user
         /// Includes personal metrics and branch-level metrics
         /// Queries tblAssessments and tblBusiness tables
-        /// </summary>
+       
         public async Task<KPIMetricsModel> GetKPIMetricsAsync(long userId)
         {
             try
@@ -190,10 +190,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get KPI metrics for a specific branch (for managers/admins)
         /// Queries tblAssessments and tblBusiness tables
-        /// </summary>
+       
         public async Task<KPIMetricsModel> GetBranchKPIMetricsAsync(int branchId)
         {
             try

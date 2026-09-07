@@ -57,12 +57,20 @@
                 </NavLink>
                 @* <hr class="border-secondary my-0" /> *@
 
-                <NavLink class="fa-nav-item py-0 my-0" href="assessment/dashboards" Match="NavLinkMatch.All">
+                <NavLink class="fa-nav-item py-0 my-0 mb-1" href="assessment/dashboards" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-speedometer2"></i></div>
                     <span class="footer-main-text-sm">Dashboard</span>
                 </NavLink>
 
                 <div class="fa-nav-heading" style="border-top: dotted 0.6px #92c7c7; border-bottom: dotted 0.6px #92c7c7;">Main Operations</div>
+
+
+                <NavLink class="fa-nav-item py-0 mt-1" href="assessment/assets">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-suitcase-lg-fill"></i></div>
+                    <span class="footer-main-text-sm">Assets</span>
+                    <span class="ms-1 viq-indicator-dot @(HasAssetsData ? "status-success" : "status-warning")"
+                          title="@(HasAssetsData ? "Assets data entry verified" : "No Assets records populated yet")"></span>
+                </NavLink>
 
                 <NavLink class="fa-nav-item py-0 mt-1" href="assessment/sales">
                     <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
@@ -112,7 +120,7 @@
 
                 <NavLink class="fa-nav-item" href="assessment/reports" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
-                    <span class="footer-main-text-sm">Reports</span>
+                    <span class="footer-main-text-sm">Assessment Reports</span>
                     @* <span class="ms-1 viq-indicator-dot @(HasReportsData ? "status-success" : "status-warning")"
                           title="@(HasReportsData ? "Client report generation verified" : "Reports ungenerated")"></span> *@
                 </NavLink>
@@ -121,7 +129,7 @@
 
                 <NavLink class="fa-nav-item" href="assessment/settings" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
-                    <span class="footer-main-text">Setup</span>&nbsp;<i class="bi bi-caret-right"></i>
+                    <span class="footer-main-text">Assessment Settings</span><i class="bi bi-caret-right"></i>
                 </NavLink>
             </div>
 
@@ -225,6 +233,7 @@
 
     private bool HasDebtorsCreditorsData => SessionService.HasDebtorsCreditorsData;
     private bool HasLoansData => SessionService!.HasLoansData;
+    private bool HasAssetsData => SessionService!.HasAssetsData;
     private bool HasSalesData => SessionService!.HasSalesEntries;
     private bool HasStockData => SessionService!.HasStockEntries;
     private bool HasExpensesData => SessionService!.HasExpensesEntries;

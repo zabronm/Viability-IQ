@@ -24,6 +24,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField, string? ParentIdField)> _metadataRegistry = new()
         {
             //============= master data lookups  ======================================
+
             { DDLookupEnums.AssessmentTypes, ("tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName", null) },
             { DDLookupEnums.Genders, ("tblGender", "GenderId", "Gender", null) },
             { DDLookupEnums.Races, ("tblRace", "RaceId", "Race", null) },
@@ -31,6 +32,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
             { DDLookupEnums.LoanTypes, ("tblLoanType", "LoanTypeId", "LoanTypeName", null) },
             { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName", null) },
             { DDLookupEnums.Businesses, ("tblBusiness", "BusinessId", "BusinessName", null) },
+            { DDLookupEnums.AssetCategories, ("tblAssetCategory", "AssetCategoryId", "CategoryName", null) },
+            { DDLookupEnums.AssetTypes, ("tblAssetType", "AssetTypeId", "TypeName", null) },
             { DDLookupEnums.ClientCategories, ("tblClientCategories", "ClientCategoryId", "ClientCategoryName", null) },
             { DDLookupEnums.ProductServiceCategories, ("tblProductCategory", "ProductCategoryId", "ProductCategoryName", null) },
             { DDLookupEnums.Products, ("tblProduct", "ProductServiceId", "ProductServiceName", null) },

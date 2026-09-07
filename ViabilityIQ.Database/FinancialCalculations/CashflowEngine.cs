@@ -23,6 +23,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         private readonly IGenericDataRepository<AssessmentExpenses> _expensesRepository;
         private readonly IGenericDataRepository<AssessmentStock> _stockRepository;
         private readonly IGenericDataRepository<AssessmentLoanRepayment> _loanRepaymentRepository;
+        private readonly IAssetDepreciationEngine _depreciationEngine;
         private readonly ICashflowRepository _cashflowRepository;
         private readonly IProjectionStateManager _projectionStateManager;
         private readonly ILogger<CashflowEngine> _logger;
@@ -39,8 +40,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
                                 IGenericDataRepository<AssessmentExpenses> expensesRepository,
                                 IGenericDataRepository<AssessmentLoanRepayment> loanRepaymentRepository,
                                 IGenericDataRepository<AssessmentStock> stockRepository,
+                                IAssetDepreciationEngine depreciationEngine,                                           //Gets Depreciation data for assets
                                 ICashflowRepository cashflowRepository,
-                                IProjectionStateManager projectionStateManager,
+                                IProjectionStateManager projectionStateManager,                               
                                 ILogger<CashflowEngine> logger)
         {
             _assessmentRepository = assessmentRepository ?? throw new ArgumentNullException(nameof(assessmentRepository));
@@ -48,6 +50,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
             _expensesRepository = expensesRepository ?? throw new ArgumentNullException(nameof(expensesRepository));
             _loanRepaymentRepository = loanRepaymentRepository ?? throw new ArgumentNullException(nameof(loanRepaymentRepository));
             _stockRepository = stockRepository ?? throw new ArgumentNullException(nameof(stockRepository));
+            _depreciationEngine = depreciationEngine ?? throw new ArgumentNullException(nameof(depreciationEngine));
             _cashflowRepository = cashflowRepository ?? throw new ArgumentNullException(nameof(cashflowRepository));
             _projectionStateManager = projectionStateManager ?? throw new ArgumentNullException(nameof(projectionStateManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -89,6 +92,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
                 var monthlyData = new List<AssessmentCashflow>();
                 decimal runningBalance = assessment.OpeningBalance_Bank;  // ✅ CHANGED
 
+                //Pre-calculate ALL depreciation for the year (optimization)
+                var annualDepreciation = await _depreciationEngine.CalculateAnnualDepreciationAsync(assessmentId);  //Anual depreciation for all assets in the assessment
+
                 // Calculate for each month (1-12)
                 for (int month = 1; month <= 12; month++)
                 {
@@ -114,10 +120,13 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     cashflow.MarketingExpense = CalculateExpenseByType(expensesList, month, "Marketing");
                     cashflow.OtherExpense = CalculateExpenseByType(expensesList, month, "Other");
                     cashflow.LoanRepayment = CalculateLoanRepaymentByMonth(loanRepayments, month);
+                    cashflow.DepreciationExpense = annualDepreciation.ContainsKey(month) ? annualDepreciation[month-1] : 0m;
 
                     cashflow.TotalExpense = cashflow.COGS + cashflow.SalaryExpense + cashflow.RentExpense +
                                            cashflow.UtilityExpense + cashflow.MarketingExpense +
-                                           cashflow.LoanRepayment + cashflow.OtherExpense;
+                                           cashflow.LoanRepayment + cashflow.OtherExpense + 
+                                           cashflow.DepreciationExpense;  // ✅ Add depreciation here
+
 
                     // ========== CASHFLOW METRICS ==========
                     cashflow.NetCashflow = cashflow.TotalIncome - cashflow.TotalExpense;
@@ -249,6 +258,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     MarketingExpense = m.MarketingExpense,
                     LoanRepayment = m.LoanRepayment,
                     OtherExpense = m.OtherExpense,
+                    DepreciationExpense = m.DepreciationExpense,
                     TotalExpense = m.TotalExpense,
                     NetCashflow = m.NetCashflow,
                     OpeningBalance = m.OpeningBalance,

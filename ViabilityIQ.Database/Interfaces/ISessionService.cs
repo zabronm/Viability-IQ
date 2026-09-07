@@ -1,17 +1,19 @@
-﻿namespace ViabilityIQ.Application.Interfaces
+﻿using ViabilityIQ.Shared.SharedModels;
+
+namespace ViabilityIQ.Application.Interfaces
 {
     public interface ISessionService
     {
         event Action? OnSessionChanged;
 
-        // ====================================================\r
-        // APPLICATION\r
-        // ====================================================\r
+        // ====================================================
+        // APPLICATION
+        // ====================================================
         string AppTitle { get; set; }
 
-        // ====================================================\r
-        // USER CONTEXT\r
-        // ====================================================\r
+        // ====================================================
+        // USER CONTEXT
+        // ====================================================
         long UserId { get; }
         string UserName { get; }
         string UserEmail { get; }
@@ -21,20 +23,22 @@
         long BranchId { get; }
         long ProvinceId { get; }
 
-        // ====================================================\r
-        // ASSESSMENT CONTEXT\r
-        // ====================================================\r
+        // ====================================================
+        // ASSESSMENT CONTEXT
+        // ====================================================
         long? AssessmentId { get; }
         string CaseNumber { get; }
+        bool HasAssetsData { get; }
         bool HasSalesData { get; }
         bool HasStockData { get; }
         bool HasExpensesData { get; }
         bool HasReportsData { get; }
         bool HasReviewsData { get; }
+        bool HasReviews { get; }
         bool HasDebtorsCreditorsData { get; }
         bool HasLoansData { get; }
 
-        bool HasReviews { get; }
+        bool HasAssetsEntries { get; }
         bool HasSalesEntries { get; }
         bool HasStockEntries { get; }
         bool HasExpensesEntries { get; }
@@ -49,14 +53,14 @@
         string ClientName { get; }
         string AssessmentType { get; }
 
-        // ====================================================\r
-        // NAVIGATION\r
-        // ====================================================\r
+        // ====================================================
+        // NAVIGATION
+        // ====================================================
         string CurrentPage { get; }
 
-        // ====================================================\r
-        // LOGIN\r
-        // ====================================================\r
+        // ====================================================
+        // LOGIN
+        // ====================================================
         void EstablishUserSession(
             long userId,
             string userName,
@@ -65,37 +69,49 @@
             long branchId,
             long provinceId);
 
-        // ====================================================\r
-        // ASSESSMENT\r
-        // ====================================================\r
+        // ====================================================
+        // ASSESSMENT
+        // ====================================================
         void SetActiveAssessment(
-            long assessmentId,
             string caseNumber,
-            long? businessId,
+            long assessmentId,
+            long businessId,
             string businessName,
-            long? clientId,
+            long clientId,
             string clientName,
+            string assessmentType,
+            bool HasAssetsData,
+            bool HasExpensesData,
             bool HasSalesData,
             bool HasStockData,
-            bool HasExpensesData,
             bool HasReportsData,
             bool HasReviewsData,
-            bool HasDebtorsCreditorsData,
-            bool HasLoansData,
             bool HasReviews,
-            string assessmentType);
+            bool HasDebtorsCreditorsData,
+            bool HasLoansData);
+
 
         void ClearAssessment();
 
-        // ====================================================\r
-        // NAVIGATION\r
-        // ====================================================\r
+        // ====================================================
+        // NAVIGATION
+        // ====================================================
         void UpdateCurrentPage(string pageRoute);
 
-        // ====================================================\r
-        // GENERAL\r
-        // ====================================================\r
+        // ====================================================
+        // GENERAL
+        // ====================================================
         void ClearWorkflow();
         void TerminateSession();
+
+
+
+        // ====================================================
+        // DATA VALIDATION ENGINE (NEW)
+        // ====================================================
+        AssessmentDataStatus GetAssessmentDataStatus();
+        bool HasAnyAssessmentData();
+        List<string> GetMissingAssessmentData();
+        Dictionary<string, bool> GetAllAssessmentDataStatus();
     }
 }

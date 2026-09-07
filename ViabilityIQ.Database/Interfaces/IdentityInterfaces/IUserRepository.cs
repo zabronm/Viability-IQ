@@ -9,14 +9,14 @@ namespace ViabilityIQ.Application.Interfaces.IdentityInterfaces
 {
     public interface IUserRepository
     {
-        /// <summary>
+       
         /// Gets a user by email using Dapper (not EF Core)
-        /// </summary>
+       
         Task<ApplicationUser> GetUserByEmailAsync(string email);
 
-        /// <summary>
+       
         /// Gets a user by ID using Dapper
-        /// </summary>
+       
         Task<ApplicationUser> GetUserByIdAsync(long userId);
     }
 }

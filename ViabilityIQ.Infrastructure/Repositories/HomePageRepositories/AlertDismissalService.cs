@@ -25,10 +25,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _logger = logger;
         }
 
-        /// <summary>
+       
         /// Dismiss an alert and store the dismissal in the database
         /// Dismissed alerts are hidden for 7 days
-        /// </summary>
+       
         public async Task<bool> DismissAlertAsync(long userId, string alertId, string alertType)
         {
             try
@@ -78,9 +78,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Check if an alert has been dismissed by the user (and not expired)
-        /// </summary>
+       
         public async Task<bool> IsAlertDismissedAsync(long userId, string alertId)
         {
             try
@@ -115,9 +115,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Restore a dismissed alert (remove dismissal from database)
-        /// </summary>
+       
         public async Task<bool> RestoreDismissedAlertAsync(long userId, string alertId)
         {
             try

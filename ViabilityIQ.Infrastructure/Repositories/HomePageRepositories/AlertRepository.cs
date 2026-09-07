@@ -27,9 +27,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _logger = logger;
         }
 
-        /// <summary>
+       
         /// Get all alerts for a user (urgent + upcoming)
-        /// </summary>
+       
         public async Task<AlertsModel> GetAlertsAsync(long userId)
         {
             try
@@ -57,10 +57,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get urgent assessments due within 24 hours
         /// Joins with tblBusiness to get BusinessName
-        /// </summary>
+       
         public async Task<List<UrgentAssessmentModel>> GetUrgentAssessmentsAsync(long userId)
         {
             try
@@ -102,10 +102,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get assessments due this week (1-7 days from now)
         /// Joins with tblBusiness to get BusinessName
-        /// </summary>
+       
         public async Task<List<UpcomingAssessmentModel>> GetUpcomingAssessmentsAsync(long userId)
         {
             try

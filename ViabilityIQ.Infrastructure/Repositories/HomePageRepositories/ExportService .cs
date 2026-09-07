@@ -11,9 +11,9 @@ using ViabilityIQ.Infrastructure.DbFactory;
 
 namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
 {
-    /// <summary>
+   
     /// Service for exporting dashboard data to Excel and PDF formats using Dapper
-    /// </summary>
+   
     public class ExportService : IExportService
     {
         private readonly ILogger<ExportService> _logger;
@@ -25,11 +25,11 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _logger = logger;
         }
 
-        /// <summary>
+       
         /// Export data as Excel file
         /// For tabular data: returns raw data with formulas
         /// For charts: returns data with embedded charts
-        /// </summary>
+       
         public async Task<byte[]> ExportToExcelAsync(string exportType, long userId)
         {
             try
@@ -55,11 +55,11 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Export data as PDF file
         /// For charts: returns formatted chart as PDF
         /// For tabular data: returns formatted report as PDF
-        /// </summary>
+       
         public async Task<byte[]> ExportToPdfAsync(string exportType, long userId)
         {
             try
@@ -85,9 +85,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get the appropriate file extension and content type for the format
-        /// </summary>
+       
         public (string extension, string contentType) GetFileInfo(string format)
         {
             return format?.ToLower() switch
@@ -100,9 +100,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
 
         #region Private Export Methods
 
-        /// <summary>
+       
         /// Export completion rate metric
-        /// </summary>
+       
         private async Task<byte[]> ExportCompletionRateAsync(long userId, string format)
         {
             try
@@ -149,9 +149,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Export average completion time metric
-        /// </summary>
+       
         private async Task<byte[]> ExportAvgCompletionTimeAsync(long userId, string format)
         {
             try
@@ -192,9 +192,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Export assessment status distribution data
-        /// </summary>
+       
         private async Task<byte[]> ExportStatusDistributionAsync(long userId, string format)
         {
             try
@@ -226,9 +226,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Export top performers leaderboard
-        /// </summary>
+       
         private async Task<byte[]> ExportTopPerformersAsync(long userId, string format)
         {
             try

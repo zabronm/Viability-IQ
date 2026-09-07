@@ -5,16 +5,16 @@ using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Extensions
 {
-    /// <summary>
+   
     /// Extension for initializing the database
     /// NOTE: Must be in ViabilityIQ.Web project (not Infrastructure)
-    /// </summary>
+   
     public static class DatabaseInitializationExtension
     {
-        /// <summary>
+       
         /// Initializes both IdentityDbContext and ApplicationDbContext
         /// Applies migrations and seeds data
-        /// </summary>
+       
         public static async Task InitializeDatabaseAsync(this WebApplication app)
         {
             using (var scope = app.Services.CreateScope())

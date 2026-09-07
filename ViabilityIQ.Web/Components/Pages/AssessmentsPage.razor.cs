@@ -19,6 +19,7 @@ namespace ViabilityIQ.Web.Components.Pages
     {
         [Inject] private IGenericDataRepository<AssessmentDto> assessmentDtoRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<Assessment> coreAssessmentRepository { get; set; } = default!;
+        [Inject] private IAssessmentDataValidationService dataValidationService { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
@@ -117,34 +118,53 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
+        // ✅ Initialize session and redirect to the assessment session page
         private async Task InitializeAndRedirectToSessionAsync(long assessmentId)
         {
             var selectedRecord = assessmentsList.FirstOrDefault(x => x.AssessmentId == assessmentId);
-            if (selectedRecord == null) return;
+            if (selectedRecord == null)
+            {
+                _Toast!.ShowError("Assessment record not found.", "Error");
+                return; 
+            }
+
 
             try
             {
-                if (sessionService != null)
+                if (sessionService == null)
                 {
-                    sessionService.SetActiveAssessment(
-                         caseNumber: selectedRecord.CaseNumber,
-                         assessmentId: selectedRecord.AssessmentId,
-                         businessId: selectedRecord.BusinessId,
-                         businessName: selectedRecord.BusinessName,
-                         clientId: selectedRecord.ClientId,
-                         clientName: selectedRecord.BusinessOwner,
-                         assessmentType: selectedRecord.AssessmentTypeName,
-                         HasExpensesData: true,
-                         HasSalesData: true,
-                         HasStockData: false,
-                         HasReportsData: false,
-                         HasReviewsData: false,
-                         HasReviews: false,
-                         HasDebtorsCreditorsData: true,
-                         HasLoansData: true
-                    );
+                    _Toast!.ShowError("Session service is not available.", "Error");
+                    return;
                 }
 
+                // This queries the database to check which data types have records
+                var dataStatus = await dataValidationService.ValidateAssessmentDataAsync(assessmentId);
+                // Set the session with the ACTUAL data status (not hardcoded values)
+                sessionService.SetActiveAssessment(
+                    caseNumber: selectedRecord.CaseNumber,
+                    assessmentId: selectedRecord.AssessmentId,
+                    businessId: selectedRecord.BusinessId,
+                    businessName: selectedRecord.BusinessName,
+                    clientId: selectedRecord.ClientId,
+                    clientName: selectedRecord.BusinessOwner,
+                    assessmentType: selectedRecord.AssessmentTypeName,
+                    HasAssetsData: dataStatus.HasAssets,              // ✅ FROM VALIDATION
+                    HasExpensesData: dataStatus.HasExpenses,          // ✅ FROM VALIDATION
+                    HasSalesData: dataStatus.HasSales,                // ✅ FROM VALIDATION
+                    HasStockData: dataStatus.HasStock,                // ✅ FROM VALIDATION
+                    HasReportsData: dataStatus.HasReports,            // ✅ FROM VALIDATION
+                    HasReviewsData: dataStatus.HasReviews,            // ✅ FROM VALIDATION
+                    HasReviews: dataStatus.HasReviews,                // ✅ FROM VALIDATION
+                    HasDebtorsCreditorsData: dataStatus.HasDebtorsCreditors,  // ✅ FROM VALIDATION
+                    HasLoansData: dataStatus.HasLoans                 // ✅ FROM VALIDATION
+                );
+
+                // ✅ STEP 4: LOG VALIDATION RESULTS FOR DEBUGGING
+                System.Diagnostics.Debug.WriteLine($"[AssessmentsPage] {dataStatus.GetSummary()}");
+                //System.Diagnostics.Debug.WriteLine($"[AssessmentsPage] Loaded modules: {string.Join(", ", dataStatus.LoadedDataTypes)}");
+                //System.Diagnostics.Debug.WriteLine($"[AssessmentsPage] Missing modules: {string.Join(", ", dataStatus.MissingDataTypes)}");
+
+                // ✅ STEP 5: NAVIGATE TO DASHBOARD
                 Navigation.NavigateTo($"/assessment/dashboards/{selectedRecord.AssessmentId}");
             }
             catch (Exception ex)

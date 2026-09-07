@@ -19,25 +19,25 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Properties
 
-        /// <summary>
+       
         /// Currently selected filter ID
         /// 1 = 24 hours, 2 = 7 days, 3 = 30 days, 4 = All
-        /// </summary>
+       
         private int SelectedFilterId = 1;
 
         #endregion
 
         #region Parameters
 
-        /// <summary>
+       
         /// List of recent activities to display
-        /// </summary>
+       
         [Parameter]
         public List<ActivityLogModel> Activities { get; set; }
 
-        /// <summary>
+       
         /// Callback to refresh activities when filter changes
-        /// </summary>
+       
         [Parameter]
         public EventCallback OnRefresh { get; set; }
 
@@ -45,19 +45,19 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Methods
 
-        /// <summary>
+       
         /// Get filter button CSS class based on selected filter
         /// filterId: 1=24h, 2=7d, 3=30d, 4=all
-        /// </summary>
+       
         public string GetFilterClass(int filterId)
         {
             return SelectedFilterId == filterId ? "active" : "";
         }
 
-        /// <summary>
+       
         /// Select a filter and refresh activities
         /// filterId: 1=24h, 2=7d, 3=30d, 4=all
-        /// </summary>
+       
         public async Task SelectFilter(int filterId)
         {
             Logger.LogInformation("Activity filter selected: Filter ID {FilterId}", filterId);
@@ -70,10 +70,10 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             }
         }
 
-        /// <summary>
+       
         /// Format activity time to relative time string
         /// e.g., "2 minutes ago", "1 hour ago", "Yesterday"
-        /// </summary>
+       
         public string FormatActivityTime(DateTime createdDate)
         {
             var now = DateTime.UtcNow;
@@ -93,9 +93,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
                 return createdDate.ToString("MMM d, h:mm tt");
         }
 
-        /// <summary>
+       
         /// Get CSS class for activity action badge based on type
-        /// </summary>
+       
         public string GetActivityActionClass(string activityType)
         {
             return activityType switch
@@ -111,9 +111,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             };
         }
 
-        /// <summary>
+       
         /// Get human-readable activity action display text
-        /// </summary>
+       
         public string GetActivityActionDisplay(string activityType)
         {
             return activityType switch
@@ -129,10 +129,10 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             };
         }
 
-        /// <summary>
+       
         /// Get the filter type string based on selected filter ID
         /// Used when calling parent refresh
-        /// </summary>
+       
         public string GetSelectedFilterType()
         {
             return SelectedFilterId switch

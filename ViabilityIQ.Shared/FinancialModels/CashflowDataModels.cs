@@ -42,8 +42,15 @@ namespace ViabilityIQ.Shared.FinancialModels
         [Column(TypeName = "decimal(18,2)")] public decimal UtilityExpense { get; set; } = 0;
         [Column(TypeName = "decimal(18,2)")] public decimal MarketingExpense { get; set; } = 0;
         [Column(TypeName = "decimal(18,2)")] public decimal LoanRepayment { get; set; } = 0;
+        [Column(TypeName = "decimal(18,2)")] public decimal DepreciationExpense { get; set; } = 0;          //Take note here - very important
         [Column(TypeName = "decimal(18,2)")] public decimal OtherExpense { get; set; } = 0;
+
+
+        // This is calculated as:
+        // COGS + SalaryExpense + RentExpense + UtilityExpense + 
+        // MarketingExpense + LoanRepayment + OtherExpense + DepreciationExpense (Notice Depreciation)
         [Column(TypeName = "decimal(18,2)")] public decimal TotalExpense { get; set; } = 0;
+
 
         // ========== CASHFLOW METRICS ==========
 
@@ -134,7 +141,7 @@ namespace ViabilityIQ.Shared.FinancialModels
         public decimal LoanRepayment { get; set; }
         public decimal OtherExpense { get; set; }
         public decimal TotalExpense { get; set; }
-
+        public decimal DepreciationExpense { get; set; }
         public decimal GrossVAT { get; set; }
         public decimal NetVAT { get; set; }
 
@@ -155,7 +162,7 @@ namespace ViabilityIQ.Shared.FinancialModels
         public decimal TotalAnnualIncome { get; set; }
         public decimal TotalAnnualExpense { get; set; }
         public decimal TotalAnnualNetCashflow { get; set; }
-
+        public decimal TotalAnnualDepreciation { get; set; }        /// Total annual depreciation expense across all assets
         public decimal MinimumCashBalance { get; set; }
         public decimal MaximumCashBalance { get; set; }
         public decimal AverageMonthlyNetCashflow { get; set; }

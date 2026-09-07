@@ -1,0 +1,213 @@
+﻿
+<div class="row g-2 mb-3">
+    <div class="kpi-header">
+        <h5 class="kpi-title">
+            <i class="bi bi-speedometer2"></i>
+            Assets Performance Metrics
+        </h5>
+        <span class="kpi-subtext ps-4">Quick Assets KPI Metrics</span>
+    </div>
+    <!-- 1. Total Assets -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Total Assets</span>
+                    <i class="bi bi-boxes text-primary fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0">@TotalAssetsCount</span><br />
+                    <span class="text-xxs text-muted">Registered items</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Opening Balance -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Opening Bal.</span>
+                    <i class="bi bi-wallet2 text-secondary fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0 ">@TotalGrossValue.ToString("C0")</span><br />
+                    <span class="text-xxs text-muted">Initial valuation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Total Additions -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Additions</span>
+                    <i class="bi bi-plus-square text-success fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0">@TotalAdditions.ToString("C0")</span><br />
+                    <span class="text-xxs text-muted">Current period</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Total Disposals -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Disposals</span>
+                    <i class="bi bi-dash-square text-danger fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0">@TotalDisposals.ToString("C0")</span><br />
+                    <span class="text-xxs text-muted">Retired assets</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Gross Value -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Gross Value</span>
+                    <i class="bi bi-graph-up-arrow text-info fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0">@TotalGrossValue.ToString("C0")</span><br />
+                    <span class="text-xxs text-muted">Base pool</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Acc. Depreciation -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Acc. Depr.</span>
+                    <i class="bi bi-file-earmark-bar-graph text-warning fs-6"></i>
+                </div>
+                <div>
+                    <spant class="kpi-value mb-0">@TotalAccumulatedDepreciation.ToString("C0")</spant><br />
+                    <span class="text-xxs text-muted">Total wear & tear</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Net Value -->
+    <div class="col">
+        <div class="card h-100 kpi-card border border-primary border-2">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Net Value</span>
+                    <i class="bi bi-shield-check text-primary fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0">@TotalNetValue.ToString("C0")</span><br />
+                    <span class="text-xxs text-muted">Book carrying value</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Utilization Rate (8th Metric) -->
+    <div class="col">
+        <div class="card h-100 kpi-card border">
+            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted text-xxs fw-bold uppercase">Health Rate</span>
+                    <i class="bi bi-cpu text-success fs-6"></i>
+                </div>
+                <div>
+                    <span class="kpi-value mb-0">94.2%</span><br/>
+                    <span class="text-xxs text-success">Operational</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style type="text/css">
+    /* ✅ 8-Column Equal Fit Grid Customization for KPI Cards */
+    .row.g-2 > .col {
+        flex: 1 0 0%;
+        min-width: 110px;
+    }
+
+    /* ✅ Smooth Hover Enhancements for KPI Cards */
+    .kpi-card {
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        background-color: #ffffff !important;
+        border: 1px solid #C2DFFF !important;    
+        border-radius: 10px;        
+        border-left: 3px solid #C2DFFF !important;
+
+    }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;            
+            box-shadow: 0 4px 10px rgba(0, 0, 153, 0.08) !important;
+            border: 1px solid #29465B !important;
+            border-left: 4px solid #29465B !important;
+        }
+
+    .kpi-subtext {
+        font-size: 0.70rem;
+        color: #64748b;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-transform:capitalize;
+    }
+
+    .kpi-header {
+        margin-bottom: 2px;
+    }
+
+    .kpi-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #778899 !important;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .kpi-title i {
+            font-size: 1.25rem;
+            color: #000099;
+        }
+
+    .kpi-subtitle {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    .kpi-value{
+        font-size: 0.85rem !important;
+        font-weight: bold;
+        color: #36454F !important;
+    }
+</style>
+
+@code {
+    [Parameter] public int TotalAssetsCount { get; set; }
+    [Parameter] public decimal TotalGrossValue { get; set; }
+    [Parameter] public decimal TotalAdditions { get; set; }
+    [Parameter] public decimal TotalDisposals { get; set; }
+    [Parameter] public decimal TotalAccumulatedDepreciation { get; set; }
+    [Parameter] public decimal TotalNetValue { get; set; }
+}

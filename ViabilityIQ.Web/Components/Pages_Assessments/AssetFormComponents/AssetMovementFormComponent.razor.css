@@ -1,0 +1,650 @@
+﻿/* ========================================
+   ASSET MOVEMENT FORM COMPONENT (AMF)
+   COMPLETELY ISOLATED STYLING
+   All classes prefixed with 'amf-' to prevent conflicts
+   ======================================== */
+
+/* ========================================
+   MAIN CONTAINER
+   ======================================== */
+.amf-container {
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: #212529;
+    padding: 0.5rem;
+}
+
+/* ========================================
+   ASSET HEADER CARD
+   ======================================== */
+.amf-header-card {
+    border-radius: 1rem !important;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 0.75rem !important;
+    padding: 0.75rem !important;
+    background-color: #ffffff !important;
+    border: 0 !important;
+}
+
+.amf-asset-name {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #29465B !important;
+    margin-bottom: 0rem !important;
+    letter-spacing: -0.5px;
+    line-height: 1.0;
+}
+
+.amf-asset-metadata {
+    font-size: 0.75rem !important;
+    color: #6c757d;
+    line-height: 1.4;
+    display: block !important;
+    margin: 0 !important;
+}
+
+    .amf-asset-metadata strong {
+        font-weight: 700;
+        color: #495057;
+    }
+
+/* ========================================
+   TABLE WRAPPER & RESPONSIVE
+   ======================================== */
+.amf-table-wrapper {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+    border-radius: 1rem;
+    margin-bottom: 0.75rem;
+    background-color: #ffffff;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+/* ========================================
+   TABLE STYLES - COMPLETELY ISOLATED
+   ======================================== */
+.amf-data-table {
+    table-layout: fixed;
+    font-size: 0.75rem;
+    margin-bottom: 0 !important;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* ========================================
+   TABLE HEADER
+   ======================================== */
+.amf-table-head {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.amf-header-row {
+    background-color: #f8f9fa !important;
+    border: 0 !important;
+}
+
+    .amf-header-row th {
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px;
+        background-color: #f8f9fa !important;
+        border-bottom: 2px solid #dee2e6 !important;
+        color: #6c757d !important;
+        vertical-align: middle !important;
+        padding: 0.35rem 0.4rem !important;
+        white-space: nowrap;
+        height: 32px;
+        line-height: 1.2;
+        text-align: right;
+        margin: 0 !important;
+    }
+
+.amf-col-month {
+    width: 90px !important;
+    text-align: left !important;
+}
+
+.amf-col-type {
+    width: 130px !important;
+    text-align: center !important;
+}
+
+.amf-col-value {
+    width: 120px !important;
+}
+
+.amf-col-gross {
+    width: 120px !important;
+}
+
+.amf-col-depr {
+    width: 110px !important;
+}
+
+.amf-col-nbv {
+    width: 120px !important;
+}
+
+/* ========================================
+   TABLE BODY
+   ======================================== */
+.amf-table-body {
+    background-color: #ffffff;
+}
+
+.amf-table-row {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef !important;
+    transition: background-color 0.15s ease-in-out;
+    height: 28px;
+}
+
+    .amf-table-row:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .amf-table-row:hover {
+        background-color: #f0f4f8;
+    }
+
+/* ========================================
+   TABLE CELLS
+   ======================================== */
+.amf-data-table td {
+    vertical-align: middle !important;
+    padding: 0.3rem 0.4rem !important;
+    border: 0 !important;
+    height: 28px;
+    line-height: 1.1;
+    margin: 0 !important;
+}
+
+.amf-cell-month {
+    width: 90px !important;
+    font-weight: 700;
+    color: #495057;
+    text-align: left !important;
+    padding-left: 0.75rem !important;
+}
+
+.amf-cell-type {
+    width: 130px !important;
+    text-align: center !important;
+}
+
+.amf-cell-value {
+    width: 120px !important;
+    text-align: right !important;
+    padding-right: 0.5rem !important;
+}
+
+.amf-cell-gross {
+    width: 120px !important;
+    text-align: right !important;
+    padding-right: 0.5rem !important;
+}
+
+.amf-cell-depr {
+    width: 110px !important;
+    text-align: right !important;
+    padding-right: 0.5rem !important;
+}
+
+.amf-cell-nbv {
+    width: 120px !important;
+    text-align: right !important;
+    padding-right: 0.75rem !important;
+    background-color: #f0f8ff;
+}
+
+/* ========================================
+   FORM INPUTS - MOVEMENT TYPE SELECT
+   ======================================== */
+.amf-select-movement-type {
+    font-size: 0.75rem !important;
+    min-height: 24px;
+    height: 24px;
+    padding: 0.2rem 0.4rem !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.25rem;
+    transition: all 0.15s ease-in-out;
+    background-color: #ffffff !important;
+    line-height: 1.2;
+    color: #212529 !important;
+    font-weight: 600;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 120px;
+    display: block;
+}
+
+    .amf-select-movement-type:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.08) !important;
+        outline: none !important;
+    }
+
+    .amf-select-movement-type:hover {
+        border-color: #adb5bd;
+    }
+
+/* ========================================
+   FORM INPUTS - MOVEMENT VALUE
+   ======================================== */
+.amf-input-movement-value {
+    font-size: 0.75rem !important;
+    min-height: 24px;
+    height: 24px;
+    padding: 0.2rem 0.4rem !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.25rem;
+    transition: all 0.15s ease-in-out;
+    background-color: #ffffff !important;
+    font-family: 'Courier New', monospace;
+    text-align: right !important;
+    line-height: 1.2;
+    color: #212529 !important;
+    font-weight: 600;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+    .amf-input-movement-value:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.08) !important;
+        outline: none !important;
+        background-color: #ffffff !important;
+    }
+
+    .amf-input-movement-value:hover {
+        border-color: #adb5bd;
+    }
+
+    .amf-input-movement-value::placeholder {
+        color: #adb5bd;
+        opacity: 0.7;
+    }
+
+/* ========================================
+   VALUE DISPLAY CELLS
+   ======================================== */
+.amf-value-display {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem !important;
+    display: inline-block;
+    line-height: 1.2;
+}
+
+.amf-value-bold {
+    font-weight: 700;
+    color: #212529;
+}
+
+.amf-value-muted {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.amf-value-highlight {
+    font-weight: 700;
+    color: #212529;
+    background-color: #f0f8ff;
+    padding: 0.2rem 0.3rem;
+    border-radius: 0.25rem;
+}
+
+/* ========================================
+   SUMMARY BOX
+   ======================================== */
+.amf-summary-box {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+}
+
+.amf-summary-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+    .amf-summary-row:last-child {
+        margin-bottom: 0;
+    }
+
+.amf-summary-col {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.amf-summary-col-full {
+    flex: 1 1 100%;
+}
+
+.amf-summary-label {
+    font-size: 0.7rem !important;
+    color: #6c757d;
+    font-weight: 600;
+    display: block !important;
+    margin: 0 !important;
+    white-space: nowrap;
+}
+
+.amf-summary-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: #212529;
+    font-size: 0.85rem;
+}
+
+.amf-summary-value-highlight {
+    color: #198754;
+}
+
+/* ========================================
+   FORM ACTIONS
+   ======================================== */
+.amf-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.amf-btn-cancel,
+.amf-btn-submit {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.75rem !important;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 32px;
+    line-height: 1.2;
+    text-decoration: none;
+    margin: 0 !important;
+}
+
+.amf-btn-cancel {
+    color: #6c757d;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+}
+
+    .amf-btn-cancel:hover:not(:disabled) {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+    }
+
+    .amf-btn-cancel:active:not(:disabled) {
+        background-color: #dee2e6;
+    }
+
+.amf-btn-submit {
+    color: #ffffff;
+    background-color: #0d6efd;
+    border: 1px solid #0d6efd;
+}
+
+    .amf-btn-submit:hover:not(:disabled) {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .amf-btn-submit:active:not(:disabled) {
+        background-color: #0a58ca;
+        border-color: #0a3c65;
+    }
+
+    .amf-btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .amf-btn-cancel:disabled,
+    .amf-btn-submit:disabled {
+        transform: none;
+    }
+
+    .amf-btn-cancel i,
+    .amf-btn-submit i {
+        font-size: 0.9rem;
+        margin-right: 0.15rem !important;
+    }
+
+    .amf-btn-cancel .spinner-border,
+    .amf-btn-submit .spinner-border {
+        width: 0.85rem !important;
+        height: 0.85rem !important;
+        margin-right: 0.25rem !important;
+    }
+
+/* ========================================
+   BOOTSTRAP UTILITY OVERRIDES - SCOPED
+   ======================================== */
+.amf-container .p-2 {
+    padding: 0.5rem !important;
+}
+
+.amf-container .mb-3 {
+    margin-bottom: 0.75rem !important;
+}
+
+.amf-container .mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.amf-container .d-flex {
+    display: flex !important;
+}
+
+.amf-container .gap-3 {
+    gap: 0.75rem !important;
+}
+
+.amf-container .flex-wrap {
+    flex-wrap: wrap !important;
+}
+
+.amf-container .bg-white {
+    background-color: #ffffff !important;
+}
+
+.amf-container .border-0 {
+    border: 0 !important;
+}
+
+.amf-container .rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.amf-container .shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.amf-container .card {
+    border: 0 !important;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .amf-header-row th {
+        font-size: 0.6rem !important;
+        padding: 0.25rem 0.3rem !important;
+        height: 28px;
+    }
+
+    .amf-data-table td {
+        padding: 0.25rem 0.3rem !important;
+        height: 26px;
+    }
+
+    .amf-select-movement-type,
+    .amf-input-movement-value {
+        min-height: 22px;
+        height: 22px;
+        padding: 0.15rem 0.3rem !important;
+        font-size: 0.7rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .amf-container {
+        font-size: 0.75rem;
+        padding: 0.25rem;
+    }
+
+    .amf-asset-name {
+        font-size: 1rem !important;
+    }
+
+    .amf-data-table {
+        font-size: 0.7rem;
+    }
+
+    .amf-header-row th {
+        font-size: 0.55rem !important;
+        padding: 0.2rem 0.25rem !important;
+        height: 26px;
+    }
+
+    .amf-data-table td {
+        padding: 0.2rem 0.25rem !important;
+        height: 24px;
+    }
+
+    .amf-table-row {
+        height: 24px;
+    }
+
+    .amf-select-movement-type,
+    .amf-input-movement-value {
+        min-height: 20px;
+        height: 20px;
+        padding: 0.1rem 0.25rem !important;
+        font-size: 0.65rem !important;
+    }
+
+    .amf-btn-cancel,
+    .amf-btn-submit {
+        font-size: 0.7rem !important;
+        padding: 0.35rem 0.3rem;
+        min-height: 28px;
+    }
+
+    .amf-summary-box {
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+
+    .amf-summary-col {
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .amf-container {
+        padding: 0.1rem;
+    }
+
+    .amf-table-wrapper {
+        border-radius: 0.5rem;
+        max-height: 400px;
+    }
+
+    .amf-data-table {
+        font-size: 0.65rem;
+    }
+
+    .amf-header-row th {
+        font-size: 0.5rem !important;
+        padding: 0.15rem 0.2rem !important;
+        height: 24px;
+    }
+
+    .amf-data-table td {
+        padding: 0.15rem 0.2rem !important;
+        height: 22px;
+    }
+
+    .amf-summary-row {
+        gap: 0.5rem;
+    }
+
+    .amf-summary-col {
+        flex: 1 1 100%;
+        min-width: auto;
+    }
+
+    .amf-btn-cancel,
+    .amf-btn-submit {
+        font-size: 0.65rem !important;
+        padding: 0.25rem;
+        min-height: 26px;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+    .amf-btn-cancel,
+    .amf-btn-submit {
+        display: none !important;
+    }
+
+    .amf-container {
+        background-color: #ffffff;
+        page-break-inside: avoid;
+    }
+
+    .amf-table-wrapper {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+.amf-select-movement-type:focus,
+.amf-input-movement-value:focus {
+    outline: 2px solid #0d6efd !important;
+    outline-offset: 1px;
+}
+
+.amf-btn-cancel:focus,
+.amf-btn-submit:focus {
+    outline: 2px solid #0d6efd !important;
+    outline-offset: 2px;
+}

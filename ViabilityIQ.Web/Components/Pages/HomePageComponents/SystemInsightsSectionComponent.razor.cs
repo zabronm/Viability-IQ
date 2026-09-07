@@ -23,17 +23,17 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Parameters
 
-        /// <summary>
+       
         /// The insights and analytics data to display
-        /// </summary>
+       
         [Parameter]
         public InsightsModel Insights { get; set; }
 
-        /// <summary>
+       
         /// Callback when user clicks export button
         /// exportTypeId: 1=CompletionRate, 2=AvgCompletionTime, 3=StatusDistribution, 4=TopPerformers
         /// formatId: 1=Excel, 2=PDF
-        /// </summary>
+       
         [Parameter]
         public EventCallback<(int exportTypeId, int formatId)> OnExport { get; set; }
 
@@ -41,11 +41,11 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Methods
 
-        /// <summary>
+       
         /// Handle export button click
         /// exportTypeId: 1=CompletionRate, 2=AvgCompletionTime, 3=StatusDistribution, 4=TopPerformers
         /// formatId: 1=Excel, 2=PDF
-        /// </summary>
+       
         public async Task HandleExport(int exportTypeId, int formatId)
         {
             Logger.LogInformation("Export requested: Export Type ID {ExportTypeId}, Format ID {FormatId}",

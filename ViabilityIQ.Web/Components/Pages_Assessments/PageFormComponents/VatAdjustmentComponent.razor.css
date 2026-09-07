@@ -1,4 +1,26 @@
-﻿.custom-offcanvas-backdrop {
+﻿/* Compact Borderless Table Styles */
+.borderless-table th {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid #dee2e6 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+
+.borderless-table td {
+    border: none !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+.month-cell {
+    font-size: 0.72rem;
+}
+
+/* Base custom styles from layout context */
+.custom-offcanvas-backdrop {
     position: fixed;
     top: 0;
     left: 0;

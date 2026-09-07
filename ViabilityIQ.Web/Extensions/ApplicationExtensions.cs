@@ -13,10 +13,10 @@ using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Extensions
 {
-    /// <summary>
+   
     /// Master application extensions - ALL services registered here
     /// Single entry point to avoid naming conflicts and ambiguity
-    /// </summary>
+   
     public static class ApplicationExtensions
     {
         public static IServiceCollection AddAllApplicationServices(

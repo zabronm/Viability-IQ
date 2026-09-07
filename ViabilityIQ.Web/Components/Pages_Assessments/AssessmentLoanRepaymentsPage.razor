@@ -14,7 +14,7 @@
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
         <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12 mt-0 pt-0">           
+        <div class="col-12 mt-0 pt-0">
             <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
         </div>
 
@@ -48,20 +48,22 @@
             </div>
         </div>
 
-        <!-- Loan Repayments Table -->
+        <!-- Loan Repayments Table with Navy-Blue Border Wrapper -->
         <div class="col-12">
-            <div class="table-responsive shadow-sm border border-secondary-subtle rounded mb-2">
+            <div class="table-responsive navy-border shadow-sm mb-2" style="border-radius: 8px; overflow: hidden;">
                 <table class="table table-sm vertical-align-middle align-middle mb-0 matrix-grid-table">
                     <thead>
-                        <tr class="bg-light text-muted text-xxs text-uppercase fw-bold border-bottom text-center row-header-height">
-                            <th class="text-start ps-2 py-2 text-dark col-loan-profile">Loan Profile Type<i class="bi bi-caret-down-fill text-secondary"></i></th>
+                        <tr class="bg-light text-muted text-xxs text-uppercase fw-bold border-bottom align-middle row-header-height">
+                            <th class="text-start ps-3 py-2 text-dark col-loan-profile sortable-header" @onclick="SortLoanProfileType">
+                                Loan Profile Type <i class="@GetLoanProfileSortIcon() ms-1"></i>
+                            </th>
                             <th class="py-2 text-secondary text-start ps-2 col-metric-breakdown" style="width:150px;">Metric Breakdown</th>
                             @for (int m = 1; m <= 12; m++)
                             {
                                 <th class="py-2 col-month-width text-end">M@(m)</th>
                             }
-                            <th class="fw-bold border-bottom text-center py-2 totals-bkg" style="width:130px; border-bottom: solid 1px #ababab !important;">Total Outflow</th>
-                            <th class="bg-light border-start text-center py-2 col-actions-box" style="width:70px;"></th>
+                            <th class="fw-bold border-bottom text-center py-2 totals-bkg" style="width:130px; border-bottom: solid 1px #ababab !important; background-color: #cbd5e1; color: #0f172a;">Total Outflow</th>
+                            <th class="bg-light border-start text-center py-2 col-actions-box" style="width:70px; background-color: #e2e8f0 !important;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -77,8 +79,8 @@
                         {
                             @foreach (var loan in GetFilteredLoanProfiles())
                             {
-                                <tr class="border-top border-secondary-subtle font-row-group">
-                                    <td rowspan="4" class="ps-2 align-top pt-2"
+                                <tr class="border-top border-secondary-subtle font-row-group hover-light-blue">
+                                    <td rowspan="4" class="ps-3 align-top pt-2"
                                         @onclick="() => OpenLoanFormAsync(loan.LoanId)"
                                         title=@(loan.LoanTypeName ?? "(Unknown Loan)")>
                                         <span class="clickable-cell fw-bold" style="font-size:0.78rem;">@DisplayUtility.TruncateValue(loan.LoanTypeName, 20)</span>
@@ -107,18 +109,18 @@
                                             </div>
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-dark py-1.5 pe-3 fw-normal totals-bkg cell-val-size">
+                                    <td class="text-end font-monospace text-dark py-1.5 pe-3 fw-normal totals-bkg cell-val-size" style="background-color: #e2e8f0;">
                                         @loan.MonthlyData.Sum(x => x.Expected).ToString("N0").Replace(",", " ")
                                     </td>
                                     <td rowspan="4" class="text-center border-start align-middle bg-white">
                                         <div class="py-1">
-                                            <button type="button" class="btn-action-operation btn-edit-accent"
+                                            <button type="button" class="btn-action-operation btn-edit-accent shadow-sm"
                                                     @onclick="() => OpenRepaymentsFormAsync(loan.LoanId)" title="Edit Repayments">
                                                 <i class="bi bi-vector-pen"></i>
                                             </button>
                                         </div>
                                         <div class="py-1">
-                                            <button type="button" class="btn-action-operation btn-delete-accent"
+                                            <button type="button" class="btn-action-operation btn-delete-accent shadow-sm"
                                                     @onclick="() => HandleDeleteLoanAndRepaymentsAsync(loan.LoanId)" title="Delete Loan">
                                                 <i class="bi bi-file-earmark-x"></i>
                                             </button>
@@ -126,7 +128,7 @@
                                     </td>
                                 </tr>
 
-                                <tr class="font-row-group bg-white">
+                                <tr class="font-row-group bg-white hover-light-blue">
                                     <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Calculated Interest</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
@@ -136,12 +138,12 @@
                                             @loan.MonthlyData[i].Interest.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-secondary py-1.5 pe-3 fw-normal totals-bkg cell-val-size">
+                                    <td class="text-end font-monospace text-secondary py-1.5 pe-3 fw-normal totals-bkg cell-val-size" style="background-color: #e2e8f0;">
                                         @loan.MonthlyData.Sum(x => x.Interest).ToString("N0").Replace(",", " ")
                                     </td>
                                 </tr>
 
-                                <tr class="font-row-group">
+                                <tr class="font-row-group hover-light-blue">
                                     <td class="text-xxs text-muted fw-semibold py-1.5 ps-2">Extra Repayment</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
@@ -151,12 +153,12 @@
                                             @loan.MonthlyData[i].Extra.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-success py-1.5 pe-3 fw-normal totals-bkg cell-val-size">
+                                    <td class="text-end font-monospace text-success py-1.5 pe-3 fw-normal totals-bkg cell-val-size" style="background-color: #e2e8f0;">
                                         @loan.MonthlyData.Sum(x => x.Extra).ToString("N0").Replace(",", " ")
                                     </td>
                                 </tr>
 
-                                <tr class="bg-light-totals-cell font-row-group">
+                                <tr class="bg-light-totals-cell font-row-group hover-light-blue">
                                     <td class="text-xxs text-dark fw-bold py-1.5 ps-2">Total Repaid</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
@@ -167,28 +169,28 @@
                                             @loan.MonthlyData[i].Total.ToString("N0").Replace(",", " ")
                                         </td>
                                     }
-                                    <td class="text-end font-monospace text-navy-brand py-1.5 pe-3 fw-bold totals-bkg cell-val-size" style=" border-bottom: solid 1px #dedede !important;">
+                                    <td class="text-end font-monospace text-navy-brand py-1.5 pe-3 fw-bold totals-bkg cell-val-size" style="background-color: #cbd5e1; border-bottom: solid 1px #dedede !important;">
                                         @loan.MonthlyData.Sum(x => x.Total).ToString("N0").Replace(",", " ")
                                     </td>
                                 </tr>
                             }
 
                             <!-- Aggregated Repayments Grand Totals Ledger Row -->
-                            <tr class="bg-secondary-subtle font-row-group fw-bold totals-bkg" style="border-top: 1px solid #1a365d !important; border-bottom: 1px solid #1a365d !important;">
-                                <td colspan="2" class="text-start ps-3 py-2 text-dark text-xxs text-uppercase fw-bold align-middle" style="border-top: 1px solid #1a365d !important;">
+                            <tr class="bg-secondary-subtle font-row-group fw-bold totals-bkg" style="background-color: #cbd5e1; color: #0f172a; border-top: 2px solid #1a365d !important; border-bottom: 2px solid #1a365d !important;">
+                                <td colspan="2" class="text-start ps-3 py-2 text-dark text-xxs text-uppercase fw-bold align-middle">
                                     <i class="bi bi-calculator me-1 text-navy-brand"></i>Grand Total Repayments:
                                 </td>
                                 @for (int i = 0; i < 12; i++)
                                 {
                                     var monthIdx = i;
-                                    <td class="text-end font-monospace text-xs text-navy-brand py-2 pe-2 align-middle totals-bkg">
+                                    <td class="text-end font-monospace text-xs text-dark py-2 pe-2 align-middle totals-bkg">
                                         @GetMonthlyGrandTotal(monthIdx).ToString("N0").Replace(",", " ")
                                     </td>
                                 }
-                                <td class="text-end font-monospace py-2 pe-3 fw-bold align-middle cell-val-size totals-bkg">
+                                <td class="text-end font-monospace py-2 pe-3 fw-bold text-dark align-middle cell-val-size totals-bkg">
                                     @GetAccumulatedGrandTotal().ToString("N0").Replace(",", " ")
                                 </td>
-                                <td class="bg-light border-start"></td>
+                                <td class="bg-light border-start" style="background-color: #e2e8f0 !important;"></td>
                             </tr>
                         }
                     </tbody>

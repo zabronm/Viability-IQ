@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Interfaces.HomePageInterfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
@@ -10,42 +9,57 @@ using ViabilityIQ.Infrastructure.Repositories.HomePageRepositories;
 
 namespace ViabilityIQ.Infrastructure.Extensions
 {
+    /// <summary>
+    /// Infrastructure Layer Service Registration
+    /// Handles: Database, Repositories, Data Access, External Services
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
-            // Here you would add your infrastructure services, e.g. repositories, database contexts, etc.
-
-            //services.AddMemoryCache();
-            //services.AddScoped<IAppInitializerService, AppInitializerService>();
+            // ===== MEMORY CACHING =====
             services.AddMemoryCache();
+
+            // ===== DATABASE FACTORY =====
             services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+
+            // ===== MASTER DATA SERVICE =====
             services.AddScoped<MasterDataService>();
+
+            // ===== EXPORT & REPORTING SERVICES =====
             services.AddScoped<IExcelEPPlusExportService, ExcelEPPlusExportService>();
             services.AddScoped<IEmailReportingService, EmailReportingService>();
-            services.AddScoped<IPdfExportService, PdfExportService>();                                  //Pdf Printing using QuestPDF package
-            services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));      //Handles All CRUD using Dapper.Includ          
-            services.AddScoped<IDDLookupService, DDLookupService>();                                    //Generic DropDown lookup service
-            services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));          //Generic Read only
+            services.AddScoped<IPdfExportService, PdfExportService>();
+
+            // ===== GENERIC REPOSITORIES =====
+            services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));
+            services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));
+
+            // ===== SPECIALIZED REPOSITORIES =====
             services.AddScoped<ICashflowRepository, CashflowRepository>();
             services.AddScoped<IDebtorsCreditorsRepository, DebtorsCreditorsRepository>();
+            services.AddScoped<IAssetRepository, AssetRepository>();
 
-            //serices related to home page components
+            // ===== HOME PAGE REPOSITORIES =====
             services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
             services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
             services.AddScoped<IKPIRepository, KPIRepository>();
             services.AddScoped<IAlertRepository, AlertRepository>();
-            services.AddScoped<IAlertDismissalService, AlertDismissalService>();
-            services.AddScoped<IExportService, ExportService>();
             services.AddScoped<IAssessmentRepository, AssessmentRepository>();
-            services.AddScoped<IDashboardDataService, DashboardDataService>();
             services.AddScoped<IInsightsRepository, InsightsRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
+            // ===== LOOKUP & VALIDATION SERVICES =====
+            services.AddScoped<IDDLookupService, DDLookupService>();
+            services.AddScoped<IAssessmentDataValidationService, AssessmentDataValidationService>();
 
-            //services.AddScoped<IDocumentUploadService,MicrosoftSharePointDocumentService>();        //if using Microsoft SharePoint to store files
-            //services.AddScoped<IDocumentUploadService, CloudfareDocumentService>();                 //If using Cloudfare to store files
+            // ===== HOME PAGE SERVICES =====
+            services.AddScoped<IAlertDismissalService, AlertDismissalService>();
+            services.AddScoped<IExportService, ExportService>();
+            services.AddScoped<IDashboardDataService, DashboardDataService>();
 
+            //services.AddScoped<IDocumentUploadService, MicrosoftSharePointDocumentService>();  // Microsoft SharePoint
+            //services.AddScoped<IDocumentUploadService, CloudfareDocumentService>();           // Cloudflare
 
             return services;
         }

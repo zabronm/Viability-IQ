@@ -43,6 +43,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private bool IsLoading = false;
         private string SearchTerm = string.Empty;
 
+        // Sorting State for Stock Category
+        private bool isCategoryAscending = true;
+
         #endregion
 
         #region Properties
@@ -82,6 +85,21 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         #endregion
 
+        #region Sorting Helper Methods
+
+        private void SortStockCategory()
+        {
+            isCategoryAscending = !isCategoryAscending;
+            FilterData();
+        }
+
+        private string GetSortIcon()
+        {
+            return isCategoryAscending ? "bi bi-arrow-up text-primary" : "bi bi-arrow-down text-primary";
+        }
+
+        #endregion
+
         #region Private Methods
 
         private async Task LoadStockData()
@@ -115,12 +133,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void FilterData()
         {
-            // Projection: Convert DTOs to the Unified ViewModel
-            var sourceList = string.IsNullOrWhiteSpace(SearchTerm)
-                ? StockDataList
+            var query = string.IsNullOrWhiteSpace(SearchTerm)
+                ? StockDataList.AsEnumerable()
                 : StockDataList.Where(x => x.AssessmentSalesCategoryName!.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
 
-            FilteredStockList = sourceList.Select(dto => new UnifiedStockViewModel
+            // Apply sorting by Category Name
+            query = isCategoryAscending
+                ? query.OrderBy(x => x.AssessmentSalesCategoryName)
+                : query.OrderByDescending(x => x.AssessmentSalesCategoryName);
+
+            FilteredStockList = query.Select(dto => new UnifiedStockViewModel
             {
                 Id = dto.AssessmentStockId,
                 AssessmentSalesCategoryName = dto.AssessmentSalesCategoryName ?? "Unknown",
@@ -141,7 +163,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
         {
-            // Reload stock when any projection data changes for this assessment
             if (e.AssessmentId == AssessmentId)
             {
                 Logger?.LogInformation(
@@ -177,7 +198,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 {
                     await LoadStockData();
 
-                    // ✅ TRIGGER CASHFLOW RECALCULATION
                     Logger?.LogInformation("Triggering cashflow recalculation after stock save for assessment {AssessmentId}", AssessmentId);
                     await projectionStateManager!.InvalidateDataAsync("stock", AssessmentId, AssessmentId);
                 }
