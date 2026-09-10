@@ -77,4 +77,8 @@
     <ProjectReference Include="..\ViabilityIQ.Shared\ViabilityIQ.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Pages\ActivityLogComponents\" />
+  </ItemGroup>
+
 </Project>
