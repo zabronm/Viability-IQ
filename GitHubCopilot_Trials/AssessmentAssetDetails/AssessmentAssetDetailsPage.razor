@@ -1,0 +1,407 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments
+
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
+
+<div class="aad-page container-fluid p-0 position-relative dashboard-workspace">
+    @if (IsLoading)
+    {
+        <div class="aad-loading">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>Loading asset details...</span>
+        </div>
+    }
+    else if (AssessmentId <= 0)
+    {
+        <div class="aad-session-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <div>
+                <strong>No active assessment is available.</strong>
+                <span>Select an assessment and this page will load its asset details automatically.</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        @if (ShowAlertsContainer)
+        {
+            <section class="aad-panel aad-alert-panel" aria-labelledby="aad-alerts-heading">
+                <div class="aad-section-heading">
+                    <div>
+                        <span class="aad-eyebrow">Attention required</span>
+                        <h2 id="aad-alerts-heading">Asset alerts</h2>
+                    </div>
+                    <div class="aad-alert-heading-actions">
+                        <span class="aad-alert-count">@AssetAlerts.Count alert@(AssetAlerts.Count == 1 ? string.Empty : "s")</span>
+                        <button type="button"
+                                class="aad-alert-dismiss"
+                                title="Dismiss asset alerts"
+                                aria-label="Dismiss asset alerts"
+                                @onclick="DismissAlerts">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                @if (AssetAlerts.Count == 0)
+                {
+                    <div class="aad-empty-alert">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>No asset risks or data-quality issues were detected.</span>
+                    </div>
+                }
+                else if (ShowAllAlerts)
+                {
+                    <div class="aad-alert-grid">
+                        @foreach (var alert in VisibleAlerts)
+                        {
+                            <article class="aad-alert aad-alert-@alert.Severity">
+                                <span class="aad-alert-icon"><i class="@alert.Icon"></i></span>
+                                <div>
+                                    <strong>@alert.Title</strong>
+                                    <p>@alert.Message</p>
+                                </div>
+                                @if (alert.AssessmentAssetId > 0)
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-light"
+                                            @onclick="() => OpenAssetDetailsAsync(alert.AssessmentAssetId)">
+                                        Review
+                                    </button>
+                                }
+                            </article>
+                        }
+                    </div>
+
+                }
+
+                @if (AssetAlerts.Count > 0)
+                {
+                    <button type="button" class="aad-alert-toggle" @onclick="ToggleAlerts">
+                        @(ShowAllAlerts ? "Hide asset alerts" : $"See all {AssetAlerts.Count} alerts")
+                        <i class="bi @(ShowAllAlerts ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                    </button>
+                }
+            </section>
+        }
+
+        <section class="aad-panel aad-metrics-panel" aria-label="Asset performance metrics">
+            <AssetSummaryKpiCardsComponent TotalAssetsCount="TotalAssetsCount"
+                                           TotalGrossValue="TotalOpeningNetBookValue"
+                                           TotalAdditions="TotalAdditions"
+                                           TotalDisposals="TotalDisposals"
+                                           TotalAccumulatedDepreciation="TotalAccumulatedDepreciation"
+                                           TotalNetValue="TotalClosingNetBookValue" />
+        </section>
+
+        <section class="aad-panel aad-movement-panel" aria-labelledby="aad-movement-heading">
+            <div class="aad-movement-toolbar">
+                <div>
+                    <span class="aad-eyebrow">Monthly roll-forward</span>
+                    <h2 id="aad-movement-heading">Asset movement details</h2>
+                </div>
+            </div>
+
+            <div class="aad-data-toolbar">
+                <button type="button" class="btn btn-success btn-sm text-xs shadow-sm" @onclick="AddAssetAsync">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add Asset
+                </button>
+                <div class="aad-toolbar-actions">
+                    <div class="aad-print-actions" aria-label="Print asset details">
+                        <span><i class="bi bi-printer"></i> Print</span>
+                        <button type="button"
+                                disabled="@IsPrinting"
+                                @onclick="PrintSummaryAsync"
+                                title="Print with all asset movement rows collapsed">
+                            Summary
+                        </button>
+                        <button type="button"
+                                disabled="@IsPrinting"
+                                @onclick="PrintDetailedAsync"
+                                title="Print with all asset movement rows expanded">
+                            Detailed
+                        </button>
+                    </div>
+                    <div class="aad-category-filter">
+                        <DDLookupComponent SourceKey="DDLookupEnums.AssetCategories"
+                                           @bind-Value="SelectedCategoryId"
+                                           Placeholder="All Categories" />
+                    </div>
+                    <label class="aad-search">
+                        <i class="bi bi-search"></i>
+                        <input type="search"
+                               placeholder="Search assets"
+                               @bind="SearchQuery"
+                               @bind:event="oninput" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="aad-legend">
+                <span><i class="aad-legend-swatch aad-before-acquisition"></i>Before acquisition</span>
+                <span><i class="aad-acquisition-key bi bi-arrow-right"></i>Acquisition month</span>
+                <span><i class="aad-legend-swatch aad-active-period"></i>Active period</span>
+            </div>
+
+            <div class="table-responsive aad-table-frame">
+                <table class="table table-sm align-middle mb-0 aad-movement-table">
+                    <thead>
+                        <tr>
+                            <th class="aad-asset-column aad-sortable-column" @onclick="ToggleAssetNameSort">
+                                Asset name / movement
+                                <i class="bi @(AssetNameSortAscending ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                            </th>
+                            @for (var month = 1; month <= 12; month++)
+                            {
+                                <th class="aad-month-column">M@(month)</th>
+                            }
+                            <th class="aad-actions-column">Actions</th>
+                        </tr>
+                    </thead>
+
+                    @if (!FilteredAssets.Any())
+                    {
+                        <tbody>
+                            <tr>
+                                <td colspan="14" class="aad-empty-state">
+                                    <i class="bi bi-inbox"></i>
+                                    <span>No active assets match the selected filters.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+                    else
+                    {
+                        @foreach (var asset in FilteredAssets)
+                        {
+                            <tbody class="aad-asset-group">
+                                <tr class="aad-asset-summary-row" @onclick="() => ToggleAsset(asset.AssessmentAssetId)">
+                                    <td>
+                                        <button type="button"
+                                                class="aad-collapse-button"
+                                                aria-label="Toggle @asset.AssetName movement details">
+                                            <i class="bi @(ExpandedAssetIds.Contains(asset.AssessmentAssetId) ? "bi-chevron-down" : "bi-chevron-right")"></i>
+                                        </button>
+                                        <span class="aad-asset-avatar"><i class="@GetAssetIcon(asset)"></i></span>
+                                        <span class="aad-asset-identity">
+                                            <strong>@asset.AssetName</strong>
+                                            <small>@asset.AssetCategoryName · @asset.AssetTypeName</small>
+                                        </span>
+                                    </td>
+                                    <td colspan="12">
+                                        <span class="aad-summary-label">Closing NBV</span>
+                                        <strong class="aad-summary-value">@FormatAmount(asset.ClosingNetBookValue)</strong>
+                                        <span class="aad-status-pill @GetStatusCssClass(asset)">@GetStatusText(asset)</span>
+                                    </td>
+                                    <td class="aad-actions-cell" @onclick:stopPropagation="true">
+                                        <button type="button"
+                                                class="aad-action-button aad-view-button"
+                                                title="View asset details"
+                                                @onclick="() => OpenAssetDetailsAsync(asset.AssessmentAssetId)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="aad-action-button aad-edit-button"
+                                                title="Edit movement"
+                                                @onclick="() => OpenMovementEditorAsync(asset)">
+                                            <i class="bi bi-vector-pen"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="aad-action-button aad-deactivate-button"
+                                                title="Deactivate asset"
+                                                @onclick="() => DeactivateAssetAsync(asset)">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                @if (ExpandedAssetIds.Contains(asset.AssessmentAssetId))
+                                {
+                                    <tr class="aad-detail-row">
+                                        <td class="aad-row-label">
+                                            <strong>Opening NBV</strong>
+                                            <small>Value brought into the month</small>
+                                        </td>
+                                        @foreach (var month in asset.Months)
+                                        {
+                                            <td class="@GetMonthCellClass(month)">
+                                                @if (month.IsActive)
+                                                {
+                                                    <span>@FormatAmount(month.OpeningNetBookValue)</span>
+                                                    @if (month.IsAcquisitionMonth)
+                                                    {
+                                                        <span class="aad-start-badge"
+                                                              title="Asset obtained in Month @month.Month">
+                                                            <i class="bi bi-arrow-right"></i>
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="aad-not-applicable">—</span>
+                                                }
+                                            </td>
+                                        }
+                                        <td rowspan="4" class="aad-detail-actions-spacer"></td>
+                                    </tr>
+
+                                    <tr class="aad-detail-row">
+                                        <td class="aad-row-label">
+                                            <strong>Monthly movement</strong>
+                                            <small>Addition, disposal, revaluation or transfer</small>
+                                        </td>
+                                        @foreach (var month in asset.Months)
+                                        {
+                                            <td class="@GetMonthCellClass(month)">
+                                                @if (month.IsActive)
+                                                {
+                                                    @if (month.HasMovement)
+                                                    {
+                                                        <span class="@GetMovementAmountClass(month.MovementType)">
+                                                            @FormatSignedAmount(month.SignedMovementValue)
+                                                        </span>
+                                                        <span class="@GetMovementBadgeClass(month.MovementType)">
+                                                            @GetMovementAbbreviation(month.MovementType)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="aad-zero-value">—</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="aad-not-applicable">—</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+
+                                    <tr class="aad-detail-row">
+                                        <td class="aad-row-label">
+                                            <strong>Depreciation</strong>
+                                            <small>Monthly expense</small>
+                                        </td>
+                                        @foreach (var month in asset.Months)
+                                        {
+                                            <td class="@GetMonthCellClass(month)">
+                                                @if (month.IsActive)
+                                                {
+                                                    <span class="aad-depreciation-value">@FormatAmount(month.Depreciation)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="aad-not-applicable">—</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+
+                                    <tr class="aad-detail-row aad-closing-row">
+                                        <td class="aad-row-label">
+                                            <strong>Closing NBV</strong>
+                                            <small>Gross less accumulated depreciation</small>
+                                        </td>
+                                        @foreach (var month in asset.Months)
+                                        {
+                                            <td class="@GetMonthCellClass(month)">
+                                                @if (month.IsActive)
+                                                {
+                                                    <span>@FormatAmount(month.ClosingNetBookValue)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="aad-not-applicable">—</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        }
+                    }
+                </table>
+            </div>
+
+            <div class="aad-record-navigation">
+                <span>
+                    Showing <strong>@FilteredAssetCount</strong> of <strong>@Assets.Count</strong>
+                    record@(Assets.Count == 1 ? string.Empty : "s")
+                </span>
+                <div class="btn-group shadow-sm" role="group" aria-label="Asset record navigation">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="bi bi-chevron-left me-1"></i>Previous
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                        Next<i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <p class="aad-footnote">
+                <i class="bi bi-info-circle"></i>
+                Select an asset header to expand or collapse its monthly values.
+            </p>
+        </section>
+
+        <section class="aad-panel aad-analytics-panel" aria-labelledby="aad-analytics-heading">
+            <div class="aad-section-heading">
+                <div>
+                    <span class="aad-eyebrow">Portfolio analytics</span>
+                    <h2 id="aad-analytics-heading">Asset trends & movement summaries</h2>
+                </div>
+                <span class="aad-chart-period">Months 1–12</span>
+            </div>
+
+            <div class="aad-chart-grid">
+                <article class="aad-chart-card aad-trend-card">
+                    <header>
+                        <div>
+                            <span>Portfolio net book value</span>
+                            <strong>@FormatCurrency(TotalClosingNetBookValue)</strong>
+                            <small>Combined monthly closing position</small>
+                        </div>
+                        <span class="aad-chart-chip">Trend</span>
+                    </header>
+                    <div class="aad-chart-canvas aad-chart-canvas-wide">
+                        <canvas id="@TrendChartId" aria-label="Portfolio net book value trend"></canvas>
+                    </div>
+                </article>
+
+                <article class="aad-chart-card">
+                    <header>
+                        <div>
+                            <span>Movement composition</span>
+                            <strong>@FormatCurrency(TotalMovementVolume)</strong>
+                            <small>Absolute value of recorded movements</small>
+                        </div>
+                        <span class="aad-chart-chip">Mix</span>
+                    </header>
+                    <div class="aad-chart-canvas">
+                        <canvas id="@MovementChartId" aria-label="Asset movement composition"></canvas>
+                    </div>
+                </article>
+
+                <article class="aad-chart-card">
+                    <header>
+                        <div>
+                            <span>Closing value by asset</span>
+                            <strong>@TotalAssetsCount assets</strong>
+                            <small>Month 12 portfolio distribution</small>
+                        </div>
+                        <span class="aad-chart-chip">M12</span>
+                    </header>
+                    <div class="aad-chart-canvas">
+                        <canvas id="@DistributionChartId" aria-label="Closing net book value by asset"></canvas>
+                    </div>
+                </article>
+            </div>
+        </section>
+    }
+</div>
+
+<ZabConfirmDialogComponent @ref="ConfirmDeactivateDialog" />

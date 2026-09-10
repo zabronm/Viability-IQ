@@ -1,0 +1,41 @@
+@using Microsoft.JSInterop
+@using ViabilityIQ.Web.Services
+@inject IJSRuntime JS
+@inject ToastService Toast
+
+<button type="button"
+        class="btn btn-outline-success btn-sm text-xs shadow-sm assessment-print-button"
+        disabled="@IsPrinting"
+        @onclick="PrintPageAsync">
+    <i class="bi bi-printer me-1"></i>
+    @(IsPrinting ? "Preparing..." : Label)
+</button>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Print Page";
+    [Parameter] public string TargetSelector { get; set; } = ".assessment-print-page";
+
+    private bool IsPrinting { get; set; }
+
+    private async Task PrintPageAsync()
+    {
+        if (IsPrinting)
+        {
+            return;
+        }
+
+        try
+        {
+            IsPrinting = true;
+            await JS.InvokeVoidAsync("viqAssessmentPagePrint.print", TargetSelector);
+        }
+        catch (JSException ex)
+        {
+            Toast.ShowError($"The print preview could not be opened: {ex.Message}", "Print Page");
+        }
+        finally
+        {
+            IsPrinting = false;
+        }
+    }
+}

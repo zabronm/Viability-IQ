@@ -6,7 +6,7 @@
 @using ViabilityIQ.Shared.UtilityServices
 
 
-<div class="p-0 position-relative dashboard-workspace container-fluid">
+<div class="p-0 position-relative dashboard-workspace container-fluid assessment-print-page">
     <PageHeading_Assessment _pageTitle="Sales" PageTitle="Sales & Forecasts" CurrentPage="PageType.Sales" />
 
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
@@ -18,20 +18,26 @@
 
         <div class="col-12 py-1 mt-1">
             <div class="px-0 mb-3">
-                <div class="row g-2 align-items-center">
+                <div class="row g-2 align-items-center assessment-page-toolbar">
                     <div class="col-md-4">
-                        <button class="btn btn-primary btn-sm text-xs" @onclick="() => AddIncomeStream()">
+                        <button class="btn btn-success btn-sm text-xs" @onclick="() => AddIncomeStream()">
                             <i class="bi bi-plus-circle me-1"></i>&nbsp;Add Revenue Stream
                         </button>
                     </div>
                     <div class="col-md-8 d-flex gap-2 justify-content-end">
-                        <!-- (1) Implementation of DDLookupComponent -->
-                        <div style="width: 25%; font-weight: normal!important;">
+                        <AssessmentPrintButton />
+                        <div class="assessment-page-filter">
                             <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
                                                @bind-Value="SelectedFilterId"
                                                Placeholder="All Revenue Sources" />
                         </div>
-                        <input type="text" class="form-control form-control-sm" style="width: 30%;" placeholder="Search..." @bind="SearchQuery" @bind:event="oninput" />
+                        <label class="assessment-page-search">
+                            <i class="bi bi-search"></i>
+                            <input type="search"
+                                   placeholder="Search revenue..."
+                                   @bind="SearchQuery"
+                                   @bind:event="oninput" />
+                        </label>
                     </div>
                 </div>
             </div>
@@ -50,7 +56,7 @@
                             }
                             <!-- (2) Marble background for Total column -->
                             <th class="text-end text-uppercase" style="background-color: #d1d5db; color: #000080;">Total Revenue</th>
-                            <th class="text-center"></th>
+                            <th class="text-center assessment-grid-actions"></th>
                         </tr>
                     </thead>
                     <tbody class="grid-font-standard">
@@ -86,7 +92,7 @@
                                     }
                                     <!-- (2) Marble background -->
                                     <td class="text-end font-monospace fw-bold" style="background-color: #d1d5db; color: #000080;">@item.MonthlyValues.Sum().ToString("N0")</td>
-                                    <td class="text-center">
+                                    <td class="text-center assessment-grid-actions">
                                         <button class="btn-action-operation btn-edit-accent"
                                                 @onclick="() => OpenIncomeFormPanel(item)">
                                             <i class="bi bi-vector-pen text-navy"></i>
@@ -110,6 +116,17 @@
                 </table>
             </div>
 
+            <div class="assessment-record-navigation">
+                <span>Showing <strong>@FilteredIncomeStreams.Count()</strong> of <strong>@IncomeStreams.Count</strong> records</span>
+                <div class="btn-group shadow-sm" role="group" aria-label="Revenue record navigation">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="bi bi-chevron-left me-1"></i>Previous
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                        Next<i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

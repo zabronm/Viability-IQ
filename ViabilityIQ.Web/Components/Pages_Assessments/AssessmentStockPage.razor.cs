@@ -41,7 +41,21 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private List<AssessmentStockDto> StockDataList = new();
         private List<UnifiedStockViewModel> FilteredStockList = new();
         private bool IsLoading = false;
-        private string SearchTerm = string.Empty;
+        private string _searchTerm = string.Empty;
+        private string SearchTerm
+        {
+            get => _searchTerm;
+            set
+            {
+                if (_searchTerm == value)
+                {
+                    return;
+                }
+
+                _searchTerm = value;
+                FilterData();
+            }
+        }
 
         #endregion
 
