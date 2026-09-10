@@ -1,0 +1,136 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
+
+@if (IsLoading)
+{
+    <div class="aadc-loading">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Loading asset profile...</span>
+    </div>
+}
+else if (Asset == null)
+{
+    <div class="alert alert-warning mb-0">
+        The requested asset could not be found in the current assessment.
+    </div>
+}
+else
+{
+    <div class="aadc-container">
+        <header class="aadc-profile-header">
+            <span class="aadc-profile-icon"><i class="bi bi-box-seam"></i></span>
+            <div>
+                <span class="aadc-eyebrow">Asset profile</span>
+                <h3>@(Asset.AssetName ?? "Unnamed Asset")</h3>
+                <p>@(AssetDto?.AssetCategoryName ?? "Uncategorised") · @(AssetDto?.AssetTypeName ?? "Unspecified")</p>
+            </div>
+            <span class="aadc-status">@Asset.StatusLabel</span>
+        </header>
+
+        <section class="aadc-profile-grid" aria-label="Asset profile details">
+            <div><span>Reference</span><strong>@DisplayText(Asset.AssetReference)</strong></div>
+            <div><span>Acquisition month</span><strong>@GetAcquisitionDisplay()</strong></div>
+            <div><span>Acquisition date</span><strong>@(Asset.AcquisitionDate?.ToString("dd MMM yyyy") ?? "Not recorded")</strong></div>
+            <div><span>Acquisition method</span><strong>@DisplayText(Asset.AcquisitionMethod)</strong></div>
+            <div><span>Financing status</span><strong>@DisplayText(Asset.FinancingStatus)</strong></div>
+            <div><span>Valuation basis</span><strong>@DisplayText(Asset.ValuationBasis)</strong></div>
+        </section>
+
+        <section class="aadc-summary-grid" aria-label="Valuation and depreciation summary">
+            <article>
+                <span>Opening gross value</span>
+                <strong>@FormatCurrency(Asset.OpeningBalanceValue)</strong>
+                <small>At assessment opening/acquisition</small>
+            </article>
+            <article>
+                <span>Opening accumulated depreciation</span>
+                <strong>@FormatCurrency(Asset.OpeningAccumulatedDepreciation)</strong>
+                <small>Brought forward</small>
+            </article>
+            <article>
+                <span>Closing net book value</span>
+                <strong>@FormatCurrency(ClosingNetBookValue)</strong>
+                <small>Month 12 carrying value</small>
+            </article>
+            <article>
+                <span>Annual depreciation</span>
+                <strong>@FormatCurrency(TotalDepreciation)</strong>
+                <small>@DisplayText(Asset.DepreciationMethod) · @Asset.DepreciationRate.ToString("N2")%</small>
+            </article>
+        </section>
+
+        <section class="aadc-movement-section">
+            <div class="aadc-section-heading">
+                <div>
+                    <span class="aadc-eyebrow">Read-only history</span>
+                    <h4>Monthly movement & depreciation</h4>
+                </div>
+                <span class="aadc-movement-count">@MovementCount movement@(MovementCount == 1 ? string.Empty : "s")</span>
+            </div>
+
+            <div class="table-responsive aadc-table-frame">
+                <table class="table table-sm align-middle mb-0 aadc-table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Opening NBV</th>
+                            <th>Movement</th>
+                            <th>Depreciation</th>
+                            <th>Closing NBV</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var month in Months)
+                        {
+                            <tr class="@(!month.IsActive ? "aadc-inactive-month" : string.Empty)">
+                                <td>
+                                    <strong>M@month.Month</strong>
+                                    @if (month.IsAcquisitionMonth)
+                                    {
+                                        <span class="aadc-start-badge"><i class="bi bi-arrow-right"></i> Start</span>
+                                    }
+                                </td>
+                                @if (!month.IsActive)
+                                {
+                                    <td colspan="4" class="aadc-not-owned">Asset not yet obtained</td>
+                                }
+                                else
+                                {
+                                    <td>@FormatAmount(month.OpeningNetBookValue)</td>
+                                    <td>
+                                        @if (month.HasMovement)
+                                        {
+                                            <span class="@GetMovementClass(month.MovementType)">
+                                                @FormatSignedAmount(month.SignedMovementValue)
+                                            </span>
+                                            <small>@month.MovementType</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="aadc-zero-value">—</span>
+                                        }
+                                    </td>
+                                    <td class="aadc-depreciation">@FormatAmount(month.Depreciation)</td>
+                                    <td class="aadc-closing-value">@FormatAmount(month.ClosingNetBookValue)</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Asset.Remarks))
+        {
+            <section class="aadc-remarks">
+                <span>Remarks</span>
+                <p>@Asset.Remarks</p>
+            </section>
+        }
+
+        <footer class="aadc-footer">
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseAsync">
+                <i class="bi bi-x-lg me-1"></i>Close
+            </button>
+        </footer>
+    </div>
+}

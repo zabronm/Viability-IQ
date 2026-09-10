@@ -41,10 +41,21 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private List<AssessmentStockDto> StockDataList = new();
         private List<UnifiedStockViewModel> FilteredStockList = new();
         private bool IsLoading = false;
-        private string SearchTerm = string.Empty;
+        private string _searchTerm = string.Empty;
+        private string SearchTerm
+        {
+            get => _searchTerm;
+            set
+            {
+                if (_searchTerm == value)
+                {
+                    return;
+                }
 
-        // Sorting State for Stock Category
-        private bool isCategoryAscending = true;
+                _searchTerm = value;
+                FilterData();
+            }
+        }
 
         #endregion
 
@@ -85,21 +96,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         #endregion
 
-        #region Sorting Helper Methods
-
-        private void SortStockCategory()
-        {
-            isCategoryAscending = !isCategoryAscending;
-            FilterData();
-        }
-
-        private string GetSortIcon()
-        {
-            return isCategoryAscending ? "bi bi-arrow-up text-primary" : "bi bi-arrow-down text-primary";
-        }
-
-        #endregion
-
         #region Private Methods
 
         private async Task LoadStockData()
@@ -133,16 +129,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void FilterData()
         {
-            var query = string.IsNullOrWhiteSpace(SearchTerm)
-                ? StockDataList.AsEnumerable()
+            // Projection: Convert DTOs to the Unified ViewModel
+            var sourceList = string.IsNullOrWhiteSpace(SearchTerm)
+                ? StockDataList
                 : StockDataList.Where(x => x.AssessmentSalesCategoryName!.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
 
-            // Apply sorting by Category Name
-            query = isCategoryAscending
-                ? query.OrderBy(x => x.AssessmentSalesCategoryName)
-                : query.OrderByDescending(x => x.AssessmentSalesCategoryName);
-
-            FilteredStockList = query.Select(dto => new UnifiedStockViewModel
+            FilteredStockList = sourceList.Select(dto => new UnifiedStockViewModel
             {
                 Id = dto.AssessmentStockId,
                 AssessmentSalesCategoryName = dto.AssessmentSalesCategoryName ?? "Unknown",
@@ -163,6 +155,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
         {
+            // Reload stock when any projection data changes for this assessment
             if (e.AssessmentId == AssessmentId)
             {
                 Logger?.LogInformation(
@@ -198,6 +191,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 {
                     await LoadStockData();
 
+                    // ✅ TRIGGER CASHFLOW RECALCULATION
                     Logger?.LogInformation("Triggering cashflow recalculation after stock save for assessment {AssessmentId}", AssessmentId);
                     await projectionStateManager!.InvalidateDataAsync("stock", AssessmentId, AssessmentId);
                 }

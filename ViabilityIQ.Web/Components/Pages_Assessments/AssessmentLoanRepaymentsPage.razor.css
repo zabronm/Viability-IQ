@@ -289,3 +289,8 @@
         background-color: #e2e8f0 !important;
         color: #0f172a !important;
     }
+
+.azd-table-frame {
+    border: 1px solid #1a365d !important;
+    border-radius: 8px;
+}

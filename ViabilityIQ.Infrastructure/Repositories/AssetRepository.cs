@@ -31,7 +31,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
                 const string query = @"
-                    SELECT * FROM tblAssessmentAsset
+                    SELECT * FROM tblAssessmentAssets
                     WHERE AssessmentId = @AssessmentId AND Active = 1
                     ORDER BY AssetName
                 ";

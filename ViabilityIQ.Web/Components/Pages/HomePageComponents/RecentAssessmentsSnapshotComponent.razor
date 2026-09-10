@@ -1,68 +1,120 @@
-﻿<div class="recent-assessments-section">
-    <div class="assessments-header">
-        <h3 class="assessments-title">
-            <i class="bi bi-file-check assessments-title-icon"></i>
-            Recent Assessments
-        </h3>
-        <p class="assessments-subtitle">Latest assessments for businesses</p>
-    </div>
+@namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
-    @if (Assessments == null || Assessments.Count == 0)
+<section class="recent-assessments-section" aria-labelledby="recent-assessments-title">
+    <header class="assessments-header">
+        <div>
+            <span class="assessments-eyebrow">Workspace history</span>
+            <h3 id="recent-assessments-title" class="assessments-title">
+                <i class="bi bi-clock-history"></i>
+                Recent Assessments
+            </h3>
+            <p class="assessments-subtitle">The 10 most recently created assessment files</p>
+        </div>
+        <a class="view-all-link" href="/settings/assessments">
+            View all
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="assessments-loading" role="status">
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span>Loading recent assessments...</span>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="assessments-error" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>@ErrorMessage</span>
+        </div>
+    }
+    else if (RecentAssessments.Count == 0)
     {
         <div class="no-assessments">
             <i class="bi bi-inbox assessments-empty-icon"></i>
-            <p>No recent assessments</p>
+            <strong>No assessments available</strong>
+            <span>New assessments will appear here after they are created.</span>
         </div>
     }
     else
     {
-        <div class="assessments-list">
-            @foreach (var assessment in Assessments)
-            {
-                <div class="assessment-card">
-                    <div class="assessment-card-header">
-                        <div class="assessment-info">
-                            <h4 class="assessment-name">@assessment.Name</h4>
-                            <p class="assessment-business">
-                                <i class="bi bi-building"></i>
-                                @assessment.BusinessName
-                            </p>
-                        </div>
-                        <span class="assessment-status @GetStatusClass(assessment.Status)">
-                            @assessment.Status
-                        </span>
-                    </div>
-
-                    <div class="assessment-card-body">
-                        <div class="assessment-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: @assessment.ProgressPercentage%"></div>
-                            </div>
-                            <span class="progress-text">@assessment.ProgressPercentage%</span>
-                        </div>
-
-                        <div class="assessment-meta">
-                            <span class="meta-item">
-                                <i class="bi bi-calendar"></i>
-                                Modified: @assessment.ModifiedDate.ToString("MMM d, yyyy")
-                            </span>
-                            @if (assessment.DueDate.HasValue)
-                            {
-                                <span class="meta-item">
-                                    <i class="bi bi-clock"></i>
-                                    Due: @assessment.DueDate.Value.ToString("MMM d, yyyy")
+        <div class="assessments-table-wrapper">
+            <table class="assessments-table">
+                <thead>
+                    <tr>
+                        <th class="col-case-number">Case Number</th>
+                        <th class="col-company">Company Name</th>
+                        <th class="col-owner">Owner</th>
+                        <th class="col-period-start">Period Start (Date)</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-progress">Progress</th>
+                        <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var assessment in RecentAssessments)
+                    {
+                        <tr class="assessment-row"
+                            tabindex="0"
+                            @onclick="() => OpenAssessmentAsync(assessment.AssessmentId)"
+                            @onkeydown="args => HandleRowKeyDownAsync(args, assessment.AssessmentId)">
+                            <td class="col-case-number">
+                                <button type="button"
+                                        class="assessment-case-link"
+                                        @onclick="() => OpenAssessmentAsync(assessment.AssessmentId)"
+                                        @onclick:stopPropagation="true">
+                                    @DisplayText(assessment.CaseNumber, "Unnumbered case")
+                                </button>
+                                <span class="assessment-reference">
+                                    @DisplayText(assessment.AssessmentTypeName, "Assessment")
                                 </span>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="assessment-card-actions">
-                        <a href="@assessment.ViewUrl" class="assessment-btn view-btn">View</a>
-                        <a href="@assessment.EditUrl" class="assessment-btn edit-btn">Edit</a>
-                    </div>
-                </div>
-            }
+                            </td>
+                            <td class="col-company">
+                                @DisplayText(assessment.BusinessName, "Company not recorded")
+                            </td>
+                            <td class="col-owner">
+                                @DisplayText(assessment.BusinessOwner, "Owner not recorded")
+                            </td>
+                            <td class="col-period-start">
+                                <span class="period-start-date">
+                                    @assessment.AssessmentStartDate.ToString("dd MMM yyyy")
+                                </span>
+                            </td>
+                            <td class="col-status">
+                                <span class="status-badge @GetStatusBadgeClass(assessment.StatusId)">
+                                    @GetStatusText(assessment.StatusId)
+                                </span>
+                            </td>
+                            <td class="col-progress">
+                                <div class="progress-bar-container"
+                                     title="@($"{ClampProgress(assessment.ProgressPercentage)}% complete")">
+                                    <div class="progress-bar-track">
+                                        <div class="progress-bar-fill @GetProgressClass(assessment.ProgressPercentage)"
+                                             style="width: @(ClampProgress(assessment.ProgressPercentage))%"></div>
+                                    </div>
+                                    <span class="progress-text">@ClampProgress(assessment.ProgressPercentage)%</span>
+                                </div>
+                            </td>
+                            <td class="col-actions" @onclick:stopPropagation="true">
+                                <button type="button"
+                                        class="open-assessment-button"
+                                        title="Open @assessment.CaseNumber"
+                                        aria-label="Open assessment @assessment.CaseNumber"
+                                        @onclick="() => OpenAssessmentAsync(assessment.AssessmentId)">
+                                    Open
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-    }
-</div>
 
+        <footer class="assessments-footer">
+            <span>Showing @RecentAssessments.Count of the newest assessments</span>
+        </footer>
+    }
+</section>

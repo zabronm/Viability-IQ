@@ -1,198 +1,55 @@
-﻿@page "/assessment/assets"
+@page "/assessment/assets/{RouteAssessmentId:long}"
+@page "/assessment/assets"
 @layout MainLayout_Assessment
+@namespace ViabilityIQ.Web.Components.Pages_Assessments
 
-@using ViabilityIQ.Shared.UtilityServices
-@using ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
-@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
-@using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
-@using ViabilityIQ.Shared.DataModels
-@using ViabilityIQ.Application.Dtos
-@using ViabilityIQ.Web.Components.Pages.PageFormComponents
-@inherits Microsoft.AspNetCore.Components.ComponentBase
 
-<div class="p-0 position-relative dashboard-workspace container-fluid mt-0 pt-0">
-    <PageHeading_Assessment _pageTitle="Assets" PageTitle="Asset Management & Projections" CurrentPage="PageType.Assets" />
+<div class="assets-page container-fluid p-0 position-relative dashboard-workspace">
+    <PageHeading_Assessment _pageTitle="Assets"
+                            PageTitle="Asset Management & Projections"
+                            CurrentPage="PageType.Assets" />
 
-    <div class="row bg-white g-3 my-1 py-1 px-2" style="border-radius: 6px;">
+    <section class="assets-tabs-shell">
+        <div class="assets-tabs" role="tablist" aria-label="Asset views">
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AssetPageTab.Summary)"
+                    class="assets-tab @(ActiveTab == AssetPageTab.Summary ? "active" : null)"
+                    @onclick="() => SelectTab(AssetPageTab.Summary)">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Assets Summary</span>
+            </button>
 
-        <!-- Assets Data Entry Section -->
-        <div class="col-12 py-2">
-            <div class="w-100 p-2" style="border-bottom: dotted 1px #ffffff; border-radius: 12px;">
-
-                <!-- ✅ Extracted Summary KPI Cards Component -->
-                <AssetSummaryKpiCardsComponent TotalAssetsCount="TotalAssetsCount"
-                                               TotalGrossValue="TotalGrossValue"
-                                               TotalAdditions="TotalAdditions"
-                                               TotalDisposals="TotalDisposals"
-                                               TotalAccumulatedDepreciation="totalAccumulatedDepreciation"
-                                               TotalNetValue="TotalNetValue" />
-            </div>
-            <!-- Toolbar -->
-            <div class="px-0 my-3">
-                <div class="row g-2 align-items-center">
-                    <!-- Left -->
-                    <div class="col-md-6 d-flex gap-2">
-                        <button class="btn btn-primary btn-sm text-xs shadow-sm"
-                                @onclick="AddAsset">
-                            <i class="bi bi-plus-circle me-1"></i>
-                            Add Asset
-                        </button>
-
-                        <button class="btn btn-outline-success btn-sm text-xs shadow-sm"
-                                @onclick="OpenBulkImport">
-                            <i class="bi bi-upload me-1"></i>
-                            Bulk Assets Import
-                        </button>
-                    </div>
-
-                    <!-- Right -->
-                    <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
-
-                        <div style="width:220px;">
-                            <DDLookupComponent SourceKey="DDLookupEnums.AssetCategories"
-                                               @bind-Value="SelectedFilterId"
-                                               Placeholder="All Categories" />
-                        </div>
-
-                        <!-- Search Box with Lens Icon -->
-                        <div class="input-group input-group-sm shadow-sm" style="width:250px;">
-                            <span class="input-group-text bg-white text-muted border-end-0">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text"
-                                   class="form-control form-control-sm border-start-0 ps-0"
-                                   placeholder="Search assets..."
-                                   @bind="SearchQuery"
-                                   @bind:event="oninput" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Assets Table wrapped with Marble Border -->
-            <div class="table-responsive marble-border shadow-sm mb-2" style="border-radius: 8px; overflow: hidden;">
-                <table class="table table-sm table-hover mb-0 align-middle">
-                    <!-- Table Header -->
-                    <thead class="py-1">
-                        <tr class="bg-light text-muted fw-bold border-bottom align-middle">
-                            <th class="sticky-col ps-3 text-xxs text-uppercase sortable-header py-2" @onclick='() => SortTable("AssetName")'>
-                                Asset Name <i class="@GetSortIcon("AssetName") ms-1"></i>
-                            </th>
-                            <th class="text-start text-uppercase px-2 text-xxs sortable-header" @onclick='() => SortTable("Category")'>
-                                Category <i class="@GetSortIcon("Category") ms-1"></i>
-                            </th>
-                            <th class="text-start text-uppercase px-2 text-xxs sortable-header" @onclick='() => SortTable("Type")'>
-                                Type <i class="@GetSortIcon("Type") ms-1"></i>
-                            </th>
-                            <th class="text-center text-uppercase text-xxs">Existing?</th>
-                            <th class="text-end text-uppercase text-xxs sortable-header" @onclick='() => SortTable("OpeningValue")'>
-                                Opening Value <i class="@GetSortIcon("OpeningValue") ms-1"></i>
-                            </th>
-                            <th class="text-end text-uppercase text-xxs sortable-header" @onclick='() => SortTable("Additions")'>
-                                Additions <i class="@GetSortIcon("Additions") ms-1"></i>
-                            </th>
-                            <th class="text-end text-uppercase text-xxs sortable-header" @onclick='() => SortTable("Disposals")'>
-                                Disposals <i class="@GetSortIcon("Disposals") ms-1"></i>
-                            </th>
-                            <th class="text-end text-uppercase text-xxs sortable-header" @onclick='() => SortTable("Depreciation")'>
-                                Depreciation <i class="@GetSortIcon("Depreciation") ms-1"></i>
-                            </th>
-                            <th class="text-end text-uppercase text-xxs sortable-header" @onclick='() => SortTable("NetBookValue")'>
-                                Net Book Value <i class="@GetSortIcon("NetBookValue") ms-1"></i>
-                            </th>
-                            <th class="text-center text-uppercase text-xxs">Health</th>
-                            <th class="text-center text-uppercase text-xxs" style="background-color: #e2e8f0; color: #0f172a; width: 50px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="grid-font-standard">
-                        @if (IsLoading)
-                        {
-                            <LoadingTableRowsComponent />
-                        }
-                        else if (!FilteredAndSortedAssets.Any())
-                        {
-                            <EmptyTableRowComponent EmptyRowMessage="No assets mapped to this assessment yet." />
-                        }
-                        else
-                        {
-                            @foreach (var item in FilteredAndSortedAssets)
-                            {
-                                <tr class="hover-light-blue">
-                                    <td class="ps-3 text-black">
-                                        <button class="btn btn-link p-0 fw-bold text-primary text-decoration-none border-0 bg-transparent text-start"
-                                                @onclick="() => OpenAssetFormPanel(item)"
-                                                style="font-size: 0.75rem !important;" title="@item.AssetName">
-                                            @DisplayUtility.TruncateValue(item.AssetName ?? "N/A", 19)
-                                        </button>
-                                    </td>
-
-                                    <td class="px-2 text-black text-xs">@(item.AssetCategoryName ?? "N/A")</td>
-                                    <td class="px-2 text-black text-xs">@(item.AssetTypeName ?? "N/A")</td>
-
-                                    <!-- Existing (True/False Indicator) -->
-                                    <td class="text-center">
-                                        @if (item.PreExisting)
-                                        {
-                                            <span class="badge bg-success text-xxs fw-normal px-1.5 shadow-sm">True</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-info text-xxs fw-normal px-1.5 text-dark shadow-sm">False</span>
-                                        }
-                                    </td>
-
-                                    <td class="text-end font-monospace text-secondary">@item.OpeningNetBookValue.ToString("N0")</td>
-                                    <td class="text-end font-monospace text-success">@item.TotalAdditions.ToString("N0")</td>
-                                    <td class="text-end font-monospace text-danger">@item.TotalDisposals.ToString("N0")</td>
-                                    <td class="text-end font-monospace text-muted">@item.TotalDepreciation.ToString("N0")</td>
-                                    <td class="text-end font-monospace fw-bold text-dark">@item.ClosingNetBookValue.ToString("N0")</td>
-
-                                    <!-- Status / Health Badge -->
-                                    <td class="text-center">
-                                        <span class="badge text-xxs fw-normal @GetAssetStatusBadgeClass(item) shadow-sm">
-                                            @GetAssetStatusText(item)
-                                        </span>
-                                    </td>
-
-                                    <td class="text-center">
-                                        <button class="btn-action-operation btn-edit-accent shadow-sm"
-                                                @onclick="() => ViewAssetMovements(item.AssessmentAssetId, item.AssetName)"
-                                                title="Edit Asset Movements">
-                                            <i class="bi bi-vector-pen text-navy"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-
-                            <!-- Corrected Grand Total Row -->
-                            <tr style="background-color: #cbd5e1; color: #0f172a; font-weight: bold; border-top: 2px solid #94a3b8;">
-                                <td colspan="4" class="ps-3 text-uppercase text-xxs fw-bold">Grand Total:</td>
-                                <td class="text-end font-monospace text-dark">@TotalGrossValue.ToString("N0")</td>
-                                <td class="text-end font-monospace text-success">@TotalAdditions.ToString("N0")</td>
-                                <td class="text-end font-monospace text-danger">@TotalDisposals.ToString("N0")</td>
-                                <td class="text-end font-monospace text-dark">@TotalDepreciationExpense.ToString("N0")</td>
-                                <td class="text-end font-monospace text-dark">@TotalNetValue.ToString("N0")</td>
-                                <td colspan="2"></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Record Navigation Controls -->
-            <div class="d-flex justify-content-between align-items-center mt-2 px-1">
-                <span class="text-muted text-xxs fw-medium">Showing @TotalAssetsCount of @assetsList.Count Assets</span>
-                <div class="btn-group shadow-sm" role="group">
-                    <button type="button" class="btn btn-outline-secondary btn-sm text-xxs py-1 px-2" disabled>
-                        <i class="bi bi-chevron-left me-1"></i>Previous
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm text-xxs py-1 px-2" disabled>
-                        Next<i class="bi bi-chevron-right ms-1"></i>
-                    </button>
-                </div>
-            </div>
-
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AssetPageTab.Details)"
+                    class="assets-tab @(ActiveTab == AssetPageTab.Details ? "active" : null)"
+                    @onclick="() => SelectTab(AssetPageTab.Details)">
+                <i class="bi bi-calendar3-range-fill"></i>
+                <span>Assets Detail</span>
+            </button>
         </div>
-    </div>
+
+        <div class="assets-tab-content" role="tabpanel">
+            @if (AssessmentId <= 0)
+            {
+                <div class="assets-context-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>No active assessment is available.</strong>
+                        <span>Open an assessment before viewing its assets.</span>
+                    </div>
+                </div>
+            }
+            else if (ActiveTab == AssetPageTab.Summary)
+            {
+                <AssessmentAssetSummaryPage AssessmentId="@AssessmentId" />
+            }
+            else
+            {
+                <AssessmentAssetDetailsPage AssessmentId="@AssessmentId" />
+            }
+        </div>
+    </section>
 </div>

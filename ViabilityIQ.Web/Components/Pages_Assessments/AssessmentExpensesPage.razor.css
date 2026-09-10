@@ -202,6 +202,10 @@
     animation: fadeIn 0.2s ease-in-out;
 }
 
+.axd-table-frame {
+    border: 1px solid #1a365d !important;
+    border-radius: 8px;
+}
 
 .grid-font-standard th,
 .grid-font-standard td {

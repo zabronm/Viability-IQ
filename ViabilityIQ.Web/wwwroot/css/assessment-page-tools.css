@@ -1,0 +1,150 @@
+.assessment-page-filter {
+    width: 220px;
+}
+
+.assessment-page-filter select,
+.assessment-page-filter .form-select,
+.assessment-page-filter input {
+    font-weight: 400 !important;
+}
+
+.assessment-page-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 250px;
+    padding: 0.27rem 0.55rem;
+    border: 1px solid #d6dee8;
+    border-radius: 6px;
+    color: #7b899a;
+    background: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.assessment-page-search:focus-within {
+    border-color: #86b7a0;
+    box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.12);
+}
+
+.assessment-page-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: #29384c;
+    background: transparent;
+    font-size: 0.69rem;
+    font-weight: 400;
+}
+
+.assessment-record-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+    padding: 0 0.15rem;
+    color: #738196;
+    font-size: 0.65rem;
+}
+
+.assessment-record-navigation .btn {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.62rem;
+}
+
+@media (max-width: 767.98px) {
+    .assessment-page-toolbar,
+    .assessment-page-toolbar > div {
+        width: 100%;
+    }
+
+    .assessment-page-toolbar > div {
+        align-items: stretch !important;
+        flex-direction: column;
+    }
+
+    .assessment-page-filter,
+    .assessment-page-search {
+        width: 100%;
+    }
+
+    .assessment-print-button {
+        align-self: flex-start;
+    }
+}
+
+@media print {
+    html,
+    body.assessment-page-printing {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+
+    body.assessment-page-printing .fa-top-bar,
+    body.assessment-page-printing .fa-sidebar,
+    body.assessment-page-printing .offcanvas,
+    body.assessment-page-printing .offcanvas-backdrop,
+    body.assessment-page-printing .toast-container,
+    body.assessment-page-printing .assessment-page-toolbar,
+    body.assessment-page-printing .assessment-record-navigation,
+    body.assessment-page-printing .assessment-grid-actions,
+    body.assessment-page-printing footer {
+        display: none !important;
+    }
+
+    body.assessment-page-printing .fa-layout-wrapper,
+    body.assessment-page-printing .fa-workspace-container,
+    body.assessment-page-printing .fa-main-content-surface,
+    body.assessment-page-printing .content-body-padding,
+    body.assessment-page-printing .assessment-print-page {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    body.assessment-page-printing .table-responsive,
+    body.assessment-page-printing .accordion,
+    body.assessment-page-printing .accordion-item,
+    body.assessment-page-printing .accordion-collapse,
+    body.assessment-page-printing .accordion-body {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    body.assessment-page-printing .accordion-collapse,
+    body.assessment-page-printing .accordion-collapse.collapse:not(.show) {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    body.assessment-page-printing .accordion-button::after {
+        display: none !important;
+    }
+
+    body.assessment-page-printing thead {
+        display: table-header-group !important;
+    }
+
+    body.assessment-page-printing table {
+        width: 100% !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    body.assessment-page-printing .accordion-item,
+    body.assessment-page-printing .card {
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+}

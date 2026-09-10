@@ -11,7 +11,7 @@ namespace ViabilityIQ.Application.Dtos
     /// AssessmentAssetDto - Maps to vwAssessmentAssets view
     /// Provides denormalized asset data with related category and type information
     
-    [Table("vw_assessment_assets_list")]  // ✅ Points to SQL view
+    [Table("vw_assessment_asset_list")]  // ✅ Points to SQL view
     public class AssessmentAssetDto
     {
         // ====================================================

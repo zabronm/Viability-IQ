@@ -1,16 +1,17 @@
 ﻿@page "/assessment/expenses/"
 @layout MainLayout_Assessment
 
+
 @using ViabilityIQ.Shared.UtilityServices
 @using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 
-<div class="p-0 position-relative dashboard-workspace container-fluid mt-0 pt-0">
+<div class="p-0 position-relative dashboard-workspace container-fluid mt-0 pt-0 assessment-print-page">
     <PageHeading_Assessment _pageTitle="Expenses" PageTitle="Expenses & Outflow Management" CurrentPage="PageType.Expenses" />
 
     <div class="row bg-white g-3 mt-1 mb-1 py-0 px-2" style="border-radius: 6px;">
 
         <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12 mt-0 pt-0">
+        <div class="col-12 mt-0 pt-0">          
             <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
         </div>
 
@@ -18,17 +19,17 @@
         <div class="col-12 py-2">
             <div class="px-0 mb-3">
                 <div class="row g-2 align-items-center">
-                    <div class="row align-items-center mb-2">
+                    <div class="row align-items-center mb-2 assessment-page-toolbar">
 
                         <!-- Left -->
                         <div class="col-md-6 d-flex gap-2">
-                            <button class="btn btn-primary btn-sm text-xs shadow-sm"
+                            <button class="btn btn-success btn-sm text-xs"
                                     @onclick="AddExpenseStream">
                                 <i class="bi bi-plus-circle me-1"></i>
                                 Add Expense Stream
                             </button>
 
-                            <button class="btn btn-outline-success btn-sm text-xs shadow-sm"
+                            <button class="btn btn-outline-success btn-sm text-xs"
                                     @onclick="OpenBulkImport">
                                 <i class="bi bi-upload me-1"></i>
                                 Bulk Expenses Import
@@ -37,48 +38,40 @@
 
                         <!-- Right -->
                         <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
-
-                            <div style="width:220px;">
+                            <AssessmentPrintButton />
+                            <div class="assessment-page-filter">
                                 <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes"
                                                    @bind-Value="SelectedFilterId"
                                                    Placeholder="All Expense Types" />
                             </div>
 
-                            <!-- Search Box with Lens Icon -->
-                            <div class="input-group input-group-sm shadow-sm" style="width:250px;">
-                                <span class="input-group-text bg-white text-muted border-end-0">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text"
-                                       class="form-control form-control-sm border-start-0 ps-0"
+                            <label class="assessment-page-search">
+                                <i class="bi bi-search"></i>
+                                <input type="search"
                                        placeholder="Search expenses..."
                                        @bind="SearchQuery"
                                        @bind:event="oninput" />
-                            </div>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Expenses Table wrapped with Marble Border -->
-            <div class="table-responsive marble-border shadow-sm mb-2" style="border-radius: 8px; overflow: hidden;">
-                <table class="table table-sm table-hover mb-0 align-middle">
+            <!-- Expenses Table -->
+            <div class="table-responsive shadow-sm axd-table-frame" style="overflow: hidden;">
+                <table class="table table-sm table-hover mb-0">
                     <!-- Table Header -->
                     <thead class="py-1">
-                        <tr class="bg-light text-muted fw-bold border-bottom align-middle">
-                            <th class="sticky-col ps-3 text-xxs text-uppercase sortable-header py-2" @onclick='() => SortTable("Description")'>
-                                Expense Description <i class="@GetSortIcon("Description") ms-1"></i>
-                            </th>
-                            <th class="text-start text-uppercase px-2 text-xxs sortable-header py-2" @onclick='() => SortTable("ExpenseType")'>
-                                Expense Type <i class="@GetSortIcon("ExpenseType") ms-1"></i>
-                            </th>
+                        <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
+                            <th class="sticky-col ps-2 text-xxs text-uppercase">Expense Description <i class="bi bi-caret-down-fill text-secondary"></i></th>
+                            <th class="text-start td-header-ice text-uppercase px-1 text-xxs">Expense Type</th>
                             @for (int m = 1; m <= 12; m++)
                             {
-                                <th class="text-end text-uppercase text-xxs py-2">M@(m)</th>
+                                <th class="text-end td-header-ice text-uppercase text-xxs">M@(m)</th>
                             }
                             <!-- Marble background for Total column -->
-                            <th class="text-end text-uppercase text-xxs py-2" style="background-color: #cbd5e1; color: #0f172a;">Total Expenses</th>
-                            <th class="text-center text-uppercase text-xxs py-2" style="background-color: #e2e8f0; color: #0f172a; width: 50px;">Actions</th>
+                            <th class="text-end text-uppercase text-xxs" style="background-color: #d1d5db; color: #000080;">Total Expenses</th>
+                            <th class="text-center td-header-ice text-xxs assessment-grid-actions"></th>
                         </tr>
                     </thead>
                     <tbody class="grid-font-standard">
@@ -95,30 +88,29 @@
                             @foreach (var item in FilteredExpenseStreams)
                             {
                                 <tr class="hover-light-blue">
-                                    <td class="ps-3 text-black">
+                                    <td class="ps-2 text-black">
                                         <span style="font-size:0.75rem !important;"
                                               title="@item.ExpenseItemName">
                                             @DisplayUtility.TruncateValue(item.ExpenseItemName, 20)
                                         </span>
                                         @if (item.blSendToCashBook)
                                         {
-                                            <span class="badge bg-white text-xxs border-0 ms-1 btn-outline-dark rounded-pill shadow-sm" style="font-size: 0.60rem;">
+                                            <span class="badge bg-white text-xxs border-0 ms-1 btn-outline-dark rounded-pill" style="font-size: 0.60rem;">
                                                 <i class="bi bi-check text-navy"></i>
                                             </span>
                                         }
                                     </td>
 
-                                    <td class="px-2"><span class="badge text-black text-xxs fw-normal totals-bkg shadow-sm">@item.TypeName.ToString()</span></td>
+                                    <td class="px-2"><span class="badge text-black text-xxs fw-normal totals-bkg">@item.TypeName.ToString()</span></td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         <td class="text-end font-monospace text-secondary">@item.MonthlyValues[i].ToString("N0")</td>
                                     }
                                     <!-- Marble background -->
-                                    <td class="text-end font-monospace fw-bold text-dark" style="background-color: #e2e8f0;">@item.MonthlyValues.Sum().ToString("N0")</td>
-                                    <td class="text-center">
-                                        <button class="btn-action-operation btn-edit-accent shadow-sm"
-                                                @onclick="() => OpenExpenseFormPanel(item)"
-                                                title="Edit Expense Stream">
+                                    <td class="text-end font-monospace fw-bold" style="background-color: #d1d5db; color: #000080;">@item.MonthlyValues.Sum().ToString("N0")</td>
+                                    <td class="text-center assessment-grid-actions">
+                                        <button class="btn-action-operation btn-edit-accent"
+                                                @onclick="() => OpenExpenseFormPanel(item)">
                                             <i class="bi bi-vector-pen text-navy"></i>
                                         </button>
                                     </td>
@@ -126,18 +118,30 @@
                             }
 
                             <!-- Grand Total Row -->
-                            <tr style="background-color: #cbd5e1; color: #0f172a; font-weight: bold; border-top: 2px solid #94a3b8;">
-                                <td colspan="2" class="ps-3 text-uppercase text-xxs fw-bold">Grand Total Outflows:</td>
+                            <tr style="background-color: #d1d5db; color: #000080; font-weight: bold;">
+                                <td colspan="2" class="ps-2 text-uppercase text-xxs">Grand Total Outflows:</td>
                                 @for (int i = 0; i < 12; i++)
                                 {
-                                    <td class="text-end font-monospace text-dark">@FilteredExpenseStreams.Sum(c => c.MonthlyValues[i]).ToString("N0")</td>
+                                    <td class="text-end font-monospace">@FilteredExpenseStreams.Sum(c => c.MonthlyValues[i]).ToString("N0")</td>
                                 }
-                                <td class="text-end font-monospace text-dark">@GrandTotalExpenses.ToString("N0")</td>
+                                <td class="text-end font-monospace">@GrandTotalExpenses.ToString("N0")</td>
                                 <td></td>
                             </tr>
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <div class="assessment-record-navigation">
+                <span>Showing <strong>@FilteredExpenseStreams.Count()</strong> of <strong>@ExpenseStreams.Count</strong> records</span>
+                <div class="btn-group shadow-sm" role="group" aria-label="Expense record navigation">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="bi bi-chevron-left me-1"></i>Previous
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                        Next<i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

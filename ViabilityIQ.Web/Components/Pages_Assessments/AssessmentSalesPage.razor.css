@@ -44,6 +44,11 @@
         border-left: 1px solid #cbdde0 !important;
     }
 
+.asd-table-frame {
+    border: 1px solid #1a365d !important;
+    border-radius: 8px;
+} 
+
 /* 4) Standard Table Fonts Override */
 .grid-font-standard th,
 .grid-font-standard td {
