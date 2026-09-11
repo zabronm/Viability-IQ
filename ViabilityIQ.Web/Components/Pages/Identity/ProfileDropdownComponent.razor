@@ -66,16 +66,21 @@
                 <a href="/identity/account-settings" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
                     <i class="bi bi-gear me-2"></i> Account Settings
                 </a>
-                <a href="/identity/account-settings" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
+                <a href="/activity-log" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
                     <i class="bi bi-magic"></i>&nbsp;&nbsp;&nbsp;Activity Log
                 </a>
                 <a href="/identity/change-password" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
                     <i class="bi bi-key me-2"></i> Change Password
                 </a>
                 <div class="dropdown-divider"></div>
-                <button class="profile-dropdown-item w-100 text-start border-0 bg-transparent" @onclick="LogoutAsync" type="button">
+                @* <button class="profile-dropdown-item w-100 text-start border-0 bg-transparent" @onclick="LogoutAsync" type="button">
                     <i class="bi bi-box-arrow-right me-2"></i> Sign Out
-                </button>
+                </button> *@
+                <a href="/logout"
+                   class="profile-dropdown-item text-danger"
+                   @onclick="CloseProfileMenuImmediately">
+                    <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
             </div>
         </div>
     }
@@ -278,31 +283,31 @@
         StateHasChanged();
     }
 
-    private async Task LogoutAsync()
-    {
-        try
-        {
-            Logger.LogInformation("[ProfileDropdownComponent] ===== LOGOUT INITIATED =====");
+    // private async Task LogoutAsync()
+    // {
+    //     try
+    //     {
+    //         Logger.LogInformation("[ProfileDropdownComponent] ===== LOGOUT INITIATED =====");
 
-            CloseProfileMenuImmediately();
+    //         CloseProfileMenuImmediately();
 
-            Logger.LogInformation("[ProfileDropdownComponent] Calling SignInManager.SignOutAsync()...");
-            await SignInManager.SignOutAsync();
-            Logger.LogInformation("[ProfileDropdownComponent] ✓ SignOutAsync completed");
+    //         Logger.LogInformation("[ProfileDropdownComponent] Calling SignInManager.SignOutAsync()...");
+    //         await SignInManager.SignOutAsync();
+    //         Logger.LogInformation("[ProfileDropdownComponent] ✓ SignOutAsync completed");
 
-            Logger.LogInformation("[ProfileDropdownComponent] Calling AuthenticationStateProvider.NotifyUserLogout()...");
-            AuthenticationStateProvider.NotifyUserLogout();
-            Logger.LogInformation("[ProfileDropdownComponent] ✓ NotifyUserLogout completed");
+    //         Logger.LogInformation("[ProfileDropdownComponent] Calling AuthenticationStateProvider.NotifyUserLogout()...");
+    //         AuthenticationStateProvider.NotifyUserLogout();
+    //         Logger.LogInformation("[ProfileDropdownComponent] ✓ NotifyUserLogout completed");
 
-            Logger.LogInformation("[ProfileDropdownComponent] Redirecting to home...");
-            NavigationManager.NavigateTo("/", forceLoad: true);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "[ProfileDropdownComponent] ❌ ERROR during logout");
-            NavigationManager.NavigateTo("/", forceLoad: true);
-        }
-    }
+    //         Logger.LogInformation("[ProfileDropdownComponent] Redirecting to home...");
+    //         NavigationManager.NavigateTo("/", forceLoad: true);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Logger.LogError(ex, "[ProfileDropdownComponent] ❌ ERROR during logout");
+    //         NavigationManager.NavigateTo("/", forceLoad: true);
+    //     }
+    // }
 
     public void Dispose()
     {

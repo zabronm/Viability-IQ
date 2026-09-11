@@ -1,75 +1,83 @@
-﻿<div class="recent-activity-section">
-    <div class="activity-header">
-        <div class="activity-title-section">
-            <h3 class="activity-title">
-                <i class="bi bi-clock-history activity-title-icon"></i>
+@namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
+
+<section class="recent-activity-section" aria-labelledby="recent-activity-title">
+    <header class="activity-header">
+        <div>
+            <h3 id="recent-activity-title" class="activity-title">
+                <i class="bi bi-clock-history"></i>
                 Recent Activity
             </h3>
-            <p class="activity-subtitle">Latest actions and updates across the system</p>
+            <p>Latest actions in your workspace</p>
         </div>
-
-        <div class="activity-filters">
-            <button class="filter-option @(GetFilterClass(1))" @onclick="() => SelectFilter(1)" title="Last 24 hours">
-                Last 24 hours
-            </button>
-            <button class="filter-option @(GetFilterClass(2))" @onclick="() => SelectFilter(2)" title="Last 7 days">
-                Last 7 days
-            </button>
-            <button class="filter-option @(GetFilterClass(3))" @onclick="() => SelectFilter(3)" title="Last 30 days">
-                Last 30 days
-            </button>
-            <button class="filter-option @(GetFilterClass(4))" @onclick="() => SelectFilter(4)" title="All activities">
-                All
-            </button>
+        <div class="activity-filters" aria-label="Activity period">
+            <button type="button" class="@(GetFilterClass("24h"))" @onclick="Select24HoursAsync">24h</button>
+            <button type="button" class="@(GetFilterClass("7d"))" @onclick="Select7DaysAsync">7 days</button>
+            <button type="button" class="@(GetFilterClass("30d"))" @onclick="Select30DaysAsync">30 days</button>
+            <button type="button" class="@(GetFilterClass("all"))" @onclick="SelectAllAsync">All</button>
         </div>
-    </div>
+    </header>
 
-    <div class="activity-table-wrapper">
-        @if (Activities == null || Activities.Count == 0)
-        {
-            <div class="no-activities">
-                <i class="bi bi-inbox activity-empty-icon"></i>
-                <p>No activities found</p>
-            </div>
-        }
-        else
-        {
+    @if (IsLoading)
+    {
+        <div class="snapshot-state" role="status">
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            Loading recent activity...
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="snapshot-state snapshot-error" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            @ErrorMessage
+        </div>
+    }
+    else if (LoadedActivities.Count == 0)
+    {
+        <div class="snapshot-state">
+            <i class="bi bi-inbox"></i>
+            No activity was found for this period.
+        </div>
+    }
+    else
+    {
+        <div class="activity-table-wrapper">
             <table class="activity-table">
                 <tbody>
-                    @foreach (var activity in Activities)
+                    @foreach (var activity in LoadedActivities)
                     {
-                        <tr class="activity-row">
-                            <td class="col-actor">
-                                <div class="actor-info">
-                                    <div class="actor-avatar">
-                                        <i class="bi bi-person-circle"></i>
-                                    </div>
-                                    <div class="actor-details">
-                                        <span class="actor-name">@activity.ActorName</span>
-                                        <span class="activity-time">@FormatActivityTime(activity.CreatedDate)</span>
-                                    </div>
+                        var rawActor = DisplayText(activity.ActorName, "System");
+                        var rawEntity = DisplayText(activity.EntityName, "Unnamed record");
+                        <tr>
+                            <td class="actor-cell">
+                                <span class="actor-icon"><i class="bi bi-person"></i></span>
+                                <div>
+                                    <!-- Full name retained in title attribute on hover -->
+                                    <strong title="@rawActor">@FormatAbbreviatedName(rawActor)</strong>
+                                    <small class="marble-meta">@FormatActivityTime(activity.CreatedDate)</small>
                                 </div>
                             </td>
-                            <td class="col-action">
-                                <span class="activity-action-badge @GetActivityActionClass(activity.ActivityType)">
-                                    @GetActivityActionDisplay(activity.ActivityType)
+                            <td class="action-cell">
+                                <span class="activity-action-badge @GetActivityActionClass(activity.ActivityAction)">
+                                    @FormatEnumText(activity.ActivityAction)
                                 </span>
                             </td>
-                            <td class="col-object">
-                                <span class="activity-object">@activity.ObjectName</span>
+                            <td class="object-cell">
+                                <!-- Ellipsis and title applied here for the object/email/details column -->
+                                <span title="@rawEntity">@rawEntity</span>
+                                <small class="marble-meta">@FormatEnumText(activity.EntityType)</small>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
-        }
-    </div>
+        </div>
+    }
 
-    <div class="activity-footer">
-        <a href="/activity-log" class="view-all-link">
+    <footer class="activity-footer">
+        <a href="/activity-log">
             <i class="bi bi-list-ul"></i>
-            View All Activities
+            View all activities
             <i class="bi bi-arrow-right"></i>
         </a>
-    </div>
-</div>
+    </footer>
+</section>

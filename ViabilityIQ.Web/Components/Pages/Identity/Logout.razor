@@ -1,20 +1,19 @@
-﻿@page "/logout"
-@using Microsoft.AspNetCore.Components.Authorization
-@using ViabilityIQ.Application.Interfaces.IdentityInterfaces
-@using ViabilityIQ.Web.Extensions
-@using ViabilityIQ.Web.Services
-@inject IAuthenticationService AuthService
+@page "/logout"
+@layout MainLayout_Blank
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Sign out</PageTitle>
+
+<main class="container py-5">
+    <div class="d-flex align-items-center justify-content-center gap-2 text-secondary">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Preparing secure sign out...
+    </div>
+</main>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await AuthService.LogoutAsync(new System.Security.Claims.ClaimsPrincipal());
-
-        var customAuthProvider = (CustomAuthenticationStateProvider)(object)AuthStateProvider;
-        customAuthProvider.NotifyUserLogout();
-
-        Navigation.NavigateTo("/login", replace: true);
+        Navigation.NavigateTo("/api/auth/signout-confirmation", forceLoad: true);
     }
 }

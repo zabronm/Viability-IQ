@@ -7,12 +7,14 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.DataModels;
-using System.Text.RegularExpressions;
+using ViabilityIQ.Shared.SharedModels;
+
 
 
 namespace ViabilityIQ.Infrastructure.Repositories
@@ -21,6 +23,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
     {
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly ISessionService _sessionService;
+        private readonly IActivityLogWriter _activityLogWriter;
+
 
         //private readonly ILogger<MasterDataService> _logger;
         //private readonly IMemoryCache _cache;
@@ -29,10 +33,16 @@ namespace ViabilityIQ.Infrastructure.Repositories
         private readonly object _cacheLock = new();
         private readonly object _lock = new();
 
-        public MasterDataService(IDbConnectionFactory connectionFactory, ISessionService sessionService)
+
+        //============ CONSTRUCTOR  ==============
+        public MasterDataService(
+                               IDbConnectionFactory connectionFactory,
+                               ISessionService sessionService,
+                               IActivityLogWriter activityLogWriter)
         {
             _dbConnectionFactory = connectionFactory;
             _sessionService = sessionService;
+            _activityLogWriter = activityLogWriter;
         }
 
 
@@ -80,31 +90,108 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<bool> SaveBankAsync(Bank bank)
         {
+            ArgumentNullException.ThrowIfNull(bank);
+
             using var connection = _dbConnectionFactory.CreateConnection();
-            //var runtimeUser = _session.UserEmail ?? "System.Operator";
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
 
-            if (bank.BankId == 0)
+            try
             {
-                bank.CreatedDate = DateTime.UtcNow;             // Set metadata values automatically on creation
-                bank.CreatedBy = _sessionService.UserId;
-                bank.Active = true;
+                var isCreate = bank.BankId == 0;
+                long entityId;
+                bool saved;
 
-                var newId = await connection.InsertAsync(bank);     // InsertAsync automatically maps all properties and inserts them safely
-                return newId > 0;
+                if (isCreate)
+                {
+                    bank.CreatedDate = DateTime.UtcNow;
+                    bank.CreatedBy = _sessionService.UserId;
+                    bank.Active = true;
+                    entityId = await connection.InsertAsync(bank, transaction);
+                    saved = entityId > 0;
+                }
+                else
+                {
+                    bank.ModifiedDate = DateTime.UtcNow;
+                    bank.ModifiedBy = _sessionService.UserId;
+                    entityId = bank.BankId;
+                    saved = await connection.UpdateAsync(bank, transaction);
+                }
+
+                if (!saved)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+
+                await _activityLogWriter.RecordAsync(
+                    new ActivityLogWriteRequest
+                    {
+                        Action = isCreate ? ActivityAction.Create : ActivityAction.Update,
+                        EntityType = nameof(Bank),
+                        EntityId = entityId,
+                        EntityName = bank.BankName,
+                        Module = "Master Data",
+                        Page = _sessionService.CurrentPage,
+                        Remarks = $"{(isCreate ? "Created" : "Updated")} bank record."
+                    },
+                    connection,
+                    transaction);
+
+                transaction.Commit();
+                return true;
             }
-            else
+            catch
             {
-                bank.ModifiedDate = DateTime.UtcNow;       // Maintain audit trail details on modifications
-                bank.ModifiedBy = _sessionService.UserId;
-                return await connection.UpdateAsync(bank);  // UpdateAsync automatically matches the [Key] property to modify the row
+                transaction.Rollback();
+                throw;
             }
         }
+
+
+
 
         public async Task<bool> DeleteBankAsync(Bank bank)
         {
+            ArgumentNullException.ThrowIfNull(bank);
+
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.DeleteAsync(bank); // Automatically runs: DELETE FROM Banks WHERE BankId = @id
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var deleted = await connection.DeleteAsync(bank, transaction);
+                if (!deleted)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+
+                await _activityLogWriter.RecordAsync(
+                    new ActivityLogWriteRequest
+                    {
+                        Action = ActivityAction.Delete,
+                        EntityType = nameof(Bank),
+                        EntityId = bank.BankId,
+                        EntityName = bank.BankName,
+                        Module = "Master Data",
+                        Page = _sessionService.CurrentPage,
+                        Remarks = "Deleted bank record."
+                    },
+                    connection,
+                    transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
+
 
         #endregion
 
@@ -128,32 +215,110 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
+
+        //=============  SAVE LOAN SPECIFICATION  ==============
         public async Task<bool> SaveLoanTypeAsync(LoanType loanType)
         {
+            ArgumentNullException.ThrowIfNull(loanType);
+
             using var connection = _dbConnectionFactory.CreateConnection();
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
 
-            if (loanType.LoanTypeId == 0)
+            try
             {
-                loanType.CreatedDate = DateTime.UtcNow;             // Set metadata values automatically on creation
-                loanType.CreatedBy = _sessionService.UserId;
-                loanType.Active = true;
+                var isCreate = loanType.LoanTypeId == 0;
+                long entityId;
+                bool saved;
 
-                var newId = await connection.InsertAsync(loanType);     // InsertAsync automatically maps all properties and inserts them safely
-                return newId > 0;
+                if (isCreate)
+                {
+                    loanType.CreatedDate = DateTime.UtcNow;
+                    loanType.CreatedBy = _sessionService.UserId;
+                    loanType.Active = true;
+                    entityId = await connection.InsertAsync(loanType, transaction);
+                    saved = entityId > 0;
+                }
+                else
+                {
+                    loanType.ModifiedDate = DateTime.UtcNow;
+                    loanType.ModifiedBy = _sessionService.UserId;
+                    entityId = loanType.LoanTypeId;
+                    saved = await connection.UpdateAsync(loanType, transaction);
+                }
+
+                if (!saved)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+
+                await _activityLogWriter.RecordAsync(
+                    new ActivityLogWriteRequest
+                    {
+                        Action = isCreate ? ActivityAction.Create : ActivityAction.Update,
+                        EntityType = nameof(LoanType),
+                        EntityId = entityId,
+                        EntityName = loanType.LoanTypeName,
+                        Module = "Master Data",
+                        Page = _sessionService.CurrentPage,
+                        Remarks = $"{(isCreate ? "Created" : "Updated")} loan type record."
+                    },
+                    connection,
+                    transaction);
+
+                transaction.Commit();
+                return true;
             }
-            else
+            catch
             {
-                loanType.ModifiedDate = DateTime.UtcNow;       // Maintain audit trail details on modifications
-                loanType.ModifiedBy = _sessionService.UserId;
-                return await connection.UpdateAsync(loanType);  // UpdateAsync automatically matches the [Key] property to modify the row
+                transaction.Rollback();
+                throw;
             }
         }
 
+        //==== SPECIFIC DELETE LOAN TYPE METHOD =====
         public async Task<bool> DeleteLoanTypeAsync(LoanType loanType)
         {
+            ArgumentNullException.ThrowIfNull(loanType);
+
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.DeleteAsync(loanType); // Automatically runs: DELETE FROM LoanTypes WHERE LoanTypeId = @id
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var deleted = await connection.DeleteAsync(loanType, transaction);
+                if (!deleted)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+
+                await _activityLogWriter.RecordAsync(
+                    new ActivityLogWriteRequest
+                    {
+                        Action = ActivityAction.Delete,
+                        EntityType = nameof(LoanType),
+                        EntityId = loanType.LoanTypeId,
+                        EntityName = loanType.LoanTypeName,
+                        Module = "Master Data",
+                        Page = _sessionService.CurrentPage,
+                        Remarks = "Deleted loan type record."
+                    },
+                    connection,
+                    transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
+
 
 
         //================= ASSESSMENT LOANS CRUD OPERATIONS ==============================

@@ -1,44 +1,46 @@
 CREATE TABLE dbo.tblActivityLog
 (
-    ActivityLogId BIGINT IDENTITY(1,1) NOT NULL
+    ActivityLogId bigint IDENTITY(1,1) NOT NULL
         CONSTRAINT PK_tblActivityLog PRIMARY KEY,
-
-    UserId BIGINT NULL,
-    ActorName NVARCHAR(200) NULL,
-    ActivityAction NVARCHAR(50) NOT NULL,
-    EntityType NVARCHAR(100) NOT NULL,
-    EntityId BIGINT NULL,
-    EntityName NVARCHAR(300) NULL,
-    AssessmentId BIGINT NULL,
-    AssessmentName NVARCHAR(300) NULL,
-    Remarks NVARCHAR(1000) NULL,
-    Active BIT,
-    Module NVARCHAR(100) NULL,
-    Page NVARCHAR(500) NULL,
-    IpAddress NVARCHAR(100) NULL,
-    UserAgent NVARCHAR(1000) NULL,
-    CorrelationId NVARCHAR(100) NULL,
-    MetadataJson NVARCHAR(MAX) NULL,
-    CreatedDate DATETIME2 NOT NULL
-        CONSTRAINT DF_tblActivityLog_CreatedDate
-        DEFAULT SYSUTCDATETIME(),
-    ModifiedDate DATETIME2 NOT NULL        
-        DEFAULT SYSUTCDATETIME(),
-    CreatedBy BIGINT NULL,
-    ModifiedBy BIGINT NULL,
+    UserId bigint NULL,
+    ActorName nvarchar(200) NULL,
+    ActivityAction nvarchar(50) NOT NULL,
+    EntityType nvarchar(100) NOT NULL,
+    EntityId bigint NULL,
+    EntityName nvarchar(300) NULL,
+    AssessmentId bigint NULL,
+    AssessmentName nvarchar(300) NULL,
+    Module nvarchar(100) NULL,
+    Page nvarchar(500) NULL,
+    IpAddress nvarchar(100) NULL,
+    UserAgent nvarchar(1000) NULL,
+    CorrelationId nvarchar(100) NULL,
+    MetadataJson nvarchar(max) NULL,
+    Remarks nvarchar(1000) NULL,
+    Active bit NOT NULL
+        CONSTRAINT DF_tblActivityLog_Active DEFAULT (1),
+    CreatedDate datetime2 NOT NULL
+        CONSTRAINT DF_tblActivityLog_CreatedDate DEFAULT SYSUTCDATETIME(),
+    CreatedBy bigint NOT NULL
+        CONSTRAINT DF_tblActivityLog_CreatedBy DEFAULT (0),
+    ModifiedDate datetime2 NOT NULL
+        CONSTRAINT DF_tblActivityLog_ModifiedDate DEFAULT SYSUTCDATETIME(),
+    ModifiedBy bigint NOT NULL
+        CONSTRAINT DF_tblActivityLog_ModifiedBy DEFAULT (0)
 );
 
-
-
-
 CREATE INDEX IX_tblActivityLog_CreatedDate
-ON dbo.tblActivityLog (CreatedDate DESC);
+    ON dbo.tblActivityLog (CreatedDate DESC);
 
 CREATE INDEX IX_tblActivityLog_UserId_CreatedDate
-ON dbo.tblActivityLog (UserId, CreatedDate DESC);
+    ON dbo.tblActivityLog (UserId, CreatedDate DESC);
 
 CREATE INDEX IX_tblActivityLog_AssessmentId_CreatedDate
-ON dbo.tblActivityLog (AssessmentId, CreatedDate DESC);
+    ON dbo.tblActivityLog (AssessmentId, CreatedDate DESC);
 
 CREATE INDEX IX_tblActivityLog_Entity
-ON dbo.tblActivityLog (EntityType, EntityId);
+    ON dbo.tblActivityLog (EntityType, EntityId);
+
+CREATE INDEX IX_tblActivityLog_UserFilters
+    ON dbo.tblActivityLog (UserId, ActivityAction, EntityType, CreatedDate DESC)
+    INCLUDE (ActorName, EntityName, AssessmentName, Module, Active);
