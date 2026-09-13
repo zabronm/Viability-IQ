@@ -1,0 +1,368 @@
+.accounts-shell {
+    --accounts-ink: #263746;
+    --accounts-muted: #667985;
+    --accounts-line: #dfe7e8;
+    --accounts-blue: #315e7d;
+    --accounts-mint: #dff1ea;
+    --assets-navy: #102a43;
+    --assets-blue: #2563eb;
+    --assets-border: #dbe5f0;
+    --assets-surface: #ffffff;
+    color: var(--accounts-ink);
+    padding: 0;
+}
+
+.assets-tabs-shell {
+    margin-top: 0.65rem;
+    overflow: hidden;
+    border: 1px solid #b8c7d8;
+    border-radius: 10px;
+    background: var(--assets-surface);
+    box-shadow: 0 7px 20px rgba(15, 42, 67, 0.08);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.assets-tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.2rem;
+    min-height: 42px;
+    padding: 0.35rem 0.65rem 0;
+    border-bottom: 1px solid #cbd5e1;
+    background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.assets-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 34px;
+    padding: 0.42rem 0.72rem 0.5rem;
+    margin-bottom: -1px;
+    border: 1px solid transparent;
+    border-bottom: 2px solid transparent;
+    border-radius: 6px 6px 0 0;
+    color: #526174;
+    font-size: 0.74rem;
+    font-weight: 650;
+    line-height: 1;
+    background: transparent;
+    cursor: pointer;
+    transition:
+        color 180ms ease,
+        background-color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.assets-tab:hover {
+    color: #075fc9;
+    border-color: #d4e1ef #d4e1ef #93b9e8;
+    background: #f2f7fd;
+    box-shadow: 0 -2px 8px rgba(15, 42, 67, 0.06);
+}
+
+.assets-tab.active {
+    color: var(--assets-blue);
+    border-color: #b8c7d8 #b8c7d8 #fff;
+    border-bottom-width: 2px;
+    background: #fff;
+    box-shadow: 0 -3px 10px rgba(37, 99, 235, 0.08);
+}
+
+.assets-tab.active::after {
+    position: absolute;
+    right: 0.55rem;
+    bottom: -2px;
+    left: 0.55rem;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--assets-blue);
+    content: "";
+}
+
+.assets-tab i {
+    font-size: 0.78rem;
+    transition: transform 180ms ease;
+}
+
+.assets-tab:hover i,
+.assets-tab.active i {
+    transform: translateY(-1px);
+}
+
+.assets-tab-content {
+    min-height: 280px;
+    padding: 0.7rem;
+    border-top: 0;
+    background: #fff;
+    animation: assets-tab-arrival 220ms ease-out;
+}
+
+.accounts-state {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--accounts-line);
+    border-radius: .65rem;
+    display: flex;
+    gap: .6rem;
+    justify-content: center;
+    min-height: 10rem;
+}
+
+.accounts-shell ::deep .accounts-kpis {
+    display: grid;
+    gap: .65rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-bottom: .75rem;
+}
+
+.accounts-shell ::deep .accounts-kpi,
+.accounts-shell ::deep .accounts-card {
+    background: #fff;
+    border: 1px solid var(--accounts-line);
+    border-radius: .65rem;
+    box-shadow: 0 2px 7px rgba(31, 51, 64, .04);
+}
+
+.accounts-shell ::deep .accounts-kpi {
+    padding: .7rem .75rem;
+}
+
+.accounts-shell ::deep .accounts-kpi span {
+    color: var(--accounts-muted);
+    display: block;
+    font-size: .63rem;
+    font-weight: 700;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+}
+
+.accounts-shell ::deep .accounts-kpi strong {
+    display: block;
+    font-size: 1rem;
+    margin-top: .12rem;
+}
+
+.accounts-shell ::deep .accounts-kpi small {
+    color: var(--accounts-muted);
+    font-size: .65rem;
+}
+
+.accounts-shell ::deep .accounts-grid {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: minmax(250px, .8fr) minmax(0, 1.7fr);
+    margin-bottom: .75rem;
+}
+
+.accounts-shell ::deep .accounts-card {
+    overflow: hidden;
+}
+
+.accounts-shell ::deep .accounts-card-header {
+    align-items: center;
+    border-bottom: 1px solid var(--accounts-line);
+    display: flex;
+    justify-content: space-between;
+    padding: .65rem .75rem;
+}
+
+.accounts-shell ::deep .accounts-card-header h2 {
+    font-size: .82rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.accounts-shell ::deep .accounts-card-header span {
+    color: var(--accounts-muted);
+    font-size: .66rem;
+}
+
+.accounts-shell ::deep .accounts-card-body {
+    padding: .7rem .75rem;
+}
+
+.accounts-shell ::deep .accounts-table-wrap {
+    overflow-x: auto;
+}
+
+.accounts-shell ::deep .accounts-table {
+    font-size: .7rem;
+    margin: 0;
+    min-width: 680px;
+    width: 100%;
+}
+
+.accounts-shell ::deep .accounts-table th {
+    background: #e0e5e5;
+    color: #334750;
+    font-weight: 800;
+    padding: .45rem .5rem;
+    white-space: nowrap;
+}
+
+.accounts-shell ::deep .accounts-table td {
+    border-bottom: 1px solid #edf1f1;
+    padding: .42rem .5rem;
+    white-space: nowrap;
+}
+
+.accounts-shell ::deep .accounts-table .total-row td {
+    background: #f4f7f7;
+    border-top: 2px solid #aebcbc;
+    font-weight: 800;
+}
+
+.accounts-shell ::deep .profile-row {
+    display: grid;
+    gap: .4rem;
+    grid-template-columns: 70px 1fr 50px;
+    margin-bottom: .55rem;
+}
+
+.accounts-shell ::deep .profile-row span,
+.accounts-shell ::deep .profile-row strong {
+    font-size: .69rem;
+}
+
+.accounts-shell ::deep .profile-track,
+.accounts-shell ::deep .chart-track {
+    background: #edf2f2;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.accounts-shell ::deep .profile-fill {
+    background: #63a68d;
+    border-radius: inherit;
+    height: .48rem;
+}
+
+.accounts-shell ::deep .monthly-chart {
+    align-items: end;
+    display: grid;
+    gap: .45rem;
+    grid-template-columns: repeat(12, minmax(28px, 1fr));
+    height: 180px;
+    padding-top: .5rem;
+}
+
+.accounts-shell ::deep .chart-month {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.accounts-shell ::deep .chart-bars {
+    align-items: end;
+    display: flex;
+    gap: 2px;
+    height: 145px;
+}
+
+.accounts-shell ::deep .chart-bar {
+    border-radius: 3px 3px 0 0;
+    min-height: 2px;
+    width: 7px;
+}
+
+.accounts-shell ::deep .chart-bar.primary {
+    background: #42789a;
+}
+
+.accounts-shell ::deep .chart-bar.secondary {
+    background: #72b397;
+}
+
+.accounts-shell ::deep .chart-bar.negative {
+    background: #c77a72;
+}
+
+.accounts-shell ::deep .chart-label {
+    color: var(--accounts-muted);
+    font-size: .61rem;
+}
+
+.accounts-shell ::deep .chart-legend {
+    display: flex;
+    font-size: .65rem;
+    gap: 1rem;
+}
+
+.accounts-shell ::deep .legend-dot {
+    border-radius: 50%;
+    display: inline-block;
+    height: 7px;
+    margin-right: .25rem;
+    width: 7px;
+}
+
+.accounts-shell ::deep .legend-dot.primary {
+    background: #42789a;
+}
+
+.accounts-shell ::deep .legend-dot.secondary {
+    background: #72b397;
+}
+
+@media (max-width: 1100px) {
+    .accounts-shell ::deep .accounts-kpis {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .accounts-shell ::deep .accounts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .accounts-shell ::deep .accounts-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@keyframes assets-tab-arrival {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
+    .assets-tabs {
+        overflow-x: auto;
+        padding-right: 0.4rem;
+        padding-left: 0.4rem;
+    }
+
+    .assets-tab {
+        flex: 0 0 auto;
+    }
+}
+
+@media print {
+    .assets-tabs-shell {
+        overflow: visible;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .assets-tabs {
+        display: none !important;
+    }
+
+    .assets-tab-content {
+        min-height: 0;
+        padding: 0;
+    }
+}

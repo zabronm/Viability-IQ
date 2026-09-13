@@ -1,14 +1,135 @@
 ﻿@page "/settings/notifications"
-
 @using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.DataModels
 @inject NavigationManager Nav0
 
 <div class="p-0">
-    <PageHeading _pageTitle="Notifications" CurrentPage="PageType.Communication" _pageHeading="Notifications" />
+    <PageHeading _pageTitle="Notifications & Tasks" CurrentPage="PageType.Communication" _pageHeading="Notifications & Messaging" />
 
-    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px; border: 1px solid #dce5ee; box-shadow: 0 4px 14px rgba(15, 42, 67, 0.06);">
         <div class="app-workspace-shell">
-            &nbsp;           
+
+            <!-- Navigation Tabs with Unread Counter Badge -->
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link @GetActiveTabClass("all")" @onclick='() => SetActiveTabAsync("all")'>
+                        <i class="bi bi-bell-fill me-1"></i> All Alerts
+                        @if (unreadCount > 0)
+                        {
+                            <span class="badge bg-danger ms-1">@unreadCount new</span>
+                        }
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @GetActiveTabClass("tasks")" @onclick='() => SetActiveTabAsync("tasks")'>
+                        <i class="bi bi-check2-square me-1"></i> Assigned Tasks
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @GetActiveTabClass("messages")" @onclick='() => SetActiveTabAsync("messages")'>
+                        <i class="bi bi-chat-dots-fill me-1"></i> Direct Messages
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content Area -->
+            <div class="tab-content p-2">
+                @if (isLoading)
+                {
+                    <div class="text-center py-5 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span> Loading communications...
+                    </div>
+                }
+                else if (notifications == null || notifications.Count == 0)
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                        No notifications or tasks found for this view.
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in notifications)
+                    {
+                        <div class="card mb-3 shadow-sm @(item.IsRead ? "border-light bg-white" : "border-primary bg-light-subtle")"
+                             style="border-left: 4px solid @GetAccentColor(item) !important; cursor: pointer;"
+                             @onclick="() => OpenDetails(item)">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="d-flex gap-2 align-items-center mb-1">
+                                        @if (!item.IsRead)
+                                        {
+                                            <span class="badge bg-primary text-white">NEW</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary text-light">Read</span>
+                                        }
+
+                                        <span class="badge @(item.IsTask ? "bg-warning text-dark" : "bg-info text-dark")">
+                                            @(item.IsTask ? "Assigned Task" : "Direct Message")
+                                        </span>
+
+                                        @if (!string.IsNullOrWhiteSpace(item.AssessmentNumber))
+                                        {
+                                            <span class="badge bg-light text-secondary border">
+                                                <i class="bi bi-folder2-open me-1"></i> Case: @item.AssessmentNumber
+                                            </span>
+                                        }
+
+                                        <small class="text-muted">@item.CreatedDate.ToString("dd MMM yyyy, HH:mm")</small>
+                                    </div>
+                                    <h6 class="@(item.IsRead ? "text-dark" : "text-primary fw-bolder") mb-1">@item.Title</h6>
+                                    <p class="text-secondary small mb-1">@item.Message</p>
+                                    @if (item.IsTask && item.DueDate.HasValue)
+                                    {
+                                        <small class="text-danger fw-semibold">
+                                            <i class="bi bi-calendar-event me-1"></i> Due: @item.DueDate.Value.ToString("yyyy-MM-dd")
+                                        </small>
+                                    }
+                                </div>
+                                <div class="d-flex align-items-center gap-2" @onclick:stopPropagation="true">
+                                    @if (!item.IsRead)
+                                    {
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => MarkAsReadAsync(item.NotificationItemId)" title="Mark as read">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    }
+
+                                    @if (item.IsTask)
+                                    {
+                                        @if (item.TaskStatus == TaskStatusType.Completed)
+                                        {
+                                            <span class="badge bg-success px-2 py-1">Completed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark px-2 py-1">Pending</span>
+                                            <button class="btn btn-sm btn-outline-success" @onclick="() => CompleteTaskAsync(item.NotificationItemId)">
+                                                <i class="bi bi-check-lg"></i> Mark Done
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => MarkAsReadAsync(item.NotificationItemId)">
+                                            <i class="bi bi-reply"></i> Reply
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Quick Action Footer -->
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+                <button class="btn btn-success btn-sm d-flex align-items-center gap-1" @onclick="OpenCreateDrawer">
+                    <i class="bi bi-plus-lg"></i> Create Task / Send Message
+                </button>
+            </div>
+
         </div>
     </main>
     <footer class="py-4 bg-light mt-auto">

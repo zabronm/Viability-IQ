@@ -1,0 +1,29 @@
+﻿.nav-tabs .nav-link {
+    color: #4b5e70;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+    .nav-tabs .nav-link.active {
+        color: #198754 !important;
+        background-color: #fff;
+        border-color: #dce5ee #dce5ee #fff #dce5ee;
+        font-weight: 700;
+    }
+
+.card {
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .card:hover {
+        box-shadow: 0 6px 16px rgba(15, 42, 67, 0.08) !important;
+    }
+
+.badge {
+    font-weight: 600;
+    font-size: 0.72rem;
+}

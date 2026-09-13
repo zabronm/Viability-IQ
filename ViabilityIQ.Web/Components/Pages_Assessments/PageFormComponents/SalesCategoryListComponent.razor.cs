@@ -3,14 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
     public partial class SalesCategoryListComponent
     {
+        [Inject] private ZabOffCanvasService zabOffCanvasService { get; set; } = default!;
+        [Inject] private ToastService _Toast { get; set; } = default!;
+        [Inject] private ISessionService? sessionService { get; set; }
+                
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public EventCallback<long> OnEditRequested { get; set; }
+
+
+        private long ActiveAssessmentId { get; set; }
+        private string ActivePanelTitle { get; set; } = string.Empty;
+        private Type? ActiveFormType { get; set; }
+        private Dictionary<string, object> ActiveFormParameters { get; set; } = new();
 
         private IEnumerable<AssessmentSalesCategory> Categories { get; set; } = Enumerable.Empty<AssessmentSalesCategory>();
         private bool IsComponentLoading { get; set; } = true;
@@ -18,6 +31,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         protected override async Task OnParametersSetAsync()
         {
+            ActiveAssessmentId = AssessmentId;
             await LoadSalesCategoriesAsync();
         }
 
@@ -61,6 +75,50 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 await InvokeAsync(StateHasChanged);
             }
         }
+
+
+        async Task OpenSalesCategory(long selectedId)
+        {
+            try
+            {
+                ActivePanelTitle = selectedId == 0 ?
+                        "Add Sales Category" : "Edit Sales Category";
+
+                await zabOffCanvasService.ShowAsync(
+                    new CanvasRequest
+                    {
+                        Title = ActivePanelTitle,
+                        Width = 350,
+                        ComponentType = typeof(SalesCategoryFormComponent),
+                        Parameters = new
+                        {
+                            AssessmentSalesCategoryId = selectedId,
+                            AssessmentId = ActiveAssessmentId,
+                            OnSaveComplete = EventCallback.Factory.Create<SaveResult>(this, (result) => RefreshComponentData(result)),
+                        }
+                    });
+            }
+            catch (Exception)
+            {
+                throw;
+            } 
+        }
+
+
+        private async Task RefreshComponentData(SaveResult saveResult)
+        {
+            if (saveResult.Success)
+            {
+                _Toast.ShowSuccess(saveResult.Message, sessionService!.AppTitle);                
+                 await LoadSalesCategoriesAsync();                   
+                StateHasChanged();
+            }
+            else
+            {
+                _Toast.ShowError(saveResult.Message, sessionService!.AppTitle);
+            }
+        }
+
 
         //same as below but different name in settings page
         public async Task RefreshAsync()

@@ -65,10 +65,15 @@
                             }
                         </td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit Category"
-                                    @onclick="() => OnEditRequested.InvokeAsync(cat.AssessmentSalesCategoryId)">
+                           @*  <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit Category"
+                                    @onclick="() => OnEditRequested.InvokeAsync(cat.AssessmentSalesCategoryId)">                                   
+                                <i class="bi bi-vector-pen" style="font-size: 0.95rem;"></i>
+                            </button> *@
+                            <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit Category"                                   
+                                    @onclick='() => OpenSalesCategory(cat.AssessmentSalesCategoryId)'>                                
                                 <i class="bi bi-vector-pen" style="font-size: 0.95rem;"></i>
                             </button>
+
                         </td>
                     </tr>
                     rowCounter++;

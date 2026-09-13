@@ -116,8 +116,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                             CreatedDate = DateTime.Now,
                             CreatedBy = sessionService.UserId,
                         };
+
+                        isExecutionSuccess = await salesRepository.SaveAsync(SalesModel);
                     }
-                    isExecutionSuccess = await salesRepository.SaveAsync(SalesModel);
+                    
                 }
 
                 executionFeedbackPackage = new()

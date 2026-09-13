@@ -65,14 +65,14 @@
                 <div class="fa-nav-heading" style="border-top: dotted 0.6px #92c7c7; border-bottom: dotted 0.6px #92c7c7;">Main Operations</div>
 
 
-                <NavLink class="fa-nav-item py-0 mt-1" href="assessment/assets">
+                <NavLink class="fa-nav-item py-0 mt-1" href="/assessment/assets">
                     <div class="nav-icon-avatar-round"><i class="bi bi-suitcase-lg-fill"></i></div>
                     <span class="footer-main-text-sm">Assets</span>
                     <span class="ms-1 viq-indicator-dot @(HasAssetsData ? "status-success" : "status-warning")"
                           title="@(HasAssetsData ? "Assets data entry verified" : "No Assets records populated yet")"></span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item py-0 mt-1" href="assessment/sales">
+                <NavLink class="fa-nav-item py-0 mt-1" href="/assessment/sales">
                     <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
                     <span class="footer-main-text-sm">Sales/Income</span>
                     <span class="ms-1 viq-indicator-dot @(HasSalesData ? "status-success" : "status-warning")"
@@ -81,7 +81,7 @@
 
                 @if (HasDebtorsCreditorsData)               //Shows when NOT Cash business
                 {
-                    <NavLink class="fa-nav-item py-0 my-0" href="assessment/debtors-creditors">
+                    <NavLink class="fa-nav-item py-0 my-0" href="@DebtorsCreditorsUrl">
                         <div class="nav-icon-avatar-round"><i class="bi bi-incognito"></i></div>
                         <span class="footer-main-text-sm">Debtors/Creditors</span>
                         <span class="ms-1 viq-indicator-dot @(HasDebtorsCreditorsData ? "status-success" : "status-warning")"
@@ -89,14 +89,14 @@
                     </NavLink>
                 }
 
-                <NavLink class="fa-nav-item py-0 my-0" href="assessment/stock">
+                <NavLink class="fa-nav-item py-0 my-0" href="/assessment/stock">
                     <div class="nav-icon-avatar-round"><i class="bi bi-boxes"></i></div>
                     <span class="footer-main-text-sm">Stock</span>
                     <span class="ms-1 viq-indicator-dot @(HasStockData ? "status-success" : "status-warning")"
                           title="@(HasStockData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="assessment/expenses">
+                <NavLink class="fa-nav-item" href="/assessment/expenses">
                     <div class="nav-icon-avatar-round"><i class="bi bi-wallet2 fs-xss"></i></div>
                     <span class="footer-main-text-sm">Expenses</span>
                     <span class="ms-1 viq-indicator-dot @(HasExpensesData ? "status-success" : "status-warning")"
@@ -277,5 +277,11 @@
     {
         SessionService.OnSessionChanged -= SynchronizeComponentViewLayout;
     }
+
+    private string DebtorsCreditorsUrl =>
+        SessionService.AssessmentId is long assessmentId && assessmentId > 0
+            ? $"/assessment/debtors-creditors/{assessmentId}"
+            : "/assessment/dashboards";
+
 
 }

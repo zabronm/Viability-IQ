@@ -30,13 +30,25 @@
 
                 <div class="col-12 mb-2">
                     <label class="form-label-custom mb-0">Markup Percentage (%)</label>
-                    <input type="number" step="0.01" class="form-control-compact" placeholder="0.00" @bind-value="Model.MarkupPercentage" />
+                    <input type="number" step="0.01" class="form-control-compact text-end" placeholder="0.00" @bind-value="Model.MarkupPercentage" />
                 </div>
 
-                @* ============  PUT OPENING STOCK FIELD HERE ========================================= *@
+                @* ============  OPENING STOCK FIELD HERE ========================================= *@
                 <div class="col-12 mb-2">
                     <label class="form-label-custom mb-0">Opening Stock (R)</label>
-                    <input type="number" step="0.01" class="form-control-compact" placeholder="0.00" @bind-value="Model.OpeningStock" />
+                    <input type="number" step="0.01" class="form-control-compact text-end" placeholder="0.00" @bind-value="Model.OpeningStock" />
+                </div>
+
+                @* ============  OPENING ACCOUNTS RECEIVABLES/DEBTORS FIELD HERE ========================================= *@
+                <div class="col-12 mb-2">
+                    <label class="form-label-custom mb-0">Opening Acc. Receivable/DEBTORS (R)</label>
+                    <input type="number" step="0.01" class="form-control-compact text-end" placeholder="0.00" @bind-value="Model.OpeningDebtorsAmount" />
+                </div>
+
+                @* ============  OPENING ACCOUNTS PAYABLE/CREDITORS FIELD HERE ========================================= *@
+                <div class="col-12 mb-2">
+                    <label class="form-label-custom mb-0">Opening Acc. Payable/CREDITORS (R)</label>
+                    <input type="number" step="0.01" class="form-control-compact text-end" placeholder="0.00" @bind-value="Model.OpeningCreditorsAmount" />
                 </div>
 
                 <div class="col-12">
@@ -54,7 +66,7 @@
                 </div>
             </div>
 
-            <div class="mt-4 pt-2 d-flex justify-content-end align-items-center">
+            <div class="mt-2 pt-2 d-flex justify-content-end align-items-center">
                 @if (IsSubmitting)
                 {
                     <button type="button" class="btn btn-sm btn-secondary px-4 style-opacity-75" disabled>

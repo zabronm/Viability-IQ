@@ -26,11 +26,13 @@ namespace ViabilityIQ.Shared.DataModels
         [Required(ErrorMessage ="Markup is required, please specify here.")]
         public decimal MarkupPercentage { get; set; }
         public decimal OpeningStock { get; set; }       //Opening stock will be summed to  opening stock of all products
+        public decimal OpeningDebtorsAmount { get; set; }   //Opening balances for debtors on this sales category
+        public decimal OpeningCreditorsAmount { get; set; } //Opening balance for creditors in this sales category
         public bool Active { get; set; }
         public string? Remarks { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => AssessmentSalesCategoryId;

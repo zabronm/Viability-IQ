@@ -44,6 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAlertDismissalService, AlertDismissalService>();
         services.AddScoped<IExportService, ExportService>();
         services.AddScoped<IDashboardDataService, DashboardDataService>();
+        services.AddScoped<INotificationItemRepository, NotificationItemRepository>();
 
         return services;
     }

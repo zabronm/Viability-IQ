@@ -1,0 +1,106 @@
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+<section>
+    <AccountsProjectionAlerts Alerts="@Projection.Alerts"
+                              Heading="Consolidated working-capital alerts" />
+
+    <div class="accounts-kpis">
+        <article class="accounts-kpi">
+            <span>Cash collected</span>
+            <strong>@Money(Projection.TotalCollections)</strong>
+            <small>Projected debtor receipts</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Suppliers paid</span>
+            <strong>@Money(Projection.TotalPayments)</strong>
+            <small>Projected creditor payments</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Net cash movement</span>
+            <strong class="@ValueClass(NetCashMovement)">@Money(NetCashMovement)</strong>
+            <small>Collections less payments</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Closing debtors</span>
+            <strong>@Money(Projection.ClosingDebtors)</strong>
+            <small>Year-end receivables</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Net working capital</span>
+            <strong class="@ValueClass(Projection.NetWorkingCapital)">@Money(Projection.NetWorkingCapital)</strong>
+            <small>Debtors less creditors</small>
+        </article>
+    </div>
+
+    <article class="accounts-card mb-3">
+        <header class="accounts-card-header">
+            <h2>Receipts versus supplier payments</h2>
+            <div class="chart-legend">
+                <span><i class="legend-dot primary"></i>Collections</span>
+                <span><i class="legend-dot secondary"></i>Payments</span>
+            </div>
+        </header>
+        <div class="accounts-card-body">
+            <div class="monthly-chart" aria-label="Monthly consolidated accounts chart">
+                @foreach (var month in Projection.Months)
+                {
+                    <div class="chart-month" title="@ChartTitle(month)">
+                        <div class="chart-bars">
+                            <span class="chart-bar primary" style="height:@BarHeight(month.DebtorCollections)%"></span>
+                            <span class="chart-bar secondary" style="height:@BarHeight(month.CreditorPayments)%"></span>
+                        </div>
+                        <span class="chart-label">@($"M{month.MonthNumber}")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </article>
+
+    <article class="accounts-card mb-3">
+        <header class="accounts-card-header">
+            <h2>Consolidated working-capital outlook</h2>
+            <span>Amounts available to the cashflow forecast</span>
+        </header>
+        <div class="accounts-table-wrap">
+            <table class="accounts-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th class="text-end">Collections</th>
+                        <th class="text-end">Supplier payments</th>
+                        <th class="text-end">Net cash movement</th>
+                        <th class="text-end">Closing debtors</th>
+                        <th class="text-end">Closing creditors</th>
+                        <th class="text-end">Net working capital</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var month in Projection.Months)
+                    {
+                        <tr>
+                            <td>@($"M{month.MonthNumber}")</td>
+                            <td class="text-end">@Money(month.DebtorCollections)</td>
+                            <td class="text-end">@Money(month.CreditorPayments)</td>
+                            <td class="text-end @ValueClass(month.NetCashMovement)">@Money(month.NetCashMovement)</td>
+                            <td class="text-end">@Money(month.ClosingDebtors)</td>
+                            <td class="text-end">@Money(month.ClosingCreditors)</td>
+                            <td class="text-end @ValueClass(month.ClosingDebtors - month.ClosingCreditors)">
+                                @Money(month.ClosingDebtors - month.ClosingCreditors)
+                            </td>
+                        </tr>
+                    }
+                    <tr class="total-row">
+                        <td>12-month total / closing</td>
+                        <td class="text-end">@Money(Projection.TotalCollections)</td>
+                        <td class="text-end">@Money(Projection.TotalPayments)</td>
+                        <td class="text-end @ValueClass(NetCashMovement)">@Money(NetCashMovement)</td>
+                        <td class="text-end">@Money(Projection.ClosingDebtors)</td>
+                        <td class="text-end">@Money(Projection.ClosingCreditors)</td>
+                        <td class="text-end @ValueClass(Projection.NetWorkingCapital)">@Money(Projection.NetWorkingCapital)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <CashflowMainPagesComponent AssessmentId="@Projection.AssessmentId" />
+</section>
