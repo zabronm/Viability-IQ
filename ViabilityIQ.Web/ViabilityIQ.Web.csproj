@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Remove="Components\Pages\ReportsPage.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\AssetFormComponents\AssetMovementsListComponent.razor.cs" />
     <Compile Remove="Components\Pages_Assessments\CommonComponents\CashFlowSummaryDetailComponent.razor.cs" />
     <Compile Remove="Components\Pages_Assessments\CommonComponents\ConsolidatedRevenueAnalysisComponent.razor.cs" />
     <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor.cs" />
@@ -33,6 +34,7 @@
   <ItemGroup>
     <Content Remove="Components\CommonComponents\BFooter.razor" />
     <Content Remove="Components\Pages\AppInitializer.razor" />
+    <Content Remove="Components\Pages_Assessments\AssetFormComponents\AssetMovementsListComponent.razor" />
     <Content Remove="Components\Pages_Assessments\CommonComponents\CashFlowSummaryDetailComponent.razor" />
     <Content Remove="Components\Pages_Assessments\CommonComponents\ConsolidatedRevenueAnalysisComponent.razor" />
     <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor" />

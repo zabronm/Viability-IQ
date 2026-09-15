@@ -57,12 +57,20 @@
                 </NavLink>
                 @* <hr class="border-secondary my-0" /> *@
 
-                <NavLink class="fa-nav-item py-0 my-0" href="assessment/dashboards" Match="NavLinkMatch.All">
+                <NavLink class="fa-nav-item py-0 my-0 mb-1" href="assessment/dashboards" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-speedometer2"></i></div>
                     <span class="footer-main-text-sm">Dashboard</span>
                 </NavLink>
 
                 <div class="fa-nav-heading" style="border-top: dotted 0.6px #92c7c7; border-bottom: dotted 0.6px #92c7c7;">Main Operations</div>
+
+
+                <NavLink class="fa-nav-item py-0 mt-1" href="assessment/assets">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-suitcase-lg-fill"></i></div>
+                    <span class="footer-main-text-sm">Assets</span>
+                    <span class="ms-1 viq-indicator-dot @(HasAssetsData ? "status-success" : "status-warning")"
+                          title="@(HasAssetsData ? "Assets data entry verified" : "No Assets records populated yet")"></span>
+                </NavLink>
 
                 <NavLink class="fa-nav-item py-0 mt-1" href="assessment/sales">
                     <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
@@ -77,7 +85,7 @@
                         <div class="nav-icon-avatar-round"><i class="bi bi-incognito"></i></div>
                         <span class="footer-main-text-sm">Debtors/Creditors</span>
                         <span class="ms-1 viq-indicator-dot @(HasDebtorsCreditorsData ? "status-success" : "status-warning")"
-                        title="@(HasSalesData ? "Debtors/Creditors data verified" : "No Debtors/Creditors data populated yet")"></span>
+                              title="@(HasSalesData ? "Debtors/Creditors data verified" : "No Debtors/Creditors data populated yet")"></span>
                     </NavLink>
                 }
 
@@ -95,14 +103,14 @@
                           title="@(HasExpensesData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
-               @*  @if (HasLoansData)              //Shows when Loans are available
+                @*  @if (HasLoansData)              //Shows when Loans are available
                 { *@
-                    <NavLink class="fa-nav-item" href="assessment/loan-repayments">
-                        <div class="nav-icon-avatar-round"><i class="bi bi-umbrella-fill"></i></div>
+                <NavLink class="fa-nav-item" href="assessment/loan-repayments">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-umbrella-fill"></i></div>
                     <span class="footer-main-text-sm">Loan Repayments</span>
-                        <span class="ms-1 viq-indicator-dot @(HasLoansData ? "status-success" : "status-warning")"
-                        title="@(HasExpensesData ? "Loans data entry verified" : "No Loans records populated yet")"></span>
-                    </NavLink>
+                    <span class="ms-1 viq-indicator-dot @(HasLoansData ? "status-success" : "status-warning")"
+                          title="@(HasExpensesData ? "Loans data entry verified" : "No Loans records populated yet")"></span>
+                </NavLink>
                 @* } *@
 
                 <NavLink class="fa-nav-item" href="assessment/VAT" style="border-top: solid 0.5px #cdcdcd;">
@@ -112,7 +120,7 @@
 
                 <NavLink class="fa-nav-item" href="assessment/reports" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
-                    <span class="footer-main-text-sm">Reports</span>
+                    <span class="footer-main-text-sm">Assessment Reports</span>
                     @* <span class="ms-1 viq-indicator-dot @(HasReportsData ? "status-success" : "status-warning")"
                           title="@(HasReportsData ? "Client report generation verified" : "Reports ungenerated")"></span> *@
                 </NavLink>
@@ -121,7 +129,7 @@
 
                 <NavLink class="fa-nav-item" href="assessment/settings" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
-                    <span class="footer-main-text">Setup</span>&nbsp;<i class="bi bi-caret-right"></i>
+                    <span class="footer-main-text">Assessment Settings</span><i class="bi bi-caret-right"></i>
                 </NavLink>
             </div>
 
@@ -194,29 +202,35 @@
                 </div>
             </div> *@
 
-                @* <NavLink class="fa-nav-item footer-item border-top-thick" href="global/suggestions">
+            @* <NavLink class="fa-nav-item footer-item border-top-thick" href="global/suggestions">
                     <div class="nav-icon-avatar-round"><i class="bi bi-person-raised-hand"></i></div>
                     <div class="footer-text-stack">
                         <span class="footer-main-text">Send Suggestion</span>
                     </div>
-                </NavLink> 
+                </NavLink>
                 </div> *@
             
         </aside>
 
         <main class="fa-main-content-surface @(isSidebarCollapsed ? "expanded" : "")">
             <div class="content-body-padding">
-                @Body
+                <CascadingValue TValue="long?"
+                                Name="CurrentAssessmentId"
+                                Value="SessionService.AssessmentId"
+                                IsFixed="false">
+
+                    @Body
+                </CascadingValue>
             </div>
         </main>
     </div>
 
-    <ZabOffCanvasHost />                        <!--THIS IS THE NEW HOST FOR offCanvas component -->
+    <ZabOffCanvasHost />  <!--THIS IS THE NEW HOST FOR offCanvas component -->
 </div>
 
 <ToastComponent />
 
-@code {   
+@code {
 
     private bool isSidebarCollapsed = false;
     private bool isSetupOpen = false;
@@ -225,6 +239,7 @@
 
     private bool HasDebtorsCreditorsData => SessionService.HasDebtorsCreditorsData;
     private bool HasLoansData => SessionService!.HasLoansData;
+    private bool HasAssetsData => SessionService!.HasAssetsData;
     private bool HasSalesData => SessionService!.HasSalesEntries;
     private bool HasStockData => SessionService!.HasStockEntries;
     private bool HasExpensesData => SessionService!.HasExpensesEntries;

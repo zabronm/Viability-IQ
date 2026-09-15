@@ -6,10 +6,10 @@ using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 {
-    /// <summary>
+   
     /// QuickActionsPanel displays primary action buttons for common tasks
     /// Opens form components via OffCanvas service
-    /// </summary>
+   
     public partial class QuickActionsPanelComponent : ComponentBase
     {
         #region Injected Dependencies
@@ -22,10 +22,10 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Parameters
 
-        /// <summary>
+       
         /// Callback when user clicks an action button
         /// Parameter is an action ID (1=NewAssessment, 2=NewBusiness, 3=NewClient, 4=ViewSettings)
-        /// </summary>
+       
         [Parameter]
         public EventCallback<int> OnActionClick { get; set; }
 
@@ -33,14 +33,14 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Methods
 
-        /// <summary>
+       
         /// Handle action button click
         /// Action IDs:
         /// 1 = New Assessment (opens AssessmentsFormComponent)
         /// 2 = New Business (opens BusinessFormComponent)
         /// 3 = New Client (opens ClientFormComponent)
         /// 4 = Settings (navigates to settings page)
-        /// </summary>
+       
         public async Task HandleActionClick(int actionId)
         {
             Logger.LogInformation(
@@ -82,9 +82,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             //}
         }
 
-        /// <summary>
+       
         /// Open New Assessment form via OffCanvas service
-        /// </summary>
+       
         private async Task OpenNewAssessmentForm()
         {
             try
@@ -107,9 +107,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             }
         }
 
-        /// <summary>
+       
         /// Open New Business form via OffCanvas service
-        /// </summary>
+       
         private async Task OpenNewBusinessForm()
         {
             try
@@ -132,9 +132,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             }
         }
 
-        /// <summary>
+       
         /// Open New Client form via OffCanvas service
-        /// </summary>
+       
         private async Task OpenNewClientForm()
         {
             try
@@ -157,9 +157,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
             }
         }
 
-        /// <summary>
+       
         /// Handle form result callback
-        /// </summary>
+       
         private async Task HandleFormResult(SaveResult result, string entityType)
         {
             if (result.Success)

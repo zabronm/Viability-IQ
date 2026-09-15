@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using ViabilityIQ.Shared.DataModelsInterfaces;
 
 namespace ViabilityIQ.Infrastructure.Repositories
 {
-    public class GenericDataRepository<T>: IGenericDataRepository<T> where T : class
+    public class GenericDataRepository<T> : IGenericDataRepository<T> where T : class
     {
         #region Private Fields
         private readonly IDbConnectionFactory _dbConnectionFactory;
@@ -28,9 +29,10 @@ namespace ViabilityIQ.Infrastructure.Repositories
         }
         #endregion
 
+        #region READ OPERATIONS
 
-        #region Public Methods        
-        /// Gets an entity by its ID        
+        
+        /// Gets a single entity by its ID        
         public async Task<T?> GetByIdAsync(long id)
         {
             try
@@ -45,8 +47,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
-       
-        /// Gets all entities without filtering       
+        
+        /// Gets all entities without filtering        
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             try
@@ -72,9 +74,9 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
-       
+        
         /// Gets all entities matching a predicate filter
-        /// Note: This performs client-side filtering since Dapper.Contrib doesn't support LINQ     
+        /// Note: This performs client-side filtering since Dapper.Contrib doesn't support LINQ        
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
             try
@@ -104,8 +106,92 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
-      
-        /// Saves (inserts or updates) an entity      
+        
+        /// Gets entities filtered by a specific field value
+        /// More efficient for simple single-field filtering than GetAllAsync(predicate)
+        /// Example: GetByFieldAsync("AssessmentId", 123)        
+        public async Task<IEnumerable<T>> GetByFieldAsync(string fieldName, object fieldValue)
+        {
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+
+                // Validate field name to prevent SQL injection
+                if (string.IsNullOrWhiteSpace(fieldName))
+                    throw new ArgumentException("Field name cannot be empty", nameof(fieldName));
+
+                // Build dynamic WHERE clause
+                var sql = $"SELECT * FROM [{typeof(T).Name}] WHERE [{fieldName}] = @Value";
+
+                var result = await connection.QueryAsync<T>(sql, new { Value = fieldValue });
+
+                // Apply sorting if applicable
+                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
+                {
+                    return result.Cast<ISortableEntity>()
+                                 .OrderBy(x => x.DisplayName)
+                                 .Cast<T>()
+                                 .ToList();
+                }
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Get By Field Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        
+        /// Gets entities filtered by multiple field values
+        /// Example: GetByFieldsAsync(new { AssessmentId = 123, IsActive = true })        
+        public async Task<IEnumerable<T>> GetByFieldsAsync(object filters)
+        {
+            try
+            {
+                if (filters == null)
+                    throw new ArgumentNullException(nameof(filters));
+
+                using var connection = _dbConnectionFactory.CreateConnection();
+
+                // Build WHERE clause from anonymous object properties
+                var properties = filters.GetType().GetProperties();
+                if (properties.Length == 0)
+                    throw new ArgumentException("Filters object must have at least one property", nameof(filters));
+
+                var whereClause = string.Join(" AND ",
+                    properties.Select(p => $"[{p.Name}] = @{p.Name}"));
+
+                var sql = $"SELECT * FROM [{typeof(T).Name}] WHERE {whereClause}";
+
+                var result = await connection.QueryAsync<T>(sql, filters);
+
+                // Apply sorting if applicable
+                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
+                {
+                    return result.Cast<ISortableEntity>()
+                                 .OrderBy(x => x.DisplayName)
+                                 .Cast<T>()
+                                 .ToList();
+                }
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Get By Fields Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region WRITE OPERATIONS
+
+        
+        /// Saves (inserts or updates) an entity
+        /// Automatically handles audit trail properties        
         public async Task<bool> SaveAsync(T entity)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -145,8 +231,9 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
-      
-        /// Deletes an entity      
+        
+        /// Deletes an entity
+        
         public async Task<bool> DeleteAsync(T entity)
         {
             try
@@ -157,6 +244,67 @@ namespace ViabilityIQ.Infrastructure.Repositories
             catch (Exception ex)
             {
                 Console.WriteLine($"Database Delete Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region UTILITY OPERATIONS
+
+        
+        /// Counts entities matching a predicate filter        
+        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+        {
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                var allItems = await connection.GetAllAsync<T>();
+
+                // Compile the predicate and count matching items
+                var compiled = predicate.Compile();
+                return allItems.Count(compiled);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Count Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        
+        /// Counts all entities in the table        
+        public async Task<int> CountAsync()
+        {
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                var allItems = await connection.GetAllAsync<T>();
+                return allItems.Count();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Count Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        
+        /// Checks if any entity matches a predicate filter        
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+        {
+            try
+            {
+                using var connection = _dbConnectionFactory.CreateConnection();
+                var allItems = await connection.GetAllAsync<T>();
+
+                // Compile the predicate and check if any item matches
+                var compiled = predicate.Compile();
+                return allItems.Any(compiled);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Any Error: {ex.Message}");
                 throw;
             }
         }

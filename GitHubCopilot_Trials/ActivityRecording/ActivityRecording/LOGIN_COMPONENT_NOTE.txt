@@ -1,0 +1,17 @@
+Login.razor.cs is intentionally not replaced.
+
+The supplied Login component does not perform authentication. Login.razor uses
+a native HTML POST to:
+
+    /api/auth/signin-form
+
+Therefore, recording a Login activity in Login.razor.cs would happen before the
+server knows whether the credentials are valid. It could create false login
+events.
+
+Replace AuthController.cs from this package instead. Its SignInForm method
+records ActivityAction.Login only after PasswordSignInAsync succeeds.
+
+Do not log failed credential attempts to tblActivityLog as ordinary Login
+activities. If failed-login security monitoring is required, use a separate
+security-event store with throttling, retention controls, and no password data.

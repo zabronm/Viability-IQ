@@ -1,0 +1,60 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+<div class="row bg-white g-3 mt-1 mb-4 py-2 px-2 shadow-sm rounded-3 border-0">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+            <h3 class="fw-extrabold text-marble-dark mb-1 fs-4">Cashflow Projections</h3>
+            <p class="text-muted small mb-0">Live 12-month cash, profit, balance and viability projection.</p>
+        </div>
+        <div class="badge bg-light text-marble-dark px-3 py-2 rounded-pill border fw-semibold">
+            Assessment #@AssessmentId
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary"></div>
+            <p>Calculating live projection...</p>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <strong>Cashflow calculation failed.</strong> @ErrorMessage
+        </div>
+    }
+    else if (Projection is not null)
+    {
+        <BusinessHealthAlertsComponent Projection="@Projection" />
+        <CashflowKPICardsComponent Projection="@Projection" />
+
+        <div class="row g-3 mt-1">
+            <div class="col-xl-5">
+                <CashflowSummaryDashboardComponent Projection="@Projection" />
+            </div>
+            <div class="col-xl-7">
+                <FinancialViabilityKPIComponent Projection="@Projection" />
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1 align-items-stretch">
+            <div class="col-lg-4">
+                <CashflowSummaryTableComponent Projection="@Projection" />
+            </div>
+            <div class="col-lg-8">
+                <CashflowPerformanceChartComponent Projection="@Projection" />
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-xl-5 col-lg-6">
+                <CashflowBusinessIndicatorsComponent Projection="@Projection" />
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <DetailedCashflowStatementComponent Projection="@Projection" />
+        </div>
+    }
+</div>

@@ -1,0 +1,153 @@
+﻿@using ViabilityIQ.Web.Components.CommonComponents
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
+
+<EditForm Model="MovementModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
+    <DataAnnotationsValidator />
+    <div class="p-2 amf-container">
+
+        <!-- ================= ASSET HEADER WITH NAME, CLASS, CATEGORY ================= -->
+        <div class="card bg-white border-0 mb-1 p-1 rounded-3 shadow-sm amf-header-card">
+            <!-- Asset Name - Bold and Prominent -->
+            <h5 class="fw-bold  amf-asset-name">
+                @(Asset?.AssetName ?? "Asset Movement")
+            </h5>
+
+            <!-- Asset Class and Category - Smaller, Muted -->
+            <div class="d-flex gap-3 flex-wrap" style="text-transform: capitalize">
+                @if (AssetClassName != null)
+                {
+                    <small class="text-muted d-block amf-asset-metadata " style="font-variant:small-caps;">
+                        <strong>ASSET CLASS:</strong> @AssetClassName.ToUpper()
+                    </small>
+                }
+                @if (AssetCategoryName != null)
+                {
+                    <small class="text-muted d-block amf-asset-metadata" style="font-variant: small-caps;">
+                        <strong>CATEGORY:</strong> @AssetCategoryName.ToUpper()
+                    </small>
+                }
+            </div>
+        </div>
+
+        <!-- ================= MONTHLY MOVEMENTS TABLE ================= -->
+        <div class="amf-table-wrapper">
+            <table class="table table-sm table-hover mb-0 align-middle amf-data-table">
+                <thead class="amf-table-head">
+                    <tr class="amf-header-row">
+                        <th class="amf-col-month">Month</th>
+                        <th class="amf-col-type">Movement Type</th>
+                        <th class="amf-col-value">Movement Value ($)</th>
+                        <th class="amf-col-gross">Gross Value ($)</th>
+                        <th class="amf-col-depr">Monthly Depr. ($)</th>
+                        <th class="amf-col-nbv">Net Book Value ($)</th>
+                    </tr>
+                </thead>
+                <tbody class="amf-table-body">
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        int currentMonth = m;
+                        var monthlyData = MonthlySummary?.FirstOrDefault(x => x.Month == currentMonth);
+
+                        <tr class="amf-table-row">
+                            <!-- Month Number -->
+                            <td class="amf-cell-month">
+                                Month @currentMonth
+                            </td>
+
+                            <!-- Movement Type Dropdown -->
+                            <td class="amf-cell-type">
+                                <select class="amf-select-movement-type"
+                                        value="@MovementModel.GetMovementType(currentMonth)"
+                                        @onchange="@(e => OnMovementTypeChanged(currentMonth, e.Value?.ToString()))">
+                                    <option value="">-- None --</option>
+                                    <option value="Addition">Addition</option>
+                                    <option value="Disposal">Disposal</option>
+                                    <option value="Revaluation">Revaluation</option>
+                                    <option value="Transfer">Transfer</option>
+                                </select>
+                            </td>
+
+                            <!-- Movement Value Input -->
+                            <td class="amf-cell-value">
+                                <input type="number"
+                                       class="amf-input-movement-value"
+                                       value="@MovementModel.GetMovementValue(currentMonth)"
+                                       @onchange="@(e => OnMovementValueChanged(currentMonth, e.Value))"
+                                       step="0.01"
+                                       placeholder="0.00" />
+                            </td>
+
+                            <!-- Gross Value (Calculated - Read Only) -->
+                            <td class="amf-cell-gross">
+                                <span class="amf-value-display amf-value-bold">
+                                    @(monthlyData?.GrossValue.ToString("N2") ?? "-")
+                                </span>
+                            </td>
+
+                            <!-- Monthly Depreciation (Calculated - Read Only) -->
+                            <td class="amf-cell-depr">
+                                <span class="amf-value-display amf-value-muted">
+                                    @(monthlyData?.Depreciation.ToString("N2") ?? "-")
+                                </span>
+                            </td>
+
+                            <!-- Net Book Value (Calculated - Read Only) -->
+                            <td class="amf-cell-nbv">
+                                <span class="amf-value-display amf-value-highlight">
+                                    @(monthlyData?.NetBookValue.ToString("N2") ?? "-")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ================= SUMMARY SECTION ================= -->
+        @if (MonthlySummary?.Any() == true)
+        {
+            var totalDepreciation = MonthlySummary.Sum(x => x.Depreciation);
+            var finalGrossValue = MonthlySummary.Last().GrossValue;
+            var finalNetBookValue = MonthlySummary.Last().NetBookValue;
+
+            <div class="amf-summary-box">
+                <div class="amf-summary-row">
+                    <div class="amf-summary-col">
+                        <small class="amf-summary-label"><strong>Final Gross Value:</strong></small>
+                        <span class="amf-summary-value">@finalGrossValue.ToString("N2")</span>
+                    </div>
+                    <div class="amf-summary-col">
+                        <small class="amf-summary-label"><strong>Total Annual Depreciation:</strong></small>
+                        <span class="amf-summary-value">@totalDepreciation.ToString("N2")</span>
+                    </div>
+                </div>
+                <div class="amf-summary-row">
+                    <div class="amf-summary-col amf-summary-col-full">
+                        <small class="amf-summary-label"><strong>Final Net Book Value:</strong></small>
+                        <span class="amf-summary-value amf-summary-value-highlight">@finalNetBookValue.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- ================= FORM ACTIONS ================= -->
+        <div class="amf-form-actions">
+            <button type="button" class="amf-btn-cancel" @onclick="CancelFormAsync">
+                <i class="bi bi-x-circle"></i>
+                <span>&nbsp; Cancel</span>
+            </button>
+            <button type="submit" class="amf-btn-submit btn-primary" disabled="@IsSubmitting">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-circle"></i>
+                    <span>&nbsp; Save Movements</span>
+                }
+            </button>
+        </div>
+    </div>
+</EditForm>

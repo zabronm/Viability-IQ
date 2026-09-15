@@ -1,0 +1,142 @@
+LOGOUT ACTIVITY RECORDING - .NET 8 IMPLEMENTATION
+=================================================
+
+This folder contains only the Logout task.
+
+
+FILES
+-----
+
+Logout.razor
+    Replacement route component. It force-loads the server confirmation page.
+
+AuthController_LOGOUT_CHANGES.txt
+    Adds the server-rendered confirmation and protected logout POST actions.
+
+PROFILE_DROPDOWN_CHANGE.txt
+    Ensures the visible Sign Out command routes through /logout.
+
+
+STEP 1 - REPLACE LOGOUT.RAZOR
+-----------------------------
+
+Copy:
+
+    GitHubCopilot_Trials\LogoutActivityRecording\Logout.razor
+
+to:
+
+    ViabilityIQ.Web\Components\Pages\Identity\Logout.razor
+
+
+STEP 2 - UPDATE AUTHCONTROLLER
+------------------------------
+
+Apply AuthController_LOGOUT_CHANGES.txt to:
+
+    ViabilityIQ.Web\Controllers\AuthController.cs
+
+The activity writer must already be registered and working.
+
+
+STEP 3 - UPDATE PROFILE DROPDOWN
+--------------------------------
+
+Apply PROFILE_DROPDOWN_CHANGE.txt to:
+
+    ViabilityIQ.Web\Components\Pages\Identity\ProfileDropdownComponent.razor
+
+Without this change, the visible Sign Out button bypasses audited logout.
+
+
+DO NOT MODIFY APP.RAZOR
+-----------------------
+
+This final implementation is compatible with the application's fixed,
+non-prerendered Interactive Server mode and .NET 8.
+
+The earlier ExcludeFromInteractiveRouting approach is not used because that
+attribute is unavailable in this target framework.
+
+
+HOW THE FLOW WORKS
+------------------
+
+1. The profile dropdown opens /logout.
+2. Logout.razor force-loads /api/auth/signout-confirmation.
+3. The GET controller action runs in a real HTTP request.
+4. GetAndStoreTokens creates the antiforgery cookie and request token.
+5. The controller returns a small HTML confirmation form containing the token.
+6. Confirmation POSTs to /api/auth/signout-form.
+7. ValidateRequestAsync validates the cookie/token pair.
+8. The controller writes the mandatory Logout activity.
+9. Only after recording succeeds, it clears the authentication cookie.
+10. The browser is redirected to /login.
+
+If activity recording fails, sign-out is stopped and the user remains signed
+in. This prevents completed logouts without audit records.
+
+
+WHY THE PREVIOUS TOKEN WAS MISSING
+----------------------------------
+
+The previous Logout.razor contained <AntiforgeryToken />, but the entire Routes
+tree is rendered using:
+
+    new InteractiveServerRenderMode(prerender: false)
+
+The interactive component did not have a request-bound static rendering
+context, so no __RequestVerificationToken input was emitted.
+
+The controller-rendered confirmation creates both pieces during one HTTP GET,
+which avoids that limitation without weakening antiforgery validation.
+
+
+VALIDATION
+----------
+
+1. Restart the application after editing AuthController.
+2. Sign in.
+3. Click the profile dropdown's Sign Out link.
+4. Confirm the browser reaches:
+
+       /api/auth/signout-confirmation
+
+5. Inspect page source and confirm:
+
+       name="__RequestVerificationToken"
+
+6. Click Sign out.
+7. Confirm redirection to /login.
+8. Run:
+
+       SELECT TOP (10)
+           ActivityLogId,
+           UserId,
+           ActorName,
+           ActivityAction,
+           EntityType,
+           EntityId,
+           EntityName,
+           Module,
+           Page,
+           Remarks,
+           CreatedDate
+       FROM dbo.tblActivityLog
+       WHERE ActivityAction = 'Logout'
+       ORDER BY ActivityLogId DESC;
+
+9. Confirm the newest record contains:
+
+       ActivityAction = Logout
+       EntityType     = User
+       EntityId       = signed-in user ID
+       Module         = Identity
+       Page           = /logout
+
+10. Search the application for direct user-facing calls to:
+
+       SignInManager.SignOutAsync
+       AuthService.LogoutAsync
+
+All normal sign-out commands must route through /logout.

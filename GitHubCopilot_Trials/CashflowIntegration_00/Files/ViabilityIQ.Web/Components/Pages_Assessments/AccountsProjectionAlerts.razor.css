@@ -1,0 +1,106 @@
+.projection-alert-panel {
+    margin-bottom: .75rem;
+    padding: 1rem;
+    border: 1px solid #c7d9ec;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.projection-alert-panel > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .65rem;
+}
+
+.projection-alert-panel > header span {
+    color: #6e7891;
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+
+.projection-alert-panel h2 {
+    margin: .18rem 0 0;
+    color: #102a43;
+    font-size: .9rem;
+    font-weight: 800;
+}
+
+.projection-alert-panel > header button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #d6e1eb;
+    border-radius: 50%;
+    color: #63809a;
+    background: #fff;
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.projection-alert-panel > header button:hover {
+    border-color: #9eb8cf;
+    color: #1d5f96;
+    background: #f6fafe;
+}
+
+.projection-alert-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+}
+
+.projection-alert-list article {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    width: min(100%, 480px);
+    padding: .65rem .75rem;
+    border: 1px solid;
+    border-radius: 8px;
+}
+
+.projection-alert-list article.critical {
+    border-color: #e9aaaa;
+    color: #842828;
+    background: #fff3f3;
+}
+
+.projection-alert-list article.warning {
+    border-color: #efca89;
+    color: #74500d;
+    background: #fff9ed;
+}
+
+.projection-alert-list article.information {
+    border-color: #abd7c5;
+    color: #285e4a;
+    background: #f0faf6;
+}
+
+.projection-alert-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .78);
+}
+
+.projection-alert-list strong {
+    display: block;
+    color: #162d47;
+    font-size: .73rem;
+}
+
+.projection-alert-list p {
+    margin: .14rem 0 0;
+    font-size: .67rem;
+    line-height: 1.45;
+}

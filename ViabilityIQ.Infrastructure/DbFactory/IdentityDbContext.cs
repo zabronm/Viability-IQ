@@ -5,10 +5,10 @@ using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
 namespace ViabilityIQ.Infrastructure.Data
 {
-    /// <summary>
+   
     /// DbContext for Identity/User/Role management only
     /// Separate from ApplicationDbContext to avoid Dapper/EF Core conflicts
-    /// </summary>
+   
     public class IdentityDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, long>
     {
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options)

@@ -1,0 +1,76 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+
+<div class="cashflow-summary-dashboard auth-card h-100">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+            <h5 class="mb-0">Profit Summary (VAT Inclusive)</h5>
+            <small class="text-muted">Assessment projected period total</small>
+        </div>
+        <i class="bi bi-pie-chart text-navy"></i>
+    </div>
+
+    <table class="table table-hover table-borderless align-middle mb-0">
+        <tbody>
+            <tr>
+                <td>Sales</td>
+                <td class="text-end">@Amount(Projection.Summary.SalesVatInclusive)</td>
+            </tr>
+            <tr>
+                <td>(less) Cost of Goods (COGs)</td>
+                <td class="text-end text-danger">(@Amount(Projection.Summary.CostOfGoodsSoldVatInclusive))</td>
+            </tr>
+            <tr class="summary-total">
+                <td>GROSS PROFIT</td>
+                <td class="text-end">@Amount(Projection.Summary.GrossProfitVatInclusive)</td>
+            </tr>
+            <tr>
+                <td>(add) Sundry Income</td>
+                <td class="text-end">@Amount(Projection.Summary.SundryIncomeVatInclusive)</td>
+            </tr>
+            <tr>
+                <td>(add) Other Income</td>
+                <td class="text-end">@Amount(Projection.Summary.OtherIncomeVatInclusive)</td>
+            </tr>
+            <tr class="summary-total">
+                <td>GROSS INCOME</td>
+                <td class="text-end">@Amount(Projection.Summary.GrossIncomeVatInclusive)</td>
+            </tr>
+            <tr>
+                <td>(less) Operating Expenses</td>
+                <td class="text-end text-danger">(@Amount(Projection.Summary.OperatingExpensesVatInclusive))</td>
+            </tr>
+            <tr>
+                <td>(less) Net VAT Payable / (add Refund)</td>
+                <td class="text-end">@VatAdjustment(Projection.Summary.VatPayable)</td>
+            </tr>
+            <tr class="summary-total">
+                <td>EBITDA</td>
+                <td class="text-end">@Amount(Projection.Summary.EBITDAInclusive)</td>
+            </tr>
+            <tr>
+                <td>(less) Depreciation</td>
+                <td class="text-end text-danger">(@Amount(Projection.Summary.Depreciation))</td>
+            </tr>
+            <tr>
+                <td>(less) Interest</td>
+                <td class="text-end text-danger">(@Amount(Projection.Summary.InterestExpense))</td>
+            </tr>
+            <tr class="summary-total final-total">
+                <td>NET PROFIT BEFORE TAX</td>
+                <td class="text-end">@Amount(Projection.Summary.ProfitBeforeTaxVatInclusive)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="income-note">
+        Other Income comprises Grants/Donations, Asset Disposal and unclassified
+        income. VAT-exclusive values remain authoritative for viability ratios.
+    </div>
+</div>
+
+@code {
+    private static string Amount(decimal value) => value.ToString("N0");
+    private static string VatAdjustment(decimal value) =>
+        value >= 0m ? $"({value:N0})" : Math.Abs(value).ToString("N0");
+}

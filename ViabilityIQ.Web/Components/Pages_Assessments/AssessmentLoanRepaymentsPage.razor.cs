@@ -49,6 +49,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private List<LoanRepaymentRowViewModel> LoanProfilesDataset { get; set; } = new();
         private List<AssessmentLoanRepaymentDto> LoanTypeLookupList { get; set; } = new();
 
+        // Sorting State for Loan Profile Type
+        private bool isLoanProfileAscending = true;
+
         #endregion
 
         #region Lifecycle Methods
@@ -79,6 +82,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 Logger?.LogError(ex, "Error initializing AssessmentLoanRepaymentsPage");
                 _Toast?.ShowError(ex.Message, sessionService?.AppTitle);
             }
+        }
+
+        #endregion
+
+        #region Sorting Helper Methods
+
+        private void SortLoanProfileType()
+        {
+            isLoanProfileAscending = !isLoanProfileAscending;
+        }
+
+        private string GetLoanProfileSortIcon()
+        {
+            return isLoanProfileAscending ? "bi bi-arrow-up text-primary" : "bi bi-arrow-down text-primary";
         }
 
         #endregion
@@ -228,6 +245,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     x.LoanTypeName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
                     x.BankName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
             }
+
+            query = isLoanProfileAscending
+                ? query.OrderBy(x => x.LoanTypeName)
+                : query.OrderByDescending(x => x.LoanTypeName);
 
             return query;
         }

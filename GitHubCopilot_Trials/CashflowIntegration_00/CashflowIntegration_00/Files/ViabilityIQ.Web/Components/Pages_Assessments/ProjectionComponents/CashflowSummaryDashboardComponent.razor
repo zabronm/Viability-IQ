@@ -1,0 +1,17 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+<div class="cashflow-summary-dashboard auth-card">
+    <h5>Profit Summary (VAT-exclusive)</h5>
+    <table class="table table-hover table-borderless">
+        <tbody>
+            <tr><td>Revenue</td><td class="text-end">@Projection.Summary.Revenue.ToString("N0")</td></tr>
+            <tr><td>Cost of goods sold</td><td class="text-end">(@Projection.Summary.CostOfGoodsSold.ToString("N0"))</td></tr>
+            <tr class="fw-bold"><td>Gross profit</td><td class="text-end">@Projection.Summary.GrossProfit.ToString("N0")</td></tr>
+            <tr><td>Operating expenses</td><td class="text-end">(@Projection.Summary.OperatingExpenses.ToString("N0"))</td></tr>
+            <tr class="fw-bold"><td>EBITDA</td><td class="text-end">@Projection.Summary.EBITDA.ToString("N0")</td></tr>
+            <tr><td>Depreciation</td><td class="text-end">(@Projection.Summary.Depreciation.ToString("N0"))</td></tr>
+            <tr><td>Interest</td><td class="text-end">(@Projection.Summary.InterestExpense.ToString("N0"))</td></tr>
+            <tr class="fw-bold"><td>Profit before tax</td><td class="text-end">@Projection.Summary.ProfitBeforeTax.ToString("N0")</td></tr>
+        </tbody>
+    </table>
+</div>

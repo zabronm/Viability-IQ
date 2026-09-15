@@ -40,9 +40,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Constructor
 
-        /// <summary>
+       
         /// Initializes a new instance of the AuthenticationService
-        /// </summary>
+       
         public AuthenticationService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -67,9 +67,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Registration
 
-        /// <summary>
+       
         /// Registers a new user with the provided credentials
-        /// </summary>
+       
         /// <param name="request">Registration request containing user details</param>
         /// <returns>Authentication result with success status and messages</returns>
         public async Task<AuthResult> RegisterAsync(RegisterRequest request)
@@ -157,11 +157,11 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Login
 
-        /// <summary>
+       
         /// Authenticates a user with email and password
         /// Calls the API endpoint to set the authentication cookie
         /// NOTE: Auth state notification is handled by the caller (Login.razor.cs)
-        /// </summary>
+       
         /// <param name="request">Login request containing credentials</param>
         /// <returns>Authentication result with success status and user information</returns>
         public async Task<AuthResult> LoginAsync(LoginRequest request)
@@ -297,9 +297,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Logout
 
-        /// <summary>
+       
         /// Logs out the current user
-        /// </summary>
+       
         /// <param name="user">The user principal to log out</param>
         public async Task LogoutAsync(ClaimsPrincipal user)
         {
@@ -320,9 +320,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Authentication State
 
-        /// <summary>
+       
         /// Checks if the current user is authenticated
-        /// </summary>
+       
         /// <returns>True if user is authenticated, false otherwise</returns>
         public async Task<bool> IsUserAuthenticatedAsync()
         {
@@ -340,10 +340,10 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        /// <summary>
+       
         /// Gets the current authenticated user
         /// NOTE: UserId from claims is string, pass directly to FindByIdAsync
-        /// </summary>
+       
         /// <param name="user">The user principal</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
         public async Task<ApplicationUser> GetCurrentUserAsync(ClaimsPrincipal user)
@@ -388,9 +388,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region Claims and Roles
 
-        /// <summary>
+       
         /// Gets a specific claim value for the current user
-        /// </summary>
+       
         /// <param name="claimType">The type of claim to retrieve</param>
         /// <returns>Claim value if found, empty string otherwise</returns>
         public async Task<string> GetUserClaimAsync(string claimType)
@@ -409,9 +409,9 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        /// <summary>
+       
         /// Checks if the user has a specific role
-        /// </summary>
+       
         /// <param name="user">The user principal</param>
         /// <param name="role">The role to check</param>
         /// <returns>True if user has the role, false otherwise</returns>
@@ -453,9 +453,9 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region User Management
 
-        /// <summary>
+       
         /// Gets a user by email address
-        /// </summary>
+       
         /// <param name="email">The email address</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
         public async Task<ApplicationUser> GetUserByEmailAsync(string email)
@@ -483,10 +483,10 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #region User Management - NEW DAPPER METHODS
 
-        /// <summary>
+       
         /// Gets a user by email using Dapper (avoids DbContext concurrency)
         /// ✅ USE THIS METHOD INSTEAD OF GetUserByEmailAsync when you have DbContext conflicts
-        /// </summary>
+       
         public async Task<ApplicationUser> GetUserByEmailDapperAsync(string email)
         {
             try
@@ -520,10 +520,10 @@ namespace ViabilityIQ.Application.ServicesMisc
             }
         }
 
-        /// <summary>
+       
         /// Gets a user by ID using Dapper (avoids DbContext concurrency)
         /// ✅ USE THIS METHOD INSTEAD OF GetUserByIdAsync when you have DbContext conflicts
-        /// </summary>
+       
         public async Task<ApplicationUser> GetUserByIdDapperAsync(long userId)
         {
             try
@@ -561,10 +561,10 @@ namespace ViabilityIQ.Application.ServicesMisc
     
 
 
-        /// <summary>
+       
         /// Gets a user by user ID
         /// NOTE: userId is long, but FindByIdAsync expects string, so we convert it
-        /// </summary>
+       
         /// <param name="userId">The user ID (long)</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
         public async Task<ApplicationUser> GetUserByIdAsync(long userId)

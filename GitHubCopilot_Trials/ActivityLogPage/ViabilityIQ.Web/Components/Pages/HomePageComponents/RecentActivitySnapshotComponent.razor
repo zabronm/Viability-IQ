@@ -1,0 +1,79 @@
+@namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
+
+<section class="recent-activity-section" aria-labelledby="recent-activity-title">
+    <header class="activity-header">
+        <div>
+            <h3 id="recent-activity-title" class="activity-title">
+                <i class="bi bi-clock-history"></i>
+                Recent Activity
+            </h3>
+            <p>Latest actions in your workspace</p>
+        </div>
+        <div class="activity-filters" aria-label="Activity period">
+            <button type="button" class="@(GetFilterClass("24h"))" @onclick="Select24HoursAsync">24h</button>
+            <button type="button" class="@(GetFilterClass("7d"))" @onclick="Select7DaysAsync">7 days</button>
+            <button type="button" class="@(GetFilterClass("30d"))" @onclick="Select30DaysAsync">30 days</button>
+            <button type="button" class="@(GetFilterClass("all"))" @onclick="SelectAllAsync">All</button>
+        </div>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="snapshot-state" role="status">
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            Loading recent activity...
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="snapshot-state snapshot-error" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            @ErrorMessage
+        </div>
+    }
+    else if (LoadedActivities.Count == 0)
+    {
+        <div class="snapshot-state">
+            <i class="bi bi-inbox"></i>
+            No activity was found for this period.
+        </div>
+    }
+    else
+    {
+        <div class="activity-table-wrapper">
+            <table class="activity-table">
+                <tbody>
+                    @foreach (var activity in LoadedActivities)
+                    {
+                        <tr>
+                            <td class="actor-cell">
+                                <span class="actor-icon"><i class="bi bi-person"></i></span>
+                                <span>
+                                    <strong>@DisplayText(activity.ActorName, "System")</strong>
+                                    <small>@FormatActivityTime(activity.CreatedDate)</small>
+                                </span>
+                            </td>
+                            <td class="action-cell">
+                                <span class="activity-action-badge @GetActivityActionClass(activity.ActivityAction)">
+                                    @FormatEnumText(activity.ActivityAction)
+                                </span>
+                            </td>
+                            <td class="object-cell">
+                                <span>@DisplayText(activity.EntityName, "Unnamed record")</span>
+                                <small>@FormatEnumText(activity.EntityType)</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <footer class="activity-footer">
+        <a href="/activity-log">
+            <i class="bi bi-list-ul"></i>
+            View all activities
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </footer>
+</section>

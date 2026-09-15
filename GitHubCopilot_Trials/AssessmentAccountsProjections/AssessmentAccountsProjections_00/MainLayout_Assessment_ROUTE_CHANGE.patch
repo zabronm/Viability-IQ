@@ -1,0 +1,24 @@
+diff --git a/ViabilityIQ.Web/Components/Layout/MainLayout_Assessment.razor b/ViabilityIQ.Web/Components/Layout/MainLayout_Assessment.razor
+--- a/ViabilityIQ.Web/Components/Layout/MainLayout_Assessment.razor
++++ b/ViabilityIQ.Web/Components/Layout/MainLayout_Assessment.razor
+@@ -81,7 +81,7 @@
+ 
+                 @if (HasDebtorsCreditorsData)               //Shows when NOT Cash business
+                 {
+-                    <NavLink class="fa-nav-item py-0 my-0" href="assessment/debtors-creditors">
++                    <NavLink class="fa-nav-item py-0 my-0" href="@DebtorsCreditorsUrl">
+                         <div class="nav-icon-avatar-round"><i class="bi bi-incognito"></i></div>
+                         <span class="footer-main-text-sm">Debtors/Creditors</span>
+                         <span class="ms-1 viq-indicator-dot @(HasDebtorsCreditorsData ? "status-success" : "status-warning")"
+@@ -237,6 +237,11 @@
+     private bool isProfileOpen = false;
+     private bool isShortcutsOpen = false;
+ 
++    private string DebtorsCreditorsUrl =>
++        SessionService.AssessmentId is long assessmentId && assessmentId > 0
++            ? $"/assessment/debtors-creditors/{assessmentId}"
++            : "/assessment/dashboards";
++
+     private bool HasDebtorsCreditorsData => SessionService.HasDebtorsCreditorsData;
+     private bool HasLoansData => SessionService!.HasLoansData;
+     private bool HasAssetsData => SessionService!.HasAssetsData;

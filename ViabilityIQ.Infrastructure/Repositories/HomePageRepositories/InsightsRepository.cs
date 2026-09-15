@@ -26,10 +26,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             _logger = logger;
         }
 
-        /// <summary>
+       
         /// Get comprehensive insights for a user
         /// Queries tblAssessments and tblBusiness tables
-        /// </summary>
+       
         public async Task<InsightsModel> GetInsightsAsync(long userId)
         {
             try
@@ -205,10 +205,10 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get insights for a specific branch
         /// Queries tblAssessments and tblBusiness tables
-        /// </summary>
+       
         public async Task<InsightsModel> GetBranchInsightsAsync(int branchId)
         {
             try
@@ -289,9 +289,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             }
         }
 
-        /// <summary>
+       
         /// Get top performers leaderboard (current month)
-        /// </summary>
+       
         public async Task<List<TopPerformerModel>> GetTopPerformersAsync(int count = 10)
         {
             try

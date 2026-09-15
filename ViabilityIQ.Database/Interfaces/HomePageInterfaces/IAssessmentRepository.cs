@@ -12,19 +12,19 @@ namespace ViabilityIQ.Application.Interfaces.HomePageInterfaces
    
     public interface IAssessmentRepository
     {
-        /// <summary>
+       
         /// Get recent assessments for a specific user
-        /// </summary>
+       
         Task<List<AssessmentModel>> GetRecentAssessmentsAsync(long userId, int count = 5);
 
-        /// <summary>
+       
         /// Get assessments by status
-        /// </summary>
+       
         Task<List<AssessmentModel>> GetAssessmentsByStatusAsync(long userId, string status, int count = 10);
 
-        /// <summary>
+       
         /// Get assessment by ID
-        /// </summary>
+       
         Task<AssessmentModel> GetAssessmentByIdAsync(long assessmentId);
     }
 }

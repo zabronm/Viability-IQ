@@ -1,0 +1,59 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+@inherits IndependentCashflowProjectionComponent
+
+<section class="cashflow-summary-dashboard h-100" aria-labelledby="profit-summary-title">
+    <header class="summary-header">
+        <div>
+            <i class="bi bi-pie-chart"></i>
+            <strong id="profit-summary-title">Profit Summary (VAT Inclusive)</strong>
+        </div>
+        <span>Projected period total</span>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="summary-component-state"><span class="spinner-border spinner-border-sm"></span> Loading profit summary...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <div class="summary-component-state summary-component-error"><i class="bi bi-exclamation-triangle"></i> Profit summary could not load: @LoadError</div>
+    }
+    else if (Projection is not null)
+    {
+    <div class="table-responsive">
+        <table class="table table-hover table-borderless align-middle mb-0">
+            <tbody>
+                <tr><td>Sales</td><td>@Amount(Projection.Summary.SalesVatInclusive)</td></tr>
+                <tr><td>(less) Cost of goods sold</td><td class="text-danger">(@Amount(Projection.Summary.CostOfGoodsSoldVatInclusive))</td></tr>
+                <tr class="summary-total"><td>Gross profit</td><td>@Amount(Projection.Summary.GrossProfitVatInclusive)</td></tr>
+                <tr><td>(add) Sundry income</td><td>@Amount(Projection.Summary.SundryIncomeVatInclusive)</td></tr>
+                <tr><td>(add) Other income</td><td>@Amount(Projection.Summary.OtherIncomeVatInclusive)</td></tr>
+                <tr class="summary-total"><td>Gross income</td><td>@Amount(Projection.Summary.GrossIncomeVatInclusive)</td></tr>
+                <tr><td>(less) Operating expenses</td><td class="text-danger">(@Amount(Projection.Summary.OperatingExpensesVatInclusive))</td></tr>
+                <tr><td>Net VAT payable / (refund)</td><td>@VatAdjustment(Projection.Summary.VatPayable)</td></tr>
+                <tr class="summary-total"><td>EBITDA</td><td>@Amount(Projection.Summary.EBITDAInclusive)</td></tr>
+                <tr><td>(less) Depreciation</td><td class="text-danger">(@Amount(Projection.Summary.Depreciation))</td></tr>
+                <tr><td>(less) Interest</td><td class="text-danger">(@Amount(Projection.Summary.InterestExpense))</td></tr>
+                <tr class="summary-total final-total">
+                    <td>Net profit before tax</td>
+                    <td class="@(Projection.Summary.ProfitBeforeTaxVatInclusive >= 0m ? "text-success" : "text-danger")">
+                        @Amount(Projection.Summary.ProfitBeforeTaxVatInclusive)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="summary-note mb-0">
+        VAT-exclusive values remain authoritative for viability ratios and accounting analysis.
+    </p>
+    }
+</section>
+
+@code {
+    private static string Amount(decimal value) => $"R {value:N0}";
+
+    private static string VatAdjustment(decimal value) =>
+        value >= 0m ? $"(R {value:N0})" : $"R {Math.Abs(value):N0}";
+}

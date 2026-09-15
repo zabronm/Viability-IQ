@@ -1,0 +1,84 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+@inherits IndependentCashflowProjectionComponent
+
+<section class="dashboard-chart-card" aria-labelledby="pnl-timeline-title">
+    <header class="chart-header">
+        <div>
+            <i class="bi bi-bar-chart-line"></i>
+            <strong id="pnl-timeline-title">Profit &amp; Loss Performance Timeline</strong>
+        </div>
+        <span>12-month trajectory</span>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="pnl-component-state"><span class="spinner-border spinner-border-sm"></span> Loading P&amp;L timeline...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <div class="pnl-component-state pnl-component-error"><i class="bi bi-exclamation-triangle"></i> P&amp;L timeline could not load: @LoadError</div>
+    }
+    else if (Projection is not null)
+    {
+    <div class="pnl-chart">
+        <div class="pnl-axis">
+            <span>@Compact(MaximumAbsoluteProfit)</span>
+            <span>R 0</span>
+            <span>@Compact(-MaximumAbsoluteProfit)</span>
+        </div>
+
+        <div class="pnl-plot">
+            <div class="pnl-gridline pnl-gridline-top"></div>
+            <div class="pnl-zero-line"></div>
+            <div class="pnl-gridline pnl-gridline-bottom"></div>
+
+            @foreach (var month in Projection.Months.OrderBy(month => month.MonthNumber))
+            {
+                <div class="pnl-month">
+                    <div class="pnl-bar-area">
+                        <div class="pnl-bar @(month.ProfitBeforeTax >= 0m ? "pnl-profit" : "pnl-loss")"
+                             style="@BarStyle(month.ProfitBeforeTax)"
+                             title="@($"{month.MonthLabel}: R {month.ProfitBeforeTax:N0}")">
+                        </div>
+                    </div>
+                    <span>@month.MonthLabel</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <footer class="pnl-footer">
+        <span><i class="legend-profit"></i> Profit before tax</span>
+        <strong class="@(Projection.Summary.ProfitBeforeTax >= 0m ? "text-success" : "text-danger")">
+            Period total: R @Projection.Summary.ProfitBeforeTax.ToString("N0")
+        </strong>
+    </footer>
+    }
+</section>
+
+@code {
+    private decimal MaximumAbsoluteProfit =>
+        Math.Max(1m, Projection!.Months.Select(month => Math.Abs(month.ProfitBeforeTax)).DefaultIfEmpty(0m).Max());
+
+    private string BarStyle(decimal value)
+    {
+        var height = Math.Max(2m, Math.Abs(value) / MaximumAbsoluteProfit * 46m);
+        return value >= 0m
+            ? FormattableString.Invariant($"height:{height:F2}%;bottom:50%;")
+            : FormattableString.Invariant($"height:{height:F2}%;top:50%;");
+    }
+
+    private static string Compact(decimal value)
+    {
+        var absoluteValue = Math.Abs(value);
+        var sign = value < 0m ? "-" : string.Empty;
+
+        return absoluteValue switch
+        {
+            >= 1_000_000m => $"{sign}R {absoluteValue / 1_000_000m:F1}m",
+            >= 1_000m => $"{sign}R {absoluteValue / 1_000m:F0}k",
+            _ => $"{sign}R {absoluteValue:F0}"
+        };
+    }
+}

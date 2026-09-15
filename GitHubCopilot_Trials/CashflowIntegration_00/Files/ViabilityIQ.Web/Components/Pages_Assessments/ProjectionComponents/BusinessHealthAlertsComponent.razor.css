@@ -1,0 +1,60 @@
+﻿body {
+}
+
+.business-health-alerts-container {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.alert-guidance-section {
+    animation: slideIn 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+    .alert-guidance-section ul {
+        list-style-type: none;
+        margin-left: 0;
+    }
+
+    .alert-guidance-section li {
+        position: relative;
+        padding-left: 20px;
+    }
+
+        .alert-guidance-section li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #6c757d;
+        }
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade {
+    animation: fadeIn 0.3s ease-in-out;
+}

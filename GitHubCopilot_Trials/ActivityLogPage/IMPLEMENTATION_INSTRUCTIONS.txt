@@ -1,0 +1,274 @@
+ACTIVITY LOG PAGE - IMPLEMENTATION AND INTERVENTION GUIDE
+========================================================
+
+PURPOSE
+-------
+
+This package provides:
+
+1. A complete read-only Activity Log page at /activity-log.
+2. Server-side search, date filtering, action filtering, entity filtering,
+   paging, summary metrics, row expansion, printing and current-page CSV export.
+3. A corrected RecentActivitySnapshotComponent using the same repository and
+   database table as the full page.
+4. Corrected activity-log data contracts and repository SQL.
+5. A fresh-install SQL script and a schema-alignment script.
+6. A navigation snippet for MainLayout.
+
+The page deliberately does not allow edit or delete operations. Audit history
+should be append-only from the application UI.
+
+
+FILES TO COPY
+-------------
+
+IMPORTANT: Replace the model, repository interface, repository implementation,
+and all three snapshot files in the same integration step. Do not copy only
+ActivityLogModel.cs. The old snapshot refers to the retired ActivityType and
+ObjectName properties, and the old repository queries non-existent database
+columns with those names.
+
+Copy package files to the matching paths in the application:
+
+ViabilityIQ.Shared\DataModels\ActivityLog.cs
+ViabilityIQ.Shared\DataModels\HomePageModels\ActivityLogModel.cs
+ViabilityIQ.Shared\DataModels\HomePageModels\ActivityLogQueryModel.cs
+
+ViabilityIQ.Database\Interfaces\HomePageInterfaces\IActivityLogRepository.cs
+
+ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\ActivityLogRepository.cs
+
+ViabilityIQ.Web\Components\Pages\ActivityLogPage.razor
+ViabilityIQ.Web\Components\Pages\ActivityLogPage.razor.cs
+ViabilityIQ.Web\Components\Pages\ActivityLogPage.razor.css
+
+ViabilityIQ.Web\Components\Pages\HomePageComponents\RecentActivitySnapshotComponent.razor
+ViabilityIQ.Web\Components\Pages\HomePageComponents\RecentActivitySnapshotComponent.razor.cs
+ViabilityIQ.Web\Components\Pages\HomePageComponents\RecentActivitySnapshotComponent.razor.css
+
+Do not copy both versions of a file into different live-project folders.
+Replace the existing file at its canonical path.
+
+If compilation reports:
+
+    ActivityLogModel does not contain ActivityType
+    ActivityLogModel does not contain ObjectName
+
+then the old live file is still present at:
+
+    ViabilityIQ.Web\Components\Pages\HomePageComponents\
+        RecentActivitySnapshotComponent.razor
+
+Replace all three live RecentActivitySnapshotComponent files with the three
+versions in this package. The corrected mapping is:
+
+    ActivityType -> ActivityAction
+    ObjectName   -> EntityName
+
+Also replace ActivityLogRepository.cs. Merely changing the three Razor
+references will compile, but the old repository will fail at runtime because
+its SQL still queries ActivityLogs, ActivityType and ObjectName.
+
+
+WHY THE EXISTING REPOSITORY MUST BE REPLACED
+--------------------------------------------
+
+The previous ActivityLogRepository queries:
+
+- ActivityLogs instead of dbo.tblActivityLog
+- AspNetUsers even though ActorName is already captured in the log
+- ActivityType and ObjectName, which do not exist in tblActivityLog
+- NavigationUrl, which does not exist in tblActivityLog
+
+The replacement repository queries the real columns and derives an assessment
+navigation URL in memory when AssessmentId is present.
+
+ActivityAction is now the single canonical action field. The duplicate
+ActivityType property has been removed from ActivityLog.
+
+
+DATABASE - YOUR INTERVENTION IS REQUIRED
+----------------------------------------
+
+Take a tested database backup before running either SQL script.
+
+For a NEW database:
+
+    Run ViabilityIQ.Modules\Database_Sql\ActivityLog.sql
+
+For a database where tblActivityLog ALREADY EXISTS:
+
+    Review and run:
+    ViabilityIQ.Modules\Database_Sql\ActivityLog_SCHEMA_ALIGNMENT.sql
+
+The alignment script:
+
+- changes null Active values to true;
+- fills missing CreatedBy/ModifiedBy values;
+- makes Active, CreatedBy and ModifiedBy non-nullable;
+- adds missing defaults.
+
+The replacement ActivityLog.sql also fixes the trailing comma in the supplied
+CREATE TABLE statement and adds a composite index for page filtering.
+
+If production policy does not permit CreatedBy/ModifiedBy = 0 for legacy or
+system records, replace 0 in the alignment script with your dedicated SYSTEM
+user ID before running it.
+
+
+DEPENDENCY INJECTION
+--------------------
+
+The repository is already registered in:
+
+ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+
+Expected registration:
+
+    services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+
+No second registration should be added.
+
+
+MAIN NAVIGATION - YOUR INTERVENTION IS REQUIRED
+-----------------------------------------------
+
+Open MAIN_LAYOUT_NAVIGATION_SNIPPET.txt and add its NavLink to:
+
+ViabilityIQ.Web\Components\Layout\MainLayout.razor
+
+The route is:
+
+    /activity-log
+
+The Recent Activity snapshot's "View all activities" link uses that route.
+
+
+HOME PAGE CLEANUP
+-----------------
+
+The replacement snapshot is self-loading and resolves the authenticated user
+after every new Blazor circuit. The old parameters are temporarily retained,
+so this existing markup will still compile:
+
+    <RecentActivitySnapshotComponent
+        Activities="RecentActivities"
+        OnRefresh="RefreshDashboard" />
+
+Recommended cleanup after successful integration:
+
+    <RecentActivitySnapshotComponent />
+
+Then remove the redundant HomePage request that loads RecentActivities through
+DashboardDataService. Do this only after confirming that no other HomePage
+component uses that property.
+
+
+SECURITY DECISION - YOUR INTERVENTION IS REQUIRED
+-------------------------------------------------
+
+The supplied page intentionally forces:
+
+    query.UserId = authenticated application user ID
+
+This prevents one ordinary user from reading another user's audit records by
+changing a URL or browser value.
+
+If administrators need a system-wide audit view, do NOT simply remove the
+UserId SQL predicate. Add a separate administrator route and enforce an
+administrator role server-side before passing a nullable user scope to the
+repository. Audit data contains IP addresses, user agents, and potentially
+sensitive metadata.
+
+
+ACTIVITY WRITING - YOUR INTERVENTION IS REQUIRED
+------------------------------------------------
+
+The page can only display records that application operations insert into
+tblActivityLog. Add a centralized IActivityLogWriter service rather than
+scattered direct INSERT statements. Call it after successful operations such
+as:
+
+- assessment create/update/open/submit/approve;
+- asset, sales, expense, stock and loan changes;
+- report print/export;
+- login/logout;
+- archive/restore.
+
+Record ActivityAction and EntityType using nameof(enumValue), for example:
+
+    ActivityAction = nameof(ActivityAction.Update)
+    EntityType = nameof(ActivityEntityType.Assessment)
+
+Do not log passwords, authentication tokens, full financial payloads, or other
+secrets in MetadataJson. Prefer identifiers and a small change summary.
+
+For reliable mission-critical logging, decide whether activity insertion:
+
+1. must participate in the same database transaction as the business change; or
+2. will use an outbox/event queue with retries.
+
+Avoid fire-and-forget logging because failed writes would silently create gaps
+in the audit trail.
+
+
+UTC AND DATE DISPLAY
+--------------------
+
+CreatedDate is stored and filtered as UTC. The UI converts it to local time for
+display. Ensure all activity writers use DateTime.UtcNow or the SQL
+SYSUTCDATETIME() default.
+
+
+RETENTION AND PRIVACY - YOUR INTERVENTION IS REQUIRED
+-----------------------------------------------------
+
+Before production rollout, define:
+
+- how long activity records are retained;
+- whether IP address and user-agent retention is legally permitted;
+- who can view MetadataJson;
+- archival and purge procedures;
+- whether delete events require immutable/WORM storage.
+
+Do not provide a user-facing hard-delete action for audit records.
+
+
+CSV EXPORT
+----------
+
+The page exports only the currently visible page and labels the button
+"Export current page". It uses the existing:
+
+    ZabFileSaver.DownloadBinaryStream
+
+If scripts.js is removed or renamed, replace that JS invocation with the
+application's current file-download helper.
+
+
+VALIDATION
+----------
+
+After copying the files and applying the database script:
+
+1. Run:
+
+       dotnet build .\ViabilityIQ.Web\ViabilityIQ.Web.csproj
+
+2. Sign in and browse to /activity-log.
+3. Confirm only the authenticated user's activities are returned.
+4. Verify search, action, entity and date filters.
+5. Verify Previous/Next and 10/20/50/100 row selection.
+6. Expand a row and verify technical fields are shown only there.
+7. Verify an activity with AssessmentId opens the assessment dashboard.
+8. Verify Print excludes filters, paging controls and technical expansion.
+9. Verify CSV exports exactly the visible page.
+10. Verify the HomePage snapshot changes periods without a full page reload.
+
+
+KNOWN DATA-MODEL DECISION
+-------------------------
+
+ActorName is stored as a historical snapshot intentionally. Do not replace it
+with a mandatory live join to the users table: renamed or deleted user accounts
+would otherwise alter or hide historical attribution.

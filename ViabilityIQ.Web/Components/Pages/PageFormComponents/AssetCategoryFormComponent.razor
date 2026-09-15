@@ -1,0 +1,192 @@
+﻿@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Shared.DataModels
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+<div class="asset-category-form-container">
+    @if (isLoading)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    }
+    else
+    {
+        <form @onsubmit="HandleSubmit">
+            <!-- ====================================================
+                 CATEGORY IDENTIFICATION SECTION
+                 ==================================================== -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Category Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Category Name *</label>
+                            <input type="text" class="form-control @(HasError(nameof(category.CategoryName)) ? "is-invalid" : "")"
+                                   @bind="category.CategoryName" placeholder="e.g., Land & Buildings, Plant & Machinery, Vehicles" />
+                            @if (HasError(nameof(category.CategoryName)))
+                            {
+                                <div class="invalid-feedback">@GetError(nameof(category.CategoryName))</div>
+                            }
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" rows="2" @bind="category.Description" 
+                                      placeholder="Describe what types of assets belong in this category..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================================
+                 CATEGORY CLASSIFICATION SECTION
+                 ==================================================== -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Asset Classification</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isCurrentAsset"
+                                       @onchange="OnClassificationChanged" />
+                                <label class="form-check-label" for="isCurrentAsset">
+                                    <strong>Current Asset</strong>
+                                </label>
+                                <small class="d-block text-muted ms-4">
+                                    Check this if assets in this category are convertible to cash within 1 year
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-2">
+                            <label class="form-label">Balance Sheet Section *</label>
+                            <select class="form-select @(HasError(nameof(category.BalanceSheetSection)) ? "is-invalid" : "")"
+                                    @bind="category.BalanceSheetSection">
+                                <option value="">-- Select Section --</option>
+                                @foreach (var section in balanceSheetSections)
+                                {
+                                    <option value="@section">@section</option>
+                                }
+                            </select>
+                            @if (HasError(nameof(category.BalanceSheetSection)))
+                            {
+                                <div class="invalid-feedback">@GetError(nameof(category.BalanceSheetSection))</div>
+                            }
+                            <small class="d-block text-muted mt-1">
+                                Where this category appears on the balance sheet
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================================
+                 DISPLAY SETTINGS SECTION
+                 ==================================================== -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Display Settings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Display Order</label>
+                            <input type="number" class="form-control" @bind="category.DisplayOrder" step="1" min="0" 
+                                   placeholder="0" />
+                            <small class="d-block text-muted mt-1">
+                                Lower numbers appear first in lists and dropdowns (0, 1, 2, 3...)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================================
+                 STATUS SECTION
+                 ==================================================== -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isActive" @bind="category.Active" />
+                        <label class="form-check-label" for="isActive">
+                            <strong>Active</strong>
+                        </label>
+                        <small class="d-block text-muted">
+                            Inactive categories can still be viewed but won't appear in new asset creation
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================================
+                 CATEGORY PREVIEW
+                 ==================================================== -->
+            @if (!string.IsNullOrEmpty(category.CategoryName))
+            {
+                <div class="alert alert-info" role="alert">
+                    <strong>Preview:</strong>
+                    <br />
+                    <span>
+                        <strong>@category.CategoryName</strong> 
+                        (@(category.IsCurrentAsset ? "Current Asset" : "Fixed Asset")) 
+                        • @category.BalanceSheetSection
+                        @if (category.Active)
+                        {
+                            <span class="badge bg-success ms-2">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary ms-2">Inactive</span>
+                        }
+                    </span>
+                </div>
+            }
+
+            <!-- ====================================================
+                 FORM ACTIONS
+                 ==================================================== -->
+            <div class="d-flex gap-2 mb-3">
+                <button type="submit" class="btn btn-primary btn-sm" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <span>@(category.AssetCategoryId == 0 ? "Add Category" : "Update Category")</span>
+                    }
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="HandleCancel">Cancel</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @successMessage
+                    <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (validationErrors.Any())
+            {
+                <div class="alert alert-danger" role="alert">
+                    <h6 class="alert-heading mb-2">Validation Errors:</h6>
+                    <ul class="mb-0">
+                        @foreach (var error in validationErrors)
+                        {
+                            <li>@error.Value</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </form>
+    }
+</div>

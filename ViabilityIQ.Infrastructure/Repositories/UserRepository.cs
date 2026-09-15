@@ -22,9 +22,9 @@ namespace ViabilityIQ.Infrastructure.Repositories
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        /// <summary>
+       
         /// Gets a user by email using Dapper
-        /// </summary>
+       
         public async Task<ApplicationUser> GetUserByEmailAsync(string email)
         {
             try
@@ -85,9 +85,9 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
-        /// <summary>
+       
         /// Gets a user by ID using Dapper
-        /// </summary>
+       
         public async Task<ApplicationUser> GetUserByIdAsync(long userId)
         {
             try

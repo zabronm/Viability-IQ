@@ -14,7 +14,6 @@ using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Services;
 using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents;
 
-
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
     public partial class AssessmentExpensesPage : ComponentBase, IAsyncDisposable
@@ -51,10 +50,29 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private long SelectedFilterId { get; set; } = 0;
         private decimal GrandTotalExpenses => FilteredExpenseStreams?.Sum(c => c.MonthlyValues.Sum()) ?? 0;
 
-        private IEnumerable<UnifiedExpenseViewModel> FilteredExpenseStreams =>
-            ExpenseStreams.Where(x =>
-                (string.IsNullOrWhiteSpace(SearchQuery) || x.ExpenseItemName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) &&
-                (SelectedFilterId == 0 || (long)x.TypeId == SelectedFilterId));
+        // Sorting State
+        private string currentSortColumn = "Description";
+        private bool isAscending = true;
+
+        private IEnumerable<UnifiedExpenseViewModel> FilteredExpenseStreams
+        {
+            get
+            {
+                var query = ExpenseStreams.Where(x =>
+                    (string.IsNullOrWhiteSpace(SearchQuery) ||
+                     x.ExpenseItemName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                     x.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) &&
+                    (SelectedFilterId == 0 || (long)x.TypeId == SelectedFilterId));
+
+                query = currentSortColumn switch
+                {
+                    "ExpenseType" => isAscending ? query.OrderBy(x => x.TypeName) : query.OrderByDescending(x => x.TypeName),
+                    _ => isAscending ? query.OrderBy(x => x.ExpenseItemName) : query.OrderByDescending(x => x.ExpenseItemName)
+                };
+
+                return query;
+            }
+        }
 
         #endregion
 
@@ -88,6 +106,29 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 _Toast?.ShowError(ex.Message);
                 IsLoading = false;
             }
+        }
+
+        #endregion
+
+        #region Sorting Helper Methods
+
+        private void SortTable(string columnName)
+        {
+            if (currentSortColumn == columnName)
+            {
+                isAscending = !isAscending;
+            }
+            else
+            {
+                currentSortColumn = columnName;
+                isAscending = true;
+            }
+        }
+
+        private string GetSortIcon(string columnName)
+        {
+            if (currentSortColumn != columnName) return "bi bi-arrow-down-up text-muted opacity-50";
+            return isAscending ? "bi bi-arrow-up text-primary" : "bi bi-arrow-down text-primary";
         }
 
         #endregion
@@ -135,7 +176,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private async Task CreateSummaries()
         {
-            // Define the list of IDs that you consider to be "Expenses"
             var expenseTypeIds = new List<long> { 1, 2 };
 
             ConsolidatedAssessmentData.MonthlyExpenses = ExpenseStreams
@@ -181,7 +221,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 {
                     await LoadAndMapExpensesData();
 
-                    // ✅ TRIGGER CASHFLOW RECALCULATION
                     Logger?.LogInformation("Triggering cashflow recalculation after expense save for assessment {AssessmentId}", AssessmentId);
                     await projectionStateManager!.InvalidateDataAsync("expenses", AssessmentId, AssessmentId);
                 }
@@ -194,7 +233,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
         {
-            // Reload expenses when any projection data changes for this assessment
             if (e.AssessmentId == AssessmentId)
             {
                 Logger?.LogInformation(
