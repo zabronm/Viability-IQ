@@ -1,0 +1,2 @@
+Files/ViabilityIQ.Web/Components/Pages_Assessments/ProjectionComponents/CashflowBusinessIndicatorComponent.razor
+Files/ViabilityIQ.Web/Components/Pages_Assessments/ProjectionComponents/CashflowBusinessIndicatorComponent.razor.css
