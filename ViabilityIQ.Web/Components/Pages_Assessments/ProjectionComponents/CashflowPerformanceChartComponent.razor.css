@@ -1,0 +1,127 @@
+.performance-chart {
+    min-height: 100%;
+    overflow: hidden;
+}
+
+.chart-subtitle {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.68rem;
+    font-weight: 400;
+}
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+    margin-bottom: 0.75rem;
+    color: #475569;
+    font-size: 0.72rem;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend-box {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 2px;
+}
+
+.legend-line {
+    width: 1.15rem;
+    height: 3px;
+    border-radius: 999px;
+}
+
+.sales-colour {
+    background: #2563eb;
+}
+
+.stock-colour {
+    background: #f59e0b;
+}
+
+.expenses-colour {
+    background: #7c3aed;
+}
+
+.cashflow-colour {
+    background: #0891b2;
+}
+
+.profit-colour {
+    background: #16a34a;
+}
+
+.chart-scroll {
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.cashflow-chart {
+    display: block;
+    min-width: 720px;
+    width: 100%;
+    height: 330px;
+}
+
+.grid-line {
+    stroke: #e2e8f0;
+    stroke-width: 1;
+}
+
+.zero-line {
+    stroke: #64748b;
+    stroke-width: 1.5;
+}
+
+.axis-value,
+.month-label {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.axis-value {
+    text-align: right;
+}
+
+.month-label {
+    text-align: center;
+}
+
+.series-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3;
+}
+
+.cashflow-line {
+    stroke: #0891b2;
+}
+
+.profit-line {
+    stroke: #16a34a;
+}
+
+.cashflow-point {
+    fill: #fff;
+    stroke: #0891b2;
+    stroke-width: 2.5;
+}
+
+.profit-point {
+    fill: #fff;
+    stroke: #16a34a;
+    stroke-width: 2.5;
+}
+
+.empty-chart {
+    display: grid;
+    min-height: 280px;
+    place-items: center;
+    color: #64748b;
+}

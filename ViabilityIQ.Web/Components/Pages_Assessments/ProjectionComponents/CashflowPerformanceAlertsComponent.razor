@@ -1,0 +1,175 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@inherits IndependentCashflowProjectionComponent
+@using ViabilityIQ.Shared.FinancialModels
+
+@if (ShowAlertWindow)
+{
+    <section class="cfalerts-panel" aria-labelledby="cfalerts-title">
+        <header class="cfalerts-header">
+            <div>
+                <span>Assessment performance</span>
+                <strong id="cfalerts-title">Business health alerts</strong>
+            </div>
+            <div class="cfalerts-actions">
+                @if (!IsLoading && string.IsNullOrWhiteSpace(LoadError))
+                {
+                    <span class="cfalerts-count">@PerformanceAlerts.Count alert@(PerformanceAlerts.Count == 1 ? string.Empty : "s")</span>
+                }
+                <button type="button"
+                        class="cfalerts-dismiss"
+                        title="Dismiss performance alerts"
+                        aria-label="Dismiss performance alerts"
+                        @onclick="DismissAlerts">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        @if (IsLoading)
+        {
+            <div class="cfalerts-state"><span class="spinner-border spinner-border-sm"></span> Reviewing assessment performance...</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(LoadError))
+        {
+            <div class="cfalerts-state cfalerts-error"><i class="bi bi-exclamation-triangle"></i> Alerts could not load: @LoadError</div>
+        }
+        else if (ShowAllAlerts)
+        {
+            <div class="cfalerts-grid">
+                @foreach (var alert in PerformanceAlerts)
+                {
+                    <article class="cfalerts-item cfalerts-@alert.Severity">
+                        <span class="cfalerts-icon"><i class="bi @alert.Icon"></i></span>
+                        <div>
+                            <strong>@alert.Title</strong>
+                            <p>@alert.Message</p>
+                            <small><i class="bi bi-lightbulb"></i> @alert.Advice</small>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="cfalerts-summary">
+                <i class="bi @SummaryIcon"></i>
+                <span>@SummaryText</span>
+            </div>
+        }
+
+        @if (!IsLoading && string.IsNullOrWhiteSpace(LoadError) && PerformanceAlerts.Count > 0)
+        {
+            <button type="button"
+                    class="cfalerts-toggle"
+                    aria-expanded="@ShowAllAlerts"
+                    @onclick="ToggleAlerts">
+                @(ShowAllAlerts ? "See Less Alerts" : "See All Alerts")
+                <i class="bi @(ShowAllAlerts ? "bi-chevron-up" : "bi-chevron-down")"></i>
+            </button>
+        }
+    </section>
+}
+
+@code {
+    private bool ShowAlertWindow { get; set; } = true;
+    private bool ShowAllAlerts { get; set; }
+    private IReadOnlyList<PerformanceAlert> PerformanceAlerts { get; set; } = [];
+
+    private string SummaryIcon => PerformanceAlerts.FirstOrDefault()?.Severity switch
+    {
+        "critical" => "bi-exclamation-octagon-fill",
+        "warning" => "bi-exclamation-triangle-fill",
+        _ => "bi-check-circle-fill"
+    };
+
+    private string SummaryText => PerformanceAlerts.Count switch
+    {
+        0 => "No material performance risks were detected in the current projection.",
+        1 => PerformanceAlerts[0].Title,
+        _ => $"{PerformanceAlerts[0].Title} and {PerformanceAlerts.Count - 1} additional performance alert(s)."
+    };
+
+    protected override Task OnProjectionLoadedAsync()
+    {
+        PerformanceAlerts = BuildAlerts(Projection!).Take(6).ToArray();
+        ShowAlertWindow = true;
+        return Task.CompletedTask;
+    }
+
+    private static IEnumerable<PerformanceAlert> BuildAlerts(CashflowProjectionResult projection)
+    {
+        var alerts = new List<PerformanceAlert>();
+        var summary = projection.Summary;
+        var viability = projection.Viability;
+        var negativeCashMonths = projection.Months.Count(month => month.ClosingBank < 0m);
+        var lossMonths = projection.Months.Count(month => month.ProfitBeforeTax < 0m);
+
+        if (summary.ProfitBeforeTax < 0m)
+            alerts.Add(Critical("Projected loss", $"The period projects a loss before tax of R {Math.Abs(summary.ProfitBeforeTax):N0}.", "Review pricing, gross margin and controllable operating expenses, starting with the largest monthly loss."));
+        else
+            alerts.Add(Healthy("Profitable projection", $"Profit before tax is projected at R {summary.ProfitBeforeTax:N0}.", "Protect the margin by monitoring monthly costs and collection performance."));
+
+        if (negativeCashMonths > 0)
+            alerts.Add(Critical("Cash shortfall risk", $"{negativeCashMonths} month(s) close with a negative bank balance; the minimum balance is R {summary.MinimumClosingBank:N0}.", "Accelerate debtor collections, defer discretionary spending or arrange sufficient working-capital funding before the first shortfall."));
+        else
+            alerts.Add(Healthy("Positive cash runway", "All projected months close with a non-negative bank balance.", "Retain a suitable cash reserve and investigate productive uses for sustained surpluses."));
+
+        if (viability.MarginOfSafety is < 0.10m)
+            alerts.Add(Warning("Low margin of safety", $"Sales are only {viability.MarginOfSafety.GetValueOrDefault() * 100m:F1}% above break-even.", "Increase contribution margin or reduce fixed operating costs to create a stronger buffer against sales volatility."));
+        else if (viability.MarginOfSafety is >= 0.30m)
+            alerts.Add(Healthy("Strong margin of safety", $"Sales are {viability.MarginOfSafety.Value * 100m:F1}% above break-even.", "Preserve the buffer while testing measured growth opportunities."));
+
+        if (viability.InterestCover is < 1.5m)
+            alerts.Add(Critical("Weak interest cover", $"Operating profit covers interest only {viability.InterestCover.GetValueOrDefault():F2} times.", "Reduce debt exposure, refinance expensive facilities or improve operating profit before assuming new borrowing."));
+        else if (viability.InterestCover is >= 3m)
+            alerts.Add(Healthy("Comfortable interest cover", $"Operating profit covers interest {viability.InterestCover.Value:F2} times.", "Continue monitoring debt service as rates and borrowing levels change."));
+
+        if (viability.CurrentRatio is < 1m)
+            alerts.Add(Critical("Working-capital pressure", $"The projected current ratio is {viability.CurrentRatio.GetValueOrDefault():F2}.", "Improve collections, reduce slow-moving inventory and align supplier payments with customer receipts."));
+        else if (viability.CurrentRatio is < 1.5m)
+            alerts.Add(Warning("Tight liquidity buffer", $"The projected current ratio is {viability.CurrentRatio.GetValueOrDefault():F2}.", "Build liquid reserves and avoid tying additional cash into excess inventory."));
+
+        if (viability.AssetTurnover is < 0.5m)
+            alerts.Add(Warning("Low asset utilisation", $"Asset turnover is {viability.AssetTurnover.GetValueOrDefault():F2} times.", "Increase revenue generated by existing assets or review underutilised assets for disposal."));
+
+        if (lossMonths >= 3)
+            alerts.Add(Warning("Recurring loss months", $"{lossMonths} months project a loss before tax.", "Use the P&L timeline to identify seasonal cost or sales gaps and prepare month-specific corrective actions."));
+
+        if (summary.ClosingStock > 0m && summary.Revenue > 0m && summary.ClosingStock > summary.Revenue * 0.35m)
+            alerts.Add(Warning("High closing inventory", $"Closing inventory of R {summary.ClosingStock:N0} is high relative to annual sales.", "Review slow-moving lines and purchasing plans to release working capital."));
+
+        alerts.AddRange(projection.Alerts.Select(alert => new PerformanceAlert(
+            alert.Severity == CashflowAlertSeverity.Critical ? 0 : alert.Severity == CashflowAlertSeverity.Warning ? 1 : 2,
+            alert.Severity == CashflowAlertSeverity.Critical ? "critical" : alert.Severity == CashflowAlertSeverity.Warning ? "warning" : "healthy",
+            alert.Severity == CashflowAlertSeverity.Critical ? "bi-exclamation-octagon-fill" : alert.Severity == CashflowAlertSeverity.Warning ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill",
+            alert.Title,
+            alert.Message,
+            "Review the underlying monthly projection and update the relevant assessment inputs.")));
+
+        return alerts
+            .GroupBy(alert => alert.Title, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .OrderBy(alert => alert.Priority)
+            .ThenBy(alert => alert.Title);
+    }
+
+    private static PerformanceAlert Critical(string title, string message, string advice) =>
+        new(0, "critical", "bi-exclamation-octagon-fill", title, message, advice);
+
+    private static PerformanceAlert Warning(string title, string message, string advice) =>
+        new(1, "warning", "bi-exclamation-triangle-fill", title, message, advice);
+
+    private static PerformanceAlert Healthy(string title, string message, string advice) =>
+        new(2, "healthy", "bi-check-circle-fill", title, message, advice);
+
+    private void ToggleAlerts() => ShowAllAlerts = !ShowAllAlerts;
+    private void DismissAlerts() => ShowAlertWindow = false;
+
+    private sealed record PerformanceAlert(
+        int Priority,
+        string Severity,
+        string Icon,
+        string Title,
+        string Message,
+        string Advice);
+}

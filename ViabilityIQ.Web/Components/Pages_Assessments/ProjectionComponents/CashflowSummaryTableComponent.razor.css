@@ -1,0 +1,54 @@
+﻿/* Component Outside Border Matching Row Borders */
+.cashflow-summary-kpi.auth-card {
+    background-color: #ffffff;
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid #cbdde0 !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 102, 0.08), 0 5px 15px rgba(0, 0, 102, 0.05), 0 0 1px rgba(0, 0, 102, 0.1);
+    padding: 0px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Matching Header Gradient Style with Reduced Padding */
+.bg-marble-header {
+    background: linear-gradient(135deg, #425563 0%, #566D7E 100%) !important;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Table Layout with Highly Visible Row Borders */
+.viability-summary-table {
+    font-size: 0.82rem !important;
+}
+
+    .viability-summary-table .data-row {
+        border-bottom: 1px solid #cbdde0 !important;
+    }
+
+    .viability-summary-table td {
+        padding-top: 9px !important;
+        padding-bottom: 9px !important;
+    }
+
+/* Explicit Navy Blue Fore-color for Scores / Values */
+.text-navy {
+    color: #1a365d !important;
+}
+
+/* Footer Banner Styling */
+.viability-footer-banner {
+    background-color: #f8fafc;
+    border: 1px solid #cbdde0;
+    position: relative;
+}
+
+.footer-banner-bar {
+    width: 3px;
+    height: 24px;
+    background-color: #566D7E;
+    border-radius: 2px;
+    flex-shrink: 0;
+}

@@ -1,211 +1,166 @@
-﻿body {
-}
-
-.kpi-cards-container {
-    margin: 0;
-    padding: 0;
+.cfkpi-shell {
     width: 100%;
-    max-width: 100%;
 }
 
-.kpi-grid {
+.cfkpi-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: clamp(0.4rem, 1vw, 0.6rem);
-    width: 100%;
-    max-width: 100%;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.65rem;
 }
 
-/* KPI Card Base - Fainted Marble Border (#d2dce3) & Left Alignment */
-.kpi-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    padding: clamp(0.5rem, 1.2vw, 0.7rem) clamp(0.6rem, 1.3vw, 0.8rem);
-    border: 1px solid #d2dce3;
-    border-left: clamp(3px, 0.4vw, 4px) solid #d2dce3;
-    border-radius: clamp(0.3rem, 0.8vw, 0.5rem);
-    background-color: #ffffff;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.cfkpi-card {
+    --cfkpi-accent: #64748b;
     position: relative;
-    overflow: hidden;
     min-width: 0;
+    min-height: 7.25rem;
+    padding: 0.85rem 0.9rem 0.75rem;
+    overflow: hidden;
+    border: 1px solid #dce4eb;
+    border-left: 4px solid var(--cfkpi-accent); /* (1) Left border configuration */
+    border-radius: 0.65rem;
+    background: linear-gradient(145deg, #ffffff 5%, #f8fafc 100%);
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+    transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 350ms cubic-bezier(0.4, 0, 0.2, 1), border-color 350ms cubic-bezier(0.4, 0, 0.2, 1); /* (5) Smoother, longer hover transition */
 }
 
-    .kpi-card:hover {
-        box-shadow: 0 4px 12px rgba(86, 109, 126, 0.08);
-        border-color: #b3c5d1;
-        transform: translateY(-1px);
+    .cfkpi-card::after {
+        position: absolute;
+        right: -0.75rem; /* Adjusted offset for smaller circle */
+        bottom: -1.1rem;
+        width: 2.5rem; /* (4) Reduced circle size by half (from 5rem to 2.5rem) */
+        height: 2.5rem; /* (4) Reduced circle size by half */
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--cfkpi-accent) 9%, transparent);
+        content: "";
     }
 
-/* Icon Styling - Reduced size, positioned absolute top-right */
-.kpi-icon {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    font-size: clamp(0.85rem, 1.2vw, 1rem);
-    flex-shrink: 0;
-    color: #94a3b8;
+    .cfkpi-card:hover {
+        transform: translateY(-3px);
+        border-color: #566D7E; /* (5) Marble border on hover */
+        box-shadow: 0 10px 25px rgba(86, 109, 126, 0.15); /* (5) Shadow on hover */
+    }
+
+.cfkpi-heading {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.cfkpi-label {
+    overflow: hidden;
+    color: #526477;
+    font-size: 0.58rem; /* (2) Reduced header font size */
+    font-weight: 700;
+    letter-spacing: 0.055em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cfkpi-icon {
+    display: grid;
+    width: 1.65rem;
+    height: 1.65rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--cfkpi-accent) 11%, white);
+    color: var(--cfkpi-accent);
+}
+
+.cfkpi-value {
+    margin-top: 0.5rem;
+    overflow: hidden;
+    color: #566D7E; /* (3) Marble font color */
+    font-size: clamp(0.75rem, 1.1vw, 0.9rem); /* (2) Reduced value font size */
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cfkpi-note {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    color: #718096;
+    font-size: 0.60rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cfkpi-card-sales {
+    --cfkpi-accent: #2563eb;
+}
+
+.cfkpi-card-inventory-up {
+    --cfkpi-accent: #0f766e;
+}
+
+.cfkpi-card-inventory-down {
+    --cfkpi-accent: #d97706;
+}
+
+.cfkpi-card-expenses {
+    --cfkpi-accent: #7c3aed;
+}
+
+.cfkpi-card-vat {
+    --cfkpi-accent: #475569;
+}
+
+.cfkpi-card-gross-profit {
+    --cfkpi-accent: #0891b2;
+}
+
+.cfkpi-card-ebitda {
+    --cfkpi-accent: #0369a1;
+}
+
+.cfkpi-card-profit {
+    --cfkpi-accent: #15803d;
+}
+
+.cfkpi-card-loss {
+    --cfkpi-accent: #dc2626;
+}
+
+.cfkpi-state {
+    display: flex;
+    min-height: 7rem;
     align-items: center;
     justify-content: center;
-    width: clamp(1.1rem, 1.8vw, 1.3rem);
-    height: clamp(1.1rem, 1.8vw, 1.3rem);
-    opacity: 0.75;
+    gap: 0.5rem;
+    border: 1px solid #dce4eb;
+    border-radius: 0.65rem;
+    background: #fff;
+    color: #64748b;
+    font-size: 0.72rem;
 }
 
-/* Content wrapper - Full width with right padding so text doesn't flow under absolute icon */
-.kpi-content {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(0.15rem, 0.4vw, 0.25rem);
-    min-width: 0;
-    width: 100%;
-    padding-right: 1.2rem;
-    text-align: left !important;
-    align-items: flex-start !important;
+.cfkpi-state-error {
+    border-color: #fecaca;
+    background: #fff7f7;
+    color: #b91c1c;
 }
 
-/* Card Variants - Fading Faint Marble Background Variations */
-.kpi-card-default {
-    background: linear-gradient(135deg, #f7f9fa 0%, #ffffff 100%);
-    border-left-color: #566D7E;
-}
-
-    .kpi-card-default .kpi-icon {
-        color: #566D7E;
-    }
-
-.kpi-card-primary {
-    background: linear-gradient(135deg, #f4f7f9 0%, #ffffff 100%);
-    border-left-color: #4b6173;
-}
-
-    .kpi-card-primary .kpi-icon {
-        color: #4b6173;
-    }
-
-.kpi-card-highlight {
-    background: linear-gradient(135deg, #edf7f0 0%, #ffffff 100%);
-    border-color: #d2dce3;
-    border-left-color: #16a34a;
-    border-width: 1px;
-    border-left-width: clamp(3px, 0.4vw, 4px);
-}
-
-    .kpi-card-highlight .kpi-icon {
-        color: #16a34a;
-    }
-
-.kpi-card-ebitda {
-    background: linear-gradient(135deg, #eef6f9 0%, #ffffff 100%);
-    border-color: #d2dce3;
-    border-left-color: #0284c7;
-    border-width: 1px;
-    border-left-width: clamp(3px, 0.4vw, 4px);
-}
-
-    .kpi-card-ebitda .kpi-icon {
-        color: #0284c7;
-    }
-
-.kpi-label {
-    font-size: clamp(0.48rem, 0.9vw, 0.6rem);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: clamp(0.3px, 0.4vw, 0.5px);
-    color: #566D7E;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
-    width: 100%;
-}
-
-.kpi-value {
-    font-size: clamp(0.7rem, 1.7vw, 0.9rem);
-    font-weight: 800;
-    font-family: 'Courier New', monospace;
-    letter-spacing: clamp(0.1px, 0.2vw, 0.2px);
-    color: #1f2937;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
-    width: 100%;
-}
-
-.kpi-indicator {
-    font-size: clamp(0.48rem, 0.8vw, 0.6rem);
-    font-weight: 600;
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-    gap: clamp(0.15rem, 0.3vw, 0.25rem);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
-    text-align: left;
-}
-
-    .kpi-indicator i {
-        font-size: clamp(0.48rem, 0.75vw, 0.6rem);
-        flex-shrink: 0;
-    }
-
-.text-warning {
-    color: #f59e0b !important;
-}
-
-.text-muted {
-    color: #8c9ba5 !important;
-}
-
-/* Responsive Breakpoints */
-@media (min-width: 1400px) {
-    .kpi-grid {
-        grid-template-columns: repeat(8, 1fr);
-        gap: 0.6rem;
+@media (max-width: 1450px) {
+    .cfkpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 
-@media (min-width: 1200px) and (max-width: 1399px) {
-    .kpi-grid {
-        grid-template-columns: repeat(8, 1fr);
-        gap: 0.55rem;
+@media (max-width: 900px) {
+    .cfkpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (min-width: 1024px) and (max-width: 1199px) {
-    .kpi-grid {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 0.55rem;
+@media (max-width: 480px) {
+    .cfkpi-grid {
+        grid-template-columns: 1fr;
     }
 }
-
-@media (min-width: 768px) and (max-width: 1023px) {
-    .kpi-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.5rem;
-    }
-}
-
-@media (min-width: 640px) and (max-width: 767px) {
-    .kpi-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.45rem;
-    }
-}
-
-@media (max-width: 639px) {
-    .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.4rem;
-    }
-}
-
-

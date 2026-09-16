@@ -1,0 +1,217 @@
+.cfbi-shell {
+    overflow: hidden;
+    border: 1px solid #d7e0e8;
+    border-radius: 0.7rem;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
+}
+
+.cfbi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.9rem;
+    background: linear-gradient(135deg, #34495e, #50687a);
+    color: #fff;
+}
+
+.cfbi-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cfbi-header-note {
+    color: #d7e4ea;
+    font-size: 0.62rem;
+}
+
+.cfbi-body {
+    padding: 1rem;
+}
+
+.cfbi-status-list {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.cfbi-status-row {
+    display: grid;
+    grid-template-columns: minmax(9rem, max-content) minmax(5.5rem, 1fr);
+    align-items: center;
+    column-gap: clamp(1.25rem, 4vw, 3.5rem);
+    min-height: 1.75rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid #e6edf2;
+    font-size: 0.75rem;
+}
+
+.cfbi-status-label {
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.cfbi-status-value {
+    justify-self: start;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.cfbi-green {
+    color: #15803d !important;
+}
+
+.cfbi-blue {
+    color: #0369a1 !important;
+}
+
+.cfbi-amber {
+    color: #b45309 !important;
+}
+
+.cfbi-red {
+    color: #dc2626 !important;
+}
+
+.cfbi-neutral {
+    color: #64748b !important;
+}
+
+.cfbi-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0.9rem 0;
+}
+
+.cfbi-highlight-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: 0.75rem;
+    overflow: hidden;
+    padding: 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.6rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.03);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+    .cfbi-highlight-card::after {
+        position: absolute;
+        right: -1.4rem;
+        bottom: -1.4rem;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        background: rgba(8, 145, 178, 0.08);
+        content: "";
+    }
+
+    .cfbi-highlight-card:hover {
+        transform: translateY(-2px);
+        border-color: #94a3b8;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.09);
+    }
+
+.cfbi-highlight-icon {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(8, 145, 178, 0.1);
+    color: #0891b2;
+    font-size: 1.25rem;
+}
+
+.cfbi-highlight-content {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.cfbi-highlight-label,
+.cfbi-highlight-note {
+    display: block;
+    color: #64748b;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+.cfbi-highlight-value {
+    display: block;
+    margin: 0.2rem 0;
+    overflow: hidden;
+    color: #0f4c5c;
+    font-size: 1.2rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    .cfbi-highlight-value small {
+        color: #64748b;
+        font-size: 0.62rem;
+    }
+
+.cfbi-metrics-table {
+    border: 1px solid #cbd5e1;
+    font-size: 0.72rem;
+}
+
+    .cfbi-metrics-table th,
+    .cfbi-metrics-table td {
+        padding: 0.55rem 0.7rem;
+        border-color: #cbd5e1;
+    }
+
+    .cfbi-metrics-table th {
+        width: 62%;
+        background: #ecfdf5;
+        color: #315b52;
+        font-weight: 650;
+    }
+
+    .cfbi-metrics-table td {
+        background: #f8fffd;
+        font-weight: 800;
+        text-align: right;
+    }
+
+    .cfbi-metrics-table tbody tr:hover th {
+        background: #dff8ec;
+    }
+
+    .cfbi-metrics-table tbody tr:hover td {
+        background: #eefbf7;
+    }
+
+.cfbi-state {
+    display: flex;
+    min-height: 18rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.cfbi-state-error {
+    color: #b91c1c;
+}
+
+@media (max-width: 480px) {
+    .cfbi-status-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 1rem;
+    }
+
+    .cfbi-highlight-grid {
+        grid-template-columns: 1fr;
+    }
+}

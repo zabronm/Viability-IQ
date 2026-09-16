@@ -1,147 +1,146 @@
-﻿using Microsoft.AspNetCore.Components;
-using Serilog.Core;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using ViabilityIQ.Application.Interfaces;
-using ViabilityIQ.Application.Projections;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
-using ViabilityIQ.Shared.UtilityServices; // Added for Mapper
 using ViabilityIQ.Web.Services;
 
+namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 
-namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
+public partial class IncomeSalesFormComponent : ComponentBase
 {
-    public partial class IncomeSalesFormComponent : ComponentBase
+    [Inject] private ISessionService SessionService { get; set; } = default!;
+    [Inject] private ZabOffCanvasService ZabCanvasService { get; set; } = default!;
+    [Inject] private IGenericDataRepository<AssessmentSales> DataRepository { get; set; } = default!;
+    [Inject] private ILogger<IncomeSalesFormComponent> Logger { get; set; } = default!;
+    [Inject] private IProjectionStateManager ProjectionStateManager { get; set; } = default!;
+
+    [Parameter] public long AssessmentId { get; set; }
+    [Parameter] public UnifiedIncomeViewModel? IncomeContext { get; set; }
+
+    private AssessmentSales FormModel { get; set; } = new();
+    private decimal[] MonthlyValues { get; set; } = new decimal[12];
+    private decimal BulkAnnualValueTarget { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private bool IsSubmitting { get; set; }
+
+    private decimal BaseTotalSum => MonthlyValues.Sum();
+    private decimal GrandCalculatedTotalSum =>
+        BaseTotalSum * VatFactor(FormModel.IncludeVAT, EffectiveVatRate);
+    private decimal EffectiveVatRate =>
+        FormModel.VATRate > 0m ? FormModel.VATRate : 15m;
+
+    protected override async Task OnParametersSetAsync()
     {
-        [Inject] private ISessionService sessionService { get; set; } = default!;
-        [Inject] private ZabOffCanvasService? zabCanvasService { get; set; }
-        [Inject] private IGenericDataRepository<AssessmentSales> DataRepository { get; set; } = default!;
-        [Inject] private ILogger<IncomeSalesFormComponent> Logger { get; set; } = default!;     //This is the logging service for errors and warnings
-        [Inject] private IProjectionStateManager projectionStateManager { get; set; } = default!;
+        AssessmentId = SessionService.AssessmentId ?? AssessmentId;
+        IsLoading = true;
 
-        [Parameter] public long AssessmentId { get; set; }
-        [Parameter] public UnifiedIncomeViewModel? IncomeContext { get; set; }
-        
-
-        private AssessmentSales FormModel { get; set; } = new();
-        private decimal[] MonthlyValues { get; set; } = new decimal[12];
-        private decimal BulkAnnualValueTarget { get; set; }
-
-        private decimal BaseTotalSum => MonthlyValues.Sum();
-        private decimal GrandCalculatedTotalSum => BaseTotalSum * (FormModel.IncludeVAT > 0 ? 1.15m : 1.00m);
-
-
-        private bool IsLoading { get; set; } = true;
-        private bool IsSubmitting { get; set; } = false;
-
-
-
-        protected override void OnParametersSet()
+        try
         {
-            AssessmentId = sessionService.AssessmentId ?? 0;
+            if (IncomeContext?.Id > 0)
+            {
+                var existing = await DataRepository.GetByIdAsync(IncomeContext.Id)
+                    ?? throw new InvalidOperationException(
+                        $"Revenue record {IncomeContext.Id} was not found.");
+                if (existing.AssessmentId != AssessmentId)
+                {
+                    throw new InvalidOperationException(
+                        "The selected revenue record belongs to a different assessment.");
+                }
 
-            if (IncomeContext != null)
+                FormModel = existing;
+                MonthlyValues = (decimal[])existing.MonthlyValues.Clone();
+            }
+            else
             {
                 FormModel = new AssessmentSales
                 {
                     AssessmentId = AssessmentId,
-                    AssessmentSalesId = (int)IncomeContext.Id,
-                    Description = IncomeContext.Description,
-                    IncomeTypeId = IncomeContext.TypeId,
-                    IncludeVAT = IncomeContext.IncludesVat ? 1 : 0
+                    Description = IncomeContext?.Description ?? string.Empty,
+                    IncomeTypeId = IncomeContext?.TypeId ?? 1,
+                    IncludeVAT = IncomeContext?.IncludesVat == true ? 1m : 0m,
+                    Active = true
                 };
-                MonthlyValues = (decimal[])IncomeContext.MonthlyValues.Clone();
-                Logger.LogDebug($"Income context loaded for sales ID {FormModel.AssessmentSalesId}");
+                MonthlyValues = IncomeContext?.MonthlyValues?.Length == 12
+                    ? (decimal[])IncomeContext.MonthlyValues.Clone()
+                    : new decimal[12];
             }
-            else
-            {
-                FormModel = new()
-                {
-                    AssessmentId = AssessmentId
-                };
-                Logger.LogDebug("New sales form initialized for assessment {AssessmentId}", AssessmentId);
-            }
+
+            BulkAnnualValueTarget = MonthlyValues.Sum();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(
+                exception,
+                "Unable to initialize revenue form for assessment {AssessmentId}",
+                AssessmentId);
+            await ZabCanvasService.PublishResultAsync(SaveResult.Failed(exception.Message));
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void DistributeAnnualValueEvenly()
+    {
+        var monthlyAmount = Math.Round(BulkAnnualValueTarget / 12m, 2);
+        for (var index = 0; index < MonthlyValues.Length; index++)
+        {
+            MonthlyValues[index] = monthlyAmount;
+        }
+    }
+
+    private async Task ExecuteSaveWorkflowAsync()
+    {
+        if (IsSubmitting || string.IsNullOrWhiteSpace(FormModel.Description))
+        {
+            return;
         }
 
-        private void DistributeAnnualValueEvenly()
+        IsSubmitting = true;
+        try
         {
-            decimal slice = Math.Round(BulkAnnualValueTarget / 12m, 2);
-            for (int i = 0; i < 12; i++) MonthlyValues[i] = slice;
-        }
+            FormModel.AssessmentId = AssessmentId;
+            FormModel.MonthlyValues = MonthlyValues;
+            FormModel.TotalNoVAT = BaseTotalSum;
+            FormModel.VATRate = FormModel.IncludeVAT > 0m ? EffectiveVatRate : 0m;
+            FormModel.TotalWithVAT = GrandCalculatedTotalSum;
 
-        private async Task ExecuteSaveWorkflowAsync()
-        {
-            SaveResult executionFeedbackPackage;
-
-            if (FormModel == null || IsSubmitting) return;
-            if (string.IsNullOrWhiteSpace(FormModel.Description))         //// Interface validation step guard check
+            var saved = await DataRepository.SaveAsync(FormModel);
+            if (!saved)
             {
+                await ZabCanvasService.PublishResultAsync(
+                    SaveResult.Failed("Revenue details could not be saved."));
                 return;
             }
 
-            try
-            {
-                IsSubmitting = true;
-                FormModel.MonthlyValues = MonthlyValues;
-                FormModel.AssessmentId = AssessmentId;                
+            await ProjectionStateManager.InvalidateDataAsync(
+                "Sales",
+                FormModel.AssessmentSalesId,
+                AssessmentId);
 
-                bool isExecutionSuccess = await DataRepository.SaveAsync(FormModel);
-                if (isExecutionSuccess)
-                {
-                    //// ✅ INVALIDATE CASHFLOW AFTER SUCCESSFUL SAVE
-                    try
-                    {
-                        Logger.LogInformation($"Invalidating cashflow for assessment {AssessmentId} after sales save/update");
-                        await projectionStateManager.InvalidateDataAsync
-                            (
-                                dataType: "Sales", 
-                                entityId: FormModel.AssessmentSalesId, 
-                                assessmentId: AssessmentId
-                            );
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError(ex, $"Error invalidating cashflow for assessment {AssessmentId} after sales save/update");
-                        // Don't fail the save if cashflow invalidation fails
-                    }
-
-                    
-                    executionFeedbackPackage = new()
-                    {
-                        Success = isExecutionSuccess,
-                        ClosePanel = isExecutionSuccess,
-                        RefreshGrid= true,
-                        Message = isExecutionSuccess
-                            ? $"Monthly sales details for {FormModel.Description}  committed successfully."
-                            : "Error encountered; monthly sales not saved, please retry."
-                    };
-
-                    //await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
-                    await zabCanvasService!.PublishResultAsync(executionFeedbackPackage);
-                }
-            }
-            catch (Exception ex)           
-            {
-                Logger.LogError(ex, $"Error saving sales data for assessment {AssessmentId}");
-                await zabCanvasService!.PublishResultAsync(new SaveResult
-                {
-                    Success = false,
-                    ClosePanel = false,
-                    Message = $"Error encountered: {ex.Message}",
-                    RefreshGrid = false,
-                });
-            }
-            finally
-            {
-
-                IsSubmitting = false;
-            }
-
-            //await zabCanvasService!.HideAsync(SaveResult.SavedAndClose(FormModel, "Revenue entry updated successfully."));           
+            await ZabCanvasService.PublishResultAsync(SaveResult.SavedAndClose(
+                FormModel,
+                $"Monthly sales details for {FormModel.Description} committed successfully."));
         }
-
-        private async Task CancelFormAsync() => await zabCanvasService!.HideAsync(SaveResult.Cancel());
+        catch (Exception exception)
+        {
+            Logger.LogError(
+                exception,
+                "Error saving revenue data for assessment {AssessmentId}",
+                AssessmentId);
+            await ZabCanvasService.PublishResultAsync(
+                SaveResult.Failed($"Revenue details could not be saved: {exception.Message}"));
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
+
+    private async Task CancelFormAsync() =>
+        await ZabCanvasService.HideAsync(SaveResult.Cancel());
+
+    private static decimal VatFactor(decimal includeVat, decimal rate) =>
+        includeVat > 0m ? 1m + Math.Max(rate, 0m) / 100m : 1m;
 }

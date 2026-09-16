@@ -57,7 +57,7 @@
                 </NavLink>
                 @* <hr class="border-secondary my-0" /> *@
 
-                <NavLink class="fa-nav-item py-0 my-0 mb-1" href="assessment/dashboards" Match="NavLinkMatch.All">
+                <NavLink class="fa-nav-item py-0 my-0 mb-1" href="@WhatIfUrl" Match="NavLinkMatch.All">
                     <div class="nav-icon-avatar-round"><i class="bi bi-speedometer2"></i></div>
                     <span class="footer-main-text-sm">Dashboard</span>
                 </NavLink>
@@ -281,7 +281,11 @@
     private string DebtorsCreditorsUrl =>
         SessionService.AssessmentId is long assessmentId && assessmentId > 0
             ? $"/assessment/debtors-creditors/{assessmentId}"
-            : "/assessment/dashboards";
+            : "/assessment/dashboards-error";
 
+    private string WhatIfUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                    ? $"/assessment/dashboards/{assessmentId}"
+                    : "/assessment/dashboards-error";
 
 }

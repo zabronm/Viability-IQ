@@ -48,6 +48,12 @@ namespace ViabilityIQ.Application.ExtensionServices
             // Debtors/Creditors calculations and Projection Service 
             services.AddScoped<IAccountsProjectionService, AccountsProjectionService>();
 
+            //services.AddScoped<ICashflowProjectionService, CashflowProjectionService>();
+            services.AddScoped<IAssessmentVatProjectionService, AssessmentVatProjectionService>();
+            services.AddScoped<ICashflowProjectionService, CashflowProjectionService>();
+
+
+
             return services;
         }
     }

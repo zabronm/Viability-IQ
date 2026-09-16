@@ -174,28 +174,28 @@
 }
 
 .action-success {
-    color: #17663f;
-    background: #dbf1e5;
+    color: #F0FFF0;
+    background: #033E3E;
 }
 
 .action-info {
     color: #155c80;
-    background: #dceef7;
+    background: #38ACEC;
 }
 
 .action-danger {
     color: #923542;
-    background: #f7e0e3;
+    background: #C34A2C;
 }
 
 .action-warning {
     color: #805b13;
-    background: #fff0cf;
+    background: #E9AB17;
 }
 
 .action-neutral {
     color: #536272;
-    background: #e9edf1;
+    background: #E9AB17;
 }
 
 .snapshot-state {

@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICashflowRepository, CashflowRepository>();
         services.AddScoped<IDebtorsCreditorsRepository, DebtorsCreditorsRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
+        services.AddScoped<IVatAdjustmentRepository, VatAdjustmentRepository>();
 
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
