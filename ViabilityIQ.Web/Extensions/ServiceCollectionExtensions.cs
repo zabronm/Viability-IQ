@@ -1,4 +1,5 @@
 ﻿using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Extensions
@@ -11,7 +12,7 @@ namespace ViabilityIQ.Web.Extensions
             services.AddScoped<ToastService>();
             services.AddScoped<ZabOffCanvasService>();
             services.AddScoped<OffCanvasStateService>();
-            services.AddScoped<IBusinessHealthAlertService, BusinessHealthAlertService>();
+            services.AddScoped<IBusinessHealthAlertService, BusinessHealthAlertService>();            
             return services;
         }
     }

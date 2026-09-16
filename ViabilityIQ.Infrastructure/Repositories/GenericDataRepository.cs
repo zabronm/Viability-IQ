@@ -1,314 +1,325 @@
-﻿using Dapper;
-using Dapper.Contrib.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Dapper;
+using Dapper.Contrib.Extensions;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
+using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.DataModelsInterfaces;
+using ViabilityIQ.Shared.SharedModels;
 
-namespace ViabilityIQ.Infrastructure.Repositories
+namespace ViabilityIQ.Infrastructure.Repositories;
+
+public class GenericDataRepository<T> : IGenericDataRepository<T> where T : class
 {
-    public class GenericDataRepository<T> : IGenericDataRepository<T> where T : class
+    private static readonly Regex SqlIdentifierPattern =
+        new("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
+
+    private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ISessionService _sessionService;
+    private readonly IActivityLogWriter _activityLogWriter;
+
+    public GenericDataRepository(
+        IDbConnectionFactory dbConnectionFactory,
+        ISessionService sessionService,
+        IActivityLogWriter activityLogWriter)
     {
-        #region Private Fields
-        private readonly IDbConnectionFactory _dbConnectionFactory;
-        private readonly ISessionService _sessionService;
-        #endregion
-
-        #region Constructor
-        public GenericDataRepository(
-            IDbConnectionFactory dbConnectionFactory,
-            ISessionService sessionService)
-        {
-            _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
-            _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
-        }
-        #endregion
-
-        #region READ OPERATIONS
-
-        
-        /// Gets a single entity by its ID        
-        public async Task<T?> GetByIdAsync(long id)
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                return await connection.GetAsync<T>(id);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Get By ID Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Gets all entities without filtering        
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                var items = await connection.GetAllAsync<T>();
-
-                // If the entity implements ISortableEntity, sort it dynamically by its DisplayName
-                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
-                {
-                    return items.Cast<ISortableEntity>()
-                                .OrderBy(x => x.DisplayName)
-                                .Cast<T>()
-                                .ToList();
-                }
-
-                return items.ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Generic Read Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Gets all entities matching a predicate filter
-        /// Note: This performs client-side filtering since Dapper.Contrib doesn't support LINQ        
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                var allItems = await connection.GetAllAsync<T>();
-
-                // Compile the predicate and apply it client-side
-                var compiled = predicate.Compile();
-                var filteredItems = allItems.Where(compiled).ToList();
-
-                // If the entity implements ISortableEntity, sort it
-                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
-                {
-                    return filteredItems.Cast<ISortableEntity>()
-                                        .OrderBy(x => x.DisplayName)
-                                        .Cast<T>()
-                                        .ToList();
-                }
-
-                return filteredItems;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Generic Filter Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Gets entities filtered by a specific field value
-        /// More efficient for simple single-field filtering than GetAllAsync(predicate)
-        /// Example: GetByFieldAsync("AssessmentId", 123)        
-        public async Task<IEnumerable<T>> GetByFieldAsync(string fieldName, object fieldValue)
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-
-                // Validate field name to prevent SQL injection
-                if (string.IsNullOrWhiteSpace(fieldName))
-                    throw new ArgumentException("Field name cannot be empty", nameof(fieldName));
-
-                // Build dynamic WHERE clause
-                var sql = $"SELECT * FROM [{typeof(T).Name}] WHERE [{fieldName}] = @Value";
-
-                var result = await connection.QueryAsync<T>(sql, new { Value = fieldValue });
-
-                // Apply sorting if applicable
-                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
-                {
-                    return result.Cast<ISortableEntity>()
-                                 .OrderBy(x => x.DisplayName)
-                                 .Cast<T>()
-                                 .ToList();
-                }
-
-                return result.ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Get By Field Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Gets entities filtered by multiple field values
-        /// Example: GetByFieldsAsync(new { AssessmentId = 123, IsActive = true })        
-        public async Task<IEnumerable<T>> GetByFieldsAsync(object filters)
-        {
-            try
-            {
-                if (filters == null)
-                    throw new ArgumentNullException(nameof(filters));
-
-                using var connection = _dbConnectionFactory.CreateConnection();
-
-                // Build WHERE clause from anonymous object properties
-                var properties = filters.GetType().GetProperties();
-                if (properties.Length == 0)
-                    throw new ArgumentException("Filters object must have at least one property", nameof(filters));
-
-                var whereClause = string.Join(" AND ",
-                    properties.Select(p => $"[{p.Name}] = @{p.Name}"));
-
-                var sql = $"SELECT * FROM [{typeof(T).Name}] WHERE {whereClause}";
-
-                var result = await connection.QueryAsync<T>(sql, filters);
-
-                // Apply sorting if applicable
-                if (typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
-                {
-                    return result.Cast<ISortableEntity>()
-                                 .OrderBy(x => x.DisplayName)
-                                 .Cast<T>()
-                                 .ToList();
-                }
-
-                return result.ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Get By Fields Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        #endregion
-
-        #region WRITE OPERATIONS
-
-        
-        /// Saves (inserts or updates) an entity
-        /// Automatically handles audit trail properties        
-        public async Task<bool> SaveAsync(T entity)
-        {
-            using var connection = _dbConnectionFactory.CreateConnection();
-
-            try
-            {
-                // Handle audit trails generically using our interface hook
-                if (entity is IAuditableEntity auditable)
-                {
-                    if (entity is IEntity identity && identity.Id == 0)
-                    {
-                        // INSERT
-                        auditable.CreatedDate = DateTime.UtcNow;
-                        auditable.CreatedBy = _sessionService.UserId;
-                        auditable.Active = true;
-
-                        var newId = await connection.InsertAsync(entity);
-                        return newId > 0;
-                    }
-                    else
-                    {
-                        // UPDATE
-                        auditable.ModifiedDate = DateTime.UtcNow;
-                        auditable.ModifiedBy = _sessionService.UserId;
-
-                        return await connection.UpdateAsync(entity);
-                    }
-                }
-
-                // Fallback for models that do not have audit features
-                return await connection.UpdateAsync(entity);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Save Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Deletes an entity
-        
-        public async Task<bool> DeleteAsync(T entity)
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                return await connection.DeleteAsync(entity);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Delete Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        #endregion
-
-        #region UTILITY OPERATIONS
-
-        
-        /// Counts entities matching a predicate filter        
-        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                var allItems = await connection.GetAllAsync<T>();
-
-                // Compile the predicate and count matching items
-                var compiled = predicate.Compile();
-                return allItems.Count(compiled);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Count Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Counts all entities in the table        
-        public async Task<int> CountAsync()
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                var allItems = await connection.GetAllAsync<T>();
-                return allItems.Count();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Count Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        
-        /// Checks if any entity matches a predicate filter        
-        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
-        {
-            try
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-                var allItems = await connection.GetAllAsync<T>();
-
-                // Compile the predicate and check if any item matches
-                var compiled = predicate.Compile();
-                return allItems.Any(compiled);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Database Any Error: {ex.Message}");
-                throw;
-            }
-        }
-
-        #endregion
+        _dbConnectionFactory = dbConnectionFactory
+            ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+        _sessionService = sessionService
+            ?? throw new ArgumentNullException(nameof(sessionService));
+        _activityLogWriter = activityLogWriter
+            ?? throw new ArgumentNullException(nameof(activityLogWriter));
     }
+
+    public async Task<T?> GetByIdAsync(long id)
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+        return await connection.GetAsync<T>(id);
+    }
+
+    public async Task<IEnumerable<T>> GetAllAsync()
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var items = await connection.GetAllAsync<T>();
+        return SortIfSupported(items);
+    }
+
+    public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var items = await connection.GetAllAsync<T>();
+        return SortIfSupported(items.Where(predicate.Compile()));
+    }
+
+    public async Task<IEnumerable<T>> GetByFieldAsync(string fieldName, object fieldValue)
+    {
+        ValidateSqlIdentifier(fieldName, nameof(fieldName));
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var sql = $"SELECT * FROM {GetQuotedTableName()} WHERE [{fieldName}] = @Value";
+        var result = await connection.QueryAsync<T>(sql, new { Value = fieldValue });
+        return SortIfSupported(result);
+    }
+
+    public async Task<IEnumerable<T>> GetByFieldsAsync(object filters)
+    {
+        ArgumentNullException.ThrowIfNull(filters);
+
+        var properties = filters.GetType().GetProperties();
+        if (properties.Length == 0)
+        {
+            throw new ArgumentException(
+                "Filters object must have at least one property.",
+                nameof(filters));
+        }
+
+        foreach (var property in properties)
+        {
+            ValidateSqlIdentifier(property.Name, nameof(filters));
+        }
+
+        var whereClause = string.Join(
+            " AND ",
+            properties.Select(property => $"[{property.Name}] = @{property.Name}"));
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var sql = $"SELECT * FROM {GetQuotedTableName()} WHERE {whereClause}";
+        var result = await connection.QueryAsync<T>(sql, filters);
+        return SortIfSupported(result);
+    }
+
+    public async Task<bool> SaveAsync(T entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        OpenConnection(connection);
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            var isCreate = entity is not IEntity identity || identity.Id == 0;
+            var entityId = entity is IEntity existingIdentity ? existingIdentity.Id : 0;
+            bool saved;
+
+            if (entity is IAuditableEntity auditable)
+            {
+                if (isCreate)
+                {
+                    auditable.CreatedDate = DateTime.UtcNow;
+                    auditable.CreatedBy = _sessionService.UserId;
+                    auditable.Active = true;
+
+                    entityId = await connection.InsertAsync(entity, transaction);
+                    saved = entityId > 0;
+                }
+                else
+                {
+                    auditable.ModifiedDate = DateTime.UtcNow;
+                    auditable.ModifiedBy = _sessionService.UserId;
+                    saved = await connection.UpdateAsync(entity, transaction);
+                }
+            }
+            else
+            {
+                saved = await connection.UpdateAsync(entity, transaction);
+            }
+
+            if (!saved)
+            {
+                transaction.Rollback();
+                return false;
+            }
+
+            if (!IsActivityLogEntity())
+            {
+                await _activityLogWriter.RecordAsync(
+                    BuildWriteRequest(
+                        isCreate ? ActivityAction.Create : ActivityAction.Update,
+                        entity,
+                        entityId),
+                    connection,
+                    transaction);
+            }
+
+            transaction.Commit();
+            return true;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+
+    public async Task<bool> DeleteAsync(T entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        OpenConnection(connection);
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            var entityId = entity is IEntity identity ? identity.Id : 0;
+            var deleted = await connection.DeleteAsync(entity, transaction);
+
+            if (!deleted)
+            {
+                transaction.Rollback();
+                return false;
+            }
+
+            if (!IsActivityLogEntity())
+            {
+                await _activityLogWriter.RecordAsync(
+                    BuildWriteRequest(ActivityAction.Delete, entity, entityId),
+                    connection,
+                    transaction);
+            }
+
+            transaction.Commit();
+            return true;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+
+    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var items = await connection.GetAllAsync<T>();
+        return items.Count(predicate.Compile());
+    }
+
+    public async Task<int> CountAsync()
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var items = await connection.GetAllAsync<T>();
+        return items.Count();
+    }
+
+    public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        var items = await connection.GetAllAsync<T>();
+        return items.Any(predicate.Compile());
+    }
+
+    private ActivityLogWriteRequest BuildWriteRequest(
+        ActivityAction action,
+        T entity,
+        long entityId)
+    {
+        var assessmentId = ReadLongProperty(entity, "AssessmentId")
+            ?? _sessionService.AssessmentId;
+        var entityName = TryGetDisplayName(entity)
+            ?? ReadStringProperty(entity, "Name")
+            ?? ReadStringProperty(entity, $"{typeof(T).Name}Name");
+
+        return new ActivityLogWriteRequest
+        {
+            Action = action,
+            EntityType = typeof(T).Name,
+            EntityId = entityId > 0 ? entityId : null,
+            EntityName = entityName,
+            AssessmentId = assessmentId,
+            AssessmentName = assessmentId.HasValue ? _sessionService.CaseNumber : null,
+            Module = typeof(T).Namespace,
+            Page = _sessionService.CurrentPage,
+            Remarks = $"{action} {SplitPascalCase(typeof(T).Name)} record."
+        };
+    }
+
+    private static IEnumerable<T> SortIfSupported(IEnumerable<T> items)
+    {
+        if (!typeof(ISortableEntity).IsAssignableFrom(typeof(T)))
+        {
+            return items.ToList();
+        }
+
+        return items.Cast<ISortableEntity>()
+            .OrderBy(item => item.DisplayName)
+            .Cast<T>()
+            .ToList();
+    }
+
+    private static string GetQuotedTableName()
+    {
+        var tableAttribute = typeof(T).GetCustomAttribute<TableAttribute>();
+        var tableName = tableAttribute?.Name ?? typeof(T).Name;
+        var segments = tableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var segment in segments)
+        {
+            ValidateSqlIdentifier(segment, nameof(tableName));
+        }
+
+        return string.Join(".", segments.Select(segment => $"[{segment}]"));
+    }
+
+    private static void ValidateSqlIdentifier(string identifier, string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(identifier) || !SqlIdentifierPattern.IsMatch(identifier))
+        {
+            throw new ArgumentException($"Invalid SQL identifier '{identifier}'.", parameterName);
+        }
+    }
+
+    private static void OpenConnection(IDbConnection connection)
+    {
+        if (connection.State != ConnectionState.Open)
+        {
+            connection.Open();
+        }
+    }
+
+    private static bool IsActivityLogEntity() => typeof(T) == typeof(ActivityLog);
+
+    private static long? ReadLongProperty(T entity, string propertyName)
+    {
+        var value = typeof(T).GetProperty(propertyName)?.GetValue(entity);
+        return value switch
+        {
+            long longValue when longValue > 0 => longValue,
+            int intValue when intValue > 0 => intValue,
+            _ => null
+        };
+    }
+
+    private static string? ReadStringProperty(T entity, string propertyName) =>
+        typeof(T).GetProperty(propertyName)?.GetValue(entity)?.ToString();
+
+    private static string? TryGetDisplayName(T entity)
+    {
+        if (entity is not ISortableEntity sortable)
+        {
+            return null;
+        }
+
+        try
+        {
+            return sortable.DisplayName;
+        }
+        catch (NotImplementedException)
+        {
+            return null;
+        }
+    }
+
+    private static string SplitPascalCase(string value) =>
+        Regex.Replace(value, "(?<=[a-z])(?=[A-Z])", " ");
 }

@@ -45,6 +45,9 @@ namespace ViabilityIQ.Application.ExtensionServices
             // Cashflow calculations (can safely use IProjectionStateManager now)
             services.AddScoped<ICashflowEngine, CashflowEngine>();
 
+            // Debtors/Creditors calculations and Projection Service 
+            services.AddScoped<IAccountsProjectionService, AccountsProjectionService>();
+
             return services;
         }
     }

@@ -1,0 +1,76 @@
+@page "/assessment/accounts/{AssessmentId:long}"
+@page "/assessment/debtors-creditors/{AssessmentId:long}"
+@layout MainLayout_Assessment
+@namespace ViabilityIQ.Web.Components.Pages_Assessments
+
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="accounts-shell container-fluid p-0 position-relative dashboard-workspace">
+    <PageHeading_Assessment _pageTitle="Debtors/Creditors"
+                            PageTitle="Debtors, Creditors & Consolidated Outlook"
+                            CurrentPage="PageType.Creditors" />
+
+    <section class="assets-tabs-shell">
+        <div class="assets-tabs" role="tablist" aria-label="Debtors and creditors sections">
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AccountsTab.Debtors)"
+                    class="assets-tab @(ActiveTab == AccountsTab.Debtors ? "active" : null)"
+                    @onclick="() => SelectTab(AccountsTab.Debtors)">
+                <i class="bi bi-people-fill"></i>
+                <span>Debtors</span>
+            </button>
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AccountsTab.Creditors)"
+                    class="assets-tab @(ActiveTab == AccountsTab.Creditors ? "active" : null)"
+                    @onclick="() => SelectTab(AccountsTab.Creditors)">
+                <i class="bi bi-truck-front-fill"></i>
+                <span>Creditors</span>
+            </button>
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AccountsTab.Consolidated)"
+                    class="assets-tab @(ActiveTab == AccountsTab.Consolidated ? "active" : null)"
+                    @onclick="() => SelectTab(AccountsTab.Consolidated)">
+                <i class="bi bi-bar-chart-line-fill"></i>
+                <span>Consolidated Outlook</span>
+            </button>
+        </div>
+
+        <div class="assets-tab-content" role="tabpanel">
+            @if (IsLoading)
+            {
+                <div class="accounts-state">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span>Calculating the 12-month outlook...</span>
+                </div>
+            }
+            else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    <div>
+                        <strong>Projection could not be loaded.</strong>
+                        <div>@ErrorMessage</div>
+                    </div>
+                </div>
+            }
+            else if (Projection is not null)
+            {
+                @switch (ActiveTab)
+                {
+                    case AccountsTab.Debtors:
+                        <AssessmentAccs_DebtorsPage Projection="@Projection" />
+                        break;
+                    case AccountsTab.Creditors:
+                        <AssessmentAccs_CreditorsPage Projection="@Projection" />
+                        break;
+                    case AccountsTab.Consolidated:
+                        <AssessmentAccs_ConsolidatedPage Projection="@Projection" />
+                        break;
+                }
+            }
+        </div>
+    </section>
+</div>

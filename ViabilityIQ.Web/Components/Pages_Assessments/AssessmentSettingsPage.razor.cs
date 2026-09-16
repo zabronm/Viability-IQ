@@ -233,7 +233,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         //============================== REFEESH AFTER UPDATING ANY COMPONENT ============
         //private async Task RefreshComponentData(SaveResult saveResult, string refName = "")
-            private async Task RefreshComponentData(SaveResult saveResult, string refName = "")
+        private async Task RefreshComponentData(SaveResult saveResult, string refName = "")
         {
             if (saveResult.Success)
             {

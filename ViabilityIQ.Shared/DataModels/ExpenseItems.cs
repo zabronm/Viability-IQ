@@ -17,10 +17,10 @@ namespace ViabilityIQ.Shared.DataModels
         public string? ExpenseItemName { get; set; }
         public string? Remarks { get; set; }
         public bool Active { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy { get; set; }
         public long  ModifiedBy { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
 
         long IEntity.Id => ExpenseItemId;
         string ISortableEntity.DisplayName => ExpenseItemName;

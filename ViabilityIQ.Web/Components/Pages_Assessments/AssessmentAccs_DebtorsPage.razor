@@ -1,0 +1,180 @@
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+<section>
+    <AccountsProjectionAlerts Alerts="@Projection.Alerts"
+                              Heading="Debtors and cashflow alerts" />
+
+    <div class="accounts-kpis">
+        <article class="accounts-kpi">
+            <span>Opening debtors</span>
+            <strong>@Money(OpeningDebtors)</strong>
+            <small>From active sales categories</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Projected sales</span>
+            <strong>@Money(Projection.TotalSales)</strong>
+            <small>12-month credit-sales basis</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Collections</span>
+            <strong>@Money(Projection.TotalCollections)</strong>
+            <small>Within the projection period</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Closing debtors</span>
+            <strong>@Money(Projection.ClosingDebtors)</strong>
+            <small>Includes post-year collections</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Projected DSO</span>
+            <strong>@DaysSalesOutstanding.ToString("N0") days</strong>
+            <small>Closing debtors / average daily sales</small>
+        </article>
+    </div>
+
+    <div class="accounts-grid">
+        <article class="accounts-card">
+            <header class="accounts-card-header">
+                <h2>Debtor collection profile</h2>
+                <span>Total @Projection.Profile.DebtorPercentageTotal.ToString("N1")%</span>
+            </header>
+            <div class="accounts-card-body">
+                @foreach (var bucket in Projection.Profile.DebtorBuckets)
+                {
+                    <div class="profile-row">
+                        <span>@bucket.Label</span>
+                        <div class="profile-track">
+                            <div class="profile-fill" style="width:@Width(bucket.Percentage)%"></div>
+                        </div>
+                        <strong class="text-end">@bucket.Percentage.ToString("N1")%</strong>
+                    </div>
+                }
+                <hr />
+                <div class="d-flex justify-content-between small">
+                    <span>Bad-debt assumption</span>
+                    <strong>@Projection.Profile.BadDebtPercentage.ToString("N1")%</strong>
+                </div>
+                <div class="d-flex justify-content-between small mt-1">
+                    <span>VAT basis</span>
+                    <strong>@(Projection.Profile.IncludeVat ? "Inclusive" : "Exclusive")</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="accounts-card">
+            <header class="accounts-card-header">
+                <h2>Collections and closing debtors</h2>
+                <div class="chart-legend">
+                    <span><i class="legend-dot primary"></i>Collections</span>
+                    <span><i class="legend-dot secondary"></i>Closing debtors</span>
+                </div>
+            </header>
+            <div class="accounts-card-body">
+                <div class="monthly-chart" aria-label="Monthly debtor chart">
+                    @foreach (var month in Projection.Months)
+                    {
+                        <div class="chart-month" title="@ChartTitle(month)">
+                            <div class="chart-bars">
+                                <span class="chart-bar primary" style="height:@BarHeight(month.DebtorCollections)%"></span>
+                                <span class="chart-bar secondary" style="height:@BarHeight(month.ClosingDebtors)%"></span>
+                            </div>
+                            <span class="chart-label">@($"M{month.MonthNumber}")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <article class="accounts-card mb-3">
+        <header class="accounts-card-header">
+            <h2>Monthly debtor movement</h2>
+            <span>Opening + sales - collections - bad debt = closing</span>
+        </header>
+        <div class="accounts-table-wrap">
+            <table class="accounts-table">
+                <thead>
+                    <tr>
+                        <th>Movement</th>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <th class="text-end">@($"M{month.MonthNumber}")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Opening debtors</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end">@Money(month.OpeningDebtors)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Credit sales</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end">@Money(month.CreditSales)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Collections</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end text-success">(@Money(month.DebtorCollections))</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Bad debt</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end text-danger">(@Money(month.BadDebt))</td>
+                        }
+                    </tr>
+                    <tr class="total-row">
+                        <td>Closing debtors</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end">@Money(month.ClosingDebtors)</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="accounts-card">
+        <header class="accounts-card-header">
+            <h2>Sales-category distribution</h2>
+            <span>Live category opening balances and annual sales</span>
+        </header>
+        <div class="accounts-table-wrap">
+            <table class="accounts-table">
+                <thead>
+                    <tr>
+                        <th>Sales category</th>
+                        <th class="text-end">Opening debtors</th>
+                        <th class="text-end">Annual sales</th>
+                        @foreach (var bucket in Projection.Profile.DebtorBuckets)
+                        {
+                            <th class="text-end">@bucket.Label</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Projection.Categories)
+                    {
+                        <tr>
+                            <td>@category.CategoryName</td>
+                            <td class="text-end">@Money(category.OpeningDebtors)</td>
+                            <td class="text-end">@Money(category.AnnualSales)</td>
+                            @foreach (var bucket in Projection.Profile.DebtorBuckets)
+                            {
+                                <td class="text-end">@Money(category.AnnualSales * bucket.Percentage / 100m)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>

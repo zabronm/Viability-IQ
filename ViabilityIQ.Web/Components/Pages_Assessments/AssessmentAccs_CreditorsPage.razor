@@ -1,0 +1,169 @@
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+<section>
+    <AccountsProjectionAlerts Alerts="@Projection.Alerts"
+                              Heading="Creditors and cashflow alerts" />
+
+    <div class="accounts-kpis">
+        <article class="accounts-kpi">
+            <span>Opening creditors</span>
+            <strong>@Money(OpeningCreditors)</strong>
+            <small>From active sales categories</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Stock purchases</span>
+            <strong>@Money(Projection.TotalPurchases)</strong>
+            <small>Live AssessmentStock values</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Supplier payments</span>
+            <strong>@Money(Projection.TotalPayments)</strong>
+            <small>Within the projection period</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Closing creditors</span>
+            <strong>@Money(Projection.ClosingCreditors)</strong>
+            <small>Includes post-year payments</small>
+        </article>
+        <article class="accounts-kpi">
+            <span>Payment coverage</span>
+            <strong>@PaymentCoverage.ToString("N1")%</strong>
+            <small>Payments / opening plus purchases</small>
+        </article>
+    </div>
+
+    <div class="accounts-grid">
+        <article class="accounts-card">
+            <header class="accounts-card-header">
+                <h2>Creditor payment profile</h2>
+                <span>Total @Projection.Profile.CreditorPercentageTotal.ToString("N1")%</span>
+            </header>
+            <div class="accounts-card-body">
+                @foreach (var bucket in Projection.Profile.CreditorBuckets)
+                {
+                    <div class="profile-row">
+                        <span>@bucket.Label</span>
+                        <div class="profile-track">
+                            <div class="profile-fill" style="width:@Width(bucket.Percentage)%"></div>
+                        </div>
+                        <strong class="text-end">@bucket.Percentage.ToString("N1")%</strong>
+                    </div>
+                }
+                <hr />
+                <p class="small text-muted mb-0">
+                    New creditor liabilities are generated only from active monthly
+                    <code>AssessmentStock</code> purchases, as selected.
+                </p>
+            </div>
+        </article>
+
+        <article class="accounts-card">
+            <header class="accounts-card-header">
+                <h2>Supplier payments and closing creditors</h2>
+                <div class="chart-legend">
+                    <span><i class="legend-dot primary"></i>Payments</span>
+                    <span><i class="legend-dot secondary"></i>Closing creditors</span>
+                </div>
+            </header>
+            <div class="accounts-card-body">
+                <div class="monthly-chart" aria-label="Monthly creditor chart">
+                    @foreach (var month in Projection.Months)
+                    {
+                        <div class="chart-month" title="@ChartTitle(month)">
+                            <div class="chart-bars">
+                                <span class="chart-bar primary" style="height:@BarHeight(month.CreditorPayments)%"></span>
+                                <span class="chart-bar secondary" style="height:@BarHeight(month.ClosingCreditors)%"></span>
+                            </div>
+                            <span class="chart-label">@($"M{month.MonthNumber}")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <article class="accounts-card mb-3">
+        <header class="accounts-card-header">
+            <h2>Monthly creditor movement</h2>
+            <span>Opening + stock purchases - supplier payments = closing</span>
+        </header>
+        <div class="accounts-table-wrap">
+            <table class="accounts-table">
+                <thead>
+                    <tr>
+                        <th>Movement</th>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <th class="text-end">@($"M{month.MonthNumber}")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Opening creditors</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end">@Money(month.OpeningCreditors)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Stock purchases</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end">@Money(month.CreditPurchases)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Supplier payments</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end text-success">(@Money(month.CreditorPayments))</td>
+                        }
+                    </tr>
+                    <tr class="total-row">
+                        <td>Closing creditors</td>
+                        @foreach (var month in Projection.Months)
+                        {
+                            <td class="text-end">@Money(month.ClosingCreditors)</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="accounts-card">
+        <header class="accounts-card-header">
+            <h2>Purchase-category distribution</h2>
+            <span>Opening creditors and annual stock purchases</span>
+        </header>
+        <div class="accounts-table-wrap">
+            <table class="accounts-table">
+                <thead>
+                    <tr>
+                        <th>Sales category</th>
+                        <th class="text-end">Opening creditors</th>
+                        <th class="text-end">Annual purchases</th>
+                        @foreach (var bucket in Projection.Profile.CreditorBuckets)
+                        {
+                            <th class="text-end">@bucket.Label</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Projection.Categories)
+                    {
+                        <tr>
+                            <td>@category.CategoryName</td>
+                            <td class="text-end">@Money(category.OpeningCreditors)</td>
+                            <td class="text-end">@Money(category.AnnualPurchases)</td>
+                            @foreach (var bucket in Projection.Profile.CreditorBuckets)
+                            {
+                                <td class="text-end">@Money(category.AnnualPurchases * bucket.Percentage / 100m)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
