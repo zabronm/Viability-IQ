@@ -1,0 +1,62 @@
+ASSESSMENT ASSUMPTIONS UI REFINEMENT - FILE MANIFEST
+===================================================
+
+Root documentation
+------------------
+IMPLEMENTATION_INSTRUCTIONS.txt
+FILES_MANIFEST.txt
+AssessmentAssumptionsHelp.html
+
+Shared model and SQL
+--------------------
+Files\ViabilityIQ.Shared\DataModels\AssessmentProjectionAssumptions.cs
+Files\ViabilityIQ.Modules\Database_Sql\AssessmentProjectionAssumptions.sql
+
+Assumptions page and supporting components
+------------------------------------------
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSettingsPage.razor
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSettingsPage.razor.css
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\
+  AssessmentProjectionReadinessComponent.razor
+  AssessmentProjectionReadinessComponent.razor.cs
+  AssessmentProjectionReadinessComponent.razor.css
+  AssumptionsGuidanceComponent.razor
+  AssumptionsGuidanceComponent.razor.css
+  LightweightProjectionAssumptionsComponent.razor
+  LightweightProjectionAssumptionsComponent.razor.cs
+  LightweightProjectionAssumptionsComponent.razor.css
+
+Refined setting components
+--------------------------
+Files\ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\
+  SalesCategoryListComponent.razor
+  SalesCategoryListComponent.razor.cs
+  SalesCategoryListComponent.razor.css
+  AssessmentLoansListComponent.razor
+  AssessmentLoansListComponent.razor.cs
+  AssessmentLoansListComponent.razor.css
+
+Files\ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\
+  OpeningBalancesComponent.razor
+  OpeningBalancesComponent.razor.css
+  DebtorsCreditorsComponent.razor
+  DebtorsCreditorsComponent.razor.cs
+  DebtorsCreditorsComponent.razor.css
+  VATEditComponent.razor
+  VATEditComponent.razor.css
+  DirectorWagesComponent.razor
+  DirectorWagesComponent.razor.css
+
+Layouts and help
+----------------
+Files\ViabilityIQ.Web\Components\Layout\MainLayout.razor
+Files\ViabilityIQ.Web\Components\Layout\MainLayout.razor.css
+Files\ViabilityIQ.Web\Components\Layout\MainLayout_Assessment.razor
+Files\ViabilityIQ.Web\Components\Layout\MainLayout_Assessment.razor.css
+Files\ViabilityIQ.Web\wwwroot\documents\AssessmentAssumptionsHelp.pdf
+
+Excluded by design
+------------------
+- Projection calculator/service changes
+- Additional database migrations beyond the existing assumptions table
+- Direct modification of production files

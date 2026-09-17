@@ -1,0 +1,108 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments
+@using ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+<div class="abs-page">
+    <div class="abs-print-toolbar">
+        <div>
+            <i class="bi bi-file-earmark-spreadsheet"></i>
+            <span>Assessment Balance Sheet</span>
+        </div>
+        <button type="button"
+                class="btn btn-outline-success btn-sm"
+                disabled="@(IsPrinting || IsLoadingAssets || IsLoadingProjection || Projection is null)"
+                @onclick="PreparePrintAsync">
+            @if (IsPrinting)
+            {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                <span>Preparing...</span>
+            }
+            else
+            {
+                <i class="bi bi-printer me-1"></i>
+                <span>Print Full Page</span>
+            }
+        </button>
+    </div>
+
+    @if (IsLoadingAssets)
+    {
+        <div class="abs-state"><span class="spinner-border spinner-border-sm"></span> Loading asset performance metrics...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(AssetError))
+    {
+        <div class="abs-error"><i class="bi bi-exclamation-triangle"></i> Asset metrics could not load: @AssetError</div>
+    }
+    else
+    {
+        <section class="abs-metrics" aria-label="Asset performance metrics">
+            <AssetSummaryKpiCardsComponent TotalAssetsCount="@TotalAssetsCount"
+                                           TotalGrossValue="@OpeningGrossValue"
+                                           TotalAdditions="@TotalAdditions"
+                                           TotalDisposals="@TotalDisposals"
+                                           TotalAccumulatedDepreciation="@ClosingAccumulatedDepreciation"
+                                           TotalNetValue="@ClosingNetBookValue"
+                                           HealthRate="@AssetHealthRate" />
+        </section>
+    }
+
+    @if (!IsLoadingProjection && Projection is not null)
+    {
+        @if (ShowAlerts)
+        {
+            <section class="abs-alert-panel" aria-labelledby="abs-alert-heading">
+                <header>
+                    <div>
+                        <span>Complete assessment review</span>
+                        <h2 id="abs-alert-heading">Balance sheet findings &amp; recommendations</h2>
+                    </div>
+                    <div class="abs-alert-actions">
+                        <span class="abs-alert-count">@BalanceSheetAlerts.Count finding@(BalanceSheetAlerts.Count == 1 ? string.Empty : "s")</span>
+                        <button type="button" class="abs-dismiss" title="Dismiss balance sheet alerts" @onclick="DismissAlerts">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </header>
+
+                @if (ShowAllAlerts)
+                {
+                    <div class="abs-alert-grid">
+                        @foreach (var alert in BalanceSheetAlerts)
+                        {
+                            <article class="abs-alert abs-alert-@alert.Severity">
+                                <i class="bi @alert.Icon"></i>
+                                <div>
+                                    <strong>@alert.Title</strong>
+                                    <p>@alert.Finding</p>
+                                    <small><i class="bi bi-lightbulb"></i> @alert.Recommendation</small>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="abs-alert-summary">
+                        <i class="bi @PrimaryAlertIcon"></i>
+                        <span>@PrimaryAlertSummary</span>
+                    </div>
+                }
+
+                <button type="button" class="abs-alert-toggle" @onclick="ToggleAlerts">
+                    @(ShowAllAlerts ? "See Less Alerts" : "See All Alerts")
+                    <i class="bi @(ShowAllAlerts ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                </button>
+            </section>
+        }
+
+        <AssessmentBalanceSheetComponent Projection="@Projection" />
+    }
+    else if (IsLoadingProjection)
+    {
+        <div class="abs-state"><span class="spinner-border spinner-border-sm"></span> Compiling the assessment balance sheet...</div>
+    }
+    else
+    {
+        <div class="abs-error"><i class="bi bi-exclamation-triangle"></i> Balance sheet could not load: @ProjectionError</div>
+    }
+</div>

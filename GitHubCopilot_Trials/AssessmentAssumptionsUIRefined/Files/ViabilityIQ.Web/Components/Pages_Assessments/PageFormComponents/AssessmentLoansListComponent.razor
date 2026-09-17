@@ -1,0 +1,38 @@
+﻿@using ViabilityIQ.Application.Dtos
+
+<section class="all-card">
+    <header class="all-header">
+        <div><span class="all-icon"><i class="bi bi-bank"></i></span><div><span>Funding commitments</span><h3>Assessment Loans</h3><p>Contractual balances, rates and repayments included in projected cashflow.</p></div></div>
+        <button type="button" @onclick="() => OnEditRequested.InvokeAsync(0)"><i class="bi bi-plus-lg"></i> Add Loan</button>
+    </header>
+    <div class="all-body">
+        @if (IsComponentLoading)
+        {
+            <div class="all-state"><span class="spinner-border spinner-border-sm"></span> Loading assessment loans...</div>
+        }
+        else if (!Loans.Any())
+        {
+            <div class="all-state"><i class="bi bi-folder-plus"></i><strong>No loans captured</strong><span>Add only funding that affects this assessment.</span></div>
+        }
+        else
+        {
+            <div class="all-table-wrap"><table class="all-table">
+                <thead><tr><th>#</th><th>Loan type</th><th>Institution</th><th class="text-end">Balance</th><th class="text-end">Interest</th><th class="text-end">Instalment</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <tbody>
+                @{ var row = 1; }
+                @foreach (var loan in Loans)
+                {
+                    <tr><td>@row</td><td><strong>@loan.LoanTypeName</strong></td><td>@loan.BankName</td>
+                        <td class="text-end">R @loan.LoanBalanceAtAssessmentDate.ToString("N2")</td>
+                        <td class="text-end"><span class="all-rate">@loan.InterestRatePerAnnum.ToString("N2")%</span></td>
+                        <td class="text-end">R @loan.ActualRepaymentAmount.ToString("N2")</td>
+                        <td class="text-center"><span class="all-status @(loan.Active ? "active" : "inactive")">@(loan.Active ? "Active" : "Inactive")</span></td>
+                        <td class="text-center"><button class="all-edit" type="button" title="Edit loan" @onclick="() => OnEditRequested.InvokeAsync(loan.AssessmentLoanId)"><i class="bi bi-pencil-square"></i></button></td></tr>
+                    row++;
+                }
+                </tbody>
+            </table></div>
+        }
+    </div>
+    <footer><i class="bi bi-info-circle"></i> Active loan instalments and interest affect monthly financing cash outflows.</footer>
+</section>

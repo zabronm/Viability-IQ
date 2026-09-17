@@ -1,0 +1,9 @@
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentAssetsPage.razor
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentAssetsPage.razor.cs
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentBalanceSheetPage.razor
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentBalanceSheetPage.razor.cs
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentBalanceSheetPage.razor.css
+Files/ViabilityIQ.Web/Components/Pages_Assessments/ProjectionComponents/AssessmentBalanceSheetComponent.razor
+Files/ViabilityIQ.Web/Components/Pages_Assessments/ProjectionComponents/AssessmentBalanceSheetComponent.razor.css
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssetFormComponents/AssetSummaryKpiCardsComponent.razor
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssetFormComponents/AssetSummaryKpiCardsComponent.razor.css

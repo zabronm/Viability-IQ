@@ -1,0 +1,56 @@
+ASSESSMENT ASSUMPTIONS UI REFINEMENT - IMPLEMENTATION
+=====================================================
+
+Scope
+-----
+This is a complete deployment package for the Assessment Assumptions & Baseline
+module. It includes the baseline model/table/page, readiness controls, refined
+settings components, the Debtors/Creditors entry-mode workflow, and PDF help.
+
+No projection calculator or projection service was changed.
+
+Deployment
+----------
+1. Back up the application and database.
+2. If the assumptions table is not already installed, review and run:
+   Files\ViabilityIQ.Modules\Database_Sql\AssessmentProjectionAssumptions.sql
+3. Copy everything beneath Files to the corresponding solution paths.
+4. Build and deploy ViabilityIQ.sln.
+
+Key UI changes
+--------------
+- Assumptions tabs use the same structure and visual rules as AssessmentAssetsPage.
+- Opening balances use two-decimal inputs and a bottom update action.
+- Sales Categories and Assessment Loans own their complete bordered cards, including
+  headings, narration, add controls, loading/empty states, tables and actions.
+- Sales Categories now display their actual OpeningStock value.
+- Month selectors display Month 1 through Month 12 while retaining numeric values.
+- VAT and Director Wages use the new card/input/footer treatment.
+- DirectorWagesAmountTotal is recalculated before persistence.
+- Both main top bars contain a Help link to the assumptions PDF.
+
+Help document
+-------------
+Deployed URL:
+  /documents/AssessmentAssumptionsHelp.pdf
+
+Editable source:
+  AssessmentAssumptionsHelp.html
+
+Verification
+------------
+1. Open Assessment Settings / Assumptions.
+2. Compare the four tabs with AssessmentAssetsPage tab styling.
+3. Save opening balances and confirm all four inputs display two decimals.
+4. Add/edit a Sales Category from inside its card and verify Opening Stock.
+5. Verify growth selectors show Month 1 through Month 12.
+6. Save VAT and Director Wages using the footer buttons.
+7. Confirm the combined director wage total is persisted.
+8. Add/edit a loan from inside the Assessment Loans card.
+9. Test both Debtors/Creditors entry modes and confirm profiles total 100%.
+10. Open Help from both the general and assessment top bars.
+
+Build evidence
+--------------
+Integrated isolated solution build succeeded with 0 errors.
+Existing solution warnings remain and are not deployment blockers for this package.

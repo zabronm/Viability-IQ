@@ -11,13 +11,14 @@ public abstract class IndependentCashflowProjectionComponent : ComponentBase, ID
     [Inject] private ILoggerFactory LoggerFactory { get; set; } = default!;
 
     [Parameter] public long AssessmentId { get; set; }
+    [Parameter] public CashflowProjectionResult? Projection { get; set; }
 
-    protected CashflowProjectionResult? Projection { get; private set; }
     protected bool IsLoading { get; private set; } = true;
     protected string? LoadError { get; private set; }
 
     private long _loadedAssessmentId;
     private bool _subscribed;
+    private bool _usesSuppliedProjection;
 
     protected override void OnInitialized()
     {
@@ -27,6 +28,17 @@ public abstract class IndependentCashflowProjectionComponent : ComponentBase, ID
 
     protected override async Task OnParametersSetAsync()
     {
+        if (_loadedAssessmentId == 0 && Projection is not null)
+            _usesSuppliedProjection = true;
+
+        if (_usesSuppliedProjection)
+        {
+            IsLoading = false;
+            LoadError = null;
+            await OnProjectionLoadedAsync();
+            return;
+        }
+
         if (_loadedAssessmentId != AssessmentId || Projection is null)
             await LoadProjectionAsync();
     }
@@ -63,7 +75,7 @@ public abstract class IndependentCashflowProjectionComponent : ComponentBase, ID
 
     private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs args)
     {
-        if (args.AssessmentId != AssessmentId)
+        if (_usesSuppliedProjection || args.AssessmentId != AssessmentId)
             return;
 
         _ = InvokeAsync(async () =>

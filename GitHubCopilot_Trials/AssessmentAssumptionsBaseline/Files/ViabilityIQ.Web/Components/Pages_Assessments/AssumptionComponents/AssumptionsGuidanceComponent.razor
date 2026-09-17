@@ -1,0 +1,46 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.AssumptionComponents
+
+<aside class="ag-card">
+    <header><i class="bi @Icon"></i><strong>@Title</strong></header>
+    <p>@Description</p>
+    <ul>
+        @foreach (var item in Items)
+        {
+            <li>@item</li>
+        }
+    </ul>
+    @if (!string.IsNullOrWhiteSpace(Link))
+    {
+        <a href="@Link" class="btn btn-outline-primary btn-sm"><i class="bi bi-box-arrow-up-right me-1"></i>@LinkLabel</a>
+    }
+</aside>
+
+@code {
+    [Parameter] public string Section { get; set; } = "opening";
+    [Parameter] public long AssessmentId { get; set; }
+
+    private string Title => Section == "assets" ? "Assets remain authoritative" : "Opening facts checklist";
+    private string Icon => Section == "assets" ? "bi-building-gear" : "bi-clipboard2-check";
+    private string Description => Section == "assets"
+        ? "Do not duplicate individual asset assumptions here. Maintain each asset in the Assets module."
+        : "Use balances confirmed at the start of the assessment period, even when the valid amount is zero.";
+    private string? Link => Section == "assets" ? $"/assessment/assets/{AssessmentId}" : null;
+    private string LinkLabel => "Manage Assets";
+
+    private IReadOnlyList<string> Items => Section == "assets"
+        ?
+        [
+            "Opening cost and accumulated depreciation",
+            "Acquisition month for planned assets",
+            "Depreciation rate and method",
+            "Additions, disposals and impairments"
+        ]
+        :
+        [
+            "Bank balance or overdraft",
+            "Opening stock",
+            "Opening debtors and creditors",
+            "Opening fixed assets and loans",
+            "Opening VAT payable or refundable where relevant"
+        ];
+}

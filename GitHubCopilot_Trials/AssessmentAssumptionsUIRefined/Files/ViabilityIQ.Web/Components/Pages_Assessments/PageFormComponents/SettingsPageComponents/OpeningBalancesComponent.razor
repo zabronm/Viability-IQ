@@ -1,0 +1,101 @@
+﻿@using ViabilityIQ.Infrastructure.Repositories
+
+@if (loadingStateActive)
+{
+    <FormLoadingComponent />
+}
+else
+{
+    <EditForm Model="@openingBalancesModel" OnValidSubmit="UpdateOpeningBalances">
+        <DataAnnotationsValidator />
+        <section class="ob-card">
+            <header class="ob-header">
+                <span class="ob-icon"><i class="bi bi-bank2"></i></span>
+                <div>
+                    <span>Opening position</span>
+                    <h3>Opening Balances</h3>
+                    <p>Balances carried into Month 1 of the assessment projection.</p>
+                </div>
+            </header>
+            <ValidationSummary class="ob-validation" />
+            <div class="ob-grid">
+                <label class="ob-field">
+                    <span>Opening stock / current assets</span>
+                    <small>Starting stock or other opening current-asset value.</small>
+                    <div class="ob-input"><span>R</span><input type="number" step="0.01" value="@FormatDecimal(openingBalancesModel.OpeningBalance_Assets)" @onchange="e => openingBalancesModel.OpeningBalance_Assets = ParseDecimal(e.Value)" /></div>
+                </label>
+                <label class="ob-field">
+                    <span>Opening bank balance</span>
+                    <small>Cash available at the beginning of Month 1.</small>
+                    <div class="ob-input"><span>R</span><input type="number" step="0.01" value="@FormatDecimal(openingBalancesModel.OpeningBalance_Bank)" @onchange="e => openingBalancesModel.OpeningBalance_Bank = ParseDecimal(e.Value)" /></div>
+                </label>
+                <label class="ob-field">
+                    <span>Overdraft interest</span>
+                    <small>Annual rate applied when the bank balance is overdrawn.</small>
+                    <div class="ob-input ob-suffix"><input type="number" step="0.01" min="0" value="@FormatDecimal(openingBalancesModel.InterestOnOverDraft)" @onchange="e => openingBalancesModel.InterestOnOverDraft = ParseDecimal(e.Value)" /><span>%</span></div>
+                </label>
+                <label class="ob-field">
+                    <span>Projected depreciation</span>
+                    <small>Opening depreciation allowance used by the assessment.</small>
+                    <div class="ob-input"><span>R</span><input type="number" step="0.01" value="@FormatDecimal(openingBalancesModel.DepreciationProjectedAmount)" @onchange="e => openingBalancesModel.DepreciationProjectedAmount = ParseDecimal(e.Value)" /></div>
+                </label>
+            </div>
+            <footer class="ob-footer">
+                <span><i class="bi bi-info-circle"></i> These values establish the projection's starting financial position.</span>
+                <button type="submit" disabled="@IsSubmitting"><i class="bi bi-check2-circle"></i> Update Opening Balances</button>
+            </footer>
+        </section>
+    </EditForm>
+}
+
+@code {
+    [Inject] private MasterDataService? ViqCrudService { get; set; }
+    [Parameter] public OpeningBalancesModel openingBalancesModel { get; set; } = new();
+    [Parameter] public EventCallback<SaveResult> OnUpdate { get; set; }
+    private SaveResult? result = new();
+    private bool IsSubmitting;
+    private bool loadingStateActive;
+    private static string FormatDecimal(decimal value) => value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    private static decimal ParseDecimal(object? value) => decimal.TryParse(Convert.ToString(value), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var parsed) ? parsed : 0m;
+
+    protected override async Task OnParametersSetAsync() => await RefreshAsync();
+
+    public async Task RefreshAsync()
+    {
+        loadingStateActive = true;
+        await Task.Delay(150);
+        loadingStateActive = false;
+        StateHasChanged();
+    }
+
+    private async Task UpdateOpeningBalances()
+    {
+        IsSubmitting = true;
+        const string sql = @"UPDATE tblAssessments SET OpeningBalance_Assets=@OpeningBalance_Assets,
+            OpeningBalance_Bank=@OpeningBalance_Bank, InterestOnOverDraft=@InterestOnOverDraft,
+            DepreciationProjectedAmount=@DepreciationProjectedAmount WHERE AssessmentId=@AssessmentId";
+        try
+        {
+            var rows = await ViqCrudService!.ExecuteCommandAsync(sql, new
+            {
+                openingBalancesModel.OpeningBalance_Assets,
+                openingBalancesModel.OpeningBalance_Bank,
+                openingBalancesModel.InterestOnOverDraft,
+                openingBalancesModel.DepreciationProjectedAmount,
+                openingBalancesModel.AssessmentId
+            });
+            result = rows > 0
+                ? new SaveResult { Message = "Opening balances updated successfully", Success = true }
+                : SaveResult.Failed("Opening balances were not updated. Please retry.");
+        }
+        catch (Exception ex)
+        {
+            result = SaveResult.Failed($"Opening balances could not be updated: {ex.Message}");
+        }
+        finally
+        {
+            IsSubmitting = false;
+            if (OnUpdate.HasDelegate) await OnUpdate.InvokeAsync(result!);
+        }
+    }
+}
