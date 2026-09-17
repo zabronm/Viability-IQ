@@ -1,0 +1,161 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+
+<section class="performance-chart card border-0 shadow-sm h-100" aria-labelledby="cashflow-performance-title">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <div>
+            <strong id="cashflow-performance-title">Monthly Performance</strong>
+            <div class="chart-subtitle">Sales, stock, expenses, cashflow and profit</div>
+        </div>
+        <i class="bi bi-graph-up-arrow"></i>
+    </div>
+
+    <div class="card-body">
+        <div class="chart-legend" aria-hidden="true">
+            <span class="legend-item"><span class="legend-box sales-colour"></span>Sales</span>
+            <span class="legend-item"><span class="legend-box stock-colour"></span>Stock</span>
+            <span class="legend-item"><span class="legend-box expenses-colour"></span>Expenses</span>
+            <span class="legend-item"><span class="legend-line cashflow-colour"></span>Net cashflow</span>
+            <span class="legend-item"><span class="legend-line profit-colour"></span>Net profit</span>
+        </div>
+
+        @if (Projection.Months.Count == 0)
+        {
+            <div class="empty-chart">No monthly projection data is available.</div>
+        }
+        else
+        {
+            <div class="chart-scroll">
+                <svg class="cashflow-chart"
+                     viewBox="0 0 960 370"
+                     role="img"
+                     aria-labelledby="cashflow-performance-title cashflow-performance-description">
+                    <desc id="cashflow-performance-description">
+                        Clustered monthly bars for sales, stock purchases and expenses, with lines for net cashflow and net profit.
+                    </desc>
+
+                    @foreach (var tick in AxisTicks)
+                    {
+                        <line x1="@PlotLeft" y1="@Y(tick)" x2="@PlotRight" y2="@Y(tick)" class="grid-line" />
+                        <foreignObject x="0" y="@(Y(tick) - 9)" width="68" height="18">
+                            <div class="axis-value">@Compact(tick)</div>
+                        </foreignObject>
+                    }
+
+                    <line x1="@PlotLeft" y1="@ZeroY" x2="@PlotRight" y2="@ZeroY" class="zero-line" />
+
+                    @foreach (var month in Projection.Months.OrderBy(x => x.MonthNumber))
+                    {
+                        var x = X(month.MonthNumber);
+                        var salesY = Math.Min(Y(month.Revenue), ZeroY);
+                        var salesHeight = Math.Max(1m, Math.Abs(Y(month.Revenue) - ZeroY));
+                        var stockY = Math.Min(Y(month.StockPurchases), ZeroY);
+                        var stockHeight = Math.Max(1m, Math.Abs(Y(month.StockPurchases) - ZeroY));
+                        var expensesY = Math.Min(Y(month.OperatingExpenses), ZeroY);
+                        var expensesHeight = Math.Max(1m, Math.Abs(Y(month.OperatingExpenses) - ZeroY));
+
+                        <rect x="@(x - 15)" y="@salesY" width="@BarWidth" height="@salesHeight" rx="1.5" fill="#2563eb">
+                            <title>Sales @month.MonthLabel: @month.Revenue.ToString("N0")</title>
+                        </rect>
+                        <rect x="@(x - 5)" y="@stockY" width="@BarWidth" height="@stockHeight" rx="1.5" fill="#f59e0b">
+                            <title>Stock @month.MonthLabel: @month.StockPurchases.ToString("N0")</title>
+                        </rect>
+                        <rect x="@(x + 5)" y="@expensesY" width="@BarWidth" height="@expensesHeight" rx="1.5" fill="#7c3aed">
+                            <title>Expenses @month.MonthLabel: @month.OperatingExpenses.ToString("N0")</title>
+                        </rect>
+                        <foreignObject x="@(x - 18)" y="334" width="36" height="20">
+                            <div class="month-label">@month.MonthLabel</div>
+                        </foreignObject>
+                    }
+
+                    <polyline points="@NetCashflowPoints" class="series-line cashflow-line" />
+                    <polyline points="@NetProfitPoints" class="series-line profit-line" />
+
+                    @foreach (var month in Projection.Months.OrderBy(x => x.MonthNumber))
+                    {
+                        <circle cx="@X(month.MonthNumber)" cy="@Y(month.NetCashflow)" r="4" class="cashflow-point">
+                            <title>Net cashflow @month.MonthLabel: @month.NetCashflow.ToString("N0")</title>
+                        </circle>
+                        <circle cx="@X(month.MonthNumber)" cy="@Y(month.ProfitBeforeTax)" r="4" class="profit-point">
+                            <title>Net profit @month.MonthLabel: @month.ProfitBeforeTax.ToString("N0")</title>
+                        </circle>
+                    }
+                </svg>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public CashflowProjectionResult Projection { get; set; } = default!;
+
+    private const decimal PlotTop = 20m;
+    private const decimal PlotBottom = 320m;
+    private const decimal PlotLeft = 78m;
+    private const decimal PlotRight = 940m;
+    private const decimal BarWidth = 9m;
+
+    private decimal MaximumValue
+    {
+        get
+        {
+            var values = Projection.Months.SelectMany(x => new[]
+            {
+                x.Revenue,
+                x.StockPurchases,
+                x.OperatingExpenses,
+                x.NetCashflow,
+                x.ProfitBeforeTax
+            }).ToList();
+            return values.Count == 0 ? 1m : Math.Max(1m, values.Max());
+        }
+    }
+
+    private decimal MinimumValue
+    {
+        get
+        {
+            var values = Projection.Months.SelectMany(x => new[]
+            {
+                x.Revenue,
+                x.StockPurchases,
+                x.OperatingExpenses,
+                x.NetCashflow,
+                x.ProfitBeforeTax
+            }).ToList();
+            return values.Count == 0 ? 0m : Math.Min(0m, values.Min());
+        }
+    }
+
+    private decimal Range => Math.Max(1m, MaximumValue - MinimumValue);
+    private decimal ZeroY => Y(0m);
+    private IReadOnlyList<decimal> AxisTicks =>
+        Enumerable.Range(0, 5)
+            .Select(index => MinimumValue + Range * index / 4m)
+            .Reverse()
+            .ToList();
+
+    private string NetCashflowPoints => Points(x => x.NetCashflow);
+    private string NetProfitPoints => Points(x => x.ProfitBeforeTax);
+
+    private decimal X(int monthNumber) =>
+        PlotLeft + 30m + (monthNumber - 1) * ((PlotRight - PlotLeft - 50m) / 11m);
+
+    private decimal Y(decimal value) =>
+        PlotTop + (MaximumValue - value) / Range * (PlotBottom - PlotTop);
+
+    private string Points(Func<CashflowProjectionMonth, decimal> selector) =>
+        string.Join(" ", Projection.Months
+            .OrderBy(x => x.MonthNumber)
+            .Select(x => $"{X(x.MonthNumber):F2},{Y(selector(x)):F2}"));
+
+    private static string Compact(decimal value)
+    {
+        var absolute = Math.Abs(value);
+        return absolute >= 1_000_000m
+            ? $"{value / 1_000_000m:0.#}m"
+            : absolute >= 1_000m ? $"{value / 1_000m:0.#}k" : $"{value:0}";
+    }
+
+}

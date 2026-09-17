@@ -1,0 +1,148 @@
+.dw-card {
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #d8e3ec;
+    border-radius: .7rem;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(21,49,72,.07)
+}
+
+    .dw-card > header {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding: .7rem .8rem;
+        background: linear-gradient(120deg,#173d59,#245a73);
+        color: #fff
+    }
+
+.dw-icon {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: .5rem;
+    background: rgba(255,255,255,.1);
+    color: #8ee4d4
+}
+
+.dw-card header div > span {
+    color: #9bd8de;
+    font-size: .52rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase
+}
+
+.dw-card h3 {
+    margin: .04rem 0;
+    color: #fff;
+    font-size: .8rem
+}
+
+.dw-card header p {
+    margin: 0;
+    color: #d2e1e8;
+    font-size: .54rem
+}
+
+.dw-validation {
+    margin: .6rem .7rem 0;
+    color: #b91c1c;
+    font-size: .58rem
+}
+
+    .dw-validation:empty {
+        display: none
+    }
+
+.dw-fields {
+    display: grid;
+    gap: .6rem;
+    padding: .75rem
+}
+
+    .dw-fields label {
+        display: grid;
+        gap: .2rem;
+        margin: 0
+    }
+
+        .dw-fields label > span {
+            color: #40586a;
+            font-size: .70rem;
+            font-weight: 750
+        }
+
+    .dw-fields > label > input, .dw-input {
+        height: 2rem;
+        border: 1px solid #cad6df;
+        border-radius: .38rem
+    }
+
+    .dw-fields > label > input {
+        padding: .3rem .45rem;
+        text-align: right;
+        color: #29475d;
+        font-size: .70rem
+    }
+
+.dw-input {
+    display: flex;
+    overflow: hidden;
+    font-size: .85rem !important;
+}
+
+    .dw-input span {
+        display: grid;
+        min-width: 2rem;
+        place-items: center;
+        background: #f1f5f8;
+        color: #607486;
+        font-size: .56rem
+    }
+
+    .dw-input input {
+        width: 100%;
+        border: 0;
+        padding: .3rem .45rem;
+        text-align: right;
+        color: #29475d;
+        font-size: .90rem
+    }
+
+        .dw-input input:disabled {
+            background: #f3f6f8
+        }
+
+.dw-card footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .6rem .75rem;
+    border-top: 1px solid #dce5ec;
+    background: #f8fafc
+}
+
+    .dw-card footer > span {
+        color: #718294;
+        font-size: .51rem
+    }
+
+    .dw-card footer button {
+        padding: .4rem .65rem;
+        border: 1px solid #62cbb8;
+        border-radius: .42rem;
+        background: #2ba88f;
+        color: #fff;
+        font-size: .57rem;
+        font-weight: 800
+    }
+
+@media(max-width:550px) {
+    .dw-card footer {
+        align-items: stretch;
+        flex-direction: column
+    }
+}

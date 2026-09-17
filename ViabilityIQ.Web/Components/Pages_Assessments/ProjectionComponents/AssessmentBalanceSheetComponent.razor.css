@@ -1,0 +1,221 @@
+.absheet-card {
+    overflow: hidden;
+    border: 1px solid #cbd8e5;
+    border-radius: 0.7rem;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(15, 42, 67, 0.07);
+}
+
+.absheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(135deg, #334e68, #486581);
+    color: #fff;
+}
+
+.absheet-header span {
+    display: block;
+    color: #d9e7f2;
+    font-size: 0.58rem;
+    font-weight: 750;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.absheet-header h2 {
+    margin: 0.1rem 0 0;
+    font-size: 0.95rem;
+}
+
+.absheet-header-meta {
+    text-align: right;
+}
+
+.absheet-header-meta strong {
+    font-size: 0.75rem;
+}
+
+.absheet-frame {
+    max-width: 100%;
+}
+
+.absheet-table {
+    min-width: 1180px;
+    table-layout: fixed;
+    font-size: 0.66rem;
+}
+
+.absheet-table th,
+.absheet-table td {
+    padding: 0.4rem 0.45rem;
+    border-color: #dce5ed;
+}
+
+.absheet-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #eaf1f7;
+    color: #29445d;
+    font-weight: 800;
+    text-align: right;
+}
+
+.absheet-table thead th:first-child,
+.absheet-table tbody th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 245px;
+    text-align: left;
+}
+
+.absheet-table tbody th {
+    background: #fff;
+    color: #40566d;
+    font-weight: 600;
+}
+
+.absheet-table tbody td {
+    color: #26384a;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    text-align: right;
+}
+
+.absheet-section th {
+    position: static !important;
+    padding: 0.48rem 0.55rem;
+    background: #d7e6f2 !important;
+    color: #173f5f !important;
+    font-size: 0.68rem;
+    letter-spacing: 0.055em;
+}
+
+.absheet-subsection th {
+    position: static !important;
+    background: #f0f6fa !important;
+    color: #486581 !important;
+    font-size: 0.63rem;
+    text-transform: uppercase;
+}
+
+.absheet-total-row th,
+.absheet-total-row td {
+    border-top: 1px solid #8fa9bd;
+    background: #f7fafc !important;
+    font-weight: 800 !important;
+}
+
+.absheet-grand-total th,
+.absheet-grand-total td {
+    border-top: 2px solid #486581;
+    border-bottom: 3px double #486581;
+    background: #eaf1f7 !important;
+    color: #173f5f !important;
+    font-weight: 900 !important;
+}
+
+.absheet-equity-row th,
+.absheet-equity-row td {
+    background: #f0fdf4 !important;
+    color: #166534 !important;
+    font-weight: 800 !important;
+}
+
+.absheet-check-row th,
+.absheet-check-row td {
+    background: #fafcff !important;
+    font-weight: 750 !important;
+}
+
+.absheet-balanced {
+    color: #15803d !important;
+}
+
+.absheet-unbalanced {
+    color: #dc2626 !important;
+}
+
+.absheet-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    border-top: 1px solid #dce5ed;
+    background: #f8fafc;
+    color: #607286;
+    font-size: 0.61rem;
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
+
+    .absheet-card {
+        overflow: visible !important;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none !important;
+        break-before: page;
+        page-break-before: always;
+    }
+
+    .absheet-header {
+        padding: 2.5mm 3mm;
+        background: #334e68 !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .absheet-frame {
+        overflow: visible !important;
+    }
+
+    .absheet-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed;
+        font-size: 6.4pt;
+    }
+
+    .absheet-table thead {
+        display: table-header-group;
+    }
+
+    .absheet-table thead th,
+    .absheet-table tbody th:first-child {
+        position: static !important;
+    }
+
+    .absheet-table thead th:first-child,
+    .absheet-table tbody th:first-child {
+        width: 22% !important;
+    }
+
+    .absheet-table th,
+    .absheet-table td {
+        padding: 1.15mm 1mm;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .absheet-section,
+    .absheet-subsection,
+    .absheet-total-row,
+    .absheet-grand-total,
+    .absheet-equity-row,
+    .absheet-check-row {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .absheet-note {
+        padding: 2mm 3mm;
+        font-size: 6pt;
+    }
+}

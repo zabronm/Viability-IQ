@@ -1,5 +1,5 @@
 @page "/assessment/assets/{RouteAssessmentId:long}"
-@page "/assessment/assets"
+
 @layout MainLayout_Assessment
 @namespace ViabilityIQ.Web.Components.Pages_Assessments
 
@@ -7,7 +7,7 @@
 
 <div class="assets-page container-fluid p-0 position-relative dashboard-workspace">
     <PageHeading_Assessment _pageTitle="Assets"
-                            PageTitle="Asset Management & Projections"
+                            PageTitle="Asset Management &amp; Projections"
                             CurrentPage="PageType.Assets" />
 
     <section class="assets-tabs-shell">
@@ -29,6 +29,15 @@
                 <i class="bi bi-calendar3-range-fill"></i>
                 <span>Assets Detail</span>
             </button>
+
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AssetPageTab.BalanceSheet)"
+                    class="assets-tab @(ActiveTab == AssetPageTab.BalanceSheet ? "active" : null)"
+                    @onclick="() => SelectTab(AssetPageTab.BalanceSheet)">
+                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                <span>Balance Sheet</span>
+            </button>
         </div>
 
         <div class="assets-tab-content" role="tabpanel">
@@ -42,13 +51,20 @@
                     </div>
                 </div>
             }
-            else if (ActiveTab == AssetPageTab.Summary)
-            {
-                <AssessmentAssetSummaryPage AssessmentId="@AssessmentId" />
-            }
             else
             {
-                <AssessmentAssetDetailsPage AssessmentId="@AssessmentId" />
+                @switch (ActiveTab)
+                {
+                    case AssetPageTab.Summary:
+                        <AssessmentAssetSummaryPage AssessmentId="@AssessmentId" />
+                        break;
+                    case AssetPageTab.Details:
+                        <AssessmentAssetDetailsPage AssessmentId="@AssessmentId" />
+                        break;
+                    case AssetPageTab.BalanceSheet:
+                        <AssessmentBalanceSheetPage AssessmentId="@AssessmentId" />
+                        break;
+                }
             }
         </div>
     </section>

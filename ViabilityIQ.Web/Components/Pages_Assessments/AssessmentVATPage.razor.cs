@@ -236,6 +236,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 // Implement actual save logic here
                 // await VATService.SaveAsync(AssessmentId, vatData);
 
+                await projectionStateManager!.InvalidateDataAsync(
+                                                                   "VAT",
+                                                                   AssessmentId,
+                                                                   AssessmentId);
+
                 _Toast?.ShowSuccess("VAT data saved successfully", "Success");
                 await Task.CompletedTask;
             }

@@ -1,0 +1,244 @@
+.cfhealth-card {
+    overflow: hidden;
+    min-width: 0;
+    border: 1px solid #d7e0e8;
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), border-color 250ms ease, box-shadow 250ms ease;
+}
+
+    .cfhealth-card:hover {
+        transform: translateY(-3px);
+        border-color: #0891b2;
+        box-shadow: 0 16px 30px rgba(8, 145, 178, 0.14), 0 4px 10px rgba(15, 23, 42, 0.08);
+    }
+
+.cfhealth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.72rem 0.95rem;
+    background: linear-gradient(135deg, #334155, #475569);
+    color: #fff;
+}
+
+    .cfhealth-header div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .cfhealth-header span {
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        background: #0891b2;
+        font-size: 0.62rem;
+        font-weight: 700;
+    }
+
+.cfhealth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7.8rem;
+    align-items: center;
+    min-height: 22rem;
+    padding: 0.6rem 0.75rem 0.85rem;
+}
+
+.cfhealth-radar-wrap {
+    min-width: 0;
+}
+
+.cfhealth-radar {
+    width: 100%;
+    max-height: 22rem;
+    overflow: visible;
+    transform-origin: 50% 55%;
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1), filter 300ms ease;
+}
+
+.cfhealth-card:hover .cfhealth-radar {
+    filter: drop-shadow(0 10px 14px rgba(8, 145, 178, 0.2));
+    transform: scale(1.02);
+}
+
+.cfhealth-grid {
+    fill: rgba(8, 145, 178, 0.015);
+    stroke: #cbd5e1;
+    stroke-dasharray: 2.5 2.5;
+    stroke-width: 1;
+}
+
+.cfhealth-grid-outer {
+    stroke: #64748b;
+    stroke-dasharray: none;
+    stroke-width: 1.5;
+}
+
+.cfhealth-axis-arm {
+    stroke: #475569;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.cfhealth-tick {
+    stroke: #64748b;
+    stroke-width: 1.2;
+}
+
+.cfhealth-tick-label {
+    fill: #64748b;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.cfhealth-zone {
+    stroke-width: 0;
+    transform-origin: 275px 270px;
+    transition: opacity 280ms ease, transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cfhealth-zone-interest {
+    fill: rgba(245, 158, 11, 0.32);
+}
+
+.cfhealth-zone-margin {
+    fill: rgba(16, 185, 129, 0.3);
+}
+
+.cfhealth-zone-efficiency {
+    fill: rgba(236, 72, 153, 0.26);
+}
+
+.cfhealth-card:hover .cfhealth-zone-interest {
+    transform: scale(1.02);
+}
+
+.cfhealth-card:hover .cfhealth-zone-margin {
+    transform: scale(1.03);
+}
+
+.cfhealth-card:hover .cfhealth-zone-efficiency {
+    transform: scale(1.04);
+}
+
+.cfhealth-outline {
+    fill: url(#cfhealthGrad);
+    stroke: #0284c7;
+    stroke-linejoin: round;
+    stroke-width: 3;
+    filter: url(#cfhealthGlow);
+    transition: stroke-width 220ms ease, stroke 220ms ease;
+}
+
+.cfhealth-card:hover .cfhealth-outline {
+    stroke-width: 4;
+    stroke: #0891b2;
+}
+
+.cfhealth-point {
+    stroke: #fff;
+    stroke-width: 2.2;
+    transition: r 220ms ease, filter 220ms ease;
+}
+
+.cfhealth-card:hover .cfhealth-point {
+    r: 7.5px;
+    filter: drop-shadow(0 3px 5px rgba(15, 23, 42, 0.35));
+}
+
+.cfhealth-point-interest {
+    fill: #d97706;
+}
+
+.cfhealth-point-margin {
+    fill: #059669;
+}
+
+.cfhealth-point-efficiency {
+    fill: #db2777;
+}
+
+.cfhealth-label {
+    fill: #1e293b;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.cfhealth-value-label {
+    fill: #475569;
+    font-size: 9.5px;
+    font-weight: 700;
+}
+
+.cfhealth-score {
+    padding: 0.65rem 0.5rem;
+    border: 1px solid #dbe5ec;
+    border-radius: 0.65rem;
+    background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+    text-align: center;
+}
+
+    .cfhealth-score > span {
+        display: block;
+        color: #64748b;
+        font-size: 0.55rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .cfhealth-score strong {
+        display: block;
+        margin: 0.2rem 0;
+        color: #0f4c5c;
+        font-size: 1.45rem;
+    }
+
+    .cfhealth-score small {
+        color: #7c8b98;
+        font-size: 0.58rem;
+    }
+
+    .cfhealth-score p {
+        margin: 0.35rem 0 0;
+        color: #60717f;
+        font-size: 0.55rem;
+        line-height: 1.2;
+    }
+
+.cfhealth-score-track {
+    height: 0.38rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #dce5eb;
+}
+
+    .cfhealth-score-track span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ef4444 0%, #f59e0b 45%, #16a34a 100%);
+        transition: width 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+.cfhealth-state {
+    display: flex;
+    min-height: 22rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.cfhealth-state-error {
+    color: #b91c1c;
+}
+
+@media (max-width: 620px) {
+    .cfhealth-layout {
+        grid-template-columns: 1fr;
+    }
+}

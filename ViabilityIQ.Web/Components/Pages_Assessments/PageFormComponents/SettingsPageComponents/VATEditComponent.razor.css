@@ -1,0 +1,153 @@
+.vat-card {
+    overflow: hidden;
+    border: 1px solid #d8e3ec;
+    border-radius: .7rem;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(21,49,72,.07)
+}
+
+    .vat-card > header {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding: .7rem .8rem;
+        background: linear-gradient(120deg,#173d59,#245a73);
+        color: #fff
+    }
+
+.vat-icon {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: .5rem;
+    background: rgba(255,255,255,.1);
+    color: #8ee4d4
+}
+
+.vat-card header div > span {
+    color: #9bd8de;
+    font-size: .52rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase
+}
+
+.vat-card h3 {
+    margin: .04rem 0;
+    color: #fff;
+    font-size: .8rem
+}
+
+.vat-card header p {
+    margin: 0;
+    color: #d2e1e8;
+    font-size: .55rem
+}
+
+.vat-validation {
+    margin: .6rem .7rem 0;
+    color: #b91c1c;
+    font-size: .58rem
+}
+
+    .vat-validation:empty {
+        display: none
+    }
+
+.vat-grid {
+    display: grid;
+    grid-template-columns: repeat(5,minmax(0,1fr));
+    gap: .6rem;
+    padding: .75rem
+}
+
+    .vat-grid label {
+        display: grid;
+        gap: .2rem;
+        margin: 0
+    }
+
+        .vat-grid label > span {
+            color: #40586a;
+            font-size: .70rem;
+            font-weight: 750
+        }
+
+    .vat-grid input, .vat-grid select {
+        width: 100%;
+        height: 2rem;
+        padding: .3rem .4rem;
+        border: 1px solid #cad6df;
+        border-radius: .38rem;
+        color: #29475d;
+        background: #fff;
+        font-size: .90rem
+    }
+
+        .vat-grid input:disabled {
+            background: #f3f6f8
+        }
+
+.vat-input {
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #cad6df;
+    border-radius: .38rem
+}
+
+    .vat-input input {
+        border: 0;
+        text-align: right
+    }
+
+    .vat-input span {
+        display: grid;
+        min-width: 2rem;
+        place-items: center;
+        background: #f1f5f8;
+        color: #607486;
+        font-size: .56rem
+    }
+
+.vat-card footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .6rem .75rem;
+    border-top: 1px solid #dce5ec;
+    background: #f8fafc
+}
+
+    .vat-card footer > span {
+        color: #718294;
+        font-size: .53rem
+    }
+
+    .vat-card footer button {
+        padding: .4rem .7rem;
+        border: 1px solid #62cbb8;
+        border-radius: .42rem;
+        background: #2ba88f;
+        color: #fff;
+        font-size: .59rem;
+        font-weight: 800
+    }
+
+@media(max-width:900px) {
+    .vat-grid {
+        grid-template-columns: repeat(2,1fr)
+    }
+}
+
+@media(max-width:550px) {
+    .vat-grid {
+        grid-template-columns: 1fr
+    }
+
+    .vat-card footer {
+        align-items: stretch;
+        gap: .5rem;
+        flex-direction: column
+    }
+}

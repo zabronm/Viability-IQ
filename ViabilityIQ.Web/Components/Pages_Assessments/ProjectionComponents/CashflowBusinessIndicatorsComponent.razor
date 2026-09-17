@@ -1,0 +1,139 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+@inherits IndependentCashflowProjectionComponent
+
+<section class="business-indicators h-100" aria-labelledby="business-indicators-title">
+    <header class="indicator-header">
+        <div>
+            <i class="bi bi-speedometer2"></i>
+            <strong id="business-indicators-title">Business Performance Indicators</strong>
+        </div>
+        <span>Viability assessment</span>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="indicator-component-state"><span class="spinner-border spinner-border-sm"></span> Loading indicators...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <div class="indicator-component-state indicator-component-error"><i class="bi bi-exclamation-triangle"></i> Indicators could not load: @LoadError</div>
+    }
+    else if (Projection is not null)
+    {
+        <div class="indicator-body">
+            <div class="indicator-statuses">
+                @Status("Margin of safety", MarginOfSafetyStatus, MarginOfSafetyClass)
+                @Status("Interest cover", InterestCoverStatus, InterestCoverClass)
+                @Status("Asset efficiency", AssetEfficiencyStatus, AssetEfficiencyClass)
+            </div>
+
+            <div class="indicator-highlights">
+                <div class="kpi-card health-kpi">
+                    <div class="kpi-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+                    <div class="kpi-content">
+                        <span>Health score</span>
+                        <strong>@Projection.Viability.HealthScore.ToString("F0")<small>/100</small></strong>
+                    </div>
+                </div>
+                <div class="kpi-card value-kpi">
+                    <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                    <div class="kpi-content">
+                        <span>Indicative business value</span>
+                        <strong>@Money(Projection.Viability.IndicativeBusinessValue)</strong>
+                        <small>12-month NPV</small>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-sm indicator-table mb-0">
+                <tbody>
+                    <tr>
+                        <th>Monthly break-even</th>
+                        <td>@Money(Projection.Viability.MonthlyBreakEvenSales)</td>
+                    </tr>
+                    <tr>
+                        <th>Margin of safety</th>
+                        <td class="@MarginOfSafetyClass">@Percent(Projection.Viability.MarginOfSafety)</td>
+                    </tr>
+                    <tr>
+                        <th>Interest cover</th>
+                        <td class="@InterestCoverClass">@Ratio(Projection.Viability.InterestCover)</td>
+                    </tr>
+                    <tr>
+                        <th>Return on assets</th>
+                        <td>@Percent(Projection.Viability.ReturnOnAssets)</td>
+                    </tr>
+                    <tr>
+                        <th>Current ratio</th>
+                        <td>@Ratio(Projection.Viability.CurrentRatio)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@code {
+    private string MarginOfSafetyStatus => Projection!.Viability.MarginOfSafety switch
+    {
+        >= 0.30m => "Very good",
+        >= 0.20m => "Good",
+        >= 0.10m => "Fair",
+        >= 0m => "Low",
+        _ => "At risk"
+    };
+
+    private string InterestCoverStatus => Projection.Viability.InterestCover switch
+    {
+        null when Projection.Summary.InterestExpense == 0m && Projection.Summary.EBIT > 0m => "No interest burden",
+        null => "Not available",
+        >= 3m => "Excellent",
+        >= 2m => "Good",
+        >= 1.5m => "Adequate",
+        >= 1m => "Weak",
+        _ => "Critical"
+    };
+
+    private string AssetEfficiencyStatus => Projection.Viability.AssetTurnover switch
+    {
+        null => "Not available",
+        >= 1.5m => "Strong",
+        >= 1m => "Good",
+        >= 0.5m => "Fair",
+        _ => "Low"
+    };
+
+    private string MarginOfSafetyClass => StatusClass(Projection.Viability.MarginOfSafety, 0.20m, 0.10m);
+    private string InterestCoverClass => Projection.Viability.InterestCover is null
+        ? "status-neutral"
+        : StatusClass(Projection.Viability.InterestCover, 2m, 1.5m);
+    private string AssetEfficiencyClass => Projection.Viability.AssetTurnover is null
+        ? "status-neutral"
+        : StatusClass(Projection.Viability.AssetTurnover, 1m, 0.5m);
+
+    private static RenderFragment Status(string label, string value, string cssClass) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.OpenElement(1, "span");
+        builder.AddContent(2, label);
+        builder.CloseElement();
+        builder.OpenElement(3, "strong");
+        builder.AddAttribute(4, "class", cssClass);
+        builder.AddContent(5, value);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private static string StatusClass(decimal? value, decimal good, decimal warning) =>
+        value >= good ? "status-good" : value >= warning ? "status-warning" : "status-risk";
+
+    private static string Money(decimal? value) =>
+        value.HasValue ? $"R {value.Value:N0}" : "N/A";
+
+    private static string Percent(decimal? value) =>
+        value.HasValue ? $"{value.Value * 100m:F1}%" : "N/A";
+
+    private static string Ratio(decimal? value) =>
+        value.HasValue ? $"{value.Value:F2}x" : "N/A";
+}

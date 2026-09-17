@@ -1,114 +1,30 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Components;
 using ViabilityIQ.Application.Interfaces;
-using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Services;
-using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
 
-namespace ViabilityIQ.Web.Components.Pages_Assessments
+namespace ViabilityIQ.Web.Components.Pages_Assessments;
+
+public partial class WhatIfPage
 {
-    public partial class WhatIfPage
+    [Inject] private ISessionService SessionService { get; set; } = default!;
+    [Inject] private ToastService Toast { get; set; } = default!;
+
+    [Parameter] public long AssessmentId { get; set; }
+
+    private long ActiveAssessmentId { get; set; }
+    private string? ErrorMessage { get; set; }
+
+    protected override void OnParametersSet()
     {
-        [Inject] ISessionService? sessionService { get; set; }
-        [Inject] ToastService? _Toast { get; set; }
-        [Parameter] public long AssessmentId { get; set; }
+        ActiveAssessmentId = AssessmentId > 0
+            ? AssessmentId
+            : SessionService.AssessmentId.GetValueOrDefault();
 
-        private long ActiveAssessmentId { get; set; }
+        ErrorMessage = ActiveAssessmentId > 0
+            ? null
+            : "No active assessment was found.";
 
-        //=======================ALERT VARIABLES 
-        private bool blAlert { get; set; } = true;
-        private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
-        private string AlertHeading { get; set; } = "ALERT:";
-        private string AlertMessage { get; set; } = "Welcome to Viability.IQ; the ultimate business analysis expert!! Let us know what you think !! .";
-
-
-        // ======================Dashboard State Controls & Data Properties
-        protected bool IsProfitable { get; set; } = true;
-        protected List<MonthPnLSummary> MonthlyPerformanceMockData { get; set; } = new();
-
-        // Evaluates dynamically using your logic thresholds: red (<40), yellow (40-49), green (50-55), navy(>55)
-        protected double SimulatedNetMarginPercentage { get; set; } = 46.1;
-
-        protected string ProfitStyleClass => SimulatedNetMarginPercentage switch
-        {
-            < 40.0 => "border-left-danger-dynamic",
-            >= 40.0 and < 50.0 => "border-left-warning-dynamic",
-            >= 50.0 and <= 55.0 => "border-left-success-dynamic",
-            _ => "border-left-navy-dynamic"
-        };
-
-        protected override void OnInitialized()
-        {
-            if (sessionService?.AssessmentId != null)
-            {
-                ActiveAssessmentId = sessionService.AssessmentId.Value;
-                InitializeDashboardMockDataset();
-            }
-            else
-            {
-                _Toast!.ShowError("Case number is unknown, please restart your application.");
-            }
-            
-        }
-
-        protected override async Task OnParametersSetAsync()
-        {
-            //Check and display notices ALWAYS
-            await  DisplayNotificationAlerts();
-        }
-
-
-        async Task DisplayNotificationAlerts()
-        {
-
-            if (IsProfitable)
-            {
-                blAlert = true;
-                AlertSeverity = AlertSeverity.Success;
-                AlertHeading = "WELLDONE:";
-                AlertMessage = $"Your business is doing well. However, be careful of stock-outs! This exceeds standard cash flow risk thresholds.";
-            }
-            else if (!IsProfitable)
-            {
-                blAlert = true;
-                AlertSeverity = AlertSeverity.Danger;
-                AlertHeading = "VERY LOW PROFITS:";
-                AlertMessage = "Your business is performing excessively under the radar! Holding days indicate rapid product movement cycles.";
-            }
-            else
-            {
-                blAlert = true;
-                AlertSeverity = AlertSeverity.Info;
-                AlertHeading = "Information Ledger:";
-                AlertMessage = "Inventory configurations are active. Adjust parameters using the edit action button framework at any time.";
-            }
-        }
-
-
-        private void InitializeDashboardMockDataset()
-        {
-            MonthlyPerformanceMockData = new List<MonthPnLSummary>
-            {
-                new() { Month = "Jan", Value = 45, IsProfit = true },
-                new() { Month = "Feb", Value = 55, IsProfit = true },
-                new() { Month = "Mar", Value = 38, IsProfit = true },
-                new() { Month = "Apr", Value = 22, IsProfit = false },
-                new() { Month = "May", Value = 62, IsProfit = true },
-                new() { Month = "Jun", Value = 78, IsProfit = true },
-                new() { Month = "Jul", Value = 85, IsProfit = true },
-                new() { Month = "Aug", Value = 92, IsProfit = true },
-                new() { Month = "Sep", Value = 64, IsProfit = true },
-                new() { Month = "Oct", Value = 15, IsProfit = false },
-                new() { Month = "Nov", Value = 110, IsProfit = true },
-                new() { Month = "Dec", Value = 145, IsProfit = true }
-            };
-        }
-
-        public class MonthPnLSummary
-        {
-            public string Month { get; set; } = string.Empty;
-            public int Value { get; set; }
-            public bool IsProfit { get; set; }
-        }
+        if (ActiveAssessmentId <= 0)
+            Toast.ShowError("Case number is unknown. Please restart the application.");
     }
 }

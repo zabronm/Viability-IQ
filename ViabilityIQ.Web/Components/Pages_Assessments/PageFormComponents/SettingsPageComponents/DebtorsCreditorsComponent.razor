@@ -1,307 +1,273 @@
-﻿@using ViabilityIQ.Application.Interfaces
-@using ViabilityIQ.Infrastructure.Repositories
-@using ViabilityIQ.Shared.DataModels
+﻿@using ViabilityIQ.Shared.DataModels
 
 @if (loadingStateActive)
 {
     <FormLoadingComponent />
 }
-else
+else if (debtorsCreditorsModel is not null)
 {
     <EditForm Model="@debtorsCreditorsModel" OnValidSubmit="UpdateDebtorsCreditors">
         <DataAnnotationsValidator />
-        <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
-        <div class="viq-elevated-card">
-            <div class="viq-card-header-dark-ice">
-                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.90rem;">Debtors/Creditors Ageing Profiles</span>
-                <button type="submit" class="btn btn-sm btn-primary btn-update-font py-1 px-3 shadow-sm" disabled="@IsSubmitting">
-                    <i class="bi bi-save me-1"></i> Update Profiles
-                </button>
-            </div>
 
-            <div class="p-3">
-                <div class="row g-0">
-                    <!-- Entry Mode Switch -->
-                    <div class="col-12 ps-1">
-                        <div class="form-check form-switch bg-light rounded">
-                            <input class="form-check-input" type="checkbox" id="entryModeSwitch"
-                                   @bind="debtorsCreditorsModel.EntryMode"
-                                   @bind:event="onchange" />
-                            <label class="form-check-label fw-semibold text-navy" for="entryModeSwitch">
-                                &nbsp;&nbsp;&nbsp;@(debtorsCreditorsModel.EntryMode ? "Entry Mode: Actual Values (R)" : "Entry Mode: Percentages (%)")
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Creditors Section -->
-                    <div class="col-md-6 col-12 border-end pe-md-3">
-                        <div class="row mb-2 pb-2 border-bottom g-1 text-uppercase fw-bold text-dark" style="font-size: 0.75rem; letter-spacing: 0.3px;">
-                            <div class="col-6 text-start">Creditors Profile Items</div>
-                            <div class="col-3 text-end">% Value</div>
-                            <div class="col-3 text-end">R Value</div>
-                        </div>
-                        <div class="d-flex flex-column gap-0">
-                            <!-- 0-30 Days (Auto) -->
-                            <div class="row form-inline-align-row g-0 align-items-center py-0">
-                                <div class="col-6 py-1">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">0-30 Days (Auto):</label>
-                                </div>
-                                <div class="col-3 py-1">
-                                    <input type="text" class="form-control form-control-sm text-end bg-light"
-                                           value="@CalculatedCreditors0To30.ToString("F2")%" readonly />
-                                </div>
-                                <div class="col-3 py-1">
-                                    <div class="input-group input-group-sm py-0">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end bg-light"
-                                               value="@CalculatedCreditors0To30Value.ToString("F2")" readonly />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 31-60 Days -->
-                            <div class="row form-inline-align-row g-0 align-items-center">
-                                <div class="col-6 py-1">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">31-60 Days:</label>
-                                </div>
-                                <div class="col-3 py-1">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Creditors_60"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3 py-1">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.CreditorsValue_60"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 61-90 Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center py-0">
-                                <div class="col-6 py-1">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">61-90 Days:</label>
-                                </div>
-                                <div class="col-3 py-1">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Creditors_90"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3 py-1">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.CreditorsValue_90"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 91-120 Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center py-0">
-                                <div class="col-6 py-1">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">91-120 Days:</label>
-                                </div>
-                                <div class="col-3 py-1">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Creditors_120"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3 py-1">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.CreditorsValue_120"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 120+ Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center py-0">
-                                <div class="col-6 py-1">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">120+ Days:</label>
-                                </div>
-                                <div class="col-3 py-1">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Creditors_120Plus"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3 py-1">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.CreditorsValue_120Plus"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Total Row -->
-                            <div class="row form-inline-align-row g-1 align-items-center border-top pt-1 mt-1 fw-bold">
-                                <div class="col-6 py-0">
-                                    <label class="form-label-custom text-dark mb-0 fw-bold" style="font-size: 0.70rem;">TOTAL:</label>
-                                </div>
-                                <div class="col-3 py-0">
-                                    <input type="text" class="form-control form-control-sm text-end bg-light"
-                                           value="@TotalCreditorsPercentage.ToString("F2")%" readonly />
-                                </div>
-                                <div class="col-3 py-0">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="text" class="form-control form-control-sm text-end bg-light"
-                                               value="@TotalCreditorsValue.ToString("F2")" readonly />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Debtors Section -->
-                    <div class="col-md-6 col-12 ps-md-2">
-                        <div class="row mb-2 pb-2 border-bottom g-1 text-uppercase fw-bold text-dark" style="font-size: 0.75rem; letter-spacing: 0.3px;">
-                            <div class="col-6 text-start">Debtors Profile Items</div>
-                            <div class="col-3 text-end">% Value</div>
-                            <div class="col-3 text-end">R Value</div>
-                        </div>
-                        <div class="d-flex flex-column gap-2">
-                            <!-- 0-30 Days (Auto) -->
-                            <div class="row form-inline-align-row g-1 align-items-center">
-                                <div class="col-6">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">0-30 Days (Auto):</label>
-                                </div>
-                                <div class="col-3">
-                                    <input type="text" class="form-control form-control-sm text-end bg-light"
-                                           value="@CalculatedDebtors0To30.ToString("F2")%" readonly />
-                                </div>
-                                <div class="col-3">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end bg-light"
-                                               value="@CalculatedDebtors0To30Value.ToString("F2")" readonly />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 31-60 Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center">
-                                <div class="col-6">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">31-60 Days:</label>
-                                </div>
-                                <div class="col-3">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Debtors_60"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.DebtorsValue_60"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 61-90 Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center">
-                                <div class="col-6">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">61-90 Days:</label>
-                                </div>
-                                <div class="col-3">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Debtors_90"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.DebtorsValue_90"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 91-120 Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center">
-                                <div class="col-6">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">91-120 Days:</label>
-                                </div>
-                                <div class="col-3">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Debtors_120"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.DebtorsValue_120"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 120+ Days -->
-                            <div class="row form-inline-align-row g-1 align-items-center">
-                                <div class="col-6">
-                                    <label class="form-label-custom text-muted mb-0" style="font-size: 0.80rem;">120+ Days:</label>
-                                </div>
-                                <div class="col-3">
-                                    <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                           @bind="debtorsCreditorsModel.Debtors_120Plus"
-                                           @bind:event="onchange"
-                                           min="0" max="100" />
-                                </div>
-                                <div class="col-3">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end"
-                                               @bind="debtorsCreditorsModel.DebtorsValue_120Plus"
-                                               @bind:event="onchange"
-                                               disabled="@(!debtorsCreditorsModel.EntryMode)" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Total Row -->
-                            <div class="row form-inline-align-row g-1 align-items-center border-top pt-1 mt-1 fw-bold ">
-                                <div class="col-6 py-0">
-                                    <label class="form-label-custom text-dark mb-0 fw-bold" style="font-size: 0.70rem;">TOTAL:</label>
-                                </div>
-                                <div class="col-3 py-0">
-                                    <input type="text" class="form-control form-control-sm text-end bg-light"
-                                           value="@TotalDebtorsPercentage.ToString("F2")%" readonly />
-                                </div>
-                                <div class="col-3 py-0">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light py-0 px-1" style="font-size: 0.75rem;">R</span>
-                                        <input type="text" class="form-control form-control-sm text-end bg-light"
-                                               value="@TotalDebtorsValue.ToString("F2")" readonly />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <section class="dc-profile-card">
+            <header class="dc-profile-header">
+                <div class="dc-profile-title">
+                    <span class="dc-profile-icon"><i class="bi bi-calendar3-range"></i></span>
+                    <div>
+                        <span>Working capital assumptions</span>
+                        <h2>Debtors &amp; Creditors Ageing Profiles</h2>
+                        <p>Capture the ageing information you know. The saved projection profile is always stored as percentages.</p>
                     </div>
                 </div>
+                <button type="submit" class="dc-save-button" disabled="@IsSubmitting">
+                    @if (IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Save Profiles</span>
+                    }
+                </button>
+            </header>
+
+            <div class="dc-profile-body">
+                <ValidationSummary class="dc-validation-summary" />
+
+                @if (ValidationMessages.Count > 0)
+                {
+                    <div class="dc-validation-summary" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <ul>
+                            @foreach (var message in ValidationMessages)
+                            {
+                                <li>@message</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <div class="dc-mode-panel">
+                    <div>
+                        <strong>Entry mode</strong>
+                        <span>@ModeDescription</span>
+                    </div>
+                    <div class="dc-mode-options" role="radiogroup" aria-label="Ageing profile entry mode">
+                        <label class="@(!debtorsCreditorsModel.EntryMode ? "active" : null)">
+                            <input type="radio"
+                                   name="dc-entry-mode"
+                                   value="percentage"
+                                   checked="@(!debtorsCreditorsModel.EntryMode)"
+                                   @onchange="() => SetEntryMode(false)" />
+                            <i class="bi bi-percent"></i>
+                            Percentages
+                        </label>
+                        <label class="@(debtorsCreditorsModel.EntryMode ? "active" : null)">
+                            <input type="radio"
+                                   name="dc-entry-mode"
+                                   value="amount"
+                                   checked="@debtorsCreditorsModel.EntryMode"
+                                   @onchange="() => SetEntryMode(true)" />
+                            <i class="bi bi-cash-stack"></i>
+                            Actual values
+                        </label>
+                    </div>
+                </div>
+
+                @if (debtorsCreditorsModel.EntryMode)
+                {
+                    <div class="dc-conversion-note">
+                        <i class="bi bi-arrow-left-right"></i>
+                        Enter actual ageing balances. Percentages update automatically and are the values used by projections.
+                    </div>
+                }
+                else
+                {
+                    <div class="dc-conversion-note">
+                        <i class="bi bi-calculator"></i>
+                        Enter the 31+ day buckets. The 0–30 day bucket is automatically calculated as the balance to 100%.
+                    </div>
+                }
+
+                <div class="dc-profile-grid">
+                    <article class="dc-ageing-panel dc-creditors-panel">
+                        <div class="dc-panel-heading">
+                            <div>
+                                <span class="dc-panel-icon"><i class="bi bi-box-arrow-in-down-left"></i></span>
+                                <div>
+                                    <h3>Creditors profile</h3>
+                                    <p>Expected timing of supplier payments</p>
+                                </div>
+                            </div>
+                            <span class="dc-total-badge">@FormatCurrency(TotalCreditorsValue)</span>
+                        </div>
+
+                        <div class="dc-table-heading">
+                            <span>Age bucket</span>
+                            <span>@(debtorsCreditorsModel.EntryMode ? "Actual value" : "Percentage")</span>
+                            <span>Projection profile</span>
+                        </div>
+
+                        @foreach (var bucket in AgeBuckets)
+                        {
+                            <div class="dc-ageing-row">
+                                <label for="@($"creditor-{bucket.Index}")">
+                                    <strong>@bucket.Label</strong>
+                                    <small>@bucket.Description</small>
+                                </label>
+                                <div>
+                                    @if (debtorsCreditorsModel.EntryMode)
+                                    {
+                                        <div class="dc-input-with-prefix">
+                                            <span>R</span>
+                                            <input id="@($"creditor-{bucket.Index}")"
+                                                   type="number"
+                                                   min="0"
+                                                   step="0.01"
+                                                   value="@GetValue(false, bucket.Index)"
+                                                   @onchange="eventArgs => SetValue(false, bucket.Index, eventArgs.Value)" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="dc-input-with-suffix">
+                                            <input id="@($"creditor-{bucket.Index}")"
+                                                   type="number"
+                                                   min="0"
+                                                   max="100"
+                                                   step="0.01"
+                                                   value="@GetPercentage(false, bucket.Index)"
+                                                   disabled="@(bucket.Index == 0)"
+                                                   @onchange="eventArgs => SetPercentage(false, bucket.Index, eventArgs.Value)" />
+                                            <span>%</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="dc-converted-value">
+                                    <strong>@GetPercentage(false, bucket.Index).ToString("N2")%</strong>
+                                    @if (!debtorsCreditorsModel.EntryMode && TotalCreditorsValue > 0m)
+                                    {
+                                        <small>@FormatCurrency(GetValue(false, bucket.Index))</small>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <footer>
+                            <span>Total creditors</span>
+                            <span>@FormatCurrency(TotalCreditorsValue)</span>
+                            <strong>@TotalCreditorsPercentage.ToString("N2")%</strong>
+                        </footer>
+                    </article>
+
+                    <article class="dc-ageing-panel dc-debtors-panel">
+                        <div class="dc-panel-heading">
+                            <div>
+                                <span class="dc-panel-icon"><i class="bi bi-box-arrow-in-up-right"></i></span>
+                                <div>
+                                    <h3>Debtors profile</h3>
+                                    <p>Expected timing of customer collections</p>
+                                </div>
+                            </div>
+                            <span class="dc-total-badge">@FormatCurrency(TotalDebtorsValue)</span>
+                        </div>
+
+                        <div class="dc-table-heading">
+                            <span>Age bucket</span>
+                            <span>@(debtorsCreditorsModel.EntryMode ? "Actual value" : "Percentage")</span>
+                            <span>Projection profile</span>
+                        </div>
+
+                        @foreach (var bucket in AgeBuckets)
+                        {
+                            <div class="dc-ageing-row">
+                                <label for="@($"debtor-{bucket.Index}")">
+                                    <strong>@bucket.Label</strong>
+                                    <small>@bucket.Description</small>
+                                </label>
+                                <div>
+                                    @if (debtorsCreditorsModel.EntryMode)
+                                    {
+                                        <div class="dc-input-with-prefix">
+                                            <span>R</span>
+                                            <input id="@($"debtor-{bucket.Index}")"
+                                                   type="number"
+                                                   min="0"
+                                                   step="0.01"
+                                                   value="@GetValue(true, bucket.Index)"
+                                                   @onchange="eventArgs => SetValue(true, bucket.Index, eventArgs.Value)" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="dc-input-with-suffix">
+                                            <input id="@($"debtor-{bucket.Index}")"
+                                                   type="number"
+                                                   min="0"
+                                                   max="100"
+                                                   step="0.01"
+                                                   value="@GetPercentage(true, bucket.Index)"
+                                                   disabled="@(bucket.Index == 0)"
+                                                   @onchange="eventArgs => SetPercentage(true, bucket.Index, eventArgs.Value)" />
+                                            <span>%</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="dc-converted-value">
+                                    <strong>@GetPercentage(true, bucket.Index).ToString("N2")%</strong>
+                                    @if (!debtorsCreditorsModel.EntryMode && TotalDebtorsValue > 0m)
+                                    {
+                                        <small>@FormatCurrency(GetValue(true, bucket.Index))</small>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <footer>
+                            <span>Total debtors</span>
+                            <span>@FormatCurrency(TotalDebtorsValue)</span>
+                            <strong>@TotalDebtorsPercentage.ToString("N2")%</strong>
+                        </footer>
+                    </article>
+                </div>
+
+                <section class="dc-policy-panel">
+                    <div class="dc-policy-heading">
+                        <i class="bi bi-sliders"></i>
+                        <div>
+                            <h3>Collection policy</h3>
+                            <p>Supporting settings used when interpreting the debtor profile.</p>
+                        </div>
+                    </div>
+                    <div class="dc-policy-fields">
+                        <label>
+                            <span>Expected bad debts</span>
+                            <div class="dc-input-with-suffix">
+                                <input type="number" min="0" max="100" step="0.01"
+                                       @bind="debtorsCreditorsModel.BadDebtPercentage" />
+                                <span>%</span>
+                            </div>
+                        </label>
+                        <label>
+                            <span>Average payment days</span>
+                            <div class="dc-input-with-suffix">
+                                <input type="number" min="0" max="365"
+                                       @bind="debtorsCreditorsModel.AveragePaymentDays" />
+                                <span>days</span>
+                            </div>
+                        </label>
+                        <label class="dc-vat-option">
+                            <input type="checkbox" @bind="debtorsCreditorsModel.IncludeVAT" />
+                            <span>
+                                <strong>Include VAT</strong>
+                                <small>Ageing balances are VAT inclusive</small>
+                            </span>
+                        </label>
+                    </div>
+                </section>
             </div>
-        </div>
+        </section>
     </EditForm>
 }

@@ -1,0 +1,179 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+@inherits IndependentCashflowProjectionComponent
+
+<section class="cfbi-shell h-100" aria-labelledby="cfbi-title">
+    <header class="cfbi-header">
+        <div class="cfbi-header-title">
+            <i class="bi bi-speedometer2"></i>
+            <strong id="cfbi-title">Business Performance Indicators</strong>
+        </div>
+        <span class="cfbi-header-note">Viability assessment</span>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="cfbi-state">
+            <span class="spinner-border spinner-border-sm"></span>
+            Loading indicators...
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <div class="cfbi-state cfbi-state-error">
+            <i class="bi bi-exclamation-triangle"></i>
+            Indicators could not load: @LoadError
+        </div>
+    }
+    else if (Projection is not null)
+    {
+        <div class="cfbi-body">
+            <div class="cfbi-status-list" aria-label="Performance classifications">
+                <div class="cfbi-status-row">
+                    <span class="cfbi-status-label">Margin of safety</span>
+                    <strong class="cfbi-status-value @MarginOfSafetyClass">@MarginOfSafetyStatus</strong>
+                </div>
+                <div class="cfbi-status-row">
+                    <span class="cfbi-status-label">Interest cover</span>
+                    <strong class="cfbi-status-value @InterestCoverClass">@InterestCoverStatus</strong>
+                </div>
+                <div class="cfbi-status-row">
+                    <span class="cfbi-status-label">Asset efficiency</span>
+                    <strong class="cfbi-status-value @AssetEfficiencyClass">@AssetEfficiencyStatus</strong>
+                </div>
+            </div>
+
+            <div class="cfbi-highlight-grid">
+                <article class="cfbi-highlight-card">
+                    <span class="cfbi-highlight-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+                    <div class="cfbi-highlight-content">
+                        <span class="cfbi-highlight-label">Health score</span>
+                        <strong class="cfbi-highlight-value">
+                            @Projection.Viability.HealthScore.ToString("F0")<small>/100</small>
+                        </strong>
+                    </div>
+                </article>
+
+                <article class="cfbi-highlight-card">
+                    <span class="cfbi-highlight-icon"><i class="bi bi-cash-stack"></i></span>
+                    <div class="cfbi-highlight-content">
+                        <span class="cfbi-highlight-label">Indicative business value</span>
+                        <strong class="cfbi-highlight-value">@Money(Projection.Viability.IndicativeBusinessValue)</strong>
+                        <small class="cfbi-highlight-note">12-month NPV</small>
+                    </div>
+                </article>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm cfbi-metrics-table mb-0">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Monthly break-even</th>
+                            <td class="cfbi-neutral">@Money(Projection.Viability.MonthlyBreakEvenSales)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Margin of safety</th>
+                            <td class="@MarginOfSafetyClass">@Percent(Projection.Viability.MarginOfSafety)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Interest cover</th>
+                            <td class="@InterestCoverClass">@Ratio(Projection.Viability.InterestCover)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return on assets</th>
+                            <td class="@ReturnOnAssetsClass">@Percent(Projection.Viability.ReturnOnAssets)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Current ratio</th>
+                            <td class="@CurrentRatioClass">@Ratio(Projection.Viability.CurrentRatio)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    private string MarginOfSafetyStatus => Projection!.Viability.MarginOfSafety switch
+    {
+        >= 0.30m => "Very good",
+        >= 0.20m => "Good",
+        >= 0.10m => "Fair",
+        >= 0m => "Low",
+        _ => "At risk"
+    };
+
+    private string InterestCoverStatus => Projection!.Viability.InterestCover switch
+    {
+        null when Projection.Summary.InterestExpense == 0m && Projection.Summary.EBIT > 0m => "No interest burden",
+        null => "Not available",
+        >= 3m => "Excellent",
+        >= 2m => "Good",
+        >= 1.5m => "Adequate",
+        >= 1m => "Weak",
+        _ => "Critical"
+    };
+
+    private string AssetEfficiencyStatus => Projection!.Viability.AssetTurnover switch
+    {
+        null => "Not available",
+        >= 1.5m => "Strong",
+        >= 1m => "Good",
+        >= 0.5m => "Fair",
+        _ => "Low"
+    };
+
+    private string MarginOfSafetyClass =>
+        StatusClass(Projection!.Viability.MarginOfSafety, 0.30m, 0.20m, 0.10m);
+
+    private string InterestCoverClass =>
+        Projection!.Viability.InterestCover is null
+            ? "cfbi-neutral"
+            : StatusClass(Projection.Viability.InterestCover, 3m, 2m, 1.5m);
+
+    private string AssetEfficiencyClass =>
+        Projection!.Viability.AssetTurnover is null
+            ? "cfbi-neutral"
+            : StatusClass(Projection.Viability.AssetTurnover, 1.5m, 1m, 0.5m);
+
+    private string ReturnOnAssetsClass =>
+        Projection!.Viability.ReturnOnAssets is null
+            ? "cfbi-neutral"
+            : StatusClass(Projection.Viability.ReturnOnAssets, 0.15m, 0.08m, 0m);
+
+    private string CurrentRatioClass =>
+        Projection!.Viability.CurrentRatio is null
+            ? "cfbi-neutral"
+            : StatusClass(Projection.Viability.CurrentRatio, 1.5m, 1.2m, 1m);
+
+    private static string StatusClass(
+        decimal? value,
+        decimal greenThreshold,
+        decimal blueThreshold,
+        decimal amberThreshold)
+    {
+        if (!value.HasValue)
+            return "cfbi-neutral";
+
+        if (value.Value >= greenThreshold)
+            return "cfbi-green";
+
+        if (value.Value >= blueThreshold)
+            return "cfbi-blue";
+
+        if (value.Value >= amberThreshold)
+            return "cfbi-amber";
+
+        return "cfbi-red";
+    }
+
+    private static string Money(decimal? value) =>
+        value.HasValue ? $"R {value.Value:N0}" : "N/A";
+
+    private static string Percent(decimal? value) =>
+        value.HasValue ? $"{value.Value * 100m:F1}%" : "N/A";
+
+    private static string Ratio(decimal? value) =>
+        value.HasValue ? $"{value.Value:F2}x" : "N/A";
+}

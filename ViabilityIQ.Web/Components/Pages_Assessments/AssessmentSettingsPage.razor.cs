@@ -18,6 +18,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
     public partial class AssessmentSettingsPage
     {
+        [Inject] IProjectionStateManager? ProjectionStateManager { get; set; } = default!;
         [Inject] private ISessionService? sessionService { get; set; }
         [Inject] private ZabOffCanvasService zabOffCanvasService { get; set; } = default!;
         [Inject] private ToastService _Toast { get; set; } = default!;
@@ -237,6 +238,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             if (saveResult.Success)
             {
+
+                //INVALIDATE CURRENT ASSESSMENT RECORD AND RELOAD FROM DATABASE
+                var dataType = refName switch
+                {
+                    "VAT-UPDATE" => "VAT",
+                    "DEBTORS-CREDITORS" => "ddebtors-creditors",
+                    _ => "assessment"
+                };
+
+                await ProjectionStateManager!.InvalidateDataAsync(
+                                                dataType, 
+                                                ActiveAssessmentId, 
+                                                ActiveAssessmentId);
+
                 _Toast.ShowSuccess(saveResult.Message, sessionService!.AppTitle);
 
                 // 1. Logic for specific component refresh

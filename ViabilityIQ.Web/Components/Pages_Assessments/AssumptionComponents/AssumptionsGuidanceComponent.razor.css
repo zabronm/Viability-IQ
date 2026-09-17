@@ -1,0 +1,34 @@
+.ag-card {
+    height: 100%;
+    padding: 0.8rem;
+    border: 1px solid #d7e2ec;
+    border-radius: 0.6rem;
+    background: linear-gradient(145deg, #f8fafc, #eef5fa);
+}
+
+.ag-card header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #29445d;
+    font-size: 0.74rem;
+}
+
+.ag-card header i {
+    color: #2563eb;
+}
+
+.ag-card p {
+    margin: 0.45rem 0;
+    color: #64748b;
+    font-size: 0.62rem;
+}
+
+.ag-card ul {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0 0 0.65rem;
+    padding-left: 1rem;
+    color: #526477;
+    font-size: 0.61rem;
+}

@@ -1,13 +1,13 @@
-﻿.kpi-widgets-section {
+﻿.wk-widgets-section {
     padding: 20px 0;
     margin-bottom: 20px;
 }
 
-.kpi-header {
+.wk-widgets-header {
     margin-bottom: 16px;
 }
 
-.kpi-title {
+.wk-widgets-title {
     font-size: 1.15rem;
     font-weight: 700;
     color: #0f172a;
@@ -17,18 +17,18 @@
     gap: 8px;
 }
 
-    .kpi-title i {
+    .wk-widgets-title i {
         font-size: 1.25rem;
         color: #000099;
     }
 
-.kpi-subtitle {
+.wk-widgets-subtitle {
     font-size: 0.8rem;
     color: #94a3b8;
     margin: 0;
 }
 
-.kpi-loading {
+.wk-widgets-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -39,15 +39,105 @@
     border: 1px solid #e2e8f0;
 }
 
-    .kpi-loading p {
+    .wk-widgets-loading p {
         margin-top: 12px;
         color: #64748b;
         font-size: 0.875rem;
     }
 
-::deep .kpi-card-container,
-::deep .card {
+/* ==========================================================================
+   STRICTLY NAMESPACED SELECTORS (Unique to .wk-widgets-section)
+   ========================================================================== */
+
+.wk-widgets-section ::deep .kpi-card-container,
+.wk-widgets-section ::deep .card {
+    position: relative !important;
+    overflow: hidden !important;
     border-color: #cbd5e1 !important;
-    border-left-width: 1px !important;
+    border-left: 4px solid #566D7E !important; /* (1) Marble left border color */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
+
+    .wk-widgets-section ::deep .card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #566D7E !important;
+    }
+
+    /* Bottom-right semi-circle base positioning */
+    .wk-widgets-section ::deep .card::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: -22px !important;
+        right: -22px !important;
+        width: 64px !important;
+        height: 64px !important;
+        border-radius: 50% !important;
+        pointer-events: none !important;
+        z-index: 1 !important;
+        transition: transform 0.3s ease !important;
+    }
+
+    .wk-widgets-section ::deep .card:hover::after {
+        transform: scale(1.15) !important;
+    }
+
+    /* Marble font color for KPI values (#566D7E) */
+    .wk-widgets-section ::deep .card .value,
+    .wk-widgets-section ::deep .card h3,
+    .wk-widgets-section ::deep .card h2,
+    .wk-widgets-section ::deep .card .kpi-value,
+    .wk-widgets-section ::deep .card strong {
+        color: #566D7E !important;
+    }
+
+/* (2) Varying subtle backgrounds and corresponding semi-circle accent colors per card */
+.wk-widgets-section .row > div:nth-child(1) ::deep .card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+    .wk-widgets-section .row > div:nth-child(1) ::deep .card::after {
+        background: rgba(148, 163, 184, 0.22) !important;
+    }
+
+.wk-widgets-section .row > div:nth-child(2) ::deep .card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+}
+
+    .wk-widgets-section .row > div:nth-child(2) ::deep .card::after {
+        background: rgba(34, 197, 94, 0.15) !important;
+    }
+
+.wk-widgets-section .row > div:nth-child(3) ::deep .card {
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%) !important;
+}
+
+    .wk-widgets-section .row > div:nth-child(3) ::deep .card::after {
+        background: rgba(234, 179, 8, 0.15) !important;
+    }
+
+.wk-widgets-section .row > div:nth-child(4) ::deep .card {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+}
+
+    .wk-widgets-section .row > div:nth-child(4) ::deep .card::after {
+        background: rgba(168, 85, 247, 0.15) !important;
+    }
+
+.wk-widgets-section .row > div:nth-child(5) ::deep .card {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%) !important;
+}
+
+    .wk-widgets-section .row > div:nth-child(5) ::deep .card::after {
+        background: rgba(20, 184, 166, 0.15) !important;
+    }
+
+.wk-widgets-section .row > div:nth-child(6) ::deep .card {
+    background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%) !important;
+}
+
+    .wk-widgets-section .row > div:nth-child(6) ::deep .card::after {
+        background: rgba(244, 63, 94, 0.15) !important;
+    }

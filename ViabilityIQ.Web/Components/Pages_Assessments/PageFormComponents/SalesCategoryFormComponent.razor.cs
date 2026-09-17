@@ -6,7 +6,7 @@ using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 {
-    public partial class SalesCategoryFormComponent 
+    public partial class SalesCategoryFormComponent
     {
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public long AssessmentSalesCategoryId { get; set; }
@@ -15,11 +15,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         [Inject] private ISessionService sessionService { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentSalesCategory> DataRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentSales> salesRepository { get; set; }
+        [Inject] private IGenericDataRepository<AssessmentStock> stockRepository { get; set; } = default!;
 
 
         private AssessmentSalesCategory? Model { get; set; }
         private AssessmentSales? SalesModel { get; set; }
-
+        private AssessmentStock? StockModel { get; set; }
 
         private bool IsLoading { get; set; } = true;
         private bool IsSubmitting { get; set; } = false;
@@ -90,7 +91,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         {
             SaveResult executionFeedbackPackage;
 
-            if (Model == null || IsSubmitting) return;            
+            if (Model == null || IsSubmitting) return;
             if (string.IsNullOrWhiteSpace(Model.AssessmentSalesCategoryName))         //// Interface validation step guard check
             {
                 return;
@@ -104,8 +105,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 bool isExecutionSuccess = await DataRepository.SaveAsync(Model);
                 if (isExecutionSuccess)
                 {
-                    if (isNewCategory)           //write this record into sales if its new
+                    //==== INITIATE THE SALES CATEGORY INTO SALES AND INVENTORY
+                    if (isNewCategory)
                     {
+                        //write this record into sales if its new
                         SalesModel = new()
                         {
                             AssessmentSalesId = 0, // Signals repo to trigger an automated SQL INSERT statement
@@ -118,8 +121,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         };
 
                         isExecutionSuccess = await salesRepository.SaveAsync(SalesModel);
+
+                        //Initialise Stock record for this category
+                        StockModel = new()
+                        {
+                            AssessmentId = Model.AssessmentId,
+                            Active = true,
+                            AssessmentSalesCategoryId = Model.AssessmentSalesCategoryId,
+                            Remarks = Model.Remarks,
+                            CreatedDate = DateTime.UtcNow,
+                            CreatedBy = sessionService.UserId
+                        };
+                        isExecutionSuccess = await stockRepository.SaveAsync(StockModel);
                     }
-                    
+
                 }
 
                 executionFeedbackPackage = new()
@@ -145,7 +160,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
             finally
             {
-                
+
                 IsSubmitting = false;
             }
         }

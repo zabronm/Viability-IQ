@@ -1,121 +1,40 @@
 ﻿@using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Application.Interfaces
-
 @inject IGenericDataRepository<AssessmentSalesCategory> SalesCategoryRepository
 
-<div class="w-100 table-responsive viq-table-container">
-    @if (IsComponentLoading)
-    {
-        <div class="p-3 text-center">
-            <div class="spinner-border text-primary spinner-border-sm mb-1" role="status"></div>
-            <div class="text-muted" style="font-size: 0.72rem;">Loading sales metrics...</div>
-        </div>
-    }
-    else if (Categories == null || !Categories.Any())
-    {
-        <div class="p-3 text-center text-muted" style="font-size: 0.75rem;">
-            <i class="bi bi-folder-x d-block mb-1 fs-5"></i> No sales categories mapped to this assessment.
-        </div>
-    }
-    else
-    {
-        <table class="table table-sm table-hover align-middle mb-0 text-nowrap border-0">
-            <thead>
-                <tr class="pb-1" style="background-color: #f5f5f5 !important;">
-                    <th class="text-center small text-secondary " style="width: 60px;font-size:0.70rem;">Item#</th>
-                    <th class="text-start small text-secondary" style="font-size:0.70rem;">Category</th>
-                    <th class="text-end small text-secondary" style="font-size:0.70rem;">Markup(%)</th>
-                    <th class="text-end small text-secondary" style="font-size:0.70rem;">Opening Stock(R)</th>
-                    <th class="text-center small text-secondary" style=" font-size:0.70rem;">Status</th>
-                    <th class="text-center small text-secondary" style=" font-size:0.70rem;">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    int rowCounter = 1;
-                }
-                @foreach (var cat in Categories)
+<section class="scl-card">
+    <header class="scl-header">
+        <div><span class="scl-icon"><i class="bi bi-tags"></i></span><div><span>Revenue structure</span><h3>Sales Categories</h3><p>Classify income streams and define markup and opening stock assumptions.</p></div></div>
+        <button type="button" @onclick="() => OnEditRequested.InvokeAsync(0)"><i class="bi bi-plus-lg"></i> Add Sales Category</button>
+    </header>
+    <div class="scl-body">
+        @if (IsComponentLoading)
+        {
+            <div class="scl-state"><span class="spinner-border spinner-border-sm"></span> Loading Sales Categories...</div>
+        }
+        else if (!Categories.Any())
+        {
+            <div class="scl-state"><i class="bi bi-folder-plus"></i><strong>No Sales Categories yet</strong><span>Add a category to classify projected income.</span></div>
+        }
+        else
+        {
+            <div class="scl-table-wrap"><table class="scl-table">
+                <thead><tr><th>#</th><th>Category</th><th class="text-end">Markup</th><th class="text-end">Opening stock</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <tbody>
+                @{ var row = 1; }
+                @foreach (var category in Categories)
                 {
-                    <tr class="viq-td-style">
-                        <td class="text-center text-muted fw-semibold">
-                            @rowCounter
-                        </td>
-                        <td class="text-start text-dark fw-medium">
-                            @cat.AssessmentSalesCategoryName
-                        </td>
-                        <td class="text-end">
-                            <span class="badge fw-normal px-1 py-1 @GetMarkupBadgeClass(cat.MarkupPercentage)" style="min-width: 65px; font-size: 0.70rem;">
-                                @cat.MarkupPercentage.ToString("N2")%
-                            </span>
-                        </td>
-
-                        @* ==============PUT ACTUAL OPENING STOCK FOR THE CATEGORY HERE ==================== *@
-                        <td class="text-end text-dark fw-medium">
-                            R 0.00
-                        </td>
-
-                        <td class="text-center">
-                            @if (cat.Active)
-                            {
-                                <span class="badge border" style="font-size: 0.65rem; padding: 2px 5px; background-color: #e8f5e9; color: #2e7d32; border-color: #c8e6c9 !important;">Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge border" style="font-size: 0.65rem; padding: 2px 5px; background-color: #ffebee; color: #c62828; border-color: #ffcdd2 !important;">Inactive</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                           @*  <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit Category"
-                                    @onclick="() => OnEditRequested.InvokeAsync(cat.AssessmentSalesCategoryId)">                                   
-                                <i class="bi bi-vector-pen" style="font-size: 0.95rem;"></i>
-                            </button> *@
-                            <button type="button" class="btn btn-xs btn-link p-0 text-primary line-height-1" title="Edit Category"                                   
-                                    @onclick='() => OpenSalesCategory(cat.AssessmentSalesCategoryId)'>                                
-                                <i class="bi bi-vector-pen" style="font-size: 0.95rem;"></i>
-                            </button>
-
-                        </td>
+                    <tr><td>@row</td><td><strong>@category.AssessmentSalesCategoryName</strong></td>
+                        <td class="text-end"><span class="scl-rate">@category.MarkupPercentage.ToString("N2")%</span></td>
+                        <td class="text-end">R @category.OpeningStock.ToString("N2")</td>
+                        <td class="text-center"><span class="scl-status @(category.Active ? "active" : "inactive")">@(category.Active ? "Active" : "Inactive")</span></td>
+                        <td class="text-center"><button class="scl-edit" type="button" title="Edit category" @onclick="() => OnEditRequested.InvokeAsync(category.AssessmentSalesCategoryId)"><i class="bi bi-pencil-square"></i></button></td>
                     </tr>
-                    rowCounter++;
+                    row++;
                 }
-            </tbody>
-        </table>
-    }
-</div>
-
-<style type="text/css">
-    /* Table Wrapper to isolate rounded clipping context */
-    .viq-table-container {
-        border-top-left-radius: 6px !important; /* Matches dashboard card theme */
-        border-top-right-radius: 6px !important;
-        overflow: hidden !important;
-    }
-
-    /* Table Header Specific Rules */
-    .viq-th-style {
-        font-size: 0.75rem !important;
-        font-weight: 700 !important;
-        color: #212529 !important;
-        padding-top: 6px !important;
-        padding-bottom: 2px !important;
-        border-bottom: 2px solid #b2b2b2 !important;
-    }
-
-        /* Force the leftmost th to clip cleanly */
-        .viq-th-style:first-child {
-            border-top-left-radius: 6px !important;
+                </tbody>
+            </table></div>
         }
-
-        /* Force the rightmost th to clip cleanly */
-        .viq-th-style:last-child {
-            border-top-right-radius: 6px !important;
-        }
-
-    /* Detail Line Item Styling */
-    .viq-td-style td {
-        font-size: 0.85rem !important;
-        padding-top: 2px !important;
-        padding-bottom: 2px !important;
-        border-bottom: 1px solid #dee2e6 !important;
-    }
-</style>
+    </div>
+    <footer><i class="bi bi-info-circle"></i> Markup supports cost-of-Sales estimates; opening stock feeds the starting working-capital position.</footer>
+</section>

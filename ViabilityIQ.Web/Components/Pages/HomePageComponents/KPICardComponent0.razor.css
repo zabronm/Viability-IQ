@@ -1,8 +1,8 @@
 ﻿/* Compact, Professional KPI Card with Marble Left Border Accent */
 .kpi-card {
     background-color: #ffffff;
-    border: 1px solid #C2DFFF; /*#e2e8f0;*/
-    border-left: 4px solid #C2DFFF;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #566D7E; /* (1) Marble left border color */
     border-radius: 12px;
     padding: 12px 14px;
     display: flex;
@@ -13,26 +13,70 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
     height: 100%;
     min-height: 115px;
+    position: relative; /* Required for the semi-circle positioning */
+    overflow: hidden; /* Clips the semi-circle to the card corner */
 }
 
     .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 153, 0.08);
-        border: 1px solid #29465B;
-        border-left: 4px solid #29465B;
+        box-shadow: 0 4px 10px rgba(86, 109, 126, 0.15);
+        border-color: #94a3b8;
+        border-left-color: #566D7E;
     }
+
+    /* (2) Bottom-right semi-circle decorative accent (Reduced by 25%) */
+    .kpi-card::after {
+        content: '';
+        position: absolute;
+        bottom: -16px;
+        right: -16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        pointer-events: none;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .kpi-card:hover::after {
+        transform: scale(1.15);
+    }
+
+/* Theme-specific varying subtle colors for the bottom-right semi-circle */
+.kpi-color-blue::after {
+    background-color: rgba(0, 102, 204, 0.12);
+}
+
+.kpi-color-green::after {
+    background-color: rgba(5, 150, 105, 0.12);
+}
+
+.kpi-color-orange::after {
+    background-color: rgba(217, 119, 6, 0.12);
+}
+
+.kpi-color-purple::after {
+    background-color: rgba(124, 58, 237, 0.12);
+}
+
+.kpi-color-teal::after {
+    background-color: rgba(13, 148, 136, 0.12);
+}
+
+.kpi-color-indigo::after {
+    background-color: rgba(79, 70, 229, 0.12);
+}
 
 /* Header & Title */
 .kpi-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: 1px;
     border-bottom: solid 1px #EBF4FA;
 }
 
 .kpi-label {
-    font-size: 0.68rem;
+    font-size: 0.60rem;
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
