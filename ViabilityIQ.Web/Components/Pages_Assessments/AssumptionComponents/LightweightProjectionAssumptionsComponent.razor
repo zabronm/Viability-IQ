@@ -1,0 +1,183 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.AssumptionComponents
+
+<section class="lpa-card" aria-labelledby="@($"lpa-title-{Section}")">
+    <header>
+        <div>
+            <span>Baseline assumptions</span>
+            <h3 id="@($"lpa-title-{Section}")">@SectionTitle</h3>
+        </div>
+        @if (Model.IsConfirmed)
+        {
+            <span class="lpa-confirmed"><i class="bi bi-check-circle-fill"></i> Confirmed</span>
+        }
+        else
+        {
+            <span class="lpa-draft"><i class="bi bi-pencil-fill"></i> Draft</span>
+        }
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="lpa-state"><span class="spinner-border spinner-border-sm"></span> Loading baseline assumptions...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="lpa-error"><i class="bi bi-exclamation-triangle"></i> @ErrorMessage</div>
+    }
+    else
+    {
+        <div class="lpa-body">
+            @if (Section == "sales")
+            {
+                <div class="lpa-grid">
+                    <label class="lpa-field">
+                        <span>Sales growth</span><small>Expected overall change in Sales.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="-100" max="1000" step="0.1" @bind="Model.SalesGrowthRate" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Growth starts</span><small>First month affected by Sales growth.</small>
+                        <select class="form-select form-select-sm" @bind="Model.SalesGrowthStartMonth">
+                            @for (var month = 1; month <= 12; month++)
+                            {
+                                <option value="@month">Month @month</option>
+                            }
+                        </select>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Cash Sales</span><small>Percentage collected in the month of sale.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="0" max="100" step="0.1" @bind="Model.CashSalesPercentage" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Bad debts</span><small>Percentage of credit Sales not expected to be collected.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="0" max="100" step="0.1" @bind="Model.BadDebtRate" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Cost of Sales</span><small>Use only when Sales Categories cannot provide a reliable cost basis.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="0" max="100" step="0.1" @bind="Model.CostOfSalesPercentage" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Minimum closing stock</span><small>Target stock as a percentage of Sales.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="0" max="100" step="0.1" @bind="Model.MinimumClosingStockPercentage" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                </div>
+            }
+            else if (Section == "expenses")
+            {
+                <div class="lpa-grid">
+                    <label class="lpa-field">
+                        <span>Expense increase</span><small>Simple escalation applied to operating expenses.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="-100" max="1000" step="0.1" @bind="Model.ExpenseIncreaseRate" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Increase starts</span><small>First month affected by the expense increase.</small>
+                        <select class="form-select form-select-sm" @bind="Model.ExpenseIncreaseStartMonth">
+                            @for (var month = 1; month <= 12; month++)
+                            {
+                                <option value="@month">Month @month</option>
+                            }
+                        </select>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Contingency</span><small>General allowance for unforeseen operating costs.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="0" max="100" step="0.1" @bind="Model.ContingencyRate" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>Director wage increase</span><small>Expected increase in monthly director remuneration.</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" min="-100" max="1000" step="0.1" @bind="Model.DirectorWageIncreaseRate" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </label>
+                    <label class="lpa-field">
+                        <span>VAT payment frequency</span>
+                        <small>How often net VAT is settled.</small>
+                        <select class="form-select form-select-sm" @bind="Model.VatPaymentFrequencyMonths">
+                            <option value="1">Monthly</option>
+                            <option value="2">Every two months</option>
+                        </select>
+                    </label>
+                </div>
+            }
+            else if (Section == "funding")
+            {
+                <div class="lpa-grid">
+                    <label class="lpa-field">
+                        <span>Minimum cash balance</span>
+                        <small>Preferred minimum closing bank balance.</small>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">R</span>
+                            <input type="number" class="form-control" min="0" step="100" @bind="Model.MinimumCashBalance" />
+                        </div>
+                    </label>
+                    <div class="lpa-linked-fact">
+                        <span>Overdraft interest</span>
+                        <strong>Maintained in Opening Position</strong>
+                        <small>The existing Opening Balances component remains authoritative.</small>
+                    </div>
+                    <div class="lpa-linked-fact">
+                        <span>Asset assumptions</span>
+                        <strong>Maintained in Assets</strong>
+                        <small>Acquisitions, depreciation and disposals are not duplicated here.</small>
+                    </div>
+                </div>
+            }
+
+            <label class="lpa-remarks">
+                <span>Assumption notes</span>
+                <textarea class="form-control form-control-sm"
+                          rows="2"
+                          maxlength="1000"
+                          @bind="Model.Remarks"
+                          placeholder="Record the source or reason for these assumptions."></textarea>
+            </label>
+
+            @if (ValidationMessages.Count > 0)
+            {
+                <div class="lpa-validation">
+                    @foreach (var message in ValidationMessages)
+                    {
+                        <span><i class="bi bi-exclamation-circle"></i> @message</span>
+                    }
+                </div>
+            }
+
+            <footer>
+                <label class="lpa-confirm-check">
+                    <input type="checkbox" class="form-check-input" @bind="Model.IsConfirmed" />
+                    <span>I confirm that these are reasonable baseline assumptions for this assessment.</span>
+                </label>
+                <button type="button" class="btn btn-primary btn-sm" disabled="@IsSaving" @onclick="SaveAsync">
+                    @if (IsSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    <i class="bi bi-check2-circle me-1"></i>Save Assumptions
+                </button>
+            </footer>
+        </div>
+    }
+</section>
+
+@code {
+}

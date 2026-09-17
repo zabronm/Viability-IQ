@@ -32,6 +32,13 @@
         </div>
 
         <div class="fa-top-bar-right">
+            <a class="viq-help-link"
+               href="/documents/AssessmentAssumptionsHelp.pdf"
+               target="_blank"
+               rel="noopener"
+               aria-label="Open assessment assumptions help">
+                <i class="bi bi-question-circle-fill"></i><span>Help</span>
+            </a>
             <span class="marble-date-badge">
                 <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
             </span>
@@ -65,14 +72,14 @@
                 <div class="fa-nav-heading" style="border-top: dotted 0.6px #92c7c7; border-bottom: dotted 0.6px #92c7c7;">Main Operations</div>
 
 
-                <NavLink class="fa-nav-item py-0 mt-1" href="/assessment/assets">
+                <NavLink class="fa-nav-item py-0 mt-1" href="@AssetsUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-suitcase-lg-fill"></i></div>
                     <span class="footer-main-text-sm">Assets</span>
                     <span class="ms-1 viq-indicator-dot @(HasAssetsData ? "status-success" : "status-warning")"
                           title="@(HasAssetsData ? "Assets data entry verified" : "No Assets records populated yet")"></span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item py-0 mt-1" href="/assessment/sales">
+                <NavLink class="fa-nav-item py-0 mt-1" href="@SalesUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
                     <span class="footer-main-text-sm">Sales/Income</span>
                     <span class="ms-1 viq-indicator-dot @(HasSalesData ? "status-success" : "status-warning")"
@@ -89,14 +96,14 @@
                     </NavLink>
                 }
 
-                <NavLink class="fa-nav-item py-0 my-0" href="/assessment/stock">
+                <NavLink class="fa-nav-item py-0 my-0" href="@StockUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-boxes"></i></div>
                     <span class="footer-main-text-sm">Stock</span>
                     <span class="ms-1 viq-indicator-dot @(HasStockData ? "status-success" : "status-warning")"
                           title="@(HasStockData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="/assessment/expenses">
+                <NavLink class="fa-nav-item" href="@ExpensesUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-wallet2 fs-xss"></i></div>
                     <span class="footer-main-text-sm">Expenses</span>
                     <span class="ms-1 viq-indicator-dot @(HasExpensesData ? "status-success" : "status-warning")"
@@ -105,7 +112,7 @@
 
                 @*  @if (HasLoansData)              //Shows when Loans are available
                 { *@
-                <NavLink class="fa-nav-item" href="assessment/loan-repayments">
+                <NavLink class="fa-nav-item" href="@LoansUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-umbrella-fill"></i></div>
                     <span class="footer-main-text-sm">Loan Repayments</span>
                     <span class="ms-1 viq-indicator-dot @(HasLoansData ? "status-success" : "status-warning")"
@@ -113,12 +120,12 @@
                 </NavLink>
                 @* } *@
 
-                <NavLink class="fa-nav-item" href="assessment/VAT" style="border-top: solid 0.5px #cdcdcd;">
+                <NavLink class="fa-nav-item" href="@VatUrl" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-bug"></i></div>
                     <span class="footer-main-text-sm">Value Added Tax(VAT)</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item" href="assessment/reports" style="border-top: solid 0.5px #cdcdcd;">
+                <NavLink class="fa-nav-item" href="@ReportsUrl" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
                     <span class="footer-main-text-sm">Assessment Reports</span>
                     @* <span class="ms-1 viq-indicator-dot @(HasReportsData ? "status-success" : "status-warning")"
@@ -127,9 +134,9 @@
 
                 @* <div class="fa-nav-heading" style="border-top: solid 0.6px #bcbcbc; border-bottom: solid 0.6px #bcbcbc;">Assessment Config</div> *@
 
-                <NavLink class="fa-nav-item" href="assessment/settings" style="border-top: solid 0.5px #cdcdcd;">
+                <NavLink class="fa-nav-item" href="@AssumptionsUrl" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
-                    <span class="footer-main-text">Assessment Settings</span><i class="bi bi-caret-right"></i>
+                    <span class="footer-main-text">Assumptions/Baseline</span><i class="bi bi-caret-right"></i>
                 </NavLink>
             </div>
 
@@ -278,14 +285,63 @@
         SessionService.OnSessionChanged -= SynchronizeComponentViewLayout;
     }
 
-    private string DebtorsCreditorsUrl =>
-        SessionService.AssessmentId is long assessmentId && assessmentId > 0
-            ? $"/assessment/debtors-creditors/{assessmentId}"
-            : "/assessment/dashboards-error";
-
+    //=========== Main Dashboards Page ====================
     private string WhatIfUrl =>
                     SessionService.AssessmentId is long assessmentId && assessmentId > 0
-                    ? $"/assessment/dashboards/{assessmentId}"
-                    : "/assessment/dashboards-error";
+                       ? $"/assessment/dashboards/{assessmentId}"
+                       : "/assessment/assesment-error";
 
+    //=========== Debtors/Creditors Page ====================
+    private string DebtorsCreditorsUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/accounts/{assessmentId}"
+                        : $"/assessment/assesment-error";
+
+    //=========== Assets Page ====================
+    private string AssetsUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/assets/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== Sales Page ====================
+    private string SalesUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/sales/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== Stock Page ====================
+    private string StockUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/stock/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== Expenses Page ====================
+    private string ExpensesUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/expenses/{assessmentId}"
+                    : "/assessment/assesment-error";
+
+    //=========== Loan Repayments Page ====================
+    private string LoansUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/loans/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== VAT/Adustments Page ====================
+    private string VatUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/vat/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== Assessment Reports Page ====================
+    private string ReportsUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/reports/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== Assessment Assumptions/Baseline Page ====================
+    private string AssumptionsUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/assumptions/{assessmentId}"
+                        : "/assessment/assesment-error";
 }

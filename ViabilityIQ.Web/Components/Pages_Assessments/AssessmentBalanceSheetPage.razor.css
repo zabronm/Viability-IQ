@@ -1,0 +1,227 @@
+.abs-page {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.abs-print-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #dbe5ee;
+    border-radius: 0.55rem;
+    background: #f8fafc;
+}
+
+.abs-print-toolbar > div {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #40566d;
+    font-size: 0.7rem;
+    font-weight: 750;
+}
+
+.abs-print-toolbar > div i {
+    color: #2563eb;
+}
+
+.abs-metrics {
+    padding: 0.15rem;
+}
+
+.abs-state,
+.abs-error {
+    display: flex;
+    min-height: 7rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    border: 1px solid #dce5ed;
+    border-radius: 0.65rem;
+    background: #fff;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.abs-error {
+    border-color: #fecaca;
+    background: #fff7f7;
+    color: #b91c1c;
+}
+
+.abs-alert-panel {
+    overflow: hidden;
+    border: 1px solid #d8e1e9;
+    border-radius: 0.7rem;
+    background: #fff;
+}
+
+.abs-alert-panel > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid #e8eef3;
+    background: #fbfcfd;
+}
+
+.abs-alert-panel header span:first-child {
+    display: block;
+    color: #7b8794;
+    font-size: 0.57rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.abs-alert-panel h2 {
+    margin: 0.1rem 0 0;
+    color: #19324d;
+    font-size: 0.84rem;
+}
+
+.abs-alert-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.abs-alert-count {
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: #fff3df;
+    color: #995d08 !important;
+    font-size: 0.61rem !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.abs-dismiss {
+    display: inline-grid;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    place-items: center;
+    border: 1px solid #d5dfe9;
+    border-radius: 50%;
+    background: #fff;
+    color: #65758a;
+}
+
+.abs-alert-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 0.9rem;
+    color: #526477;
+    font-size: 0.7rem;
+}
+
+.abs-alert-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    padding: 0.75rem;
+}
+
+.abs-alert {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.65rem;
+    padding: 0.7rem;
+    border: 1px solid;
+    border-radius: 0.55rem;
+}
+
+.abs-alert > i {
+    margin-top: 0.1rem;
+}
+
+.abs-alert-critical {
+    border-color: #f3b3b0;
+    background: #fff5f4;
+    color: #b42318;
+}
+
+.abs-alert-warning {
+    border-color: #f0d296;
+    background: #fffaed;
+    color: #9a5b00;
+}
+
+.abs-alert-healthy {
+    border-color: #a9d7c3;
+    background: #f0faf5;
+    color: #13795b;
+}
+
+.abs-alert strong {
+    color: #23364b;
+    font-size: 0.7rem;
+}
+
+.abs-alert p {
+    margin: 0.16rem 0;
+    color: #59697a;
+    font-size: 0.64rem;
+}
+
+.abs-alert small {
+    color: #40566d;
+    font-size: 0.6rem;
+    font-weight: 650;
+}
+
+.abs-alert-toggle {
+    width: 100%;
+    padding: 0.46rem;
+    border: 0;
+    border-top: 1px solid #e8eef3;
+    background: #f8fafc;
+    color: #315b77;
+    font-size: 0.64rem;
+    font-weight: 800;
+}
+
+@media (max-width: 800px) {
+    .abs-alert-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    .abs-print-toolbar,
+    .abs-dismiss,
+    .abs-alert-toggle {
+        display: none !important;
+    }
+
+    .abs-page {
+        display: block !important;
+    }
+
+    .abs-metrics,
+    .abs-alert-panel {
+        margin-bottom: 5mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .abs-alert-panel,
+    .abs-alert {
+        box-shadow: none !important;
+    }
+
+    .abs-alert-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2mm;
+        padding: 2.5mm;
+    }
+
+    .abs-alert {
+        padding: 2mm;
+    }
+}

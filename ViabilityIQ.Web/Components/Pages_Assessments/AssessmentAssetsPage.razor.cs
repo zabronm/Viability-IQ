@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using ViabilityIQ.Application.Interfaces;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments;
@@ -20,17 +19,12 @@ public partial class AssessmentAssetsPage : ComponentBase, IDisposable
     protected override void OnInitialized()
     {
         if (SessionService != null)
-        {
             SessionService.OnSessionChanged += OnSessionChanged;
-        }
 
         ResolveAssessmentContext();
     }
 
-    protected override void OnParametersSet()
-    {
-        ResolveAssessmentContext();
-    }
+    protected override void OnParametersSet() => ResolveAssessmentContext();
 
     private void ResolveAssessmentContext()
     {
@@ -45,10 +39,7 @@ public partial class AssessmentAssetsPage : ComponentBase, IDisposable
             AssessmentId);
     }
 
-    private void SelectTab(AssetPageTab tab)
-    {
-        ActiveTab = tab;
-    }
+    private void SelectTab(AssetPageTab tab) => ActiveTab = tab;
 
     private void OnSessionChanged()
     {
@@ -62,14 +53,15 @@ public partial class AssessmentAssetsPage : ComponentBase, IDisposable
     public void Dispose()
     {
         if (SessionService != null)
-        {
             SessionService.OnSessionChanged -= OnSessionChanged;
-        }
+
+        GC.SuppressFinalize(this);
     }
 
     private enum AssetPageTab
     {
         Summary,
-        Details
+        Details,
+        BalanceSheet
     }
 }

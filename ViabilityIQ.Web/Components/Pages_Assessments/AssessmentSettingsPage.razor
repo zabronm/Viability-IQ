@@ -1,122 +1,176 @@
-﻿@page "/assessment/settings/"
+@page "/assessment/assumptions/{ActiveAssessmentId:long}"
 
 @layout MainLayout_Assessment
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.Pages_Assessments.AssumptionComponents
 
-
-<div class="p-0 position-relative dashboard-workspace container-fluid">
-    <PageHeading_Assessment _pageTitle="Settings" PageTitle="Assessment Settings" CurrentPage="PageType.Settings" />
-
-    <div class="row bg-white g-3 mt-1" @key="ActiveAssessmentId" style="border-radius: 6px;">
-        @if (blAlert)
+<div class="assumptions-page container-fluid p-0 position-relative dashboard-workspace">
+    <PageHeading_Assessment _pageTitle="Assumptions"
+                            PageTitle="Assessment Assumptions &amp; Baseline"
+                            CurrentPage="PageType.Settings" />
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
+        @if (IsLoading)
         {
-            <div class="my-0">
-                <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
-            </div>
+            <FormLoadingComponent />
         }
-        <div class="col-lg-12 col-12 order-lg-1 order-2">
-            
-            @if (IsLoading)
-            {
-                <FormLoadingComponent />
-            }
-            else if (Model != null)
-            {
-                @if (!string.IsNullOrEmpty(ValidationAlertMessage))
-                {
-                    <div class="alert alert-warning p-2 rounded mb-2 d-flex align-items-center justify-content-between shadow-sm" style="font-size: 0.82rem;">
-                        <span><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i> @ValidationAlertMessage</span>
-                        <button type="button" class="btn-close small" @onclick="ClearValidationMessage" style="font-size: 0.7rem;"></button>
-                    </div>
-                }
-
-                <!--- =================VAT & MAIN HEADER FIELDS =============================================================== -->
-                <div class="row g-3">
-                    <VATEditComponent @ref="VATEditRef" vatUpdateModel="@vatUpdateModel" OnUpdate='(result) => RefreshComponentData(result, "VAT-UPDATE")' />
-                </div>
-
-                <div class="row g-3">
-                    <div class="col-md-4 col-12">
-                        <OpeningBalancesComponent @ref="OpeningBalancesRef" openingBalancesModel="@openingBalancesModel" OnUpdate='(result) => RefreshComponentData(result, "OPENING-BALANCES")' />
-                    </div>
-                    <div class="col-md-8 col-12">
-                        <div class="viq-elevated-card h-100">
-                            <div class="viq-card-header-dark-ice">
-                                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.85rem;">Sales Categories</span>
-                                <button type="button" class="btn btn-primary btn-update-font py-1 px-2 shadow-sm" @onclick='() => OpenConfigurationPanel("SALES-CATEGORY", 0)'>
-                                    <i class="bi bi-plus-lg me-1 fw-bold"></i>Add New Sales Category
-                                </button>
-                            </div>
-                            <div class="p-0">
-                                <SalesCategoryListComponent @ref="SalesCategoryListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- ==============================================CREDITORS/DEBTORS COMPONENT ROW -->
-                <div class="row g-3 mt-2">
-                    <DebtorsCreditorsComponent @ref="DebtorsCreditorsRef" AssessmentId="@ActiveAssessmentId" OnUpdate='(result) => RefreshComponentData(result, "DEBTORS-CREDITORS")' />
-                </div>
-
-                <!-- ============================================== DIRECTOR WAGES & LOANS LIST ROW  -->
-                <div class="row g-3">
-                    <div class="col-md-4 col-12">
-                        <DirectorWagesComponent @ref="DirectorWagesRef" directorWagesModel="@directorWagesModel" OnUpdate='(result) => RefreshComponentData(result, "DIRECTOR-WAGES")' />
-                    </div>
-                    <div class="col-md-8 col-12">
-                        <!-- PUT ASSESSMENT LOANS HERE -->
-                        <div class="viq-elevated-card h-100">
-                            <div class="viq-card-header-dark-ice d-flex align-items-center justify-content-between">
-                                <span class="fw-bold text-smokewhite-brand" style="font-size: 0.85rem;">Assessment Loans</span>
-                                <button type="button" class="btn btn-primary btn-update-font py-1 px-2 shadow-sm" @onclick='() => OpenConfigurationPanel("ASSESSMENT-LOANS", 0)'>
-                                    <i class="bi bi-plus-lg me-1 fw-bold"></i>Add New Loan
-                                </button>
-                            </div>
-                            <div class="p-0">
-                                <AssessmentLoansListComponent @ref="AssessmentLoansListRef" AssessmentId="@ActiveAssessmentId" OnEditRequested='(id) => OpenConfigurationPanel("ASSESSMENT-LOANS", id)' />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- ==================== QUICK SETTINGS =============================================== -->
-        @* <div class="col-lg-2 col-3 order-lg-2 order-1">
-            <div class="viq-elevated-card viq-security-sidebar-card h-100 p-2">
-                <span class="fw-bold text-dark d-block mb-2 border-bottom pb-1 px-1" style="font-size: 0.78rem;">
-                    <i class="bi bi-sliders me-1 text-muted"></i> Quick Settings
-                </span>
-
-                <div class="d-flex flex-column gap-2">
-                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded w-100" @onclick='() => OpenConfigurationPanel("ASSESSMENT")'>
-                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
-                            <i class="fas fa-building text-primary"></i>
-                        </div>
-                        <div class="tile-meta-block">
-                            <span class="tile-label d-block text-dark fw-bold">Director Wages</span>
-                            <p class="tile-narration text-muted mb-0">Specify Director Wages</p>
-                        </div>
-                    </button>
-
-                    <button type="button" class="settings-action-tile border-0 bg-light text-start p-2 rounded w-100" @onclick='() => OpenConfigurationPanel("DEBTORS-CREDITORS")'>
-                        <div class="tile-icon-wrapper base-avatar text-center mb-1">
-                            <i class="bi bi-incognito text-navy"></i>
-                        </div>
-                        <div class="tile-meta-block">
-                            <span class="tile-label d-block text-dark fw-bold">Debtors/Creditors</span>
-                            <p class="tile-narration text-muted mb-0">Map Profiles</p>
-                        </div>
-                    </button>
+        else if (Model is not null)
+        {
+            <div class="mb-2 mt-2 px-0 assessment-readiness-wrapper">
+                <div class="assumption-hover-card px-0">
+                    <AssessmentProjectionReadinessComponent @key="AssumptionsRevision"
+                                                            AssessmentId="@ActiveAssessmentId" />
                 </div>
             </div>
-        </div> *@
+            <section class="assets-tabs-shell">
+                <div class="assets-tabs" role="tablist" aria-label="Assessment assumption sections">
+                    <button type="button" role="tab"
+                            aria-selected="@(ActiveTab == AssumptionTab.OpeningPosition)"
+                            class="assets-tab @(ActiveTab == AssumptionTab.OpeningPosition ? "active" : null)"
+                            @onclick="() => ActiveTab = AssumptionTab.OpeningPosition">
+                        <i class="bi bi-bank"></i><span>Opening Position</span>
+                    </button>
+                    <button type="button" role="tab"
+                            aria-selected="@(ActiveTab == AssumptionTab.SalesWorkingCapital)"
+                            class="assets-tab @(ActiveTab == AssumptionTab.SalesWorkingCapital ? "active" : null)"
+                            @onclick="() => ActiveTab = AssumptionTab.SalesWorkingCapital">
+                        <i class="bi bi-graph-up-arrow"></i><span>Sales &amp; Working Capital</span>
+                    </button>
+                    <button type="button" role="tab"
+                            aria-selected="@(ActiveTab == AssumptionTab.ExpensesVat)"
+                            class="assets-tab @(ActiveTab == AssumptionTab.ExpensesVat ? "active" : null)"
+                            @onclick="() => ActiveTab = AssumptionTab.ExpensesVat">
+                        <i class="bi bi-receipt"></i><span>Expenses &amp; VAT</span>
+                    </button>
+                    <button type="button" role="tab"
+                            aria-selected="@(ActiveTab == AssumptionTab.FundingAssets)"
+                            class="assets-tab @(ActiveTab == AssumptionTab.FundingAssets ? "active" : null)"
+                            @onclick="() => ActiveTab = AssumptionTab.FundingAssets">
+                        <i class="bi bi-building"></i><span>Funding &amp; Assets</span>
+                    </button>
+                </div>
+
+                <div class="assets-tab-content" role="tabpanel">
+                    @switch (ActiveTab)
+                    {
+                        case AssumptionTab.OpeningPosition:
+                            <section class="assumptions-section-heading">
+                                <div>
+                                    <span>Baseline facts</span>
+                                    <h2>Opening financial position</h2>
+                                    <p>Record the confirmed balances at the start of the assessment period.</p>
+                                </div>
+                            </section>
+                            <div class="assumption-hover-card mb-3">
+                                <OpeningBalancesComponent @ref="OpeningBalancesRef"
+                                                          openingBalancesModel="@openingBalancesModel"
+                                                          OnUpdate='(result) => RefreshAssumptionSource(result, "OPENING-BALANCES")' />
+                            </div>
+                            <div class="assumption-hover-card mb-3">
+                                <AssumptionsGuidanceComponent Section="opening" />
+                            </div>
+                            break;
+
+                        case AssumptionTab.SalesWorkingCapital:
+                            <section class="assumptions-section-heading">
+                                <div>
+                                    <span>Operating assumptions</span>
+                                    <h2>Sales, stock and working capital</h2>
+                                    <p>Define revenue structure and the timing of customer and supplier cash movements.</p>
+                                </div>
+                            </section>
+
+                            <div class="assumption-hover-card mb-3">
+                                <SalesCategoryListComponent @ref="SalesCategoryListRef"
+                                                            AssessmentId="@ActiveAssessmentId"
+                                                            OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />
+                            </div>
+
+                            <div class="assumption-hover-card mb-3">
+                                <DebtorsCreditorsComponent @ref="DebtorsCreditorsRef"
+                                                           AssessmentId="@ActiveAssessmentId"
+                                                           OnUpdate='(result) => RefreshAssumptionSource(result, "DEBTORS-CREDITORS")' />
+                            </div>
+
+                            <div class="assumption-hover-card mb-3">
+                                <LightweightProjectionAssumptionsComponent AssessmentId="@ActiveAssessmentId"
+                                                                           Section="sales"
+                                                                           OnSaved="RefreshReadiness" />
+                            </div>
+                            break;
+
+                        case AssumptionTab.ExpensesVat:
+                            <section class="assumptions-section-heading">
+                                <div>
+                                    <span>Cost assumptions</span>
+                                    <h2>Expenses, payroll and VAT</h2>
+                                    <p>Confirm statutory settings and simple cost-escalation assumptions.</p>
+                                </div>
+                            </section>
+
+                            <div class="assumption-hover-card mb-3">
+                                <VATEditComponent @ref="VATEditRef"
+                                                  vatUpdateModel="@vatUpdateModel"
+                                                  OnUpdate='(result) => RefreshAssumptionSource(result, "VAT-UPDATE")' />
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-lg-5">
+                                    <div class="assumption-hover-card h-100">
+                                        <DirectorWagesComponent @ref="DirectorWagesRef"
+                                                                directorWagesModel="@directorWagesModel"
+                                                                OnUpdate='(result) => RefreshAssumptionSource(result, "DIRECTOR-WAGES")' />
+                                    </div>
+                                </div>
+                                <div class="col-lg-7">
+                                    <div class="assumption-hover-card h-100">
+                                        <LightweightProjectionAssumptionsComponent AssessmentId="@ActiveAssessmentId"
+                                                                                   Section="expenses"
+                                                                                   OnSaved="RefreshReadiness" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+
+                        case AssumptionTab.FundingAssets:
+                            <section class="assumptions-section-heading">
+                                <div>
+                                    <span>Funding facts and policy</span>
+                                    <h2>Loans, cash reserve and assets</h2>
+                                    <p>Maintain contractual funding data and the minimum cash buffer used for readiness review.</p>
+                                </div>
+                            </section>
+
+                            <div class="assumption-hover-card mb-3">
+                                <AssessmentLoansListComponent @ref="AssessmentLoansListRef"
+                                                              AssessmentId="@ActiveAssessmentId"
+                                                              OnEditRequested='(id) => OpenConfigurationPanel("ASSESSMENT-LOANS", id)' />
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-lg-7">
+                                    <div class="assumption-hover-card h-100">
+                                        <LightweightProjectionAssumptionsComponent AssessmentId="@ActiveAssessmentId"
+                                                                                   Section="funding"
+                                                                                   OnSaved="RefreshReadiness" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="assumption-hover-card h-100">
+                                        <AssumptionsGuidanceComponent Section="assets"
+                                                                      AssessmentId="@ActiveAssessmentId" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                    }
+                </div>
+            </section>
+        }
     </div>
 </div>
+
 
 <ZabOffCanvas @ref="OffCanvasControlRef" HeaderTitle="@ActivePanelTitle" dWidth="350">
     @if (ActiveFormType != null)
@@ -125,6 +179,26 @@
     }
 </ZabOffCanvas>
 
-<footer class="py-2 bg-light mt-3">
-    <BFooter />
-</footer>
+<footer class="py-2 bg-light mt-3"><BFooter /></footer>
+
+@code {
+    private AssumptionTab ActiveTab { get; set; } = AssumptionTab.OpeningPosition;
+    private int AssumptionsRevision { get; set; }
+
+    private void RefreshReadiness() => AssumptionsRevision++;
+
+    private async Task RefreshAssumptionSource(SaveResult result, string reference)
+    {
+        await RefreshComponentData(result, reference);
+        if (result.Success)
+            RefreshReadiness();
+    }
+
+    private enum AssumptionTab
+    {
+        OpeningPosition,
+        SalesWorkingCapital,
+        ExpensesVat,
+        FundingAssets
+    }
+}

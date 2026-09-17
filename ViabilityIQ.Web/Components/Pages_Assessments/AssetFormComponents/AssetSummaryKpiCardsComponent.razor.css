@@ -1,0 +1,149 @@
+.asmkpi-shell {
+    width: 100%;
+}
+
+.asmkpi-header {
+    margin-bottom: 0.45rem;
+}
+
+    .asmkpi-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0;
+        color: #526477;
+        font-size: 0.95rem;
+    }
+
+        .asmkpi-header h2 i {
+            color: #1d4ed8;
+        }
+
+    .asmkpi-header span {
+        padding-left: 1.65rem;
+        color: #7b8794;
+        font-size: 0.62rem;
+    }
+
+.asmkpi-grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.asmkpi-card {
+    --asmkpi-accent: #64748b;
+    min-width: 0;
+    padding: 0.65rem;
+    border: 1px solid #d8e4ee;
+    border-left: 3px solid var(--asmkpi-accent);
+    border-radius: 0.55rem;
+    background: #fff;
+    position: relative; /* Required for semi-circle positioning */
+    overflow: hidden; /* Clips the semi-circle to the card corner */
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+    /* Bottom-right faded semi-circle treatment */
+    .asmkpi-card::after {
+        content: '';
+        position: absolute;
+        bottom: -14px;
+        right: -14px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        /* Uses the card's specific left border color with a subtle opacity fade */
+        background-color: var(--asmkpi-accent);
+        opacity: 0.15;
+        pointer-events: none;
+        transition: transform 180ms ease;
+    }
+
+    .asmkpi-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--asmkpi-accent);
+        box-shadow: 0 7px 15px rgba(15, 42, 67, 0.09);
+    }
+
+        .asmkpi-card:hover::after {
+            transform: scale(1.15);
+        }
+
+    .asmkpi-card > div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
+    }
+
+.asmkpi-label {
+    overflow: hidden;
+    color: #65758a;
+    font-size: 0.54rem;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.asmkpi-card i {
+    color: var(--asmkpi-accent);
+}
+
+.asmkpi-card strong {
+    display: block;
+    margin-top: 0.55rem;
+    overflow: hidden;
+    color: #26384a;
+    font-size: 0.79rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.asmkpi-card small {
+    display: block;
+    margin-top: 0.15rem;
+    overflow: hidden;
+    color: #8492a2;
+    font-size: 0.53rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.asmkpi-blue {
+    --asmkpi-accent: #2563eb;
+}
+
+.asmkpi-slate {
+    --asmkpi-accent: #64748b;
+}
+
+.asmkpi-green {
+    --asmkpi-accent: #16a34a;
+}
+
+.asmkpi-red {
+    --asmkpi-accent: #dc2626;
+}
+
+.asmkpi-cyan {
+    --asmkpi-accent: #0891b2;
+}
+
+.asmkpi-amber {
+    --asmkpi-accent: #d97706;
+}
+
+@media (max-width: 1400px) {
+    .asmkpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .asmkpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

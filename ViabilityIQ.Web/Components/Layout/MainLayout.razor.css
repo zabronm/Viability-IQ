@@ -256,6 +256,27 @@
     gap: 20px;
 }
 
+.viq-help-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px;
+    border: 1px solid #bfdbd6;
+    border-radius: 20px;
+    color: #176b63;
+    background: #effaf8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.viq-help-link:hover {
+    transform: translateY(-1px);
+    color: #fff;
+    background: #218f80;
+}
+
 .marble-date-badge {
     font-size: 0.8rem;
     font-weight: 600;
