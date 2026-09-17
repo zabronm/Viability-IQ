@@ -134,6 +134,11 @@
 
                 @* <div class="fa-nav-heading" style="border-top: solid 0.6px #bcbcbc; border-bottom: solid 0.6px #bcbcbc;">Assessment Config</div> *@
 
+                 <NavLink class="fa-nav-item" href="@SensitivityUrl">
+                    <div class="nav-icon-avatar-round"><i class="bi bi-graph-up-arrow"></i></div>
+                    <span class="footer-main-text-sm">Sensitivity Analysis</span>
+                </NavLink>
+
                 <NavLink class="fa-nav-item" href="@AssumptionsUrl" style="border-top: solid 0.5px #cdcdcd;">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
                     <span class="footer-main-text">Assumptions/Baseline</span><i class="bi bi-caret-right"></i>
@@ -337,6 +342,12 @@
     private string ReportsUrl =>
                     SessionService.AssessmentId is long assessmentId && assessmentId > 0
                         ? $"/assessment/reports/{assessmentId}"
+                        : "/assessment/assesment-error";
+
+    //=========== Sensitivity Analysis Page ====================
+    private string SensitivityUrl =>
+                    SessionService.AssessmentId is long assessmentId && assessmentId > 0
+                        ? $"/assessment/sensitivity/{assessmentId}"
                         : "/assessment/assesment-error";
 
     //=========== Assessment Assumptions/Baseline Page ====================

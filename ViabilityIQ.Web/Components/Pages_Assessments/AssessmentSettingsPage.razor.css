@@ -3,6 +3,7 @@
     --assumption-blue: #2563eb;
     --assumption-border: #d7e2ec;
 }
+.assumptions-resources{display:flex;justify-content:flex-end;gap:.4rem;flex-wrap:wrap;margin:.45rem 0}.assumptions-resources a{display:inline-flex;align-items:center;gap:.28rem;padding:.34rem .55rem;border:1px solid #cbdbe8;border-radius:.4rem;background:#fff;color:#315b77;font-size:.56rem;font-weight:750;text-decoration:none}.assumptions-resources a:hover{border-color:#2a9d8f;color:#176b63;background:#effaf8}
 
 /* Fix width alignment between readiness block and the tabs container */
 .assessment-readiness-wrapper {

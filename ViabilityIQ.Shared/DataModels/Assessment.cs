@@ -38,6 +38,10 @@ namespace ViabilityIQ.Shared.DataModels
         public decimal OpeningBalance_Bank { get; set; }        
         public decimal InterestOnOverDraft { get; set; } = 0;
         public decimal DepreciationProjectedAmount { get; set; } = 0;       
+        public decimal OpeningOtherCurrentAssets { get; set; }
+        public decimal OpeningOtherCurrentLiabilities { get; set; }
+        public decimal OpeningVatPayable { get; set; }
+        public decimal OpeningVatRefundable { get; set; }
 
         //DIRECTORS WAGES SECTION
         public decimal MonthlyDirectorWagesAmountTotal { get; set; }

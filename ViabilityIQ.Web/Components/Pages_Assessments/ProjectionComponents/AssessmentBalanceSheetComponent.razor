@@ -76,7 +76,7 @@
         Projection.Months.OrderBy(month => month.MonthNumber).ToArray();
 
     private static decimal CurrentLiabilitiesExcludingLoans(CashflowProjectionMonth month) =>
-        Math.Max(-month.ClosingBank, 0m) + month.ClosingCreditors;
+        Math.Max(-month.ClosingBank, 0m) + month.ClosingCreditors + month.OtherCurrentLiabilities;
 
     private static decimal TotalLiabilities(CashflowProjectionMonth month) =>
         CurrentLiabilitiesExcludingLoans(month) + month.ClosingLoanBalance;
@@ -91,6 +91,7 @@
         Line("Cash at bank", month => Math.Max(month.ClosingBank, 0m)),
         Line("Trade debtors", month => month.ClosingDebtors),
         Line("Inventory / stock", month => month.ClosingStock),
+        Line("Other current assets", month => month.OtherCurrentAssets),
         Line("Total current assets", month => month.CurrentAssets, "absheet-total-row"),
         BalanceSheetLine.Heading("Non-current assets", "absheet-subsection"),
         Line("Property, plant & equipment (net)", month => month.ClosingFixedAssets),
@@ -100,6 +101,7 @@
         BalanceSheetLine.Heading("Current liabilities", "absheet-subsection"),
         Line("Bank overdraft", month => Math.Max(-month.ClosingBank, 0m)),
         Line("Trade creditors", month => month.ClosingCreditors),
+        Line("Other current liabilities", month => month.OtherCurrentLiabilities),
         Line("Total current liabilities", CurrentLiabilitiesExcludingLoans, "absheet-total-row"),
         BalanceSheetLine.Heading("Non-current liabilities", "absheet-subsection"),
         Line("Loans and borrowings", month => month.ClosingLoanBalance),

@@ -1,0 +1,49 @@
+@page "/assessment/assumptions/{AssessmentId:long}/report"
+@layout MainLayout_Blank
+@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Shared.FinancialModels
+@using ViabilityIQ.Shared.DataModels
+@inject IGenericDataRepository<Assessment> AssessmentRepository
+@inject IGenericDataRepository<AssessmentProjectionAssumptions> AssumptionsRepository
+@inject IGenericDataRepository<AssessmentSalesCategory> CategoryRepository
+@inject IGenericDataRepository<AssessmentAsset> AssetRepository
+@inject IGenericDataRepository<AssessmentLoan> LoanRepository
+@inject IGenericDataRepository<DebtorsCreditorsProfile> ProfileRepository
+@inject IGenericDataRepository<IncomeType> IncomeTypeRepository
+@inject IAssetDepreciationEngine DepreciationEngine
+@inject IJSRuntime JS
+
+<main class="aar-page">
+<header class="aar-toolbar"><div><strong>Assessment Assumptions Report</strong><span>Assessment #@AssessmentId</span></div><button @onclick="Print"><i class="bi bi-printer"></i> Print / Save PDF</button></header>
+@if(Loading){<div class="aar-state">Preparing report...</div>}
+else if(Assessment is null){<div class="aar-state">Assessment not found.</div>}
+else{
+<section class="aar-cover"><h1>Assessment Assumptions &amp; Baseline</h1><p>Case @Assessment.CaseNumber · Generated @DateTime.Now.ToString("dd MMMM yyyy HH:mm")</p></section>
+<section><h2>Opening financial position</h2><div class="aar-grid">
+@Metric("Bank balance",Assessment.OpeningBalance_Bank) @Metric("Opening stock",SalesCategories.Sum(x=>x.OpeningStock))
+@Metric("Opening debtors",Categories.Sum(x=>x.OpeningDebtorsAmount)) @Metric("Opening creditors",Categories.Sum(x=>x.OpeningCreditorsAmount))
+@Metric("Other current assets",Assessment.OpeningOtherCurrentAssets) @Metric("Other current liabilities",Assessment.OpeningOtherCurrentLiabilities)
+@Metric("VAT payable",Assessment.OpeningVatPayable) @Metric("VAT refundable",Assessment.OpeningVatRefundable)
+@Metric("Gross fixed assets",Assets.Sum(x=>x.OpeningBalanceValue)) @Metric("Accumulated depreciation",Assets.Sum(x=>x.OpeningAccumulatedDepreciation))
+@Metric("Net fixed assets",Assets.Sum(x=>x.OpeningBalanceValue-x.OpeningAccumulatedDepreciation)) @Metric("12-month depreciation",AnnualDepreciation)
+@Metric("Opening loans",Loans.Sum(x=>x.LoanBalanceAtAssessmentDate))
+</div></section>
+<section><h2>Sales and working capital</h2><table><thead><tr><th>Category</th><th>Markup</th><th>Stock</th><th>Debtors</th><th>Creditors</th></tr></thead><tbody>
+@foreach(var category in Categories){<tr><td>@category.AssessmentSalesCategoryName</td><td>@category.MarkupPercentage.ToString("N2")%</td><td>@Money(category.OpeningStock)</td><td>@Money(category.OpeningDebtorsAmount)</td><td>@Money(category.OpeningCreditorsAmount)</td></tr>}
+</tbody></table>
+@if(Profile is not null){<p><strong>Debtor profile:</strong> @Buckets(Profile.Debtors_30,Profile.Debtors_60,Profile.Debtors_90,Profile.Debtors_120,Profile.Debtors_120Plus)</p><p><strong>Creditor profile:</strong> @Buckets(Profile.Creditors_30,Profile.Creditors_60,Profile.Creditors_90,Profile.Creditors_120,Profile.Creditors_120Plus)</p>}
+</section>
+<section><h2>Lightweight baseline assumptions</h2>
+@if(Baseline is null){<p>No baseline assumptions have been saved.</p>}else{<div class="aar-grid">
+@TextMetric("Sales growth",$"{Baseline.SalesGrowthRate:N2}% from Month {Baseline.SalesGrowthStartMonth}") @TextMetric("Cash Sales",$"{Baseline.CashSalesPercentage:N2}%")
+@TextMetric("Bad debts",$"{Baseline.BadDebtRate:N2}%") @TextMetric("Fallback cost of Sales",Baseline.CostOfSalesPercentage.HasValue?$"{Baseline.CostOfSalesPercentage:N2}%":"Not set")
+@TextMetric("Minimum closing stock",$"{Baseline.MinimumClosingStockPercentage:N2}%") @TextMetric("Expense increase",$"{Baseline.ExpenseIncreaseRate:N2}% from Month {Baseline.ExpenseIncreaseStartMonth}")
+@TextMetric("Contingency",$"{Baseline.ContingencyRate:N2}%") @TextMetric("VAT frequency",Baseline.VatPaymentFrequencyMonths==1?"Monthly":"Every two months")
+@TextMetric("Director wage increase",$"{Baseline.DirectorWageIncreaseRate:N2}%") @Metric("Minimum cash balance",Baseline.MinimumCashBalance) @TextMetric("Status",Baseline.IsConfirmed?"Confirmed":"Draft")
+</div><p><strong>Notes:</strong> @Baseline.Remarks</p>}
+</section><footer>This summary must be read with supporting evidence and assessor judgement.</footer>}
+</main>
+@code{
+[Parameter]public long AssessmentId{get;set;}private bool Loading=true;private Assessment? Assessment;private AssessmentProjectionAssumptions? Baseline;private DebtorsCreditorsProfile? Profile;private AssessmentSalesCategory[] Categories=[];private AssessmentSalesCategory[] SalesCategories=[];private AssessmentAsset[] Assets=[];private AssessmentLoan[] Loans=[];private decimal AnnualDepreciation;
+protected override async Task OnInitializedAsync(){var a=AssessmentRepository.GetByIdAsync(AssessmentId);var b=AssumptionsRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var c=CategoryRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var d=AssetRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var l=LoanRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var p=ProfileRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var types=IncomeTypeRepository.GetAllAsync();var dep=DepreciationEngine.CalculateAnnualDepreciationAsync(AssessmentId);await Task.WhenAll(a,b,c,d,l,p,types,dep);Assessment=await a;Baseline=(await b).OrderByDescending(x=>x.AssessmentProjectionAssumptionsId).FirstOrDefault();Categories=(await c).ToArray();var classifier=new IncomeTypeClassifier(await types);SalesCategories=Categories.Where(x=>classifier.Classify(x)==IncomeSourceKind.Sales).ToArray();Assets=(await d).ToArray();Loans=(await l).ToArray();Profile=(await p).FirstOrDefault();AnnualDepreciation=(await dep).Values.Sum();Loading=false;}
+private RenderFragment Metric(string label,decimal value)=>@<div class="aar-metric"><span>@label</span><strong>@Money(value)</strong></div>;private RenderFragment TextMetric(string label,string value)=>@<div class="aar-metric"><span>@label</span><strong>@value</strong></div>;private static string Money(decimal value)=>$"R {value:N2}";private static string Buckets(params decimal[] values)=>string.Join(" / ",values.Select(x=>$"{x:N2}%"));private async Task Print()=>await JS.InvokeVoidAsync("print");}

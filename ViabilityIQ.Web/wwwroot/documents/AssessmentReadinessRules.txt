@@ -1,0 +1,59 @@
+ASSESSMENT PROJECTION READINESS RULES
+=====================================
+
+Purpose
+-------
+The readiness panel checks whether the minimum facts and assumptions needed for a
+credible lightweight SME projection have been captured. It does not guarantee the
+commercial success of a business and does not replace assessor judgement.
+
+Required checks
+---------------
+1. Opening position
+   Pass: At least one opening bank, asset, stock, debtor or creditor balance is present.
+   Action: Confirm all opening balances, including valid zero balances.
+
+2. Sales Categories
+   Pass: At least one active Sales Category exists.
+   Action: Add a category and assign the correct income type.
+
+3. Monthly Sales
+   Pass: At least one active Sales line contains a non-zero M1-M12 amount.
+   Action: Enter the baseline monthly Sales/income forecast.
+
+4. Debtor and creditor profile
+   Pass: An active profile exists and its explicit ageing buckets do not exceed 100%.
+   Action: Capture collection/payment timing. The unallocated balance is treated as current.
+
+5. Operating expenses
+   Pass: At least one active expense line exists.
+   Action: Enter recurring and material operating expenses.
+
+6. VAT status
+   Pass: The assessment contains a VAT flag or a non-negative VAT rate.
+   Action: Confirm VAT registration and the correct rate.
+
+7. Core assumptions
+   Pass: An active lightweight assumptions record exists.
+   Action: Save the Sales, expense and funding assumptions.
+
+Advisory checks
+---------------
+8. Loan details
+   Pass: Every active loan has a usable balance, rate, term and M1-M12 start month.
+
+9. Asset depreciation
+   Pass: Every active depreciable asset has a positive rate and a method.
+
+10. Baseline confirmation
+    Pass: The assessor has marked the baseline assumptions as confirmed.
+
+Status calculation
+------------------
+- Ready: no required failures and at least 90% of all checks pass.
+- Ready with warnings: no required failures and fewer than 90% pass.
+- Incomplete: one or more required checks fail.
+
+The score is the number of passed checks divided by the ten checks. The projection
+engine is intentionally unchanged in this package; readiness is an assessment-quality
+control only.

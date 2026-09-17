@@ -120,7 +120,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 OpeningBalance_Assets = Model.OpeningBalance_Assets,
                 OpeningBalance_Bank = Model.OpeningBalance_Bank,
                 InterestOnOverDraft = Model.InterestOnOverDraft,
-                DepreciationProjectedAmount = Model.DepreciationProjectedAmount
+                DepreciationProjectedAmount = Model.DepreciationProjectedAmount,
+                OpeningOtherCurrentAssets = Model.OpeningOtherCurrentAssets,
+                OpeningOtherCurrentLiabilities = Model.OpeningOtherCurrentLiabilities,
+                OpeningVatPayable = Model.OpeningVatPayable,
+                OpeningVatRefundable = Model.OpeningVatRefundable
             };
                      
 
@@ -377,6 +381,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public decimal OpeningBalance_Bank { get; set; }
         public decimal InterestOnOverDraft { get; set; } = 0;
         public decimal DepreciationProjectedAmount { get; set; } = 0;
+        public decimal OpeningOtherCurrentAssets { get; set; }
+        public decimal OpeningOtherCurrentLiabilities { get; set; }
+        public decimal OpeningVatPayable { get; set; }
+        public decimal OpeningVatRefundable { get; set; }
     }
 
 }

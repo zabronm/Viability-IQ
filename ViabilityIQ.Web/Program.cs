@@ -134,7 +134,7 @@ namespace ViabilityIQ.Web
                     Console.WriteLine("[STEP 7] Adding financial calculation services...");
                     try
                     {
-                        builder.Services.AddFinancialCalculationServices();
+                        builder.Services.AddFinancialCalculationServices(builder.Configuration);
                         Console.WriteLine("[STEP 7] ✓ Success - Financial services registered");
                         Console.WriteLine("[STEP 7]   ├─ IProjectionStateManager");
                         Console.WriteLine("[STEP 7]   ├─ IAssetMovementCalculationService");

@@ -1,0 +1,482 @@
+@page "/assessment/sensitivity/{RouteAssessmentId:long}"
+@page "/assessment/sensitivity"
+@layout MainLayout_Assessment
+@namespace ViabilityIQ.Web.Components.Pages_Assessments
+@using ViabilityIQ.Shared.FinancialModels
+@using System.Globalization
+
+<div class="sensitivity-page container-fluid p-0 position-relative dashboard-workspace">
+    <PageHeading_Assessment _pageTitle="Sensitivity Analysis"
+                            PageTitle="Sensitivity Analysis"
+                            CurrentPage="PageType.Reports" />
+    <div class="row bg-white g-3 mt-1 mb-1 py-0 px-2" style="border-radius: 6px;">
+        <div class="sensitivity-actions">
+            <span><i class="bi bi-shield-lock"></i> Baseline is read-only. Scenarios remain in memory and are not saved.</span>
+            <div>
+                <button class="btn btn-sm btn-outline-secondary" type="button" @onclick="PrintAsync">
+                    <i class="bi bi-printer"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+
+        @if (BaselineDraft)
+        {
+            <div class="sensitivity-alert amber" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div><strong>Draft baseline</strong><span>Sales or expense inputs are incomplete. Results reflect only the data currently captured.</span></div>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="sensitivity-alert red" role="alert">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+                <div><strong>Calculation error</strong><span>@ErrorMessage</span></div>
+            </div>
+        }
+
+        <section class="sensitivity-tabs-shell">
+            <div class="sensitivity-tabs" role="tablist" aria-label="Sensitivity analysis views">
+                <button type="button" role="tab" aria-selected="@(ActiveTab == SensitivityTab.Builder)"
+                        class="sensitivity-tab @(ActiveTab == SensitivityTab.Builder ? "active" : null)"
+                        @onclick="() => SelectTab(SensitivityTab.Builder)">
+                    <i class="bi bi-sliders"></i><span>Scenario Builder</span>
+                </button>
+                <button type="button" role="tab" aria-selected="@(ActiveTab == SensitivityTab.Results)"
+                        class="sensitivity-tab @(ActiveTab == SensitivityTab.Results ? "active" : null)"
+                        @onclick="() => SelectTab(SensitivityTab.Results)">
+                    <i class="bi bi-graph-up-arrow"></i><span>Sensitivity Results</span>
+                </button>
+                <button type="button" role="tab" aria-selected="@(ActiveTab == SensitivityTab.Comparison)"
+                        class="sensitivity-tab @(ActiveTab == SensitivityTab.Comparison ? "active" : null)"
+                        @onclick="() => SelectTab(SensitivityTab.Comparison)">
+                    <i class="bi bi-columns-gap"></i><span>Scenario Comparison</span>
+                </button>
+                <button type="button" role="tab" aria-selected="@(ActiveTab == SensitivityTab.Risk)"
+                        class="sensitivity-tab @(ActiveTab == SensitivityTab.Risk ? "active" : null)"
+                        @onclick="() => SelectTab(SensitivityTab.Risk)">
+                    <i class="bi bi-shield-exclamation"></i><span>Risk &amp; Break-even</span>
+                </button>
+                <button type="button" role="tab" aria-selected="@(ActiveTab == SensitivityTab.AiAnalysis)"
+                        class="sensitivity-tab @(ActiveTab == SensitivityTab.AiAnalysis ? "active" : null)"
+                        @onclick="() => SelectTab(SensitivityTab.AiAnalysis)">
+                    <i class="bi bi-stars"></i><span>AI Analysis (Demo)</span>
+                </button>
+            </div>
+
+            <div class="sensitivity-tab-content" role="tabpanel">
+                @if (AssessmentId <= 0)
+                {
+                    <div class="sensitivity-alert amber" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div><strong>No active assessment</strong><span>Open an assessment before running sensitivity analysis.</span></div>
+                    </div>
+                }
+                else if (IsLoading)
+                {
+                    <div class="sensitivity-state" role="status">
+                        <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                        <span>Loading authoritative projection…</span>
+                    </div>
+                }
+                else if (BaselineResult is null)
+                {
+                    <div class="sensitivity-state">No projection data is available for this assessment.</div>
+                }
+                else
+                {
+                    @switch (ActiveTab)
+                    {
+                        case SensitivityTab.Builder:
+                            <section aria-labelledby="builder-heading">
+                                <div class="section-heading">
+                                    <div><h2 id="builder-heading">Build a practical scenario</h2><p>Choose a preset or layer temporary adjustments over the baseline.</p></div>
+                                </div>
+                                <div class="preset-grid" aria-label="Scenario presets">
+                                    @foreach (var preset in _scenarios.Where(x => x.Name is not "Optimistic" and not "Expected" and not "Pessimistic"))
+                                    {
+                                        <button type="button" class="preset-card" @onclick="() => ApplyPreset(preset.Name)">
+                                            <strong>@preset.Name</strong><span>@preset.Description</span>
+                                        </button>
+                                    }
+                                </div>
+
+                                <div class="panel-grid">
+                                    <div class="sensitivity-panel">
+                                        <h3>Scenario details</h3>
+                                        <label for="scenario-name">Name</label>
+                                        <input id="scenario-name" class="form-control form-control-sm" maxlength="60" @bind="WorkingScenario.Name" />
+                                        <label for="scenario-description">Description</label>
+                                        <textarea id="scenario-description" class="form-control form-control-sm" rows="2" maxlength="240" @bind="WorkingScenario.Description"></textarea>
+
+                                        <h3 class="mt-3">Add adjustment</h3>
+                                        <div class="form-grid">
+                                            <div>
+                                                <label for="driver">Driver</label><select id="driver" class="form-select form-select-sm" @bind="SelectedDriver">
+                                                @foreach (var driver in Enum.GetValues<SensitivityDriver>())
+                                                {
+                                                    <option value="@driver">@DriverName(driver)</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div><label for="adjustment">Adjustment (@DriverUnit(SelectedDriver))</label><input id="adjustment" type="number" step="0.5" class="form-control form-control-sm" @bind="AdjustmentValue" /></div>
+                                        <div><label for="start-month">Effective month</label><input id="start-month" type="number" min="1" max="12" class="form-control form-control-sm" @bind="EffectiveMonth" /></div>
+                                        <div>
+                                            <label for="duration">Duration</label><div class="duration-row">
+                                            <input id="duration" type="number" min="1" max="12" disabled="@IsOngoing" class="form-control form-control-sm" @bind="DurationMonths" />
+                                            <label class="check-label"><input type="checkbox" @bind="IsOngoing" /> Ongoing</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary mt-2" type="button" @onclick="AddAdjustment"><i class="bi bi-plus-circle"></i> Add adjustment</button>
+                            </div>
+
+                            <div class="sensitivity-panel">
+                                <h3>Scenario adjustments</h3>
+                                @if (WorkingScenario.Adjustments.Count == 0)
+                                {
+                                    <p class="empty-copy">No adjustments. This scenario currently equals baseline.</p>
+                                }
+                                else
+                                {
+                                    <div class="adjustment-list">
+                                        @foreach (var adjustment in WorkingScenario.Adjustments)
+                                        {
+                                            <div>
+                                                <span><strong>@DriverName(adjustment.Driver)</strong><small>@adjustment.Value.ToString("+0.##;-0.##;0") @DriverUnit(adjustment.Driver), M@adjustment.EffectiveStartMonth @(adjustment.DurationMonths.HasValue ? $"for {adjustment.DurationMonths} months" : "onward")</small></span>
+                                                <button type="button" aria-label="Remove adjustment" @onclick="() => RemoveAdjustment(adjustment)"><i class="bi bi-x-lg"></i></button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                <button class="btn btn-sm btn-primary mt-3" type="button" @onclick="RunScenarioAsync"><i class="bi bi-play-fill"></i> Run scenario</button>
+                            </div>
+                    </div>
+
+                    @if (CurrentResult is not null)
+                    {
+                        <div class="kpi-grid mt-3">
+                            <article class="kpi-card"><span>Revenue</span><strong>@CurrentResult.Metrics.Revenue.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card"><span>Gross profit</span><strong>@CurrentResult.Metrics.GrossProfit.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card"><span>PBT</span><strong>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card"><span>Closing cash</span><strong>@CurrentResult.Metrics.ClosingCash.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card"><span>Minimum cash</span><strong>@CurrentResult.Metrics.MinimumCash.ToString("N0")</strong><small>M@CurrentResult.Metrics.MinimumCashMonth</small></article>
+                        </div>
+                        <div class="explanation-panel">
+                            <h3>Deterministic explanation</h3>
+                            <ul>@foreach (var line in CurrentResult.Explanations) {
+                                <li>@line</li>
+                            }
+                        </ul>
+                        <details><summary>Calculation scope</summary><ul>@foreach (var note in CurrentResult.CalculationNotes) {
+                            <li>@note</li>
+                        }
+                    </ul></details>
+                </div>
+            }
+        </section>
+        break;
+
+                    case SensitivityTab.Results:
+            <section aria-labelledby="results-heading">
+                <div class="section-heading">
+                    <div><h2 id="results-heading">One-variable sensitivity</h2><p>Each point is independently calculated from the same authoritative baseline.</p></div>
+                    <button class="btn btn-sm btn-outline-secondary" disabled="@(SweepResult is null)" @onclick="ExportSweepCsvAsync"><i class="bi bi-download"></i> CSV</button>
+                </div>
+                <div class="sweep-controls">
+                    <div>
+                        <label for="sweep-driver">Driver</label><select id="sweep-driver" class="form-select form-select-sm" @bind="SweepDriver">
+                        @foreach (var driver in Enum.GetValues<SensitivityDriver>().Where(x => x != SensitivityDriver.MinimumCashReserve))
+                        {
+                            <option value="@driver">@DriverName(driver)</option>
+                        }
+                    </select>
+                </div>
+                <div><label for="sweep-min">Minimum</label><input id="sweep-min" type="number" class="form-control form-control-sm" @bind="SweepMinimum" /></div>
+                <div><label for="sweep-max">Maximum</label><input id="sweep-max" type="number" class="form-control form-control-sm" @bind="SweepMaximum" /></div>
+                <div><label for="sweep-step">Step</label><input id="sweep-step" type="number" min="0.01" class="form-control form-control-sm" @bind="SweepStep" /></div>
+                <div><label for="sweep-month">Effective month</label><input id="sweep-month" type="number" min="1" max="12" class="form-control form-control-sm" @bind="SweepEffectiveMonth" /></div>
+                <button class="btn btn-sm btn-primary" disabled="@IsRunningSweep" @onclick="RunSweepAsync">@(IsRunningSweep ? "Calculating…" : "Run range")</button>
+            </div>
+            @if (SweepResult is null)
+            {
+                <div class="sensitivity-state compact">Set a range and run the analysis. The baseline point is shown separately in each result.</div>
+            }
+            else
+            {
+                <div class="mini-chart" aria-label="Closing cash by sensitivity point">
+                    @foreach (var point in SweepResult.Points)
+                    {
+                        <div class="chart-row"><span>@point.DriverValue.ToString("0.##")</span><div><i class="@point.Status.ToString().ToLowerInvariant()" style="width:@(ChartWidth(point.Metrics.ClosingCash, SweepResult.Points.Select(x => x.Metrics.ClosingCash)).ToString("0.##", CultureInfo.InvariantCulture))%"></i></div><b>@point.Metrics.ClosingCash.ToString("N0")</b></div>
+                    }
+                </div>
+                <div class="table-responsive">
+                    <table class="table sensitivity-table">
+                        <thead><tr><th>Adjustment</th><th>Revenue</th><th>Gross margin</th><th>EBITDA</th><th>PBT</th><th>Closing cash</th><th>Minimum cash (month)</th><th>Funding gap</th><th>Current ratio</th><th>Interest cover</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr class="baseline-row"><th>Baseline</th><td>@BaselineResult.Metrics.Revenue.ToString("N0")</td><td>@BaselineResult.Metrics.GrossMarginPercent?.ToString("N1")%</td><td>@BaselineResult.Metrics.EBITDA.ToString("N0")</td><td>@BaselineResult.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@BaselineResult.Metrics.ClosingCash.ToString("N0")</td><td>@BaselineResult.Metrics.MinimumCash.ToString("N0") (M@BaselineResult.Metrics.MinimumCashMonth)</td><td>@BaselineResult.Metrics.FundingShortfall.ToString("N0")</td><td>@BaselineResult.Metrics.CurrentRatio?.ToString("N2")</td><td>@BaselineResult.Metrics.InterestCover?.ToString("N2")</td><td><span class="status-pill green">Baseline</span></td></tr>
+                            @foreach (var point in SweepResult.Points)
+                            {
+                                <tr><th>@point.DriverValue.ToString("+0.##;-0.##;0") @DriverUnit(SweepResult.Request.Driver)</th><td>@point.Metrics.Revenue.ToString("N0")</td><td>@point.Metrics.GrossMarginPercent?.ToString("N1")%</td><td>@point.Metrics.EBITDA.ToString("N0")</td><td>@point.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@point.Metrics.ClosingCash.ToString("N0")</td><td>@point.Metrics.MinimumCash.ToString("N0") (M@point.Metrics.MinimumCashMonth)</td><td>@point.Metrics.FundingShortfall.ToString("N0")</td><td>@point.Metrics.CurrentRatio?.ToString("N2")</td><td>@point.Metrics.InterestCover?.ToString("N2")</td><td><span class="status-pill @point.Status.ToString().ToLowerInvariant()">@point.Status</span></td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+        break;
+
+                    case SensitivityTab.Comparison:
+            <section aria-labelledby="comparison-heading">
+                <div class="section-heading">
+                    <div><h2 id="comparison-heading">Scenario comparison</h2><p>Baseline plus up to three named scenarios.</p></div>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="ExportComparisonCsvAsync"><i class="bi bi-download"></i> CSV</button>
+                </div>
+                <div class="comparison-picker">
+                    @foreach (var scenario in _scenarios.Take(3))
+                    {
+                        <label class="@(_comparisonSelection.Contains(scenario.Id) ? "selected" : null)">
+                            <input type="checkbox" checked="@_comparisonSelection.Contains(scenario.Id)"
+                                   disabled="@(!_comparisonSelection.Contains(scenario.Id) && _comparisonSelection.Count >= 3)"
+                                   @onchange="e => ToggleComparisonAsync(scenario, Convert.ToBoolean(e.Value))" />
+                            <span><strong>@scenario.Name</strong><small>@scenario.Description</small></span>
+                        </label>
+                    }
+                </div>
+                <div class="table-responsive">
+                    <table class="table sensitivity-table">
+                        <thead><tr><th>KPI</th><th>Baseline</th>@foreach (var result in SelectedComparisons) {
+                            <th>@result.Scenario.Name</th>
+                        }
+                    </tr></thead>
+                    <tbody>
+                        <tr><th>Revenue</th><td>@BaselineResult.Metrics.Revenue.ToString("N0")</td>@foreach (var result in SelectedComparisons) {
+                            <td>@result.Metrics.Revenue.ToString("N0")<small class="variance">@Variance(result.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") / @(VariancePercent(result.Metrics.Revenue, BaselineResult.Metrics.Revenue)?.ToString("+0.0;-0.0;0") ?? "n/a")%</small></td>
+                        }
+                    </tr>
+                    <tr><th>Gross profit</th><td>@BaselineResult.Metrics.GrossProfit.ToString("N0")</td>@foreach (var result in SelectedComparisons) {
+                        <td>@result.Metrics.GrossProfit.ToString("N0")<small class="variance">@Variance(result.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit).ToString("+N0;-N0;0") / @(VariancePercent(result.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit)?.ToString("+0.0;-0.0;0") ?? "n/a")%</small></td>
+                    }
+                </tr>
+                <tr><th>EBITDA</th><td>@BaselineResult.Metrics.EBITDA.ToString("N0")</td>@foreach (var result in SelectedComparisons) {
+                    <td>@result.Metrics.EBITDA.ToString("N0")<small class="variance">@Variance(result.Metrics.EBITDA, BaselineResult.Metrics.EBITDA).ToString("+N0;-N0;0") / @(VariancePercent(result.Metrics.EBITDA, BaselineResult.Metrics.EBITDA)?.ToString("+0.0;-0.0;0") ?? "n/a")%</small></td>
+                }
+            </tr>
+            <tr><th>Profit before tax</th><td>@BaselineResult.Metrics.ProfitBeforeTax.ToString("N0")</td>@foreach (var result in SelectedComparisons) {
+                <td>@result.Metrics.ProfitBeforeTax.ToString("N0")<small class="variance">@Variance(result.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") / @(VariancePercent(result.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax)?.ToString("+0.0;-0.0;0") ?? "n/a")%</small></td>
+            }
+        </tr>
+        <tr><th>Closing cash</th><td>@BaselineResult.Metrics.ClosingCash.ToString("N0")</td>@foreach (var result in SelectedComparisons) {
+            <td>@result.Metrics.ClosingCash.ToString("N0")<small class="variance">@Variance(result.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") / @(VariancePercent(result.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash)?.ToString("+0.0;-0.0;0") ?? "n/a")%</small></td>
+        }
+    </tr>
+    <tr><th>Minimum cash</th><td>@BaselineResult.Metrics.MinimumCash.ToString("N0")</td>@foreach (var result in SelectedComparisons) {
+        <td>@result.Metrics.MinimumCash.ToString("N0")<small class="variance">@Variance(result.Metrics.MinimumCash, BaselineResult.Metrics.MinimumCash).ToString("+N0;-N0;0") / @(VariancePercent(result.Metrics.MinimumCash, BaselineResult.Metrics.MinimumCash)?.ToString("+0.0;-0.0;0") ?? "n/a")%</small></td>
+    }
+</tr>
+</tbody>
+</table>
+</div>
+<h3 class="mt-3">M1–M12 revenue, profit and cash</h3>
+<div class="table-responsive">
+    <table class="table sensitivity-table compact-table">
+        <thead><tr><th>Scenario / metric</th>@foreach (var month in BaselineResult.Projection.Months) {
+            <th>@month.MonthLabel</th>
+        }
+    </tr></thead>
+    <tbody>
+        @foreach (var result in new[] { BaselineResult }.Concat(SelectedComparisons))
+        {
+            <tr><th>@result.Scenario.Name — Revenue</th>@foreach (var month in result.Projection.Months) {
+                <td>@month.Revenue.ToString("N0")</td>
+            }
+        </tr>
+        <tr><th>@result.Scenario.Name — PBT</th>@foreach (var month in result.Projection.Months) {
+            <td>@month.ProfitBeforeTax.ToString("N0")</td>
+        }
+    </tr>
+    <tr><th>@result.Scenario.Name — Cash</th>@foreach (var month in result.Projection.Months) {
+        <td>@month.ClosingBank.ToString("N0")</td>
+    }
+</tr>
+                                        }
+</tbody>
+</table>
+</div>
+                            @foreach (var result in SelectedComparisons)
+{
+    <div class="explanation-panel"><h3>@result.Scenario.Name: main causes</h3><ul>@foreach (var line in result.Explanations) {
+        <li>@line</li>
+    }
+</ul></div>
+                            }
+</section>
+                        break;
+
+                    case SensitivityTab.Risk:
+    <section aria-labelledby="risk-heading">
+        <div class="section-heading"><div><h2 id="risk-heading">Risk &amp; break-even</h2><p>Practical thresholds based on the current 12-month projection.</p></div></div>
+        <div class="reserve-control">
+            <div><label for="cash-reserve">Management minimum cash reserve</label><input id="cash-reserve" type="number" min="0" step="1000" class="form-control form-control-sm" @bind="MinimumCashReserve" /></div>
+            <button class="btn btn-sm btn-primary" @onclick="RefreshRisksAsync">Recalculate thresholds</button>
+        </div>
+        @if (RiskResult is not null)
+        {
+            <div class="threshold-grid">
+                @foreach (var threshold in RiskResult.Thresholds)
+                {
+                    <article class="threshold-card @threshold.Status.ToString().ToLowerInvariant()">
+                        <span>@threshold.Name</span><strong>@(threshold.Value?.ToString("N1") ?? "Not reached")@threshold.Unit</strong><p>@threshold.Interpretation</p>
+                    </article>
+                }
+            </div>
+            <div class="findings-list">
+                @foreach (var finding in RiskResult.Findings)
+                {
+                    <article class="@finding.Status.ToString().ToLowerInvariant()">
+                        <i class="bi @(finding.Status == SensitivityStatus.Red ? "bi-exclamation-octagon-fill" : finding.Status == SensitivityStatus.Amber ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill")"></i>
+                        <div><h3>@finding.Title</h3><p>@finding.Detail</p><strong>Action: @finding.RecommendedAction</strong></div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+    break;
+
+case SensitivityTab.AiAnalysis:
+    <section class="ai-analysis" aria-labelledby="ai-analysis-heading">
+        <div class="section-heading">
+            <div>
+                <h2 id="ai-analysis-heading">AI Analysis <span class="demo-badge">Demo</span></h2>
+                <p>Advisory interpretation of the current deterministic sensitivity output.</p>
+            </div>
+            <div class="ai-provider-state">
+                <strong>@AiConfiguration.Provider</strong>
+                <span>@AiConfiguration.Model</span>
+                <span class="configuration-pill @(AiConfiguration.Configured ? "configured" : "not-configured")">
+                    @(AiConfiguration.Configured ? "Configured" : "Not configured")
+                </span>
+            </div>
+        </div>
+
+        <div class="ai-disclosure" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>
+                <strong>Gemini free-tier data may be used by Google to improve its products.</strong>
+                <span>Only calculated financial metrics and scenario adjustments are sent. Business identity, assessment ID, names, notes and source records are excluded.</span>
+            </div>
+        </div>
+
+        @if (!AiConfiguration.Enabled || !AiConfiguration.Configured)
+        {
+            <div class="ai-configuration-panel">
+                <h3>Demo configuration required</h3>
+                <p>Set <code>SensitivityAI__Enabled=true</code> and <code>SensitivityAI__ApiKey=&lt;your-key&gt;</code> as server environment variables, then restart the application. Alternatively, use .NET user-secrets on the Web project. Never place a key in source control.</p>
+            </div>
+        }
+        else
+        {
+            <div class="ai-controls-panel">
+                <div>
+                    <strong>Case being analysed: @(CurrentResult?.Scenario.IsBaseline == false ? "Current adjusted scenario" : "Baseline")</strong>
+                    <span>No scenario name or description is sent.</span>
+                </div>
+                <label class="ai-consent">
+                    <input type="checkbox" @bind="AiConsentGiven" disabled="@IsGeneratingAiAnalysis" />
+                    <span>I consent to sending the disclosed calculated data to Google Gemini for this assessment session.</span>
+                </label>
+                <div class="ai-buttons">
+                    <button type="button" class="btn btn-sm btn-primary"
+                            disabled="@(!AiConsentGiven || IsGeneratingAiAnalysis)"
+                            @onclick="GenerateAiAnalysisAsync">
+                        @if (IsGeneratingAiAnalysis)
+                        {
+                            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span>Generating…</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-stars"></i>
+                            <span>@(AiAnalysis?.IsSuccess == true ? "Regenerate" : "Generate AI Analysis")</span>
+                        }
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            disabled="@(AiAnalysis is null && !IsGeneratingAiAnalysis)"
+                            @onclick="ClearAiAnalysis">
+                        Clear AI analysis
+                    </button>
+                </div>
+            </div>
+
+            @if (IsGeneratingAiAnalysis)
+            {
+                <div class="sensitivity-state compact" role="status">
+                    <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                    <span>Gemini is interpreting the calculated result…</span>
+                </div>
+            }
+            else if (AiAnalysis is null)
+            {
+                <div class="sensitivity-state compact">Give explicit consent, then generate an advisory analysis of the current case.</div>
+            }
+            else if (!AiAnalysis.IsSuccess)
+            {
+                <div class="sensitivity-alert red" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    <div>
+                        <strong>AI analysis unavailable</strong>
+                        <span>@AiAnalysis.UserMessage Reference: @AiAnalysis.CorrelationId</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="ai-summary">
+                    <h3>Executive summary</h3>
+                    <p>@AiAnalysis.ExecutiveSummary</p>
+                </div>
+                <div class="table-responsive ai-table-wrap">
+                    <table class="table sensitivity-table ai-table">
+                        <caption>Generated @AiAnalysis.GeneratedAtUtc?.ToLocalTime().ToString("g") by @AiAnalysis.Provider / @AiAnalysis.Model. Advisory output; not saved.</caption>
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Area</th>
+                                <th>Severity</th>
+                                <th>Finding</th>
+                                <th>Authoritative Evidence</th>
+                                <th>Recommended Action</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var finding in AiAnalysis.Findings)
+                            {
+                                <tr>
+                                    <td>@finding.Priority</td>
+                                    <td>@finding.Area</td>
+                                    <td><span class="ai-severity @finding.Severity.ToLowerInvariant()">@finding.Severity</span></td>
+                                    <td>@finding.Finding</td>
+                                    <td>@finding.AuthoritativeEvidence</td>
+                                    <td>@finding.RecommendedAction</td>
+                                    <td>@finding.Confidence%</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+
+        <div class="ai-disclaimer">
+            <i class="bi bi-info-circle-fill"></i>
+            <span><strong>Advisory and not saved.</strong> AI recommendations may be incomplete or wrong and must be checked against source records, deterministic calculations and professional judgement.</span>
+        </div>
+    </section>
+    break;
+}
+            }
+</div>
+</section>
+</div>
+</div>
