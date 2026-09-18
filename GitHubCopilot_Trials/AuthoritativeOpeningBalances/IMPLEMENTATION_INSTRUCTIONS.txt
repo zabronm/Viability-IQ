@@ -1,0 +1,68 @@
+AUTHORITATIVE OPENING BALANCES - IMPLEMENTATION
+===============================================
+
+Purpose
+-------
+This package removes duplicate manual stock and depreciation inputs from the Opening
+Balances UI. Detailed Sales Category, loan and asset records are authoritative.
+
+Database
+--------
+Back up the database, then run:
+  Files\ViabilityIQ.Modules\Database_Sql\AssessmentOpeningBalances.sql
+
+The script adds four non-negative opening balance columns to tblAssessments:
+- OpeningOtherCurrentAssets
+- OpeningOtherCurrentLiabilities
+- OpeningVatPayable
+- OpeningVatRefundable
+
+Application
+-----------
+Copy all files beneath Files to matching solution paths and build ViabilityIQ.sln.
+
+Opening balance behavior
+------------------------
+Read-only calculated totals:
+- Stock, debtors and creditors from active Sales Categories
+- Loan balance from active assessment loans
+- Gross fixed assets and accumulated depreciation from active assets
+- Net fixed assets from gross value less accumulated depreciation
+- Projected depreciation from the asset depreciation engine
+
+Direct inputs:
+- Opening bank balance (negative values represent an overdraft)
+- Overdraft interest rate
+- Other current assets
+- Other current liabilities
+- Opening VAT payable
+- Opening VAT refundable
+
+Projection treatment:
+- VAT payable is a Month 1 cash outflow.
+- VAT refundable is a Month 1 cash inflow.
+- Other current assets and liabilities remain on the projected balance sheet.
+- Opening equity remains the automatic balancing net-assets amount.
+
+Assumptions resources
+---------------------
+The Assumptions page now exposes:
+- Assessment-specific printable report (Print / Save PDF)
+- CSV data-collection template
+- Readiness-rules reference
+- PDF help guide
+
+Verification
+------------
+1. Confirm calculated balances agree to their detailed records.
+2. Confirm the calculated controls cannot be edited.
+3. Save all six direct inputs and reload the page.
+4. Confirm opening VAT changes Month 1 closing cash.
+5. Confirm other current assets/liabilities appear in the Balance Sheet.
+6. Open the assumptions report and use Print / Save PDF.
+7. Download the CSV and readiness-rules resources.
+
+Build evidence
+--------------
+Integrated isolated solution build: 0 errors.
+The solution reported 121 existing warnings.

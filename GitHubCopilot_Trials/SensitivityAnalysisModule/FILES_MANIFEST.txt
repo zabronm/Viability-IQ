@@ -1,0 +1,22 @@
+SENSITIVITY ANALYSIS MODULE — FILES MANIFEST
+Generated: 2026-09-17
+
+NEW
+Files\ViabilityIQ.Shared\FinancialModels\SensitivityAnalysisModels.cs
+Files\ViabilityIQ.Database\Interfaces\ISensitivityAnalysisService.cs
+Files\ViabilityIQ.Database\FinancialCalculations\SensitivityAnalysisService.cs
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor.cs
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor.css
+
+REPLACED / MERGED FROM AUTHORITATIVE INTEGRATED BASELINE
+Files\ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+  Registers ISensitivityAnalysisService.
+Files\ViabilityIQ.Web\Components\Layout\MainLayout_Assessment.razor
+  Adds assessment-aware navigation immediately after Assessment Reports.
+
+PACKAGE DOCUMENTATION
+DEPLOYMENT_INSTRUCTIONS.txt
+FILES_MANIFEST.txt
+
+No database scripts, migrations, third-party dependencies, or AI functionality.

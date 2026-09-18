@@ -1,0 +1,58 @@
+﻿ASSESSMENT REPORTING FRAMEWORK - FILES MANIFEST
+Generated: 2026-09-17
+
+Legend: NEW = copy; REPLACE = review then replace; MERGE = apply manual snippet only.
+
+NEW      ViabilityIQ.Database\Interfaces\IAssessmentReportService.cs
+         Size: 600 bytes | SHA256: B8090EBFB0386F98C304DA71F1D075DA03F96BA11011920185935568BA91B697
+REPLACE  ViabilityIQ.Database\Interfaces\IEmailReportingService.cs
+         Size: 354 bytes | SHA256: 85F98259B46CDD47AB7D0A4568B2127A1B7136E5C17147E43995D813F47B51CC
+NEW      ViabilityIQ.Database\Reporting\AssessmentReportService.cs
+         Size: 24967 bytes | SHA256: C5A133E748E7CE2469A9E2944E91B38C096347D603A5221BE33DE5462E9EA32B
+NEW      ViabilityIQ.Database\Reporting\OpenXmlReportWorkbookWriter.cs
+         Size: 11631 bytes | SHA256: 6CEBC7AA8111232DBA5ABE010B553325BE7D0C041CD4E80D64EE66F3AC50A3F8
+NEW      ViabilityIQ.Infrastructure\Data\Migrations\20260917_CreateReportActivity.sql
+         Size: 2262 bytes | SHA256: 89509233D8C2B33AE5C3803DEA2861D0B114A4EC407BBB5C02106F89D55D80FD
+REPLACE  ViabilityIQ.Infrastructure\Reporting\EmailReportingService.cs
+         Size: 4564 bytes | SHA256: 89843E6A65B12A8FC38489665A9A491FEEB40377A38435D2749F9BC7903077DD
+NEW      ViabilityIQ.Infrastructure\Reporting\ReportActivityRepository.cs
+         Size: 2695 bytes | SHA256: E9176277E461A4638F4FA299DEBBA1493B88633A4711C8991A0230471D3D5454
+NEW      ViabilityIQ.Shared\Reporting\ReportCatalogue.cs
+         Size: 1695 bytes | SHA256: 916BC6B50E473C2D6B56678FE525DA7A5BDA9A8BF6F7C0DC01E7412FF81513A4
+NEW      ViabilityIQ.Shared\Reporting\ReportModels.cs
+         Size: 2804 bytes | SHA256: 2A1428B0358BE4B315EAFD76D0F06A2C3728A9290393925F8AEB50D9952DF6EA
+REPLACE  ViabilityIQ.Shared\SharedModels\EmailReportRequest.cs
+         Size: 735 bytes | SHA256: 97AA86CEB1381C22583E47DBD607693B89A84E724A0AC6798A82731B57B80480
+REPLACE  ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor
+         Size: 4305 bytes | SHA256: F36B1B395832A6C7FAEA04E03CF85C1F8C99B10D04F8DC2AF475B21948BC36FC
+REPLACE  ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor.cs
+         Size: 9829 bytes | SHA256: D34CF48E547CFDD500A710E1461A238D928E75CD36EF8A0FB38E05788D76E2C9
+NEW      ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor.css
+         Size: 3358 bytes | SHA256: C35A01A8F518B552275106BE6B007D4217D9A6C1E445803B4F062FA448DD7B29
+NEW      ViabilityIQ.Web\Components\Reporting\AssessmentReportRenderer.razor
+         Size: 4741 bytes | SHA256: A4913FFD5F66FE8A7B7BA8E814E4E247299FD54623BF8CA4C19228DB48DE9913
+NEW      ViabilityIQ.Web\Components\Reporting\AssessmentReportRenderer.razor.css
+         Size: 3544 bytes | SHA256: 2B43EE2A2FDD6AE3355586D5002453FD9B1ECF7F93730A7FBED62AA485BE3E7A
+NEW      ViabilityIQ.Web\Components\Reporting\EmailReportSubmitRequest.cs
+         Size: 149 bytes | SHA256: 0C40BE283101A11C7AA38A0DD228710CC14084B4409087CBAC7AAC2ECA6E2363
+NEW      ViabilityIQ.Web\Components\Reporting\ReportEmailModal.razor
+         Size: 4017 bytes | SHA256: FB7A28B0E53E6CD1D38B2C43D081665EDEC717551ECA196898FD85DE9E9D561E
+NEW      ViabilityIQ.Web\Components\Reporting\ReportEmailModal.razor.css
+         Size: 1245 bytes | SHA256: 4B8137A534434E90EA4BEEDF3BC7AAA915B95D851767808A71B51FE9C62C27F0
+NEW      ViabilityIQ.Web\Components\Reporting\ReportOutputMenu.razor
+         Size: 2109 bytes | SHA256: 59B0E353348B44105EA1991022792294BB4A3249EC2155F67925B448E80DBA2F
+NEW      ViabilityIQ.Web\Components\Reporting\ReportOutputMenu.razor.css
+         Size: 310 bytes | SHA256: CC5E786DE7A7A6DEA0B66B38A7BF5912A06F52B0ECFB9FAE7C4B50F2DE96B5C5
+NEW      ViabilityIQ.Web\wwwroot\scripts\reportOutput.js
+         Size: 2401 bytes | SHA256: 5A64DB87AD5E9FCDCFA195033B8AF7D610C914FFED51E29F8229246FEB84D605
+
+MERGE    ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+MERGE    ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+MERGE    ViabilityIQ.Web\Components\App.razor
+MERGE    appsettings/environment configuration (no secrets in package)
+
+Package documents:
+DEPLOYMENT_INSTRUCTIONS.txt
+MANUAL_EXISTING_FILE_MERGE.txt
+VALIDATION_RESULTS.txt
+FILES_MANIFEST.txt
