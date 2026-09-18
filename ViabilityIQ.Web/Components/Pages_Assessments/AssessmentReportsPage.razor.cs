@@ -1,190 +1,337 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Collections.Generic;
-using System.Reflection.Metadata;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Shared.Reporting;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Components.Reporting;
 
-namespace ViabilityIQ.Web.Components.Pages_Assessments
+namespace ViabilityIQ.Web.Components.Pages_Assessments;
+
+public partial class AssessmentReportsPage
 {
-    public partial class AssessmentReportsPage
+    [Parameter] public long AssessmentId { get; set; }
+    [Inject] private IAssessmentReportService Reports { get; set; } = default!;
+    [Inject] private IReportWorkbookWriter Workbooks { get; set; } = default!;
+    [Inject] private IActivityLogWriter ActivityLog { get; set; } = default!;
+    [Inject] private IEmailReportingService Email { get; set; } = default!;
+    [Inject] private ISessionService Session { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private ILogger<AssessmentReportsPage> Logger { get; set; } = default!;
+
+    private ReportType SelectedType { get; set; } = ReportType.AssessmentSummary;
+    private ReportDocument? Document { get; set; }
+    private int StartMonth { get; set; } = 1;
+    private int EndMonth { get; set; } = 12;
+    private bool IsLoading { get; set; }
+    private bool IsPdfBusy { get; set; }
+    private bool IsExcelBusy { get; set; }
+    private bool IsEmailBusy { get; set; }
+    private bool ShowEmail { get; set; }
+    private bool EmailSucceeded { get; set; }
+    private string? EmailStatus { get; set; }
+    private string? ErrorMessage { get; set; }
+    private string? AuditWarning { get; set; }
+    private long _loadedAssessmentId;
+    private string ReportElementId => $"assessment-report-{AssessmentId}";
+    private string ProjectedPeriodLabel => StartMonth <= EndMonth
+        ? ProjectPeriodMapper.GetRangeLabel(Document?.AssessmentStartDate, StartMonth, EndMonth)
+        : $"M-{StartMonth} – M-{EndMonth}";
+
+    protected override async Task OnParametersSetAsync()
     {
-        [Parameter] public long AssessmentId { get; set; }
+        if (_loadedAssessmentId == AssessmentId) return;
+        _loadedAssessmentId = AssessmentId;
+        await GenerateAsync();
+    }
 
-        private Dictionary<string, List<ReportDefinition>> GroupedReports { get; set; } = new();
-        private ReportDefinition? SelectedReport { get; set; }
-        private Dictionary<string, string> ParameterValues { get; set; } = new();
+    private async Task SelectReportAsync(ReportType type)
+    {
+        SelectedType = type;
+        await GenerateAsync();
+    }
 
-        private bool IsLoading { get; set; } = false;
-        private bool HasGenerated { get; set; } = false;
-
-        // Strong typed model representation for the data table
-        private List<ReportRowModel> MockReportItems { get; set; } = new();
-
-        protected override void OnInitialized()
+    private async Task GenerateAsync()
+    {
+        if (StartMonth > EndMonth)
         {
-            LoadReportMetadataDefinitions();
+            ErrorMessage = "The start month must not be after the end month.";
+            return;
         }
-
-        private void LoadReportMetadataDefinitions()
+        IsLoading = true;
+        ErrorMessage = null;
+        AuditWarning = null;
+        try
         {
-            var rawList = new List<ReportDefinition>
-        {
-            new ReportDefinition
-            {
-                Id = "SALES_PERF",
-                Name = "Sales Performance Ledger",
-                Category = "Operational Trading & Performance",
-                Description = "Evaluates chronological trading margins, volume velocities, and turnover benchmarks.",
-                Parameters = new() {
-                    new() { Key = "StartDate", Label = "Start Date Range", Type = ReportParameterType.Date },
-                    new() { Key = "EndDate", Label = "End Date Range", Type = ReportParameterType.Date }
-                }
-            },
-            new ReportDefinition
-            {
-                Id = "EXPENSE_ANALYSIS",
-                Name = "Operational Expense Breakdown",
-                Category = "Operational Trading & Performance",
-                Description = "Granular distribution trace mapping across cost centers and dynamic discretionary spending outlays.",
-                Parameters = new() {
-                    new() { Key = "StartDate", Label = "Start Date Range", Type = ReportParameterType.Date },
-                    new() { Key = "EndDate", Label = "End Date Range", Type = ReportParameterType.Date }
-                }
-            },
-            new ReportDefinition
-            {
-                Id = "BALANCE_SHEET",
-                Name = "Statement of Financial Position (Balance Sheet)",
-                Category = "Financial Position & Structure",
-                Description = "Captures static snapshots of corporate infrastructure equity balances, assets, and operational liabilities.",
-                Parameters = new() {
-                    new() { Key = "AsAtDate", Label = "Reporting Threshold Date (As At)", Type = ReportParameterType.Date }
-                }
-            },
-            new ReportDefinition
-            {
-                Id = "VAT_LEDGER",
-                Name = "Value Added Tax (VAT) Reconciliation Matrix",
-                Category = "Statutory Compliance & Audits",
-                Description = "Validates output statutory collection logs against verifiable baseline vendor input expense claims.",
-                Parameters = new() {
-                    new() { Key = "PeriodYear", Label = "Tax Assessment Year", Type = ReportParameterType.Number },
-                    new() { Key = "FilingPeriod", Label = "Period Reference Code", Type = ReportParameterType.Text }
-                }
-            }
-        };
-
-            // Regroup into clean categorizations for the dropdown loop
-            GroupedReports = rawList.GroupBy(r => r.Category).ToDictionary(g => g.Key, g => g.ToList());
+            Document = await Reports.BuildAsync(AssessmentId, SelectedType, StartMonth, EndMonth);
+            await AuditAsync(
+                ActivityAction.View,
+                null,
+                true,
+                "Generated assessment report.",
+                null,
+                null,
+                Guid.NewGuid());
         }
-
-        private void OnReportSelected(ChangeEventArgs e)
+        catch (Exception exception)
         {
-            HasGenerated = false;
-            ParameterValues.Clear();
+            Document = null;
+            ErrorMessage = "The report could not be generated. Verify the assessment baseline and try again.";
+            Logger.LogError(exception, "Report generation failed for assessment {AssessmentId}", AssessmentId);
+            await AuditAsync(
+                ActivityAction.View,
+                null,
+                false,
+                "Assessment report generation failed.",
+                "Generation",
+                null,
+                Guid.NewGuid());
+        }
+        finally { IsLoading = false; }
+    }
 
-            string selectedId = e.Value?.ToString() ?? string.Empty;
-            SelectedReport = GroupedReports.Values.SelectMany(r => r).FirstOrDefault(r => r.Id == selectedId);
+    private async Task ExportPdfAsync()
+    {
+        if (Document is null) return;
+        IsPdfBusy = true;
+        AuditWarning = null;
+        var correlationId = Guid.NewGuid();
+        try
+        {
+            await JS.InvokeVoidAsync("viqReportOutput.printElement",
+                $"#{ReportElementId}", Document.Definition.Name, Document.Definition.Landscape);
+            await AuditAsync(
+                ActivityAction.Print,
+                ReportOutputFormat.Pdf,
+                true,
+                "Opened report PDF print preview.",
+                null,
+                null,
+                correlationId);
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = "The PDF print preview could not be opened.";
+            Logger.LogError(exception, "Report print failed for assessment {AssessmentId}", AssessmentId);
+            await AuditAsync(
+                ActivityAction.Print,
+                ReportOutputFormat.Pdf,
+                false,
+                "Report PDF print preview failed.",
+                "ClientPrint",
+                null,
+                correlationId);
+        }
+        finally { IsPdfBusy = false; }
+    }
 
-            if (SelectedReport != null)
+    private async Task ExportExcelAsync()
+    {
+        if (Document is null) return;
+        IsExcelBusy = true;
+        AuditWarning = null;
+        var correlationId = Guid.NewGuid();
+        try
+        {
+            var bytes = Workbooks.Write(Document);
+            await JS.InvokeVoidAsync("viqReportOutput.downloadBase64", FileName(Document),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                Convert.ToBase64String(bytes));
+            await AuditAsync(
+                ActivityAction.Export,
+                ReportOutputFormat.Excel,
+                true,
+                "Exported report workbook.",
+                null,
+                null,
+                correlationId);
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = "The Excel workbook could not be created.";
+            Logger.LogError(exception, "Report Excel export failed for assessment {AssessmentId}", AssessmentId);
+            await AuditAsync(
+                ActivityAction.Export,
+                ReportOutputFormat.Excel,
+                false,
+                "Report workbook export failed.",
+                "Workbook",
+                null,
+                correlationId);
+        }
+        finally { IsExcelBusy = false; }
+    }
+
+    private Task OpenEmail()
+    {
+        EmailStatus = null;
+        EmailSucceeded = false;
+        ShowEmail = true;
+        return Task.CompletedTask;
+    }
+
+    private Task CloseEmail()
+    {
+        if (!IsEmailBusy) ShowEmail = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task SendEmailAsync(EmailReportSubmitRequest request)
+    {
+        if (Document is null) return;
+        IsEmailBusy = true;
+        EmailStatus = null;
+        EmailSucceeded = false;
+        AuditWarning = null;
+        var correlationId = Guid.NewGuid();
+        string? maskedRecipient = null;
+        try
+        {
+            var address = new MailAddress(request.Recipient);
+            maskedRecipient = Mask(address.Address);
+            var bytes = Workbooks.Write(Document);
+            var result = await Email.SendReportAsync(new EmailReportRequest
             {
-                foreach (var param in SelectedReport.Parameters)
+                RecipientAddress = address.Address,
+                SubjectTitle = request.Subject,
+                MessageBodyText = BuildHtmlBody(request.Message, Document),
+                AttachmentBytes = bytes,
+                AttachmentName = FileName(Document),
+                AttachmentContentType =
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                AttachmentFormat = "Excel"
+            });
+            EmailSucceeded = result.Succeeded;
+            EmailStatus = result.Succeeded
+                ? $"Email sent. Reference: {result.Reference}"
+                : $"{result.ErrorMessage} Reference: {result.Reference}";
+            await AuditAsync(
+                ActivityAction.Share,
+                ReportOutputFormat.Excel,
+                result.Succeeded,
+                result.Succeeded ? "Shared report by email." : "Report email delivery failed.",
+                result.ErrorCategory,
+                maskedRecipient,
+                correlationId);
+        }
+        catch (FormatException)
+        {
+            EmailStatus = "Enter a valid recipient email address.";
+            await AuditAsync(
+                ActivityAction.Share,
+                ReportOutputFormat.Excel,
+                false,
+                "Report email validation failed.",
+                "Validation",
+                maskedRecipient,
+                correlationId);
+        }
+        catch (Exception exception)
+        {
+            EmailStatus = "The email could not be prepared.";
+            Logger.LogError(exception, "Report email preparation failed for assessment {AssessmentId}", AssessmentId);
+            await AuditAsync(
+                ActivityAction.Share,
+                ReportOutputFormat.Excel,
+                false,
+                "Report email preparation failed.",
+                "Preparation",
+                maskedRecipient,
+                correlationId);
+        }
+        finally { IsEmailBusy = false; }
+    }
+
+    private async Task<bool> AuditAsync(
+        ActivityAction action,
+        ReportOutputFormat? format,
+        bool succeeded,
+        string remarks,
+        string? errorCategory,
+        string? recipient,
+        Guid correlationId)
+    {
+        try
+        {
+            var definition = Document?.Definition ?? ReportCatalogue.Get(SelectedType);
+            await ActivityLog.RecordAsync(new ActivityLogWriteRequest
+            {
+                Action = action,
+                EntityType = ActivityEntityType.Report.ToString(),
+                EntityId = AssessmentId,
+                EntityName = definition.Name,
+                AssessmentId = AssessmentId,
+                AssessmentName = Document?.EntityName
+                    ?? Document?.AssessmentReference
+                    ?? Session.CaseNumber
+                    ?? Session.BusinessName,
+                Module = "Assessment Reports",
+                Page = $"/assessment/reports/{AssessmentId}",
+                Remarks = remarks,
+                Metadata = new
                 {
-                    ParameterValues[param.Key] = param.DefaultValue ?? string.Empty;
+                    reportCode = definition.Code,
+                    reportVersion = definition.Version,
+                    reportScope = definition.Scope.ToString(),
+                    outputFormat = format?.ToString(),
+                    startMonth = StartMonth,
+                    endMonth = EndMonth,
+                    succeeded,
+                    recipientMasked = recipient,
+                    errorCategory,
+                    operationCorrelationId = correlationId
                 }
-            }
-        }
-
-        // Improvement 3: Check that all required parameters possess entered text values
-        private bool IsConfigurationValid()
-        {
-            if (SelectedReport == null) return false;
-            foreach (var param in SelectedReport.Parameters)
-            {
-                if (param.IsRequired && (!ParameterValues.ContainsKey(param.Key) || string.IsNullOrWhiteSpace(ParameterValues[param.Key])))
-                {
-                    return false;
-                }
-            }
+            });
             return true;
         }
-
-        // Improvement 2: Fast Quick-Click Calculation Procedures
-        private void ApplyCurrentMonthRange()
+        catch (Exception exception)
         {
-            ParameterValues["StartDate"] = new DateTime(2026, 06, 01).ToString("yyyy-MM-dd");
-            ParameterValues["EndDate"] = new DateTime(2026, 06, 30).ToString("yyyy-MM-dd");
-        }
-
-        private void ApplyCurrentQuarterRange()
-        {
-            ParameterValues["StartDate"] = new DateTime(2026, 04, 01).ToString("yyyy-MM-dd");
-            ParameterValues["EndDate"] = new DateTime(2026, 06, 30).ToString("yyyy-MM-dd");
-        }
-
-        private void ApplyFullFinancialYear()
-        {
-            ParameterValues["StartDate"] = new DateTime(2026, 01, 01).ToString("yyyy-MM-dd");
-            ParameterValues["EndDate"] = new DateTime(2026, 12, 31).ToString("yyyy-MM-dd");
-        }
-
-        private string GetParamValue(string key) => ParameterValues.ContainsKey(key) ? ParameterValues[key] : string.Empty;
-        private void SetParamValue(string key, string? value) => ParameterValues[key] = value ?? string.Empty;
-
-        private void ClearFilters()
-        {
-            HasGenerated = false;
-            if (SelectedReport != null)
-            {
-                foreach (var param in SelectedReport.Parameters) ParameterValues[param.Key] = string.Empty;
-            }
-        }
-
-        private async Task GenerateReport()
-        {
-            IsLoading = true;
-            HasGenerated = false;
-
-            await Task.Delay(600); // Compute cycle lag mock
-
-            // Seed concrete typed list models to bind straight into downstream exports
-            MockReportItems = new List<ReportRowModel>
-        {
-            new() { LedgerCode = "GL-4001-Z01", Description = "Primary System Stream Balance Allocation", BaseAmount = 1245000.00, Variance = 42500.00 },
-            new() { LedgerCode = "GL-5082-A12", Description = "Fixed Indirect Overhead Adjustments", BaseAmount = 412800.00, Variance = -11200.00 },
-            new() { LedgerCode = "GL-7120-X09", Description = "Logistical Distribution Clearing Index", BaseAmount = 184500.00, Variance = 3400.00 }
-        };
-
-            IsLoading = false;
-            HasGenerated = true;
-        }
-
-        // Secondary structural helper wrappers
-        public enum ReportParameterType { Date, Number, Text }
-
-        public class ParameterDefinition
-        {
-            public string Key { get; set; } = string.Empty;
-            public string Label { get; set; } = string.Empty;
-            public ReportParameterType Type { get; set; }
-            public bool IsRequired { get; set; } = true;
-            public string? DefaultValue { get; set; }
-        }
-
-        public class ReportDefinition
-        {
-            public string Id { get; set; } = string.Empty;
-            public string Name { get; set; } = string.Empty;
-            public string Category { get; set; } = string.Empty;
-            public string Description { get; set; } = string.Empty;
-            public List<ParameterDefinition> Parameters { get; set; } = new();
-        }
-
-        public class ReportRowModel
-        {
-            public string LedgerCode { get; set; } = string.Empty;
-            public string Description { get; set; } = string.Empty;
-            public double BaseAmount { get; set; }
-            public double Variance { get; set; }
+            AuditWarning = "The report operation completed, but activity logging was unavailable.";
+            Logger.LogWarning(
+                exception,
+                "Activity logging failed for report {ReportCode}, action {Action}, assessment {AssessmentId}, correlation {CorrelationId}",
+                Document?.Definition.Code ?? ReportCatalogue.Get(SelectedType).Code,
+                action,
+                AssessmentId,
+                correlationId);
+            return false;
         }
     }
+
+    private static string FileName(ReportDocument document) =>
+        $"{document.Definition.Code}_{document.AssessmentId}_{document.GeneratedAtUtc:yyyyMMdd_HHmm}.xlsx";
+    private static string Mask(string address)
+    {
+        if (string.IsNullOrWhiteSpace(address)) return "***";
+
+        var separator = address.LastIndexOf('@');
+        if (separator <= 0 || separator == address.Length - 1) return "***";
+
+        var local = address[..separator];
+        var domain = address[(separator + 1)..];
+        return $"{local[0]}***@{domain}";
+    }
+    private static string BuildHtmlBody(string message, ReportDocument document)
+    {
+        var safeMessage = WebUtility.HtmlEncode(message).Replace(Environment.NewLine, "<br/>");
+        var metrics = document.Sections.SelectMany(x => x.Metrics).Take(12);
+        var rows = string.Join("", metrics.Select(x =>
+            $"<tr><td style='padding:6px;border-bottom:1px solid #ddd'>{WebUtility.HtmlEncode(x.Label)}</td>" +
+            $"<td style='padding:6px;border-bottom:1px solid #ddd;text-align:right'><b>{WebUtility.HtmlEncode(x.DisplayValue)}</b></td></tr>"));
+        return $"<div style='font-family:Segoe UI,Arial;color:#263f51'><h2>{WebUtility.HtmlEncode(document.Definition.Name)}</h2>" +
+            $"<p>{safeMessage}</p><p><b>{WebUtility.HtmlEncode(document.EntityName ?? document.AssessmentReference)}</b><br/>" +
+            $"{WebUtility.HtmlEncode(document.ReportingPeriod)} · {WebUtility.HtmlEncode(document.ReadinessStatus)}</p>" +
+            $"<table style='border-collapse:collapse'>{rows}</table><p style='font-size:11px;color:#667'>The attached .xlsx contains the complete report.</p></div>";
+    }
+
+    private static string IconFor(ReportType type) => type switch
+    {
+        ReportType.AssessmentSummary => "bi bi-journal-richtext",
+        ReportType.ProfitAndLoss => "bi bi-graph-up-arrow",
+        ReportType.Cashflow => "bi bi-cash-stack",
+        ReportType.BalanceSheet => "bi bi-columns-gap",
+        _ => "bi bi-file-earmark"
+    };
 }

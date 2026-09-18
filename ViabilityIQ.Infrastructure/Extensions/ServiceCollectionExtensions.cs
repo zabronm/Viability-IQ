@@ -18,20 +18,25 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
         services.AddScoped<MasterDataService>();
 
+        //=========== REPORTING AND EMAIL SERVICES ===========
         services.AddScoped<IExcelEPPlusExportService, ExcelEPPlusExportService>();
         services.AddScoped<IEmailReportingService, EmailReportingService>();
         services.AddScoped<IPdfExportService, PdfExportService>();
 
+        //=========== GENERIC DATA HANDLING REPOSITORIES ===========
         services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));
         services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));
 
+        //=========== CASH FLOW REPOSITORIES ===========
         services.AddScoped<ICashflowRepository, CashflowRepository>();
         services.AddScoped<IDebtorsCreditorsRepository, DebtorsCreditorsRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IVatAdjustmentRepository, VatAdjustmentRepository>();
 
+        //=========== ACTIVITY LOG REPOSITORIES ===========
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
+
         services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
         services.AddScoped<IKPIRepository, KPIRepository>();
         services.AddScoped<IAlertRepository, AlertRepository>();

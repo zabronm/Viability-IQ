@@ -1,0 +1,5 @@
+.report-output-menu .dropdown-menu { min-width: 13rem; border: 1px solid #dce7ed; }
+.report-output-menu .dropdown-item { color: #173650; font-size: .74rem; padding: .5rem .8rem; }
+.report-output-menu .dropdown-item i { color: #0f8c8c; }
+@media print { .report-output-menu { display: none !important; } }
+

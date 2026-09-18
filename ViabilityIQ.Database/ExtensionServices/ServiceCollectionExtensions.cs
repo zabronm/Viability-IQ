@@ -5,6 +5,7 @@ using Polly.Extensions.Http;
 using ViabilityIQ.Application.FinancialCalculations;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Projections;
+using ViabilityIQ.Application.Reporting;
 
 namespace ViabilityIQ.Application.ExtensionServices
 {
@@ -62,6 +63,8 @@ namespace ViabilityIQ.Application.ExtensionServices
 
             services.Configure<SensitivityAiOptions>(configuration.GetSection(SensitivityAiOptions.SectionName));
 
+
+            //============= AI SENSITIVITY ANALYSIS SERVICE =============
             services.AddHttpClient<ISensitivityAiAnalysisService, GeminiSensitivityAiAnalysisService>(
                 (serviceProvider, client) =>
                 {
@@ -87,6 +90,13 @@ namespace ViabilityIQ.Application.ExtensionServices
                             //    outcome.Result?.StatusCode.ToString() ?? outcome.Exception?.Message,
                             //    timespan.TotalSeconds);
                         }));
+
+
+            //=============== REPORTING SERVICES ===============
+            services.AddScoped<IAssessmentReportService, AssessmentReportService>();
+            services.AddSingleton<IReportWorkbookWriter, OpenXmlReportWorkbookWriter>();
+
+
 
             return services;
         }

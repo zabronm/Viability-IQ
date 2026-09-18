@@ -1,71 +1,102 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.SharedModels;
 
-namespace ViabilityIQ.Infrastructure.Reporting
+namespace ViabilityIQ.Infrastructure.Reporting;
+
+public sealed class EmailReportingService : IEmailReportingService
 {
-    public class EmailReportingService: IEmailReportingService
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<EmailReportingService> _logger;
+
+    public EmailReportingService(
+        IConfiguration configuration,
+        ILogger<EmailReportingService> logger)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+        _logger = logger;
+    }
 
-        public EmailReportingService(IConfiguration configuration)
+    public async Task<EmailDeliveryResult> SendReportAsync(
+        EmailReportRequest payload, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(payload);
+        var reference = Guid.NewGuid().ToString("N");
+        try
         {
-            _configuration = configuration;
+            var recipient = new MailAddress(payload.RecipientAddress);
+            var host = Required("EmailSettings:SmtpServer");
+            var senderAddress = Required("EmailSettings:SenderAddress");
+            var senderPassword = Required("EmailSettings:SenderPassword");
+            if (!int.TryParse(Required("EmailSettings:Port"), out var port) || port is < 1 or > 65535)
+                throw new EmailConfigurationException("EmailSettings:Port is invalid.");
+            if (!bool.TryParse(Required("EmailSettings:EnableSsl"), out var enableSsl))
+                throw new EmailConfigurationException("EmailSettings:EnableSsl must be true or false.");
+
+            using var message = new MailMessage
+            {
+                From = new MailAddress(senderAddress, "ViabilityIQ"),
+                Subject = payload.SubjectTitle,
+                Body = payload.MessageBodyText,
+                IsBodyHtml = true
+            };
+            message.To.Add(recipient);
+
+            if (payload.AttachmentBytes is { Length: > 0 })
+            {
+                if (string.IsNullOrWhiteSpace(payload.AttachmentName)
+                    || string.IsNullOrWhiteSpace(payload.AttachmentContentType))
+                    throw new ArgumentException("Attachment filename and content type are required.");
+                message.Attachments.Add(new Attachment(
+                    new MemoryStream(payload.AttachmentBytes, writable: false),
+                    payload.AttachmentName,
+                    payload.AttachmentContentType));
+            }
+
+            using var client = new SmtpClient(host, port)
+            {
+                Credentials = new NetworkCredential(senderAddress, senderPassword),
+                EnableSsl = enableSsl
+            };
+            await client.SendMailAsync(message).WaitAsync(cancellationToken);
+            _logger.LogInformation("Report email sent with reference {Reference}", reference);
+            return new(true, reference, null, null);
         }
-
-        public async Task<bool> SendSystemReportWithAttachmentAsync(EmailReportRequest payload)
+        catch (EmailConfigurationException exception)
         {
-            try
-            {
-                // 1. Fetch mail server pipeline variables safely from AppSettings configurations
-                string smtpHost = _configuration["EmailSettings:SmtpServer"] ?? "smtp.mailtrap.io";
-                int smtpPort = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
-                string senderMail = _configuration["EmailSettings:SenderAddress"] ?? "noreply@viabilityiq.co.za";
-                string senderPwd = _configuration["EmailSettings:SenderPassword"] ?? string.Empty;
-                bool enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "true");
-
-                // 2. Build the underlying MailMessage envelope structure
-                using var mailMessage = new MailMessage
-                {
-                    From = new MailAddress(senderMail, "ViabilityIQ System Engine"),
-                    Subject = payload.SubjectTitle,
-                    Body = payload.MessageBodyText,
-                    IsBodyHtml = true
-                };
-
-                mailMessage.To.Add(payload.RecipientAddress);
-
-                // 3. Process binary attachment streams if they are present in the incoming payload context
-                if (payload.AttachmentBytes != null && payload.AttachmentBytes.Length > 0)
-                {
-                    var memoryStream = new MemoryStream(payload.AttachmentBytes);
-                    var attachment = new Attachment(memoryStream, payload.AttachmentName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-                    mailMessage.Attachments.Add(attachment);
-                }
-
-                // 4. Instantiate the SMTP Transport Client and transmit the data bundle
-                using var smtpClient = new SmtpClient(smtpHost, smtpPort)
-                {
-                    Credentials = new NetworkCredential(senderMail, senderPwd),
-                    EnableSsl = enableSsl
-                };
-
-                await smtpClient.SendMailAsync(mailMessage);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                // Log the precise physical socket or routing anomaly to the diagnostic logs console
-                Console.WriteLine($"[CRITICAL] Mailing Subsystem Failure: {ex.Message}");
-                throw;
-            }
+            _logger.LogError(exception, "Report email configuration failure {Reference}", reference);
+            return new(false, reference, "Configuration", exception.Message);
+        }
+        catch (FormatException exception)
+        {
+            _logger.LogWarning(exception, "Invalid report email address {Reference}", reference);
+            return new(false, reference, "Validation", "The recipient email address is invalid.");
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("Report email cancelled {Reference}", reference);
+            return new(false, reference, "Cancelled", "Email delivery was cancelled.");
+        }
+        catch (SmtpException exception)
+        {
+            _logger.LogError(exception, "SMTP report delivery failure {Reference}", reference);
+            return new(false, reference, "Delivery", "The mail server rejected or could not deliver the message.");
         }
     }
+
+    public async Task<bool> SendSystemReportWithAttachmentAsync(EmailReportRequest payload) =>
+        (await SendReportAsync(payload)).Succeeded;
+
+    private string Required(string key)
+    {
+        var value = _configuration[key];
+        if (string.IsNullOrWhiteSpace(value))
+            throw new EmailConfigurationException($"{key} is required.");
+        return value;
+    }
+
+    private sealed class EmailConfigurationException(string message) : Exception(message);
 }

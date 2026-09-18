@@ -1,6 +1,6 @@
 .dashboard-workspace {
     min-height: 100vh;
-    background: #f4f7fa;
+    background-color: transparent;        /*  : #f4f7fa;*/
 }
 
 .dashboard-content {

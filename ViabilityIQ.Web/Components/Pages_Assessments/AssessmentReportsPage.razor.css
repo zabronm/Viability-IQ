@@ -1,0 +1,283 @@
+.arp-workspace {
+    background-color: transparent;
+    min-height: 100vh
+}
+
+.arp-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: .55rem 0;
+    margin-top: 0.1rem !important;
+    padding: 1rem 1.2rem;
+    border-radius: .65rem;
+    /*background: linear-gradient(120deg,#DBE9FA,#EBF4FA);*/
+    background-color: #fff;
+    color: #566D7E;
+    /*box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);*/
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .arp-hero::after hover {
+        border-color: #728FCE;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    }
+
+
+    .arp-hero > div > span, .arp-context span, .arp-catalogue header span, .arp-parameters > div span, .arp-toolbar span {
+        display: block;
+        color: #73d5cc;
+        font-size: .56rem;
+        font-weight: 850;
+        letter-spacing: .11em;
+        text-transform: uppercase
+    }
+
+    .arp-hero h1 {
+        margin: .14rem 0;
+        font-size: 1.15rem
+    }
+
+    .arp-hero p {
+        margin: 0;
+        color: #566D7E;
+        background-color: #fff;
+        font-size: .7rem
+    }
+
+.arp-context {
+    min-width: 7rem;
+    padding: .55rem .8rem;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: .45rem
+}
+
+    .arp-context strong {
+        font-size: 1rem
+    }
+
+.arp-layout {
+    display: grid;
+    grid-template-columns: 15rem minmax(0,1fr);
+    gap: .7rem
+}
+
+.arp-catalogue, .arp-main {
+    min-width: 0
+}
+
+.arp-catalogue {
+    overflow: hidden;
+    align-self: start;
+    border: 1px solid #dbe5eb;
+    border-radius: .6rem;
+    background: #fff;
+    box-shadow: 0 0 4px rgba(100, 110, 120, 0.30);    
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .arp-catalogue header {
+        display: flex;
+        justify-content: space-between;
+        padding: .65rem .75rem;
+        border-bottom: 1px solid #e5ecef
+    }
+
+        .arp-catalogue header span {
+            color: #0b7274
+        }
+
+        .arp-catalogue header strong {
+            color: #637988;
+            font-size: .58rem
+        }
+
+    .arp-catalogue:hover {
+        /*border-color: #728FCE;*/
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    }
+
+    .arp-report-card {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 1.7rem 1fr;
+        gap: .45rem;
+        padding: .68rem .65rem;
+        border: 0;
+        border-bottom: 1px solid #edf1f3;
+        background: #fff;
+        color: #29485c;
+        text-align: left
+    }
+
+        .arp-report-card:hover {
+            background: #f4faf9
+        }
+
+        .arp-report-card.active {
+            background: #eaf7f5;
+            box-shadow: inset 3px 0 #0d8b87
+        }
+
+        .arp-report-card i {
+            color: #0d8b87;
+            font-size: .9rem
+        }
+
+        .arp-report-card span {
+            min-width: 0
+        }
+
+        .arp-report-card strong {
+            display: block;
+            font-size: .68rem
+        }
+
+        .arp-report-card small {
+            display: block;
+            margin-top: .15rem;
+            color: #70828e;
+            font-size: .57rem;
+            line-height: 1.35
+        }
+
+    .arp-main {
+        display: grid;
+        gap: .6rem
+    }
+
+.arp-parameters {
+    display: flex;
+    align-items: end;
+    gap: .55rem;
+    padding: .65rem .8rem;
+    border: 1px solid #dce6eb;
+    border-radius: .55rem;
+    background: #fff;
+    box-shadow: 0 0 4px rgba(100, 110, 120, 0.30);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+        .arp-parameters > div {
+            margin-right: auto
+        }
+
+            .arp-parameters > div span {
+                color: #0d7779
+            }
+
+            .arp-parameters > div strong {
+                color: #1b3d53;
+                font-size: .76rem
+            }
+
+        .arp-parameters label {
+            color: #607482;
+            font-size: .56rem;
+            font-weight: 800;
+            text-transform: uppercase
+        }
+
+        .arp-parameters select {
+            min-width: 5rem;
+            margin-top: .18rem
+        }
+
+        .arp-parameters:hover {
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+            /*border-color: #566D7E;*/
+        }
+
+    .arp-container {
+        overflow: hidden;
+        border: 1px solid #d9e4e9;
+        border-radius: .6rem;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(20,57,78,.07)
+    }
+
+    .arp-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .55rem .7rem;
+        border-bottom: 1px solid #dae6ea;
+        background: #f8fbfc
+    }
+
+        .arp-toolbar span {
+            color: #0d8381
+        }
+
+        .arp-toolbar strong {
+            display: block;
+            color: #173b52;
+            font-size: .73rem
+        }
+
+    .arp-state {
+        display: flex;
+        min-height: 14rem;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        border: 1px dashed #cbd9df;
+        border-radius: .55rem;
+        background: #fff;
+        color: #667d8c;
+        font-size: .72rem
+    }
+
+    .arp-error {
+        border-color: #efb8b4;
+        background: #fff8f7;
+        color: #ae2d28
+    }
+
+    .arp-audit-warning {
+        padding: .55rem .7rem;
+        border: 1px solid #f1cf88;
+        border-radius: .45rem;
+        background: #fff9e9;
+        color: #765114;
+        font-size: .65rem
+    }
+
+    @media(max-width:900px) {
+        .arp-layout {
+            grid-template-columns: 1fr
+        }
+
+        .arp-catalogue {
+            display: grid;
+            grid-template-columns: repeat(2,1fr)
+        }
+
+            .arp-catalogue header {
+                grid-column: 1/-1
+            }
+
+        .arp-parameters {
+            flex-wrap: wrap
+        }
+
+            .arp-parameters > div {
+                width: 100%
+            }
+    }
+
+    @media print {
+        .report-screen-only, .arp-hero, .arp-catalogue, .arp-parameters, .arp-audit-warning {
+            display: none !important
+        }
+
+        .arp-layout {
+            display: block
+        }
+
+        .arp-container {
+            border: 0;
+            box-shadow: none
+        }
+    }
