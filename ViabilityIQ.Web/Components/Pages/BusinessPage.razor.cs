@@ -17,7 +17,7 @@ namespace ViabilityIQ.Web.Components.Pages
 {
     public partial class BusinessPage : IAsyncDisposable
     {
-        [Inject] private IGenericDataRepository<BusinessDto> businessRepository { get; set; } = default!;
+        [Inject] private IReadOnlyRepository<BusinessDto, long> businessRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<Business> coreBusinessRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
@@ -34,36 +34,56 @@ namespace ViabilityIQ.Web.Components.Pages
         private string AlertHeading = "Businesses";
         private string AlertMessage = "Register a business before it can be assessed. Supply all relevant details that will assist the assessment to be more accurate.";
 
-        private List<BusinessDto> businessList = new();
         private List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>> tableColumns = new();
+        private ZabDataTableAdvanced<BusinessDto>? businessTable;
 
         private bool loadingStateActive = false;
 
-        protected override async Task OnInitializedAsync()
+        protected override Task OnInitializedAsync()
         {
-            // ✅ Subscribe to OffCanvas callbacks
             OffcanvasService!.OnShow += HandleCanvasShow;
-
-            _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>>
             {
-                new() { Title = "Business Name", Value = x => x.BusinessName ?? "" },
-                new() { Title = "Sector", Value = x => x.BusinessSectorName ?? "" },
-                new() { Title = "Owner", Value = x => x.Client ?? "" },
-                new() { Title = "Reg?", Value = x => x.Registered == true ? "Yes" : "No" },
-                new() { Title = "VAT Reg?", Value = x => x.VATRegistered == true ? "Yes" : "No" },
-                new() { Title = "Province", Value = x => x.ProvinceName ?? "" },
-                new() { Title = "Website", Value = x => x.Website ?? "" },
+                new() {
+                    Title = "Business Name", ServerField = nameof(BusinessDto.BusinessName),
+                    Value = x => x.BusinessName ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Sector", ServerField = nameof(BusinessDto.BusinessSectorName),
+                    Value = x => x.BusinessSectorName ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Owner", ServerField = nameof(BusinessDto.Client),
+                    Value = x => x.Client ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Reg?", ServerField = nameof(BusinessDto.Registered),
+                    Value = x => x.Registered ? "Yes" : "No", Searchable = false
+                },
+                new() {
+                    Title = "VAT Reg?", ServerField = nameof(BusinessDto.VATRegistered),
+                    Value = x => x.VATRegistered ? "Yes" : "No", Searchable = false
+                },
+                new() {
+                    Title = "Province", ServerField = nameof(BusinessDto.ProvinceName),
+                    Value = x => x.ProvinceName ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Website", ServerField = nameof(BusinessDto.Website),
+                    Value = x => x.Website ?? "", Filterable = true
+                },
                 new() {
                     Title = "Status",
+                    ServerField = nameof(BusinessDto.Active),
                     Value = x => x.Active == true ? "Active" : "Inactive",
+                    Searchable = false,
                     UseBadge = true,
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         // ✅ Handle when canvas opens
@@ -72,21 +92,15 @@ namespace ViabilityIQ.Web.Components.Pages
             await Task.CompletedTask;
         }
 
-        private async Task LoadGridDatasetAsync()
-        {
-            loadingStateActive = true;
-            StateHasChanged();
+        private Task<DataTablePage<BusinessDto>> LoadBusinessPageAsync(
+            DataTableQuery query,
+            CancellationToken cancellationToken) =>
+            businessRepository.GetPageAsync(query, cancellationToken);
 
-            try
-            {
-                var resultSet = await businessRepository.GetAllAsync();
-                businessList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<BusinessDto>();
-            }
-            finally
-            {
-                loadingStateActive = false;
-                StateHasChanged();
-            }
+        private Task HandleTableLoadError(Exception exception)
+        {
+            _Toast!.ShowError("Business data could not be loaded. Please retry.", sessionService!.AppTitle);
+            return Task.CompletedTask;
         }
 
         // ✅ Open Business form via service
@@ -114,7 +128,8 @@ namespace ViabilityIQ.Web.Components.Pages
             if (success)
             {
                 _Toast!.ShowSuccess("Business record has been deleted from system.", sessionService!.AppTitle);
-                await LoadGridDatasetAsync();
+                if (businessTable is not null)
+                    await businessTable.RefreshAsync();
             }
         }
 
@@ -124,7 +139,8 @@ namespace ViabilityIQ.Web.Components.Pages
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
-                await LoadGridDatasetAsync();
+                if (businessTable is not null)
+                    await businessTable.RefreshAsync();
             }
             else
             {

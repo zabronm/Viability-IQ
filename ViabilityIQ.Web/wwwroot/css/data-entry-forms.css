@@ -1,0 +1,412 @@
+.viq-form-shell {
+    --viq-form-navy: #172554;
+    --viq-form-slate: #475569;
+    --viq-form-muted: #64748b;
+    --viq-form-line: #dbe4ea;
+    --viq-form-soft: #f7f9fb;
+    --viq-form-marble: #728fce;
+    --viq-form-green: #198754;
+    position: relative;
+    color: #26384a;
+    font-family: Arial, "Segoe UI", sans-serif;
+}
+
+.viq-data-form {
+    display: grid;
+    gap: .75rem;
+}
+
+.viq-form-intro {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .7rem .8rem;
+    border: 1px solid #dbe3f2;
+    border-radius: .6rem;
+    background: linear-gradient(120deg, #f2f5fb, #fff);
+}
+
+.viq-form-intro-icon,
+.viq-form-section-heading > span {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: .45rem;
+    background: #e7edf9;
+    color: #47659d;
+}
+
+.viq-form-intro-icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    font-size: 1rem;
+}
+
+.viq-form-intro h2,
+.viq-form-section-heading h3 {
+    margin: 0;
+    color: var(--viq-form-navy);
+    font-weight: 750;
+}
+
+.viq-form-intro h2 {
+    font-size: .92rem;
+}
+
+.viq-form-intro p,
+.viq-form-section-heading p {
+    margin: .15rem 0 0;
+    color: var(--viq-form-muted);
+    line-height: 1.35;
+}
+
+.viq-form-intro p {
+    font-size: .68rem;
+}
+
+.viq-form-section {
+    overflow: hidden;
+    border: 1px solid var(--viq-form-line);
+    border-radius: .6rem;
+    background: #fff;
+}
+
+.viq-form-section-heading {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .58rem .7rem;
+    border-bottom: 1px solid #e4eaee;
+    background: var(--viq-form-soft);
+}
+
+.viq-form-section-heading > span {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: .78rem;
+}
+
+.viq-form-section-heading h3 {
+    font-size: .76rem;
+}
+
+.viq-form-section-heading p {
+    font-size: .62rem;
+}
+
+.viq-form-grid {
+    display: grid;
+    gap: .65rem .75rem;
+    padding: .75rem;
+}
+
+.viq-form-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.viq-form-span-2 {
+    grid-column: 1 / -1;
+}
+
+.viq-form-field {
+    display: grid;
+    min-width: 0;
+    gap: .22rem;
+}
+
+.viq-form-section > .viq-form-field {
+    padding: .75rem .75rem 0;
+}
+
+.viq-form-field > label {
+    color: var(--viq-form-slate);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+
+.viq-required {
+    color: #c43c35;
+}
+
+.viq-form-control,
+.viq-form-shell .lookup-dropdown-group .form-select {
+    width: 100%;
+    min-height: 2.15rem;
+    margin: 0 !important;
+    padding: .38rem .58rem !important;
+    border: 1px solid #cbd7df !important;
+    border-radius: .4rem !important;
+    outline: 0;
+    background-color: #fff !important;
+    color: #1e293b !important;
+    font-family: inherit;
+    font-size: .95rem !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.viq-form-control:hover,
+.viq-form-shell .lookup-dropdown-group .form-select:hover {
+    border-color: #a9bac5 !important;
+}
+
+.viq-form-control:focus,
+.viq-form-shell .lookup-dropdown-group .form-select:focus {
+    border-color: var(--viq-form-marble) !important;
+    box-shadow: 0 0 0 .18rem rgba(114, 143, 206, .17) !important;
+}
+
+.viq-form-control.invalid,
+.viq-form-shell .lookup-dropdown-group .form-select.is-invalid {
+    border-color: #cf514a !important;
+    background-image: none;
+}
+
+.viq-form-control::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.viq-form-textarea {
+    min-height: 4.7rem;
+    resize: vertical;
+}
+
+.viq-form-validation {
+    color: #b73530;
+    font-size: .62rem;
+    line-height: 1.25;
+}
+
+.viq-form-validation-summary {
+    margin: 0;
+    padding: .55rem .7rem .55rem 2rem;
+    border: 1px solid #efc0bd;
+    border-radius: .45rem;
+    background: #fff7f6;
+    color: #9f2f2a;
+    font-size: .66rem;
+}
+
+.viq-form-validation-summary:empty {
+    display: none;
+}
+
+.viq-toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+    padding: .75rem;
+}
+
+.viq-toggle-card {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+    padding: .62rem .7rem;
+    border: 1px solid #dce5ea;
+    border-radius: .48rem;
+    background: #fbfcfd;
+    cursor: pointer;
+}
+
+.viq-toggle-card:hover {
+    border-color: #b9c8d2;
+    background: #f5f8fa;
+}
+
+.viq-toggle-card > span {
+    display: grid;
+    min-width: 0;
+}
+
+.viq-toggle-card strong {
+    color: #334155;
+    font-size: .68rem;
+}
+
+.viq-toggle-card small {
+    margin-top: .12rem;
+    color: var(--viq-form-muted);
+    font-size: .58rem;
+    line-height: 1.25;
+}
+
+.viq-toggle-card-wide {
+    margin: .65rem .75rem .75rem;
+}
+
+.viq-switch {
+    position: relative;
+    width: 2.35rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+    appearance: none;
+    border: 1px solid #aebbc5;
+    border-radius: 999px;
+    background: #cbd5dc;
+    cursor: pointer;
+    transition: background-color .16s ease, border-color .16s ease;
+}
+
+.viq-switch::before {
+    position: absolute;
+    top: .12rem;
+    left: .13rem;
+    width: .88rem;
+    height: .88rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .25);
+    content: "";
+    transition: transform .16s ease;
+}
+
+.viq-switch:checked {
+    border-color: #167447;
+    background: var(--viq-form-green);
+}
+
+.viq-switch:checked::before {
+    transform: translateX(1.06rem);
+}
+
+.viq-switch:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 .18rem rgba(25, 135, 84, .18);
+}
+
+.viq-form-actions {
+    position: sticky;
+    bottom: -.01rem;
+    z-index: 3;
+    display: flex;
+    justify-content: flex-end;
+    gap: .55rem;
+    padding: .7rem 0 .1rem;
+    border-top: 1px solid var(--viq-form-line);
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: blur(4px);
+}
+
+.viq-button {
+    display: inline-flex;
+    min-height: 2.2rem;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .4rem .85rem;
+    border-radius: .42rem;
+    font-size: .72rem;
+    font-weight: 750;
+    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.viq-button-primary {
+    min-width: 9.5rem;
+    border: 1px solid #198754;
+    background: linear-gradient(90deg, #198754, #157347);
+    color: #fff;
+}
+
+.viq-button-primary:hover:not(:disabled) {
+    border-color: #0f5132;
+    background: linear-gradient(90deg, #157347, #0f5132);
+    box-shadow: 0 .22rem .5rem rgba(15, 81, 50, .22);
+}
+
+.viq-button-secondary {
+    border: 1px solid #c7d2da;
+    background: #fff;
+    color: #526173;
+}
+
+.viq-button-secondary:hover:not(:disabled) {
+    border-color: #9eafb9;
+    background: #f2f5f7;
+    color: #334155;
+}
+
+.viq-button:disabled {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+.viq-form-busy {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    border-radius: .6rem;
+    background: rgba(248, 250, 252, .76);
+    backdrop-filter: blur(1.5px);
+}
+
+.viq-form-busy-card {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .7rem .85rem;
+    border: 1px solid #d5dfe5;
+    border-radius: .5rem;
+    background: #fff;
+    box-shadow: 0 .45rem 1.2rem rgba(15, 23, 42, .12);
+}
+
+.viq-form-busy-card > div {
+    display: grid;
+}
+
+.viq-form-busy-card strong {
+    color: var(--viq-form-navy);
+    font-size: .72rem;
+}
+
+.viq-form-busy-card span {
+    color: var(--viq-form-muted);
+    font-size: .62rem;
+}
+
+.viq-form-spinner {
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 2px solid #dce4f3;
+    border-top-color: var(--viq-form-marble);
+    border-radius: 50%;
+    animation: viq-form-spin .75s linear infinite;
+}
+
+@keyframes viq-form-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 620px) {
+    .viq-form-grid-2,
+    .viq-toggle-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .viq-form-span-2 {
+        grid-column: auto;
+    }
+
+    .viq-form-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .viq-form-shell *,
+    .viq-form-shell *::before {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

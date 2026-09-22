@@ -332,6 +332,7 @@ public partial class AssessmentReportsPage
         ReportType.ProfitAndLoss => "bi bi-graph-up-arrow",
         ReportType.Cashflow => "bi bi-cash-stack",
         ReportType.BalanceSheet => "bi bi-columns-gap",
+        ReportType.Vat => "bi bi-receipt",
         _ => "bi bi-file-earmark"
     };
 }

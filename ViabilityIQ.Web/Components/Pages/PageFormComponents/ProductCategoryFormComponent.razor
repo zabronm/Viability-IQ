@@ -2,75 +2,109 @@
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="zab-form-wrapper mb-4">
+<div class="viq-form-shell">
     @if (isProcessingData)
     {
-        <div class="form-processing-overlay animate-fade-in">
-            <div class="spinner-container-box">
-                <div class="sleek-form-spinner"></div>
-                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Processing product category</strong>
+                    <span>Synchronizing workspace dataset.</span>
+                </div>
             </div>
         </div>
     }
 
-    <EditForm Model="@productCategoryModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="@productCategoryModel" OnValidSubmit="HandleFormSubmissionAsync"
+              class="viq-data-form" aria-label="Product category details">
         <DataAnnotationsValidator />
 
-        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
-
-        <div class="mb-2">
-            <label for="categoryName" class="form-label-custom">Product Category Name <span class="text-danger">*</span></label>
-            <InputText id="categoryName" class="form-control-compact" @bind-Value="productCategoryModel.ProductCategoryName" />
-            <ValidationMessage For="@(() =>productCategoryModel.ProductCategoryName)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label-custom">Income/Revenue Type<span class="text-danger">*</span></label>
-            <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
-                               @bind-Value="productCategoryModel.IncomeTypeId" />
-            <ValidationMessage For="() => productCategoryModel.IncomeTypeId" class="text-danger small" />
-        </div>
-
-        <div class="mb-2">
-            <label for="UoM" class="form-label-custom">Unit Of Measure(Kgs, Meters, etc) <span class="text-danger">*</span></label>
-            <InputText id="UoM" class="form-control-compact" @bind-Value="productCategoryModel.UOM" />
-            <ValidationMessage For="@(() => productCategoryModel.UOM)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-2">
-            <label for="MarkupPC" class="form-label-custom">Markup(%) <span class="text-danger">*</span></label>
-            <InputNumber id="MarkupPC" class="form-control-compact" @bind-Value="productCategoryModel.MarkupPercentage" />
-            <ValidationMessage For="@(() => productCategoryModel.MarkupPercentage)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-2">
-            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="productCategoryModel.Remarks" />
-            <ValidationMessage For="@(() => productCategoryModel.Remarks)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-2 d-flex align-items-center justify-content-start ">
-            <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
-                @(isRowActive ? "Category Active" : "Category Not-Active")
-            </label>
-            <div class="form-check form-switch p-0 m-0 d-flex align-items-center col-2">
-                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-tags" aria-hidden="true"></i></span>
+            <div>
+                <h2>@(ProductCategoryId == 0 ? "New product category" : "Product category details")</h2>
+                <p>Classify products and define their default commercial values.</p>
             </div>
-        </div>       
+        </div>
 
-        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
-            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-tag" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Category information</h3>
+                    <p>Core classification and revenue mapping.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="categoryName">Product category name <span class="viq-required">*</span></label>
+                    <InputText id="categoryName" class="viq-form-control"
+                               @bind-Value="productCategoryModel.ProductCategoryName" />
+                    <ValidationMessage For="@(() =>productCategoryModel.ProductCategoryName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label>Income/revenue type <span class="viq-required">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
+                                       @bind-Value="productCategoryModel.IncomeTypeId" />
+                    <ValidationMessage For="() => productCategoryModel.IncomeTypeId" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="UoM">Unit of measure (kgs, meters, etc.)</label>
+                    <InputText id="UoM" class="viq-form-control"
+                               @bind-Value="productCategoryModel.UOM" />
+                    <ValidationMessage For="@(() => productCategoryModel.UOM)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="MarkupPC">Markup (%)</label>
+                    <InputNumber id="MarkupPC" class="viq-form-control"
+                                 @bind-Value="productCategoryModel.MarkupPercentage" />
+                    <ValidationMessage For="@(() => productCategoryModel.MarkupPercentage)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-card-text" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Administration</h3>
+                    <p>Internal context and category availability.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-field">
+                <label for="remarks">Internal notes and description</label>
+                <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="2"
+                               @bind-Value="productCategoryModel.Remarks" />
+                <ValidationMessage For="@(() => productCategoryModel.Remarks)" class="viq-form-validation" />
+            </div>
+
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span>
+                    <strong>@(isRowActive ? "Category active" : "Category inactive")</strong>
+                    <small>Inactive categories remain available in historical records.</small>
+                </span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
+            </label>
+        </section>
+
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
                 @if (isProcessingData)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span>Saving...</span>
                 }
                 else
                 {
-                    <i class="bi bi-check2-square me-1.5"></i>
+                    <i class="bi bi-check2-square" aria-hidden="true"></i>
                     <span>@(ProductCategoryId == 0 ? "Commit Record" : "Apply Modifications")</span>
                 }
             </button>
-        </div>
+        </footer>
     </EditForm>
 </div>

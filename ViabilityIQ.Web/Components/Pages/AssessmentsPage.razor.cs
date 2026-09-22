@@ -17,7 +17,7 @@ namespace ViabilityIQ.Web.Components.Pages
 {
     public partial class AssessmentsPage : IAsyncDisposable
     {
-        [Inject] private IGenericDataRepository<AssessmentDto> assessmentDtoRepository { get; set; } = default!;
+        [Inject] private IReadOnlyRepository<AssessmentDto, long> assessmentDtoRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<Assessment> coreAssessmentRepository { get; set; } = default!;
         [Inject] private IAssessmentDataValidationService dataValidationService { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -28,38 +28,42 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
-        private List<AssessmentDto> assessmentsList = new();
         private List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>> tableColumns = new();
+        private ZabDataTableAdvanced<AssessmentDto>? assessmentTable;
 
         private bool loadingStateActive = false;
 
-        protected override async Task OnInitializedAsync()
+        protected override Task OnInitializedAsync()
         {
-            // ✅ Subscribe to OffCanvas callbacks
             OffcanvasService!.OnShow += HandleCanvasShow;
-
-            _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>>
             {
-                // COLUMN 1: Case Number Link-Button
                 new() {
                     Title = "Case Number",
+                    ServerField = nameof(AssessmentDto.CaseNumber),
+                    Value = x => x.CaseNumber,
+                    Filterable = true,
                     CellTemplate = context => builder => {
-                        var scopedAssessmentId = context.AssessmentId;
                         builder.OpenElement(0, "button");
                         builder.AddAttribute(1, "class", "btn btn-link p-0 fw-bold text-primary text-decoration-none link-underline-hover border-0 bg-transparent text-start");
                         builder.AddAttribute(2, "style", "font-size: inherit;");
-                        builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => InitializeAndRedirectToSessionAsync(scopedAssessmentId)));
+                        builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => InitializeAndRedirectToSessionAsync(context)));
                         builder.AddContent(4, context.CaseNumber);
                         builder.CloseElement();
                     }
                 },
-                new() { Title = "Case Type", Value = x => x.AssessmentTypeName ?? "" },
+                new() {
+                    Title = "Case Type", ServerField = nameof(AssessmentDto.AssessmentTypeName),
+                    Value = x => x.AssessmentTypeName ?? "", Filterable = true
+                },
                 
                 // COLUMN 2: Business Name Link-Button
                 new() {
                     Title = "Business Name",
+                    ServerField = nameof(AssessmentDto.BusinessName),
+                    Value = x => x.BusinessName,
+                    Filterable = true,
                     CellTemplate = context => builder => {
                         var scopedBusinessId = context.BusinessId;
                         builder.OpenElement(0, "button");
@@ -74,6 +78,9 @@ namespace ViabilityIQ.Web.Components.Pages
                 // COLUMN 3: Business Owner Link-Button
                 new() {
                     Title = "Business Owner",
+                    ServerField = nameof(AssessmentDto.BusinessOwner),
+                    Value = x => x.BusinessOwner,
+                    Filterable = true,
                     CellTemplate = context => builder => {
                         var scopedClientId = context.ClientId;
                         builder.OpenElement(0, "button");
@@ -84,15 +91,24 @@ namespace ViabilityIQ.Web.Components.Pages
                         builder.CloseElement();
                     }
                 },
-                new() { Title = "Start Date", Value = x => x.AssessmentStartDate.ToString("yyyy-MM-dd") },
-                new() { Title = "End Date", Value = x => x.AssessmentFinishDate.ToString("yyyy-MM-dd") },
+                new() {
+                    Title = "Start Date", ServerField = nameof(AssessmentDto.AssessmentStartDate),
+                    Value = x => x.AssessmentStartDate, FormatString = "yyyy-MM-dd", Searchable = false
+                },
+                new() {
+                    Title = "End Date", ServerField = nameof(AssessmentDto.AssessmentFinishDate),
+                    Value = x => x.AssessmentFinishDate, FormatString = "yyyy-MM-dd", Searchable = false
+                },
                 new() {
                     Title = "Status",
+                    ServerField = nameof(AssessmentDto.StatusId),
                     Value = x => GetStatusText(x.StatusId),
+                    Searchable = false,
                     UseBadge = true,
                     BadgeClass = x => GetStatusBadgeClass(x.StatusId)
                 }
             };
+            return Task.CompletedTask;
         }
 
         // ✅ Handle when canvas opens
@@ -101,34 +117,20 @@ namespace ViabilityIQ.Web.Components.Pages
             await Task.CompletedTask;
         }
 
-        private async Task LoadGridDatasetAsync()
-        {
-            loadingStateActive = true;
-            StateHasChanged();
+        private Task<DataTablePage<AssessmentDto>> LoadAssessmentPageAsync(
+            DataTableQuery query,
+            CancellationToken cancellationToken) =>
+            assessmentDtoRepository.GetPageAsync(query, cancellationToken);
 
-            try
-            {
-                var resultSet = await assessmentDtoRepository.GetAllAsync();
-                assessmentsList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<AssessmentDto>();
-            }
-            finally
-            {
-                loadingStateActive = false;
-                StateHasChanged();
-            }
+        private Task HandleTableLoadError(Exception exception)
+        {
+            _Toast!.ShowError("Assessment data could not be loaded. Please retry.", sessionService!.AppTitle);
+            return Task.CompletedTask;
         }
 
         // ✅ Initialize session and redirect to the assessment session page
-        private async Task InitializeAndRedirectToSessionAsync(long assessmentId)
+        private async Task InitializeAndRedirectToSessionAsync(AssessmentDto selectedRecord)
         {
-            var selectedRecord = assessmentsList.FirstOrDefault(x => x.AssessmentId == assessmentId);
-            if (selectedRecord == null)
-            {
-                _Toast!.ShowError("Assessment record not found.", "Error");
-                return; 
-            }
-
-
             try
             {
                 if (sessionService == null)
@@ -138,7 +140,7 @@ namespace ViabilityIQ.Web.Components.Pages
                 }
 
                 // This queries the database to check which data types have records
-                var dataStatus = await dataValidationService.ValidateAssessmentDataAsync(assessmentId);
+                var dataStatus = await dataValidationService.ValidateAssessmentDataAsync(selectedRecord.AssessmentId);
                 // Set the session with the ACTUAL data status (not hardcoded values)
                 sessionService.SetActiveAssessment(
                     caseNumber: selectedRecord.CaseNumber,
@@ -234,7 +236,8 @@ namespace ViabilityIQ.Web.Components.Pages
             if (success)
             {
                 _Toast!.ShowSuccess("Assessment file has been deleted from system tracking.", sessionService!.AppTitle);
-                await LoadGridDatasetAsync();
+                if (assessmentTable is not null)
+                    await assessmentTable.RefreshAsync();
             }
         }
 
@@ -244,7 +247,8 @@ namespace ViabilityIQ.Web.Components.Pages
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
-                await LoadGridDatasetAsync();
+                if (assessmentTable is not null)
+                    await assessmentTable.RefreshAsync();
             }
             else
             {

@@ -15,7 +15,9 @@
         <div class="app-workspace-shell">
 
             <ZabDataTableAdvanced TItem="AssessmentDto"
-                                  Items="@assessmentsList"
+                                  @ref="assessmentTable"
+                                  ServerData="LoadAssessmentPageAsync"
+                                  DefaultSortField="@nameof(AssessmentDto.CaseNumber)"
                                   ItemName="Assessment"
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"
@@ -26,6 +28,7 @@
                                   GetRowId="@(x => x.AssessmentId)"
                                   OnAddRecordId="HandleFormExecution"
                                   OnEditRecordId="HandleFormExecution"
+                                  OnLoadError="HandleTableLoadError"
                                   OnPrintList="ExecutePrintFormatProcess"
                                   OnExportExcelList="ExecuteExcelExportProcess"
                                   OnEmailList="ExecuteEmailDistributionProcess" />

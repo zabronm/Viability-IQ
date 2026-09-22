@@ -1,7 +1,7 @@
 namespace ViabilityIQ.Shared.Reporting;
 
 public enum ReportScope { Assessment, System }
-public enum ReportType { AssessmentSummary, ProfitAndLoss, Cashflow, BalanceSheet }
+public enum ReportType { AssessmentSummary, ProfitAndLoss, Cashflow, BalanceSheet, Vat }
 public enum ReportOutputFormat { Pdf, Excel, Html }
 public enum ReportParameterKind { MonthRange, DateRange, Text, Number }
 

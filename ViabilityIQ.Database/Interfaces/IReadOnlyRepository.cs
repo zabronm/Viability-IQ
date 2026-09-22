@@ -18,6 +18,14 @@ namespace ViabilityIQ.Application.Interfaces
        
         /// 3) Returns a single record (FirstOrDefault) matching an identifier.      
         Task<TDto?> GetFirstOrDefaultAsync(string idFieldName, TId idValue);
+
+        /// <summary>
+        /// Executes paging, global search, column filtering and sorting in the database.
+        /// Field names are validated against public DTO properties before SQL is built.
+        /// </summary>
+        Task<DataTablePage<TDto>> GetPageAsync(
+            DataTableQuery query,
+            CancellationToken cancellationToken = default);
     }
 }
 

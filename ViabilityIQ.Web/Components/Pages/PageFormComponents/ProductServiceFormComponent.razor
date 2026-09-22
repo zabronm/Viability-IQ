@@ -3,76 +3,110 @@
 @using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="zab-form-wrapper mb-4">
+<div class="viq-form-shell">
     @if (isProcessingData)
     {
-        <div class="form-processing-overlay animate-fade-in">
-            <div class="spinner-container-box">
-                <div class="sleek-form-spinner"></div>
-                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Processing product or service</strong>
+                    <span>Synchronizing workspace dataset.</span>
+                </div>
             </div>
         </div>
     }
 
-    <EditForm Model="productServiceModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="productServiceModel" OnValidSubmit="HandleFormSubmissionAsync"
+              class="viq-data-form" aria-label="Product or service details">
         <DataAnnotationsValidator />
-        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
-        
-        <div class="mb-3">
-            <label for="prodName" class="form-label-custom">Product/Service Name<span class="text-danger">*</span></label>
-            <InputText id="prodName" class="form-control-compact" @bind-Value="productServiceModel.ProductName" />
-            <ValidationMessage For="@(() => productServiceModel.ProductName)" class="text-danger small mt-1" />
-        </div>
 
-        <div class="mb-3">
-            <label for="otherName" class="form-label-custom">Other Name/s<span class="text-danger">*</span></label>
-            <InputText id="otherName" class="form-control-compact" @bind-Value="productServiceModel.OtherName" />
-            <ValidationMessage For="@(() => productServiceModel.OtherName)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-3">
-            <label for="categoryName" class="form-label-custom">Product Category<span class="text-danger">*</span></label>
-            <DDLookupComponent SourceKey="DDLookupEnums.ProductServiceCategories"
-                                   Label="Product Category"
-                                   @bind-Value="productServiceModel.ProductCategoryId" />
-                <ValidationMessage For="() => productServiceModel.ProductCategoryId" class="text-danger small" />
-           
-        </div>
-               
-        <div class="mb-3">
-            <label for="MarkupPC" class="form-label-custom">Markup(%) <span class="text-danger">*</span></label>
-            <InputNumber id="MarkupPC" class="form-control-compact" @bind-Value="productServiceModel.MarkupPercentage" />
-            <ValidationMessage For="@(() => productServiceModel.MarkupPercentage)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-4">
-            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="productServiceModel.Remarks" />
-            <ValidationMessage For="@(() => productServiceModel.Remarks)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-3 d-flex align-items-center justify-content-start ">
-            <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
-                @(isRowActive ? "Product Active" : "Product Not-Active")
-            </label>
-            <div class="form-check form-switch p-0 m-0 d-flex align-items-center col-2">
-                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+            <div>
+                <h2>@(ProductServiceId == 0 ? "New product or service" : "Product or service details")</h2>
+                <p>Maintain the naming, category and pricing defaults used in assessments.</p>
             </div>
         </div>
 
-        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
-            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-box" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Product information</h3>
+                    <p>Core identity and commercial classification.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="prodName">Product/service name</label>
+                    <InputText id="prodName" class="viq-form-control"
+                               @bind-Value="productServiceModel.ProductName" />
+                    <ValidationMessage For="@(() => productServiceModel.ProductName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="otherName">Other name/s</label>
+                    <InputText id="otherName" class="viq-form-control"
+                               @bind-Value="productServiceModel.OtherName" />
+                    <ValidationMessage For="@(() => productServiceModel.OtherName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label>Product category</label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.ProductServiceCategories"
+                                       Label="Product Category"
+                                       @bind-Value="productServiceModel.ProductCategoryId" />
+                    <ValidationMessage For="() => productServiceModel.ProductCategoryId" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="MarkupPC">Markup (%)</label>
+                    <InputNumber id="MarkupPC" class="viq-form-control"
+                                 @bind-Value="productServiceModel.MarkupPercentage" />
+                    <ValidationMessage For="@(() => productServiceModel.MarkupPercentage)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-card-text" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Administration</h3>
+                    <p>Internal context and record availability.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-field">
+                <label for="remarks">Internal notes and description</label>
+                <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="2"
+                               @bind-Value="productServiceModel.Remarks" />
+                <ValidationMessage For="@(() => productServiceModel.Remarks)" class="viq-form-validation" />
+            </div>
+
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span>
+                    <strong>@(isRowActive ? "Product active" : "Product inactive")</strong>
+                    <small>Inactive products remain available in historical records.</small>
+                </span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
+            </label>
+        </section>
+
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
                 @if (isProcessingData)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span>Saving...</span>
                 }
                 else
                 {
-                    <i class="bi bi-check2-square me-1.5"></i>
+                    <i class="bi bi-check2-square" aria-hidden="true"></i>
                     <span>@(ProductServiceId == 0 ? "Add Product/Service" : "Update Product/Service")</span>
                 }
             </button>
-        </div>
+        </footer>
     </EditForm>
 </div>

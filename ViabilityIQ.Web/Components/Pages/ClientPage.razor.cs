@@ -34,34 +34,51 @@ namespace ViabilityIQ.Web.Components.Pages
         private string AlertHeading = "Client Register";
         private string AlertMessage = "Register clients who will own businesses in your assessments. Provide as accurate and detailed data as possible to ensure more accurate statistics and projections.";
 
-        private List<ClientDto> clientsList = new();
         private List<ZabDataTableAdvanced<ClientDto>.ColumnDefinition<ClientDto>> tableColumns = new();
+        private ZabDataTableAdvanced<ClientDto>? clientTable;
 
         private bool loadingStateActive = false;
 
-        protected override async Task OnInitializedAsync()
+        protected override Task OnInitializedAsync()
         {
-            // ✅ Subscribe to OffCanvas callbacks
             OffcanvasService!.OnShow += HandleCanvasShow;
-
-            _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<ClientDto>.ColumnDefinition<ClientDto>>
             {
-                new() { Title = "Client Name", Value = x => x.Client },
-                new() { Title = "Category", Value = x => x.ClientTypeName ?? "" },
-                new() { Title = "Gender", Value = x => x.Gender ?? "" },
-                new() { Title = "Class", Value = x => x.Race ?? "" },
-                new() { Title = "Province", Value = x => x.ProvinceName ?? "" },
-                new() { Title = "Mobile", Value = x => x.Mobile ?? "" },
+                new() {
+                    Title = "Client Name", ServerField = nameof(ClientDto.Client),
+                    Value = x => x.Client, Filterable = true
+                },
+                new() {
+                    Title = "Category", ServerField = nameof(ClientDto.ClientTypeName),
+                    Value = x => x.ClientTypeName ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Gender", ServerField = nameof(ClientDto.Gender),
+                    Value = x => x.Gender ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Class", ServerField = nameof(ClientDto.Race),
+                    Value = x => x.Race ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Province", ServerField = nameof(ClientDto.ProvinceName),
+                    Value = x => x.ProvinceName ?? "", Filterable = true
+                },
+                new() {
+                    Title = "Mobile", ServerField = nameof(ClientDto.Mobile),
+                    Value = x => x.Mobile ?? "", Filterable = true
+                },
                 new() {
                     Title = "Status",
+                    ServerField = nameof(ClientDto.Active),
                     Value = x => x.Active == true ? "Active" : "Inactive",
                     UseBadge = true,
+                    Searchable = false,
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         // ✅ Handle when form completes (called by OffcanvasService)
@@ -71,21 +88,17 @@ namespace ViabilityIQ.Web.Components.Pages
             await Task.CompletedTask;
         }
 
-        private async Task LoadGridDatasetAsync()
-        {
-            loadingStateActive = true;
-            StateHasChanged();
+        private Task<DataTablePage<ClientDto>> LoadClientPageAsync(
+            DataTableQuery query,
+            CancellationToken cancellationToken) =>
+            ClientRepository!.GetPageAsync(query, cancellationToken);
 
-            try
-            {
-                var resultSet = await ClientRepository!.GetAllAsync();
-                clientsList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ClientDto>();
-            }
-            finally
-            {
-                loadingStateActive = false;
-                StateHasChanged();
-            }
+        private Task HandleTableLoadError(Exception exception)
+        {
+            _Toast!.ShowError(
+                "Client data could not be loaded. Please retry.",
+                sessionService!.AppTitle);
+            return Task.CompletedTask;
         }
 
         // ✅ This is called when Add/Edit button is clicked
@@ -121,7 +134,8 @@ namespace ViabilityIQ.Web.Components.Pages
             if (success)
             {
                 _Toast!.ShowSuccess("Record discarded successfully.", sessionService!.AppTitle);
-                await LoadGridDatasetAsync();
+                if (clientTable is not null)
+                    await clientTable.RefreshAsync();
             }
         }
 
@@ -131,7 +145,8 @@ namespace ViabilityIQ.Web.Components.Pages
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
-                await LoadGridDatasetAsync();  // ✅ Refresh the grid
+                if (clientTable is not null)
+                    await clientTable.RefreshAsync();
             }
             else
             {

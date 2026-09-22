@@ -3,72 +3,118 @@
 @using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="zab-form-wrapper mb-4">
+<div class="viq-form-shell">
     @if (isProcessingData)
     {
-        <div class="form-processing-overlay animate-fade-in">
-            <div class="spinner-container-box">
-                <div class="sleek-form-spinner"></div>
-                <p class="processing-text-alert">Synchronizing Assessment Case Context...</p>
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Processing assessment</strong>
+                    <span>Synchronizing assessment case context.</span>
+                </div>
             </div>
         </div>
     }
 
-    <EditForm Model="@assessmentModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="@assessmentModel" OnValidSubmit="HandleFormSubmissionAsync"
+              class="viq-data-form" aria-label="Assessment details">
         <DataAnnotationsValidator />
-        <ValidationSummary class="alert alert-danger p-0 small mb-1 list-unstyled" />
 
-        <div class="p-0 mt-0">
-            <!-- Left Side Grid Structural Form Controls -->
-            @* <div class="col-md-6"> *@
-            <div class="mb-3 mt-0">
-                <label for="caseNumber" class="form-label-custom">Case Number</label>
-                <InputText id="caseNumber" class="form-control-compact bg-light" @bind-Value="assessmentModel.CaseNumber" placeholder="SYSTEM GENERATED" disabled />
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i></span>
+            <div>
+                <h2>@(AssessmentId == 0 ? "New assessment" : "Assessment details")</h2>
+                <p>Define the business, assessment type and review period for this case.</p>
             </div>
-
-            <div class="mb-1">
-                <label class="form-label-custom">Business Name<span class="text-danger">*</span></label>
-                <DDLookupComponent SourceKey="DDLookupEnums.Businesses"
-                                   @bind-Value="assessmentModel.BusinessId" />
-                <ValidationMessage For="() => assessmentModel.BusinessId" class="text-danger small" />
-            </div>
-
-            <div class="mb-1">
-                <label class="form-label-custom">Assessment Type<span class="text-danger">*</span></label>
-                <DDLookupComponent SourceKey="DDLookupEnums.AssessmentTypes"
-                                   @bind-Value="assessmentModel.AssessmentTypeId" />
-                <ValidationMessage For="() => assessmentModel.AssessmentTypeId" class="text-danger small" />
-            </div>    
-
-            <div class="mb-3">
-                <label for="startDate" class="form-label-custom">Assessment Start Date</label>
-                <input type="date" id="startDate" class="form-control-compact" value="@formattedStartDate" @onchange="OnStartDateChanged" />
-            </div>
-            <div class="mb-3">
-                <label for="endDate" class="form-label-custom">Assessment Finish Date</label>
-                <input type="date" id="endDate" class="form-control-compact" value="@formattedEndDate" @onchange="OnEndDateChanged" />
-            </div>
-        </div>        
-
-        <!-- Remarks/Internal Description Field -->
-        <div class="col-12 mb-2">
-            <label for="remarks" class="form-label-custom">Remarks & Internal Notes</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="assessmentModel.Remarks" placeholder="Enter diagnostic assignment metadata background statements..." />
         </div>
 
-        <div class="d-flex align-items-center justify-content-end gap-2 pt-3">
-            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-folder2-open" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Case details</h3>
+                    <p>Core case identity and assessment classification.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="caseNumber">Case number</label>
+                    <InputText id="caseNumber" class="viq-form-control"
+                               @bind-Value="assessmentModel.CaseNumber"
+                               placeholder="SYSTEM GENERATED" disabled />
+                </div>
+                <div class="viq-form-field">
+                    <label>Business name <span class="viq-required">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Businesses"
+                                       @bind-Value="assessmentModel.BusinessId" />
+                    <ValidationMessage For="() => assessmentModel.BusinessId" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label>Assessment type <span class="viq-required">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.AssessmentTypes"
+                                       @bind-Value="assessmentModel.AssessmentTypeId" />
+                    <ValidationMessage For="() => assessmentModel.AssessmentTypeId" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-calendar-range" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Assessment period</h3>
+                    <p>Set the planned start and finish dates.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="startDate">Assessment start date <span class="viq-required">*</span></label>
+                    <input type="date" id="startDate" class="viq-form-control"
+                           value="@formattedStartDate" @onchange="OnStartDateChanged" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="endDate">Assessment finish date</label>
+                    <input type="date" id="endDate" class="viq-form-control"
+                           value="@formattedEndDate" @onchange="OnEndDateChanged" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-card-text" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Internal notes</h3>
+                    <p>Add background information for the assessment team.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-field">
+                <label for="remarks">Remarks and internal notes</label>
+                <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="3"
+                               @bind-Value="assessmentModel.Remarks"
+                               placeholder="Enter diagnostic assignment metadata background statements..." />
+            </div>
+        </section>
+
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
                 @if (isProcessingData)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span>Saving Record Context...</span>
                 }
                 else
                 {
-                    <i class="bi bi-check2-square me-1.5"></i>
+                    <i class="bi bi-check2-square" aria-hidden="true"></i>
                     <span>@(AssessmentId == 0 ? "Commit New Case File" : "Apply Modifications")</span>
                 }
             </button>
-        </div>
+        </footer>
     </EditForm>
 </div>

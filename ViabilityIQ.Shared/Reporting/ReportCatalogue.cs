@@ -17,7 +17,9 @@ public static class ReportCatalogue
         Define(ReportType.Cashflow, "CASHFLOW", "Financial statements",
             "Cashflow", "Monthly projected receipts, payments and bank position.", true),
         Define(ReportType.BalanceSheet, "BALANCE_SHEET", "Financial statements",
-            "Balance Sheet", "Monthly projected assets, liabilities and residual net assets.", true)
+            "Balance Sheet", "Monthly projected assets, liabilities and residual net assets.", true),
+        Define(ReportType.Vat, "VAT_REPORT", "Tax reports",
+            "VAT Report", "Monthly projected output VAT, input VAT and settlement position.", true)
     ];
 
     public static ReportDefinition Get(ReportType type) =>
@@ -31,4 +33,3 @@ public static class ReportCatalogue
             [new("MONTH_RANGE", "Projection period", ReportParameterKind.MonthRange, true, "1-12")],
             landscape);
 }
-

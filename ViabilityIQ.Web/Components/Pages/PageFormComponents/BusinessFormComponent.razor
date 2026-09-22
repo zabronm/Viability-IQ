@@ -3,188 +3,244 @@
 @using ViabilityIQ.Shared.SharedModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="zab-form-wrapper mb-4">
+<div class="viq-form-shell">
     @if (isProcessingData)
     {
-        <div class="form-processing-overlay animate-fade-in">
-            <div class="spinner-container-box">
-                <div class="sleek-form-spinner"></div>
-                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Processing business</strong>
+                    <span>Please wait while the record is prepared.</span>
+                </div>
             </div>
         </div>
     }
 
-    <EditForm Model="businessModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="businessModel" OnValidSubmit="HandleFormSubmissionAsync"
+              class="viq-data-form" aria-label="Business details">
         <DataAnnotationsValidator />
-        <ValidationSummary class="alert alert-danger p-2 small mb-1 list-unstyled" />
 
-        <!-- TWO COLUMN CONTAINER HOOK -->
-        <div class="row">
-            @* <div class="col-12 mb-1">
-                <span class="text-uppercase tracking-wider fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                    <i class="bi bi-person-badge me-1"></i> Personal Information
-                </span>
-                <hr class="mt-1 mb-1" style="opacity: 0.1;" />
-            </div> *@
-            <!-- LEFT COLUMN -->
-            <div class="col-md-6">
-                <div class="mb-1">
-                    <label for="clientName" class="form-label-custom">Business Name<span class="text-danger">*</span></label>
-                    <InputText id="clientName" class="form-control-compact" @bind-Value="businessModel.BusinessName" />
-                    <ValidationMessage For="@(() => businessModel.BusinessName)" class="text-danger small mt-1" />
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-buildings" aria-hidden="true"></i></span>
+            <div>
+                <h2>@(BusinessId == 0 ? "New business profile" : "Business profile")</h2>
+                <p>Capture the organisation, compliance, address and contact information used by assessments.</p>
+            </div>
+        </div>
+
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-building" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Organisation details</h3>
+                    <p>Core identity and ownership information.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="businessName">Business name <span class="viq-required">*</span></label>
+                    <InputText id="businessName" class="viq-form-control"
+                               autocomplete="organization"
+                               @bind-Value="businessModel.BusinessName" />
+                    <ValidationMessage For="@(() => businessModel.BusinessName)" class="viq-form-validation" />
                 </div>
 
-                <div class="mb-1">
-                    <label class="form-label-custom">Business Sector<span class="text-danger">*</span></label>
+                <div class="viq-form-field">
+                    <label>Business sector <span class="viq-required">*</span></label>
                     <DDLookupComponent SourceKey="DDLookupEnums.Sectors"
                                        @bind-Value="businessModel.BusinessSectorId" />
-                    <ValidationMessage For="() => businessModel.BusinessSectorId" class="text-danger small" />
+                    <ValidationMessage For="@(() => businessModel.BusinessSectorId)" class="viq-form-validation" />
                 </div>
 
-                <div class="mb-1">
-                    <label class="form-label-custom">Business Owner<span class="text-danger">*</span></label>
+                <div class="viq-form-field">
+                    <label>Business owner <span class="viq-required">*</span></label>
                     <DDLookupComponent SourceKey="DDLookupEnums.Clients"
                                        @bind-Value="businessModel.ClientId" />
-                    <ValidationMessage For="() => businessModel.ClientId" class="text-danger small" />
+                    <ValidationMessage For="@(() => businessModel.ClientId)" class="viq-form-validation" />
                 </div>
 
-                <div class="mb-3 mt-4">
-                    <label class="form-label-custom m-0 clickable-label me-3"  style="min-width: 140px;">
-                        Is Business Registered?
-                    </label>
-                    <InputCheckbox class="form-check-input style-toggle-switch-left" @bind-Value="businessModel.IsRegistered" />
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="registrationNumber">Registration number</label>
+                    <InputText id="registrationNumber" class="viq-form-control"
+                               @bind-Value="businessModel.CKNumber" />
+                    <ValidationMessage For="@(() => businessModel.CKNumber)" class="viq-form-validation" />
                 </div>
-
-                <div class="mb-1">
-                    <label for="ckNumber" class="form-label-custom">Registration Number<span class="text-danger">*</span></label>
-                    <InputText id="ckNumber" class="form-control-compact" @bind-Value="businessModel.CKNumber" />
-                    <ValidationMessage For="@(() => businessModel.CKNumber)" class="text-danger small mt-1" />
-                </div>
-
-
-                <div class="mb-3 mt-4 pt-1">
-                    <label class="form-label-custom m-0 clickable-label me-3" style="min-width: 140px;">
-                        Is Business VAT Registered?
-                    </label>
-                    <InputCheckbox class="form-check-input style-toggle-switch-left" @bind-Value="businessModel.IsVATRegistered" />
-                </div>
-
-                <div class="mb-3 mt-4 pt-2">
-                    <label class="form-label-custom m-0 clickable-label me-3" style="min-width: 140px;">
-                        Is Business BEE Exempted?
-                    </label>
-                    <InputCheckbox class="form-check-input style-toggle-switch-left" @bind-Value="businessModel.IsBEE_Exempt" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="street" class="form-label-custom">Street Address <span class="text-danger">*</span></label>
-                    <InputText id="street" class="form-control-compact" @bind-Value="businessModel.Street_Address" />
-                    <ValidationMessage For="@(() => businessModel.Street_Address)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="area" class="form-label-custom">Suburb <span class="text-danger">*</span></label>
-                    <InputText id="area" class="form-control-compact" @bind-Value="businessModel.Surburb" />
-                    <ValidationMessage For="@(() => businessModel.Surburb)" class="text-danger small mt-1" />
-                </div>
-
             </div>
+        </section>
 
-            <!-- RIGHT COLUMN -->
-            <div class="col-md-6">
-
-
-                <div class="mb-1">
-                    <label for="city" class="form-label-custom">City/Town<span class="text-danger">*</span></label>
-                    <InputText id="city" class="form-control-compact" @bind-Value="businessModel.CityTown" />
-                    <ValidationMessage For="@(() => businessModel.CityTown)" class="text-danger small mt-1" />
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-patch-check" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Registration and compliance</h3>
+                    <p>Classify the organisation for reporting and assessment purposes.</p>
                 </div>
+            </header>
 
-                <div class="mb-1">
-                    <label for="province" class="form-label-custom">Province<span class="text-danger">*</span></label>
+            <div class="viq-toggle-grid">
+                <label class="viq-toggle-card" for="isRegistered">
+                    <span><strong>Registered business</strong><small>Formal business registration</small></span>
+                    <InputCheckbox id="isRegistered" class="viq-switch"
+                                   @bind-Value="businessModel.IsRegistered" />
+                </label>
+                <label class="viq-toggle-card" for="isVatRegistered">
+                    <span><strong>VAT registered</strong><small>Registered for value-added tax</small></span>
+                    <InputCheckbox id="isVatRegistered" class="viq-switch"
+                                   @bind-Value="businessModel.IsVATRegistered" />
+                </label>
+                <label class="viq-toggle-card" for="isBeeExempt">
+                    <span><strong>BEE exempt</strong><small>Exempt from BEE requirements</small></span>
+                    <InputCheckbox id="isBeeExempt" class="viq-switch"
+                                   @bind-Value="businessModel.IsBEE_Exempt" />
+                </label>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-geo-alt" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Physical address</h3>
+                    <p>Primary operating location of the business.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="streetAddress">Street address</label>
+                    <InputText id="streetAddress" class="viq-form-control"
+                               autocomplete="street-address"
+                               @bind-Value="businessModel.Street_Address" />
+                    <ValidationMessage For="@(() => businessModel.Street_Address)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="suburb">Suburb</label>
+                    <InputText id="suburb" class="viq-form-control"
+                               @bind-Value="businessModel.Surburb" />
+                    <ValidationMessage For="@(() => businessModel.Surburb)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="cityTown">City or town</label>
+                    <InputText id="cityTown" class="viq-form-control"
+                               autocomplete="address-level2"
+                               @bind-Value="businessModel.CityTown" />
+                    <ValidationMessage For="@(() => businessModel.CityTown)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label>Province</label>
                     <DDLookupComponent SourceKey="DDLookupEnums.Provinces"
                                        @bind-Value="businessModel.ProvinceId" />
-                    <ValidationMessage For="() => businessModel.ProvinceId" class="text-danger small" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="postAddr" class="form-label-custom">Postal Address <span class="text-danger">*</span></label>
-                    <InputText id="postAddr" class="form-control-compact" @bind-Value="businessModel.Postal_Address" />
-                    <ValidationMessage For="@(() => businessModel.Postal_Address)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="postLoc" class="form-label-custom">Post Location <span class="text-danger">*</span></label>
-                    <InputText id="postLoc" class="form-control-compact" @bind-Value="businessModel.Postal_CityTown" />
-                    <ValidationMessage For="@(() => businessModel.Postal_CityTown)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="postCode" class="form-label-custom">Postal Code <span class="text-danger">*</span></label>
-                    <InputText id="postCode" class="form-control-compact" @bind-Value="businessModel.PostalCode" />
-                    <ValidationMessage For="@(() => businessModel.PostalCode)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="telephone" class="form-label-custom">Telephone <span class="text-danger">*</span></label>
-                    <InputText id="telephone" class="form-control-compact" @bind-Value="businessModel.Telephone" />
-                    <ValidationMessage For="@(() => businessModel.Telephone)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="mobile" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
-                    <InputText id="mobile" class="form-control-compact" @bind-Value="businessModel.Mobile" />
-                    <ValidationMessage For="@(() => businessModel.Mobile)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="email" class="form-label-custom">Email<span class="text-danger">*</span></label>
-                    <InputText id="email" class="form-control-compact" @bind-Value="businessModel.Email" />
-                    <ValidationMessage For="@(() => businessModel.Email)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-1">
-                    <label for="website" class="form-label-custom">Website<span class="text-danger">*</span></label>
-                    <InputText id="email" class="form-control-compact" @bind-Value="businessModel.Website" />
-                    <ValidationMessage For="@(() => businessModel.Email)" class="text-danger small mt-1" />
+                    <ValidationMessage For="@(() => businessModel.ProvinceId)" class="viq-form-validation" />
                 </div>
             </div>
+        </section>
 
-        </div> <!-- END OF ROW SPLIT CONTAINER -->
-        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" /> *@
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-envelope-paper" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Postal and contact details</h3>
+                    <p>Correspondence address and primary contact channels.</p>
+                </div>
+            </header>
 
-        <!-- FULL WIDTH: Remarks notes field structure layout -->
-        <div class="col-12 mb-1">
-            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="businessModel.Remarks" />
-            <ValidationMessage For="@(() => businessModel.Remarks)" class="text-danger small mt-1" />
-        </div>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="postalAddress">Postal address</label>
+                    <InputText id="postalAddress" class="viq-form-control"
+                               @bind-Value="businessModel.Postal_Address" />
+                    <ValidationMessage For="@(() => businessModel.Postal_Address)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="postalLocation">Postal location</label>
+                    <InputText id="postalLocation" class="viq-form-control"
+                               @bind-Value="businessModel.Postal_CityTown" />
+                    <ValidationMessage For="@(() => businessModel.Postal_CityTown)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="postalCode">Postal code</label>
+                    <InputText id="postalCode" class="viq-form-control"
+                               autocomplete="postal-code"
+                               @bind-Value="businessModel.PostalCode" />
+                    <ValidationMessage For="@(() => businessModel.PostalCode)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="telephone">Telephone</label>
+                    <InputText id="telephone" class="viq-form-control"
+                               autocomplete="tel"
+                               @bind-Value="businessModel.Telephone" />
+                    <ValidationMessage For="@(() => businessModel.Telephone)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="mobile">Mobile</label>
+                    <InputText id="mobile" class="viq-form-control"
+                               autocomplete="tel"
+                               @bind-Value="businessModel.Mobile" />
+                    <ValidationMessage For="@(() => businessModel.Mobile)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="email">Email</label>
+                    <InputText id="email" class="viq-form-control"
+                               type="email" autocomplete="email"
+                               @bind-Value="businessModel.Email" />
+                    <ValidationMessage For="@(() => businessModel.Email)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="website">Website</label>
+                    <InputText id="website" class="viq-form-control"
+                               type="url" autocomplete="url" placeholder="https://"
+                               @bind-Value="businessModel.Website" />
+                    <ValidationMessage For="@(() => businessModel.Website)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
 
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-card-text" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Administration</h3>
+                    <p>Internal notes and record availability.</p>
+                </div>
+            </header>
 
-        <!-- FULL WIDTH: Active toggle switch layout -->
-        <div class="mb-1 d-flex align-items-center justify-content-start">
-            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
-                @(isRowActive ? "Business Active" : "Business Not-Active")
+            <div class="viq-form-field">
+                <label for="remarks">Internal notes and description</label>
+                <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="3"
+                               @bind-Value="businessModel.Remarks" />
+                <ValidationMessage For="@(() => businessModel.Remarks)" class="viq-form-validation" />
+            </div>
+
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span>
+                    <strong>@(isRowActive ? "Business active" : "Business inactive")</strong>
+                    <small>Inactive businesses remain in history but are unavailable for normal selection.</small>
+                </span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
             </label>
-            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
-                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-left" @bind-Value="isRowActive" />
-            </div>
-        </div>
+        </section>
 
-        <!-- Submissions Engine Buttons Triggers -->
-        <div class="d-flex align-items-center justify-content-end gap-2 pt-3">
-            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
+        <footer class="viq-form-actions">
+            <button type="button" class="viq-button viq-button-secondary"
+                    @onclick="CancelAsync" disabled="@isProcessingData">
+                Cancel
+            </button>
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
                 @if (isProcessingData)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span>Saving...</span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Saving…</span>
                 }
                 else
                 {
-                    <i class="bi bi-check2-square me-1.5"></i>
-                    <span>@(BusinessId == 0 ? "Add Business Details" : "Update Business Details")</span>
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>@(BusinessId == 0 ? "Add business" : "Save changes")</span>
                 }
             </button>
-        </div>
+        </footer>
     </EditForm>
 </div>
