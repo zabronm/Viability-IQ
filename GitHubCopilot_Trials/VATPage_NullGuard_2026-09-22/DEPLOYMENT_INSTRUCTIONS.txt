@@ -1,0 +1,23 @@
+ASSESSMENT VAT PAGE NULL-GUARD UPDATE
+Generated: 2026-09-22
+
+PURPOSE
+Prevents AssessmentVATPage from throwing NullReferenceException when its monthly
+projection arrays are null, incomplete, or still loading.
+
+CHANGES
+- Shows a loading state until VAT projection initialization completes.
+- Normalizes Sales, Purchases and Expenses to exactly 12 monthly values.
+- Uses safe monthly and total accessors for the base projection rows.
+- Makes calculated output/input VAT operate on normalized projection data.
+- Re-normalizes projection arrays when VAT projection-change events are received.
+
+FILES
+Copy both files under Files to their matching application paths.
+
+DATABASE / CONFIGURATION
+No database, migration, DI, appsettings, JavaScript or package-reference change is
+required.
+
+VALIDATION
+The integrated .NET solution built successfully with 0 errors.

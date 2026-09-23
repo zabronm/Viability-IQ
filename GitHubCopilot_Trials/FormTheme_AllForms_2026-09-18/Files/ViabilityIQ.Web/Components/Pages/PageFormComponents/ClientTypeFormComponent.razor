@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="viq-form-shell">
+    @if (isProcessingData)
+    {
+        <div class="viq-form-busy"><div class="viq-form-busy-card"><span class="viq-form-spinner"></span><div><strong>Saving client type</strong><span>Synchronizing the classification...</span></div></div></div>
+    }
+
+    <EditForm Model="@clientTypeModel" OnValidSubmit="HandleFormSubmissionAsync" class="viq-data-form">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-people"></i></span>
+            <div><h2>Client type</h2><p>Maintain the categories used to group clients.</p></div>
+        </div>
+
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-tag"></i></span><div><h3>Classification details</h3><p>Name and describe this client category.</p></div></div>
+            <div class="viq-form-grid">
+                <div class="viq-form-field">
+                    <label for="TypeName">Client Type <span class="viq-required">*</span></label>
+                    <InputText id="TypeName" class="viq-form-control" @bind-Value="clientTypeModel.ClientTypeName" placeholder="e.g. Individual, Corporation, NPO" />
+                    <ValidationMessage For="@(() => clientTypeModel.ClientTypeName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="remarks">Internal Notes &amp; Description</label>
+                    <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="3" @bind-Value="clientTypeModel.Remarks" placeholder="Describe this client category..." />
+                    <ValidationMessage For="@(() => clientTypeModel.Remarks)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-toggles"></i></span><div><h3>Availability</h3><p>Control whether this client type can be selected.</p></div></div>
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span><strong>@(isRowActive ? "Client type active" : "Client type inactive")</strong><small>Inactive types remain visible on existing records.</small></span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
+            </label>
+        </section>
+
+        <div class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
+                @if (isProcessingData) { <span class="spinner-border spinner-border-sm" role="status"></span><span>Saving...</span> }
+                else { <i class="bi bi-check2-square"></i><span>@(ClientTypeId == 0 ? "Add Client Type" : "Update Client Type")</span> }
+            </button>
+        </div>
+    </EditForm>
+</div>

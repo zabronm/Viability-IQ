@@ -1,0 +1,27 @@
+ZAB DATA TABLE - ASSESSMENTS/BUSINESSES INCREMENTAL UPDATE
+Generated: 2026-09-18
+
+PREREQUISITE
+Deploy ZabDataTable_Server_2026-09-18 first. This package contains only the latest requested
+changes on top of that implementation.
+
+CHANGES
+- Add button uses a Bootstrap-success green gradient that darkens from left to right.
+- Add-button hover uses a deeper green gradient and shadow.
+- Edit button has a permanently visible border and light background.
+- Edit-button hover deepens its border, background and icon colour.
+- AssessmentsPage uses server paging, searching, filtering and sorting.
+- BusinessPage uses server paging, searching, filtering and sorting.
+- Add/edit/delete completion refreshes the active server result.
+- Assessment case/business/owner actions are preserved.
+- ReadOnlyRepository accepts both the existing [TableName] and Dapper [Table] DTO mappings.
+
+DEPLOYMENT
+Review local changes, then replace the six files under Files at their matching application paths.
+
+DATABASE / CONFIGURATION
+No migration, schema, DI, appsettings or package-reference change is required.
+
+VALIDATION
+The integrated .NET 8 solution built successfully with 0 errors. All legacy local-mode table
+callers remain compatible.

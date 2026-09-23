@@ -1,0 +1,42 @@
+﻿@page "/settings/businesses"
+
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Web.Components.Pages.PageFormComponents
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+<div class="p-0 position-relative">
+    <PageHeading _pageTitle="Businesses" CurrentPage="PageType.Businesses" _pageHeading="Businesses" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+        <div class="my-0">
+            <ViqAlertComponent Severity="AlertSeverity" Heading="@AlertHeading" Message="@AlertMessage" AllowDismiss="true" />
+        </div>
+        <div class="app-workspace-shell">
+
+            <ZabDataTableAdvanced TItem="BusinessDto"
+                                  @ref="businessTable"
+                                  ServerData="LoadBusinessPageAsync"
+                                  DefaultSortField="@nameof(BusinessDto.BusinessName)"
+                                  ItemName="Business"
+                                  Columns="@tableColumns"
+                                  IsLoading="@loadingStateActive"
+                                  ShowAdd="true"
+                                  ShowDelete="false"
+                                  OnDelete="DeleteSelectedBusiness"
+                                  GetRowId="@(x => x.BusinessId)"
+                                  OnAddRecordId="HandleFormExecution"
+                                  OnEditRecordId="HandleFormExecution"
+                                  OnLoadError="HandleTableLoadError"
+                                  OnPrintList="ExecutePrintFormatProcess"
+                                  OnExportExcelList="ExecuteExcelExportProcess"
+                                  OnEmailList="ExecuteEmailDistributionProcess" />
+
+        </div>
+    </main>
+
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

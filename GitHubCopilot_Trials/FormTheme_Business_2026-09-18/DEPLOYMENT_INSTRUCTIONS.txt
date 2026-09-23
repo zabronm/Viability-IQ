@@ -1,0 +1,39 @@
+SHARED DATA-ENTRY FORM THEME - BUSINESS FORM
+Generated: 2026-09-18
+
+PURPOSE
+Introduces one reusable, globally loaded stylesheet for data-entry forms and migrates
+BusinessFormComponent as the first reference implementation.
+
+CHANGES
+- Professional application-aligned navy, marble, slate and green styling.
+- Structured Organisation, Compliance, Address, Contact and Administration sections.
+- Responsive two-column layout that stacks on narrow drawers.
+- Unified labels, inputs, lookup controls, validation, toggles, buttons and loading state.
+- Sticky Save/Cancel action area.
+- Correct required indicators based on the Business model's actual validation attributes.
+- Correct Website input ID and Website ValidationMessage target.
+- Save failures are logged and no longer expose raw exception details to users.
+
+FILES
+Copy the three files under Files to their matching application paths.
+
+MANUAL APP.RAZOR MERGE
+In ViabilityIQ.Web\Components\App.razor, add this after the existing application CSS links:
+
+  <link rel="stylesheet" href="/css/data-entry-forms.css" />
+
+Load it after app.css/viability-iq.css so the shared form system supersedes the older scattered
+form rules. Add it exactly once.
+
+FUTURE FORM MIGRATION
+Other forms are unchanged. Migrate them incrementally using the classes documented in
+FORM_STYLE_GUIDE.txt. Once all forms are migrated, the old shared form selectors in app.css and
+viability-iq.css can be removed in a separate cleanup. Do not remove them yet because unmigrated
+forms still depend on them.
+
+DATABASE / CONFIGURATION
+No database, DI, appsettings, JavaScript or package-reference change is required.
+
+VALIDATION
+The integrated .NET 8 solution built successfully with 0 errors.

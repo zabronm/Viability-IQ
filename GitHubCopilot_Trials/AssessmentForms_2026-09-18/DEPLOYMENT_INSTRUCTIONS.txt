@@ -1,0 +1,43 @@
+ASSESSMENT DATA-ENTRY FORM THEME
+Generated: 2026-09-19
+
+PURPOSE
+Applies the shared Viability IQ data-entry form design to all genuine editable
+assessment forms under:
+
+  ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents
+
+CHANGES
+- Fully restructures 18 forms with semantic viq-* sections, responsive grids,
+  fields, validation, loading states and action footers.
+- Preserves existing models, bindings, callbacks, calculations, monthly values,
+  conditional content, imports and save workflows.
+- Covers assessment assets, expenses, stock, income, loans, repayments, settings,
+  sales categories, director wages, VAT adjustments and nested settings editors.
+- Removes legacy form selectors and inline style attributes from included forms.
+
+FILES
+Copy all files under Files to their matching application paths.
+
+SHARED STYLESHEET
+The package includes:
+
+  ViabilityIQ.Web\wwwroot\css\data-entry-forms.css
+
+If it is not already linked, add this after the existing application CSS links in
+ViabilityIQ.Web\Components\App.razor:
+
+  <link rel="stylesheet" href="/css/data-entry-forms.css" />
+
+Add the link exactly once. App.razor is intentionally not included.
+
+EXCLUDED COMPONENTS
+List components, pass-through wrappers, bulk-insert hosts and EmptyCanvasTest were
+not included because they are not independent data-entry forms.
+
+DATABASE / CONFIGURATION
+No database, migration, DI, appsettings, JavaScript or package-reference change is
+required.
+
+VALIDATION
+The integrated .NET solution built successfully with 0 errors.

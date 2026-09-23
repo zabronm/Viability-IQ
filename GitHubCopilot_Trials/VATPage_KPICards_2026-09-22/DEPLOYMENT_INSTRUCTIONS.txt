@@ -1,0 +1,43 @@
+ASSESSMENT VAT KPI CARDS
+Generated: 2026-09-22
+
+PURPOSE
+Adds six responsive KPI cards above the Assessment VAT schedule.
+
+CARDS
+- Output VAT
+- Input VAT
+- VATable Sales
+- Net VAT Payable
+- VATable Purchases
+- VAT Recovery Rate
+
+DESIGN
+- Professional card layout based on the supplied reference.
+- Distinct accent colours and Bootstrap icons.
+- Smooth lift, shadow, icon and decoration transitions.
+- Marble-blue border on hover.
+- Six columns on wide screens, three on medium screens, two on tablets and one
+  on narrow mobile screens.
+- Reduced-motion support.
+
+CALCULATIONS
+- Output VAT: annual calculated output VAT.
+- Input VAT: annual calculated input VAT.
+- VATable Sales: annual taxable sales.
+- Net VAT Payable: output VAT less input VAT.
+- VATable Purchases: annual taxable purchases.
+- VAT Recovery Rate: input VAT divided by output VAT.
+
+FILES
+Copy all three files under Files to their matching application paths.
+
+This package includes the previous AssessmentVATPage null/loading guard and can
+replace VATPage_NullGuard_2026-09-22 directly.
+
+DATABASE / CONFIGURATION
+No database, migration, DI, appsettings, JavaScript or package-reference change
+is required.
+
+VALIDATION
+The integrated .NET solution built successfully with 0 errors.

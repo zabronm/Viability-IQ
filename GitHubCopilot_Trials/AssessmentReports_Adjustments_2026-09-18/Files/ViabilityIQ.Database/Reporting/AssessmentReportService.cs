@@ -96,6 +96,8 @@ public sealed class AssessmentReportService : IAssessmentReportService
                     [BuildCashflow(months, assessment.AssessmentStartDate)],
                 ReportType.BalanceSheet =>
                     [BuildBalanceSheet(months, assessment.AssessmentStartDate)],
+                ReportType.Vat =>
+                    [BuildVat(months, assessment.AssessmentStartDate)],
                 _ => throw new ArgumentOutOfRangeException(nameof(reportType))
             },
             Footnotes = BuildFootnotes(reportType, risks)
@@ -328,6 +330,43 @@ public sealed class AssessmentReportService : IAssessmentReportService
         };
     }
 
+    private static ReportSection BuildVat(
+        IReadOnlyList<CashflowProjectionMonth> months, DateTime? assessmentStartDate)
+    {
+        var outputVat = months.Sum(x => x.VatOutput);
+        var inputVat = months.Sum(x => x.VatInput);
+        var netVat = months.Sum(x => x.VatPayable);
+        var payments = months.Sum(x => x.VatPayment);
+        var refunds = months.Sum(x => x.VatRefund);
+
+        return new()
+        {
+            Title = "Projected VAT Report",
+            Narrative = "This report reconciles projected output VAT and input VAT from the authoritative " +
+                "cashflow projection. A negative net VAT position represents a projected refund.",
+            Metrics =
+            [
+                Money("Total output VAT", outputVat),
+                Money("Total input VAT", inputVat),
+                Money("Net VAT position", netVat),
+                Money("Projected VAT payments", payments),
+                Money("Projected VAT refunds", refunds)
+            ],
+            Table = Table(months, assessmentStartDate, true,
+            [
+                Heading("VAT OUTPUT"),
+                Row("Output VAT", months, x => x.VatOutput, total: true),
+                Heading("VAT INPUT"),
+                Row("Input VAT", months, x => x.VatInput, total: true),
+                Heading("VAT RECONCILIATION"),
+                Row("Net VAT payable / (refundable)", months, x => x.VatPayable, total: true),
+                Row("VAT payable", months, x => x.VatPayment),
+                Row("VAT refund", months, x => x.VatRefund),
+                Row("Net cash settlement", months, x => x.VatPayment - x.VatRefund, total: true)
+            ])
+        };
+    }
+
     private static ReportTable Table(
         IReadOnlyList<CashflowProjectionMonth> months, DateTime? assessmentStartDate, bool total,
         IReadOnlyList<ReportTableRow> rows) =>
@@ -442,6 +481,8 @@ public sealed class AssessmentReportService : IAssessmentReportService
         };
         if (type == ReportType.BalanceSheet)
             notes.Add("Residual equity/net assets is the balancing amount after recognised projected assets and liabilities; it is not a maintained share-capital or drawings ledger.");
+        if (type == ReportType.Vat)
+            notes.Add("VAT values are planning projections, not a VAT return. Confirm classifications, supporting documents and filing periods before submission to the revenue authority.");
         if (type == ReportType.AssessmentSummary && risks is null)
             notes.Add("Sensitivity analysis was unavailable when this report was generated.");
         return notes;

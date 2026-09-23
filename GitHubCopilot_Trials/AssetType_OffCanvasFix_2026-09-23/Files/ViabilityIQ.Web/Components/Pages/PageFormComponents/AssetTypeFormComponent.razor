@@ -1,0 +1,174 @@
+@using ViabilityIQ.Shared.DataModels
+
+<div class="asset-type-form-container">
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center py-5" role="status" aria-live="polite">
+            <div class="spinner-border text-primary" aria-hidden="true"></div>
+            <span class="visually-hidden">Loading asset type...</span>
+        </div>
+    }
+    else
+    {
+        <form @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-light border-bottom">
+                    <h6 class="mb-0">Asset Type Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="asset-type-name" class="form-label">Type Name <span class="text-danger">*</span></label>
+                            <input id="asset-type-name"
+                                   class="form-control @(HasError(nameof(type.TypeName)) ? "is-invalid" : null)"
+                                   @bind="type.TypeName"
+                                   placeholder="e.g., Delivery Vehicle" />
+                            @if (HasError(nameof(type.TypeName)))
+                            {
+                                <div class="invalid-feedback">@GetError(nameof(type.TypeName))</div>
+                            }
+                        </div>
+
+                        <div class="col-12">
+                            <label for="asset-type-category" class="form-label">Asset Category <span class="text-danger">*</span></label>
+                            <select id="asset-type-category"
+                                    class="form-select @(HasError(nameof(type.AssetCategoryId)) ? "is-invalid" : null)"
+                                    @bind="type.AssetCategoryId">
+                                <option value="0">Select an asset category</option>
+                                @foreach (var category in categoriesList.Where(item => item.Active))
+                                {
+                                    <option value="@category.AssetCategoryId">@category.CategoryName</option>
+                                }
+                            </select>
+                            @if (HasError(nameof(type.AssetCategoryId)))
+                            {
+                                <div class="invalid-feedback">@GetError(nameof(type.AssetCategoryId))</div>
+                            }
+                        </div>
+
+                        <div class="col-12">
+                            <label for="asset-type-description" class="form-label">Description</label>
+                            <textarea id="asset-type-description"
+                                      class="form-control"
+                                      rows="3"
+                                      @bind="type.Description"
+                                      placeholder="Describe the assets included in this type."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-light border-bottom">
+                    <h6 class="mb-0">Classification and Depreciation</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input id="asset-type-current"
+                                       class="form-check-input"
+                                       type="checkbox"
+                                       checked="@type.IsCurrent"
+                                       @onchange="OnAssetClassChanged" />
+                                <label for="asset-type-current" class="form-check-label">
+                                    Current asset
+                                </label>
+                            </div>
+                            <small class="text-muted">Enable when the asset is expected to convert to cash within twelve months.</small>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input id="asset-type-depreciable"
+                                       class="form-check-input"
+                                       type="checkbox"
+                                       checked="@type.IsDepreciable"
+                                       @onchange="OnDepreciableChanged" />
+                                <label for="asset-type-depreciable" class="form-check-label">
+                                    Depreciable asset
+                                </label>
+                            </div>
+                        </div>
+
+                        @if (type.IsDepreciable)
+                        {
+                            <div class="col-md-6">
+                                <label for="asset-type-rate" class="form-label">Default Depreciation Rate (%)</label>
+                                <input id="asset-type-rate"
+                                       type="number"
+                                       min="0"
+                                       max="100"
+                                       step="0.01"
+                                       class="form-control @(HasError(nameof(type.DefaultDepreciationRate)) ? "is-invalid" : null)"
+                                       @bind="type.DefaultDepreciationRate" />
+                                @if (HasError(nameof(type.DefaultDepreciationRate)))
+                                {
+                                    <div class="invalid-feedback">@GetError(nameof(type.DefaultDepreciationRate))</div>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="asset-type-life" class="form-label">Useful Life (Years)</label>
+                                <input id="asset-type-life"
+                                       type="number"
+                                       min="1"
+                                       step="1"
+                                       class="form-control @(HasError(nameof(type.DefaultUsefulLifeYears)) ? "is-invalid" : null)"
+                                       @bind="type.DefaultUsefulLifeYears" />
+                                @if (HasError(nameof(type.DefaultUsefulLifeYears)))
+                                {
+                                    <div class="invalid-feedback">@GetError(nameof(type.DefaultUsefulLifeYears))</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-light border-bottom">
+                    <h6 class="mb-0">Status and Notes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input id="asset-type-active" class="form-check-input" type="checkbox" @bind="type.Active" />
+                        <label for="asset-type-active" class="form-check-label">Active</label>
+                    </div>
+
+                    <label for="asset-type-remarks" class="form-label">Remarks</label>
+                    <textarea id="asset-type-remarks"
+                              class="form-control"
+                              rows="2"
+                              @bind="type.Remarks"
+                              placeholder="Optional internal notes"></textarea>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(type.TypeName))
+            {
+                <div class="alert alert-info py-2" role="status">
+                    <strong>@type.TypeName</strong>
+                    <span class="text-muted"> · @GetCategoryName() · @(type.IsCurrent ? "Current" : "Fixed") asset</span>
+                </div>
+            }
+
+            <div class="d-flex justify-content-end gap-2 pb-3">
+                <button type="button" class="btn btn-outline-secondary" disabled="@isSaving" @onclick="HandleCancel">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <span>@(type.AssetTypeId == 0 ? "Add Asset Type" : "Save Changes")</span>
+                    }
+                </button>
+            </div>
+        </form>
+    }
+</div>

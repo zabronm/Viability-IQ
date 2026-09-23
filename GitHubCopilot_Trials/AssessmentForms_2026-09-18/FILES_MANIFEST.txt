@@ -1,0 +1,30 @@
+ASSESSMENT DATA-ENTRY FORM THEME - FILE MANIFEST
+Generated: 2026-09-19
+
+NEW / REPLACE
+ViabilityIQ.Web\wwwroot\css\data-entry-forms.css
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentAssetsFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentExpensesFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentLoanFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentLoanRepaymentFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentSettingsFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentStockFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\BulkExpensesImportComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\DirectorWagesFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\IncomeSalesFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SalesCategoryFormComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SalesCategoryFormNewComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\VatAdjustmentComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\DebtorsCreditorsComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\DirectorWagesComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\OpeningBalancesComponent.razor
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\VATEditComponent.razor
+
+MANUAL MERGE
+ViabilityIQ.Web\Components\App.razor
+Add only if absent:
+<link rel="stylesheet" href="/css/data-entry-forms.css" />
+
+TOTAL PRODUCTION FILES: 19

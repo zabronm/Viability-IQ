@@ -1,0 +1,27 @@
+ZAB DATA TABLE ADVANCED - FILE MANIFEST
+Generated: 2026-09-18
+
+NEW
+ViabilityIQ.Database\Interfaces\DataTableQuery.cs
+
+REPLACE
+ViabilityIQ.Database\Interfaces\IReadOnlyRepository.cs
+ViabilityIQ.Infrastructure\Repositories\ReadOnlyRepository.cs
+ViabilityIQ.Web\Components\CommonComponents\ZabDataTableAdvanced.razor
+ViabilityIQ.Web\Components\CommonComponents\ZabDataTableAdvanced.razor.cs
+ViabilityIQ.Web\Components\CommonComponents\ZabDataTableAdvanced.razor.css
+ViabilityIQ.Web\Components\Pages\ClientPage.razor
+ViabilityIQ.Web\Components\Pages\ClientPage.razor.cs
+ViabilityIQ.Web\Components\Pages\AssessmentsPage.razor
+ViabilityIQ.Web\Components\Pages\AssessmentsPage.razor.cs
+ViabilityIQ.Web\Components\Pages\BusinessPage.razor
+ViabilityIQ.Web\Components\Pages\BusinessPage.razor.cs
+
+TOTAL PRODUCTION FILES: 12
+
+NOT REQUIRED
+- SQL migration
+- DI registration changes
+- App.razor changes
+- appsettings changes
+- NuGet/package changes
