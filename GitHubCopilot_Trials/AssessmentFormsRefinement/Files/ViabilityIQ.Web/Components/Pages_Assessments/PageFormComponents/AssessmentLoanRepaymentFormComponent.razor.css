@@ -1,0 +1,121 @@
+.viq-repayment-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: .65rem;
+    padding: .75rem;
+    border-bottom: 1px solid #e4eaee;
+    background: #fbfcfd;
+}
+
+.viq-repayment-tool-actions {
+    display: flex;
+    gap: .45rem;
+}
+
+.viq-repayment-table-wrap {
+    overflow: auto;
+    max-height: 30rem;
+    margin: .75rem;
+    border: 1px solid #d4dee6;
+    border-radius: .5rem;
+    background: #fff;
+}
+
+.viq-repayment-table {
+    width: 100%;
+    min-width: 35rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: #334155;
+    font-size: .72rem;
+}
+
+.viq-repayment-table th,
+.viq-repayment-table td {
+    padding: .42rem .45rem;
+    border-right: 1px solid #e2e8ee;
+    border-bottom: 1px solid #e2e8ee;
+    vertical-align: middle;
+}
+
+.viq-repayment-table th:last-child,
+.viq-repayment-table td:last-child { border-right: 0; }
+
+.viq-repayment-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+    background: #eef3f7;
+    color: #273d50;
+    font-size: .66rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.viq-repayment-table tbody th {
+    width: 3.5rem;
+    background: #f8fafc;
+    color: #172554;
+    font-weight: 800;
+    text-align: center;
+}
+
+.viq-repayment-table tbody tr:hover td,
+.viq-repayment-table tbody tr:hover th { background-color: #f8fbfd; }
+
+.viq-repayment-value {
+    width: 100%;
+    min-height: 2rem;
+    padding: .32rem .42rem;
+    border: 1px solid #cbd7df;
+    border-radius: .38rem;
+    outline: 0;
+    background: #fff;
+    color: #1e293b;
+    text-align: right;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .75rem;
+    font-weight: 650;
+}
+
+.viq-repayment-readonly {
+    border-color: transparent;
+    background: #f4f7f9;
+    color: #586b7b;
+}
+
+.viq-repayment-extra {
+    border-color: #9fb8db;
+    color: #173f78;
+}
+
+.viq-repayment-extra:focus {
+    border-color: #728fce;
+    box-shadow: 0 0 0 .16rem rgba(114,143,206,.17);
+}
+
+.viq-repayment-total {
+    background: #f7fafc;
+    color: #172554;
+    text-align: right;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 800;
+}
+
+.viq-repayment-grand-total th,
+.viq-repayment-grand-total td {
+    position: sticky;
+    bottom: 0;
+    border-bottom: 0;
+    background: #eaf4ef !important;
+    color: #174d36;
+    font-weight: 800;
+}
+
+@media (max-width: 620px) {
+    .viq-repayment-tools { grid-template-columns: 1fr; }
+    .viq-repayment-tool-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}

@@ -1,0 +1,110 @@
+@namespace ViabilityIQ.Web.Components.Reporting
+@using ViabilityIQ.Shared.Reporting
+
+<article class="rr-document @(Document.Definition.Landscape ? "rr-landscape" : "rr-portrait") @(Document.Definition.Type == ReportType.AssessmentSummary ? "rr-summary" : null)">
+    <header class="rr-cover">
+        <div class="rr-brand">
+            <img src="/viabilityIQ_icon.png" alt="Viability IQ logo" />
+        </div> 
+        <div>
+            @* <span class="rr-kicker">@Document.Definition.Category</span> *@
+            <h1>@Document.Definition.Name</h1>
+            <p>@Document.Definition.Description</p>
+        </div>
+        <dl>
+            @if (!string.IsNullOrWhiteSpace(Document.EntityName))
+            {
+                <div><dt>Entity</dt><dd>@Document.EntityName</dd></div>
+            }
+            <div><dt>Assessment</dt><dd>@Document.AssessmentReference</dd></div>
+            <div><dt>Period</dt><dd>@Document.ReportingPeriod</dd></div>
+            <div><dt>Generated</dt><dd>@Document.GeneratedAtUtc.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd></div>
+            <div><dt>Status</dt><dd>@Document.ReadinessStatus</dd></div>
+        </dl>
+        @if (!string.IsNullOrWhiteSpace(Document.ReadinessWarning))
+        {
+            <div class="rr-warning"><i class="bi bi-exclamation-triangle"></i> @Document.ReadinessWarning</div>
+        }
+    </header>
+
+    @foreach (var section in Document.Sections)
+    {
+        <section class="rr-section">
+            <h2>@section.Title</h2>
+            @if (!string.IsNullOrWhiteSpace(section.Narrative))
+            {
+                <p class="rr-narrative">@section.Narrative</p>
+            }
+            @if (section.Metrics.Count > 0)
+            {
+                <div class="rr-metrics">
+                    @foreach (var metric in section.Metrics)
+                    {
+                        <div><span>@metric.Label</span><strong>@metric.DisplayValue</strong></div>
+                    }
+                </div>
+            }
+            @if (section.Table is not null)
+            {
+                <div class="table-responsive rr-table-frame">
+                    <table class="rr-table">
+                        <thead><tr>
+                            @foreach (var header in section.Table.Headers)
+                            {
+                                <th>@header</th>
+                            }
+                        </tr></thead>
+                        <tbody>
+                        @foreach (var row in section.Table.Rows)
+                        {
+                            if (row.IsHeading)
+                            {
+                                <tr class="rr-heading"><th colspan="@section.Table.Headers.Count">@row.Label</th></tr>
+                            }
+                            else
+                            {
+                                <tr class="@(row.IsTotal ? "rr-total" : null)">
+                                    <th>@row.Label</th>
+                                    @foreach (var value in row.Values)
+                                    {
+                                        <td>@Display(value, row.IsPercentage)</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            @if (section.Findings.Count > 0)
+            {
+                <div class="rr-findings">
+                    @foreach (var finding in section.Findings)
+                    {
+                        <div class="rr-finding rr-@finding.Severity.ToLowerInvariant()">
+                            <span class="rr-priority">@finding.Priority</span>
+                            <div>
+                                <h3>@finding.Title <small>@finding.Severity</small></h3>
+                                <p><strong>Evidence:</strong> @finding.Evidence</p>
+                                <p><strong>Action:</strong> @finding.Recommendation</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    }
+
+    <footer class="rr-notes">
+        @foreach (var note in Document.Footnotes) { <p>@note</p> }
+        <strong>Report @Document.Definition.Code v@Document.Definition.Version · Assessment @Document.AssessmentId</strong>
+    </footer>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public ReportDocument Document { get; set; } = default!;
+    private static string Display(decimal? value, bool percentage) =>
+        !value.HasValue ? "—" :
+        percentage ? value.Value.ToString("P1") :
+        value.Value < 0m ? $"({Math.Abs(value.Value):N0})" : value.Value.ToString("N0");
+}

@@ -2,119 +2,89 @@
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="zab-form-wrapper mb-4">
+<div class="viq-form-shell">
     @if (isProcessingData)
     {
-        <div class="form-processing-overlay animate-fade-in">
-            <div class="spinner-container-box">
-                <div class="sleek-form-spinner"></div>
-                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
-            </div>
+        <div class="viq-form-busy">
+            <div class="viq-form-busy-card"><span class="viq-form-spinner"></span><div><strong>Saving company</strong><span>Synchronizing the organisation record...</span></div></div>
         </div>
     }
 
-    <EditForm Model="@companyModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="@companyModel" OnValidSubmit="HandleFormSubmissionAsync" class="viq-data-form">
         <DataAnnotationsValidator />
+        <ValidationSummary class="viq-form-validation-summary" />
 
-        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
-
-        <!-- TWO COLUMN ROW CONTAINER -->
-        <div class="row">
-
-            <!-- LEFT COLUMN -->
-            <div class="col-md-6">
-                <div class="mb-2">
-                    <label for="categoryName" class="form-label-custom">Product Category Name <span class="text-danger">*</span></label>
-                    <InputText id="categoryName" class="form-control-compact" @bind-Value="companyModel.CompanyName" />
-                    <ValidationMessage For="@(() => companyModel.CompanyName)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="customerCode" class="form-label-custom">Customer Code<span class="text-danger">*</span></label>
-                    <InputText id="customerCode" class="form-control-compact" @bind-Value="companyModel.CompanyCustomerCode" />
-                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="contactPerson" class="form-label-custom">Contact Person<span class="text-danger">*</span></label>
-                    <InputText id="contactPerson" class="form-control-compact" @bind-Value="companyModel.ContactPerson" />
-                    <ValidationMessage For="@(() => companyModel.ContactPerson)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="telephone" class="form-label-custom">Telephone<span class="text-danger">*</span></label>
-                    <InputText id="telephone" class="form-control-compact" @bind-Value="companyModel.Telephone" />
-                    <ValidationMessage For="@(() => companyModel.Telephone)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="mobile" class="form-label-custom">Mobile<span class="text-danger">*</span></label>
-                    <InputText id="mobile" class="form-control-compact" @bind-Value="companyModel.Mobile" />
-                    <ValidationMessage For="@(() => companyModel.Mobile)" class="text-danger small mt-1" />
-                </div>
-            </div>
-
-            <!-- RIGHT COLUMN -->
-            <div class="col-md-6">
-                <div class="mb-2">
-                    <label for="email" class="form-label-custom">Email<span class="text-danger">*</span></label>
-                    <InputText id="email" class="form-control-compact" @bind-Value="companyModel.Email" />
-                    <ValidationMessage For="@(() => companyModel.Email)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="website" class="form-label-custom">Website<span class="text-danger">*</span></label>
-                    <InputText id="website" class="form-control-compact" @bind-Value="companyModel.Website" />
-                    <ValidationMessage For="@(() => companyModel.Website)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="customerCodeDup1" class="form-label-custom">Customer Code <span class="text-danger">*</span></label>
-                    <InputText id="customerCodeDup1" class="form-control-compact" @bind-Value="companyModel.CompanyCustomerCode" />
-                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="text-danger small mt-1" />
-                </div>
-
-                <div class="mb-2">
-                    <label for="customerCodeDup2" class="form-label-custom">Customer Code <span class="text-danger">*</span></label>
-                    <InputText id="customerCodeDup2" class="form-control-compact" @bind-Value="companyModel.CompanyCustomerCode" />
-                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="text-danger small mt-1" />
-                </div>
-            </div>
-
-        </div> <!-- END OF GRID SPLIT -->
-
-        @* <hr class="my-3" style="border-top: dotted 1px #cbd5e1;" /> *@
-
-        <!-- FULL ROW BREAKOUT: Remarks field -->
-        <div class="col-12 mb-2">
-            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="3" @bind-Value="companyModel.Remarks" />
-            <ValidationMessage For="@(() => companyModel.Remarks)" class="text-danger small mt-1" />
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-buildings"></i></span>
+            <div><h2>Company details</h2><p>Maintain the organisation identity and primary contact information.</p></div>
         </div>
 
-        <!-- FULL ROW BREAKOUT: Active status switch toggle layout -->
-        <div class="col-12 mb-2 d-flex align-items-center justify-content-start">
-            <label class="form-label-custom m-0 clickable-label me-3" for="isActive" style="min-width: 140px;">
-                @(isRowActive ? "Company Active" : "Company Not-Active")
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-building"></i></span><div><h3>Organisation</h3><p>Core company and customer reference information.</p></div></div>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="companyName">Company Name</label>
+                    <InputText id="companyName" class="viq-form-control" @bind-Value="companyModel.CompanyName" />
+                    <ValidationMessage For="@(() => companyModel.CompanyName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="customerCode">Customer Code</label>
+                    <InputText id="customerCode" class="viq-form-control" @bind-Value="companyModel.CompanyCustomerCode" />
+                    <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-person-lines-fill"></i></span><div><h3>Contact details</h3><p>Primary person and communication channels.</p></div></div>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="contactPerson">Contact Person</label>
+                    <InputText id="contactPerson" class="viq-form-control" @bind-Value="companyModel.ContactPerson" />
+                    <ValidationMessage For="@(() => companyModel.ContactPerson)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="telephone">Telephone</label>
+                    <InputText id="telephone" class="viq-form-control" @bind-Value="companyModel.Telephone" />
+                    <ValidationMessage For="@(() => companyModel.Telephone)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="mobile">Mobile</label>
+                    <InputText id="mobile" class="viq-form-control" @bind-Value="companyModel.Mobile" />
+                    <ValidationMessage For="@(() => companyModel.Mobile)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="email">Email</label>
+                    <InputText id="email" class="viq-form-control" @bind-Value="companyModel.Email" />
+                    <ValidationMessage For="@(() => companyModel.Email)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="website">Website</label>
+                    <InputText id="website" class="viq-form-control" @bind-Value="companyModel.Website" />
+                    <ValidationMessage For="@(() => companyModel.Website)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-journal-text"></i></span><div><h3>Administration</h3><p>Internal context and record availability.</p></div></div>
+            <div class="viq-form-grid">
+                <div class="viq-form-field">
+                    <label for="remarks">Internal Notes &amp; Description</label>
+                    <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="3" @bind-Value="companyModel.Remarks" />
+                    <ValidationMessage For="@(() => companyModel.Remarks)" class="viq-form-validation" />
+                </div>
+            </div>
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span><strong>@(isRowActive ? "Company active" : "Company inactive")</strong><small>Inactive companies remain visible in historical records.</small></span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
             </label>
-            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
-                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
-            </div>
-        </div>
+        </section>
 
-        <!-- Form Submission Button Action Drawer -->
-        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
-            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
-                @if (isProcessingData)
-                {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span>Saving...</span>
-                }
-                else
-                {
-                    <i class="bi bi-check2-square me-1.5"></i>
-                    <span>@(CompanyId == 0 ? "Add Company Details" : "Update Company Details")</span>
-                }
+        <div class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
+                @if (isProcessingData) { <span class="spinner-border spinner-border-sm" role="status"></span><span>Saving...</span> }
+                else { <i class="bi bi-check2-square"></i><span>@(CompanyId == 0 ? "Add Company" : "Update Company")</span> }
             </button>
         </div>
     </EditForm>

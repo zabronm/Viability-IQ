@@ -21,40 +21,26 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         // ====================================================
         // INJECTIONS
         // ====================================================
-        [Inject]
-        private MasterDataService? ViqCrudService { get; set; }
-
-        [Inject]
-        private ISessionService? sessionService { get; set; }
-
-        [Inject]
-        private ZabOffCanvasService? zabCanvasService { get; set; }
-
-        [Inject]
-        private ToastService? _Toast { get; set; }
-
-        [Inject]
-        private IProjectionStateManager? projectionStateManager { get; set; }
-
-        [Inject]
-        private ILogger<AssessmentSalesPage>? Logger { get; set; }
+        [Inject]        private MasterDataService? ViqCrudService { get; set; }
+        [Inject]        private ISessionService? sessionService { get; set; }
+        [Inject]        private ZabOffCanvasService? zabCanvasService { get; set; }
+        [Inject]        private ToastService? _Toast { get; set; }
+        [Inject]        private IProjectionStateManager? projectionStateManager { get; set; }
+        [Inject]        private ILogger<AssessmentSalesPage>? Logger { get; set; }
 
         // ====================================================
         // PARAMETERS
         // ====================================================
-        [Parameter]
-        public long AssessmentId { get; set; } = 1;
-
-        [Parameter]
-        public EventCallback<SaveResult> OnSaveComplete { get; set; }
+        [Parameter]        public long AssessmentId { get; set; } = 1;
+        [Parameter]        public EventCallback<SaveResult> OnSaveComplete { get; set; }
 
         // ====================================================
         // PRIVATE FIELDS - DATA
         // ====================================================
         // Sample Data Arrays for 12 Months
-        private decimal[] Sales = { 150000, 165000, 180000, 170000, 190000, 200000, 210000, 195000, 215000, 220000, 230000, 250000 };
-        private decimal[] Purchases = { 80000, 85000, 95000, 90000, 100000, 105000, 110000, 100000, 110000, 115000, 120000, 130000 };
-        private decimal[] Expenses = { 30000, 30000, 35000, 32000, 35000, 38000, 40000, 37000, 39000, 41000, 42000, 45000 };
+        private decimal[] Sales;                // = { 150000, 165000, 180000, 170000, 190000, 200000, 210000, 195000, 215000, 220000, 230000, 250000 };
+        private decimal[] Purchases;            // = { 80000, 85000, 95000, 90000, 100000, 105000, 110000, 100000, 110000, 115000, 120000, 130000 };
+        private decimal[] Expenses;             // = { 30000, 30000, 35000, 32000, 35000, 38000, 40000, 37000, 39000, 41000, 42000, 45000 };
 
         private decimal[] CalcOutput => Sales.Select(s => s * 0.15m).ToArray();
         private decimal[] CalcInput => Purchases.Select(p => p * 0.15m).ToArray();
@@ -252,8 +238,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         }
 
         
-        /// Handle projection state changes
-        
+        /// Handle projection state changes        
         private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             try
@@ -320,7 +305,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         // ====================================================
         // CLEANUP
         // ====================================================
-
         async ValueTask IAsyncDisposable.DisposeAsync()
         {
             // Unsubscribe from events

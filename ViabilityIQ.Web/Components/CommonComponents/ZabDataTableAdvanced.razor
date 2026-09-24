@@ -1,191 +1,257 @@
 ﻿@typeparam TItem
 
-<div class="datatable-modern-shell">
-
-    @if (IsLoading)
+<section class="zdt-shell" aria-busy="@EffectiveLoading.ToString().ToLowerInvariant()">
+    @if (EffectiveLoading)
     {
-        <div class="datatable-loading-overlay">
-            <div class="spinner-container">
-                <div class="sleek-spinner text-info"></div>
-                <p class="loading-text">Processing Workspace Dataset...</p>
+        <div class="zdt-loading-overlay" role="status">
+            <div class="zdt-loading-card">
+                <span class="zdt-spinner" aria-hidden="true"></span>
+                <span>Loading @ItemName.ToLowerInvariant() data…</span>
             </div>
         </div>
     }
 
-    <div class="table-toolbar-matrix">
-        @if (ShowAdd)
-        {
-            <button class="btn btn-primary text-xs" @onclick="OnAddClick">
-                <i class="bi bi-plus-lg me-2"></i>Add @ItemName
-            </button>
-        }
-        else
-        {
-            <div></div>
-        }
+    <header class="zdt-toolbar">
+        <div class="zdt-toolbar-primary">
+            @if (ShowAdd)
+            {
+                <button class="zdt-add-button" type="button" @onclick="OnAddClick">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    <span>Add @ItemName</span>
+                </button>
+            }
+            <div class="zdt-record-context">
+                <strong>@ItemName register</strong>
+                <span>@TotalItemCount.ToString("N0") record@(TotalItemCount == 1 ? string.Empty : "s")</span>
+            </div>
+        </div>
 
-        <div class="toolbar-right-engine">
-            <div class="toolbar-right-engine">
-                <div class="print-addon-wrapper dropdown">
-                    <button class="btn-toolbar-utility dropdown-toggle" type="button" id="gridUtilityMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Export / Output Operations">
-                        <i class="bi bi-printer-fill"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-custom shadow-sm" aria-labelledby="gridUtilityMenu" style="font-size: 0.85rem;">
-                        <li>
-                            <button class="dropdown-item py-2" type="button" @onclick="HandlePrintTriggerAsync" disabled="@(!Items.Any())">
-                                <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Export to PDF
-                            </button>
-                        </li>
-                        <li>
-                            <button class="dropdown-item py-2" type="button" @onclick="HandleExcelExportTriggerAsync" disabled="@(!Items.Any())">
-                                <i class="bi bi-file-earmark-excel-fill text-success me-2"></i>Export to MS Excel
-                            </button>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <button class="dropdown-item py-2" type="button" @onclick="HandleEmailTriggerAsync" disabled="@(!Items.Any())">
-                                <i class="bi bi-envelope-fill text-primary me-2"></i>Send on Email
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+        <div class="zdt-toolbar-actions">
+            @if (Columns.Any(column => column.Filterable))
+            {
+                <button class="zdt-icon-button @(ShowFilters ? "active" : null)" type="button"
+                        @onclick="ToggleFilters" title="Show or hide column filters"
+                        aria-pressed="@ShowFilters">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                </button>
+            }
 
-                <div class="search-input-wrapper">
-                    <input type="text"
-                           class="form-control-search"
-                           placeholder="Search entries..."
-                           @bind="searchText"
-                           @bind:event="oninput" />
-                    <i class="bi bi-search search-inside-icon"></i>
-                </div>
+            @if (IsServerMode)
+            {
+                <button class="zdt-icon-button" type="button" @onclick="RefreshAsync"
+                        disabled="@EffectiveLoading" title="Refresh server data">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                </button>
+            }
+
+            <div class="dropdown">
+                <button class="zdt-icon-button dropdown-toggle" type="button" id="@_utilityMenuId"
+                        data-bs-toggle="dropdown" aria-expanded="false" title="Export and output">
+                    <i class="bi bi-box-arrow-up" aria-hidden="true"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end zdt-output-menu shadow-sm"
+                    aria-labelledby="@_utilityMenuId">
+                    <li>
+                        <button class="dropdown-item" type="button" @onclick="HandlePrintTriggerAsync"
+                                disabled="@(!CanPrint)">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger"></i>Export to PDF
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item" type="button" @onclick="HandleExcelExportTriggerAsync"
+                                disabled="@(!CanExportExcel)">
+                            <i class="bi bi-file-earmark-excel-fill text-success"></i>Export to MS Excel
+                        </button>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button class="dropdown-item" type="button" @onclick="HandleEmailTriggerAsync"
+                                disabled="@(!CanEmail)">
+                            <i class="bi bi-envelope-fill text-primary"></i>Send on Email
+                        </button>
+                    </li>
+                </ul>
             </div>
 
+            <div class="zdt-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input value="@_searchText" @oninput="HandleSearchInputAsync"
+                       placeholder="@SearchPlaceholder" aria-label="Search @ItemName records" />
+                @if (!string.IsNullOrWhiteSpace(_searchText))
+                {
+                    <button type="button" @onclick="ClearSearchAsync" title="Clear search">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    </button>
+                }
+            </div>
         </div>
-    </div>
+    </header>
 
-    <div class="table-scroll-container">
-        <table class="table-modern-core table-sm">
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="zdt-error" role="alert">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <span>@_errorMessage</span>
+            @if (IsServerMode)
+            {
+                <button type="button" @onclick="RefreshAsync">Retry</button>
+            }
+        </div>
+    }
+
+    <div class="zdt-table-frame">
+        <table class="zdt-table">
             <thead>
                 <tr>
-                    @foreach (var c in Columns)
+                    @foreach (var column in Columns)
                     {
-                        <th class="@(GetSortClass(c)) table-header-interactive" @onclick="() => Sort(c)">
-                            <div class="header-cell-content">
-                                @c.Title
-                                <span class="sort-indicator-slot"></span>
-                            </div>
+                        <th class="@column.HeaderCssClass" aria-sort="@GetAriaSort(column)">
+                            @if (CanSort(column))
+                            {
+                                <button class="zdt-sort-button" type="button"
+                                        @onclick="() => SortAsync(column)">
+                                    <span>@column.Title</span>
+                                    <i class="@GetSortIcon(column)" aria-hidden="true"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="zdt-static-header">@column.Title</span>
+                            }
                         </th>
                     }
-                    <th class="text-center action-header-cell">Actions</th>
+                    @if (ShowActions)
+                    {
+                        <th class="zdt-actions-header">Actions</th>
+                    }
                 </tr>
-            </thead>
-
-            <tbody>
-                @if (!PagedItems.Any())
+                @if (ShowFilters)
                 {
-                    <tr class="py-1">
-                        <td colspan="@(Columns.Count + 1)" class="table-empty-state-row">
-                            <i class="bi bi-file-earmark-spreadsheet d-block mb-2 empty-icon"></i>
-                            No records matched your search filters.
+                    <tr class="zdt-filter-row">
+                        @foreach (var column in Columns)
+                        {
+                            <th>
+                                @if (column.Filterable && (!IsServerMode || !string.IsNullOrWhiteSpace(column.ServerField)))
+                                {
+                                    <div class="zdt-column-filter">
+                                        <i class="bi bi-filter" aria-hidden="true"></i>
+                                        <input value="@GetFilterValue(column)"
+                                               @oninput="eventArgs => HandleFilterInputAsync(column, eventArgs)"
+                                               placeholder="@(column.FilterPlaceholder ?? $"Filter {column.Title}")"
+                                               aria-label="Filter @column.Title" />
+                                    </div>
+                                }
+                            </th>
+                        }
+                        @if (ShowActions)
+                        {
+                            <th>
+                                @if (HasActiveFilters)
+                                {
+                                    <button class="zdt-clear-filters" type="button" @onclick="ClearFiltersAsync">
+                                        Clear
+                                    </button>
+                                }
+                            </th>
+                        }
+                    </tr>
+                }
+            </thead>
+            <tbody>
+                @if (VisibleItems.Count == 0 && !EffectiveLoading)
+                {
+                    <tr>
+                        <td colspan="@ColumnSpan" class="zdt-empty-state">
+                            <span class="zdt-empty-icon"><i class="bi bi-inbox" aria-hidden="true"></i></span>
+                            <strong>No matching records</strong>
+                            <span>Adjust the search or filters and try again.</span>
                         </td>
                     </tr>
                 }
                 else
                 {
-                    @foreach (var row in PagedItems)
+                    @foreach (var row in VisibleItems)
                     {
-                        <tr class="table-body-row py-1 @(IsRowClickable ? "row-interactive" : "")"
-                            @onclick="async () => { if (IsRowClickable) await HandleRowClick(row); }">
-
-                            @foreach (var c in Columns)
+                        <tr class="zdt-data-row @(IsRowClickable ? "clickable" : null) @ResolveRowCssClass(row)"
+                            @onclick="() => HandleRowClick(row)">
+                            @foreach (var column in Columns)
                             {
-                                @* FIX 2 IMPLEMENTATION PLACE:
-                                   We updated the class string and the stopPropagation attribute below. 
-                                   If 'c.CellTemplate != null' is true, it marks the cell interactive 
-                                   and stops the click from bubble-bleeding upward into the row grid.
-                                *@
-                                <td class="@(ResolveCssClass(c, row)) table-cell-data @(c.IsClickable || c.CellTemplate != null ? "cell-interactive" : "")"
-                                    @onclick="async (e) => { if (c.IsClickable && c.OnClick != null) { await HandleLinkClick(c, row); } }"
-                                    @onclick:stopPropagation="c.IsClickable || c.CellTemplate != null">
-
-                                    @if (c.CellTemplate != null)
+                                <td class="@ResolveCssClass(column, row)"
+                                    @onclick:stopPropagation="column.IsClickable || column.IsLink || column.CellTemplate is not null">
+                                    @if (column.CellTemplate is not null)
                                     {
-                                        @* Renders our actual interactive C# Button objects directly into the DOM tree *@
-                                        @c.CellTemplate(row)
+                                        @column.CellTemplate(row)
                                     }
-                                    else if (c.IsLink)
+                                    else if (column.IsLink || column.IsClickable)
                                     {
-                                        <a href=""
-                                           @onclick:preventDefault="true"
-                                           @onclick:stopPropagation="true"
-                                           @onclick="async () => await HandleLinkClick(c, row)"
-                                           class="cell-anchor-link">
-                                            @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                        <button type="button" class="zdt-cell-link"
+                                                @onclick="() => HandleLinkClick(column, row)">
+                                            @if (!string.IsNullOrWhiteSpace(column.IconCss))
                                             {
-                                                <i class="@c.IconCss me-1.5"></i>
+                                                <i class="@column.IconCss" aria-hidden="true"></i>
                                             }
-                                            @if (!c.IconOnly)
+                                            @if (!column.IconOnly)
                                             {
-                                                @FormatCellValue(c, row)
+                                                @FormatCellValue(column, row)
                                             }
-                                        </a>
+                                        </button>
                                     }
-                                    else if (c.UseBadge)
+                                    else if (column.UseBadge)
                                     {
-                                        <span class="status-badge-token @(c.BadgeClass?.Invoke(row))">
-                                            @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                        <span class="zdt-status-badge @(column.BadgeClass?.Invoke(row))">
+                                            @if (!string.IsNullOrWhiteSpace(column.IconCss))
                                             {
-                                                <i class="@c.IconCss me-1"></i>
+                                                <i class="@column.IconCss" aria-hidden="true"></i>
                                             }
-                                            @if (!c.IconOnly)
+                                            @if (!column.IconOnly)
                                             {
-                                                @FormatCellValue(c, row)
+                                                @FormatCellValue(column, row)
                                             }
                                         </span>
                                     }
                                     else
                                     {
-                                        @if (!string.IsNullOrWhiteSpace(c.IconCss))
+                                        @if (!string.IsNullOrWhiteSpace(column.IconCss))
                                         {
-                                            <i class="@c.IconCss me-1.5 structural-cell-icon"></i>
+                                            <i class="@column.IconCss zdt-cell-icon" aria-hidden="true"></i>
                                         }
-                                        @if (!c.IconOnly)
+                                        @if (!column.IconOnly)
                                         {
-                                            @FormatCellValue(c, row)
+                                            @FormatCellValue(column, row)
                                         }
                                     }
                                 </td>
                             }
 
-                            <td class="text-center action-button-cell-matrix" @onclick:stopPropagation="true">
-
-                                @if (ShowSecondaryAction && GetRowId != null)
-                                {
-                                    <button class="btn-action-operation btn-secondary-accent"
-                                            @onclick="() => OnSecondaryActionClick(GetRowId(row))"
-                                            title="@SecondaryActionTitle">
-                                        <i class="@SecondaryActionIcon"></i>
-                                    </button>
-                                }
-
-                                <button class="btn-action-operation btn-edit-accent"
-                                        disabled="@(GetRowId?.Invoke(row) == null)"
-                                        @onclick="() => OnEditClick(GetRowId!(row))"
-                                        title="Modify Record">
-                                    <i class="bi bi-vector-pen text-navy"></i>
-                                </button>
-
-                                @if (ShowDelete)
-                                {
-                                    <button class="btn-action-operation btn-delete-accent"
-                                            @onclick="() => ConfirmDelete(row)"
-                                            title="Remove Record">
-                                        <i class="bi bi-trash3-fill"></i>
-                                    </button>
-                                }
-                            </td>
+                            @if (ShowActions)
+                            {
+                                <td class="zdt-row-actions" @onclick:stopPropagation="true">
+                                    @if (ShowSecondaryAction && GetRowId is not null)
+                                    {
+                                        <button class="zdt-row-button secondary" type="button"
+                                                @onclick="() => OnSecondaryActionClick(GetRowId(row))"
+                                                title="@SecondaryActionTitle">
+                                            <i class="@SecondaryActionIcon" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                    @if (GetRowId is not null)
+                                    {
+                                        <button class="zdt-row-button edit" type="button"
+                                                @onclick="() => OnEditClick(GetRowId(row))"
+                                                title="Edit @ItemName">
+                                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                    @if (ShowDelete)
+                                    {
+                                        <button class="zdt-row-button delete" type="button"
+                                                @onclick="() => ConfirmDelete(row)"
+                                                title="Delete @ItemName">
+                                            <i class="bi bi-trash3" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                </td>
+                            }
                         </tr>
                     }
                 }
@@ -193,37 +259,32 @@
         </table>
     </div>
 
-    <div class="table-pagination-footer">
-        <div class="pagination-summary-text">
-            @if (FilteredItems.Any())
-            {
-                <span>Showing </span>
-                <span class="accent-bold">@StartRecordIndex - @EndRecordIndex</span>
-                <span> of </span>
-                <span class="accent-bold">@FilteredItems.Count()</span>
-                <span> entries</span>
-            }
-            else
-            {
-                <span>Showing <span class="accent-bold">0</span> entries</span>
-            }
+    <footer class="zdt-footer">
+        <div class="zdt-page-size">
+            <label for="@_pageSizeId">Rows per page</label>
+            <select id="@_pageSizeId" value="@_pageSize" @onchange="ChangePageSizeAsync">
+                @foreach (var size in PageSizeOptions.Where(size => size > 0).Distinct().Order())
+                {
+                    <option value="@size">@size</option>
+                }
+            </select>
         </div>
 
-        <div class="pagination-control-buttons">
-            <button class="btn-pagination-nav"
-                    @onclick="PrevPage"
-                    @onclick:stopPropagation="true"
-                    disabled="@(currentPage == 1)">
-                <i class="bi bi-chevron-left"></i> Previous
-            </button>
-
-            <button class="btn-pagination-nav"
-                    @onclick="NextPage"
-                    @onclick:stopPropagation="true"
-                    disabled="@(currentPage == totalPages)">
-                Next <i class="bi bi-chevron-right"></i>
-            </button>
+        <div class="zdt-page-summary">
+            Showing <strong>@($"{StartRecordIndex:N0}–{EndRecordIndex:N0}")</strong>
+            of <strong>@TotalItemCount.ToString("N0")</strong>
         </div>
-    </div>
 
-</div>
+        <nav class="zdt-pagination" aria-label="@ItemName pagination">
+            <button type="button" @onclick="FirstPageAsync" disabled="@(_currentPage <= 1 || EffectiveLoading)"
+                    title="First page"><i class="bi bi-chevron-bar-left" aria-hidden="true"></i></button>
+            <button type="button" @onclick="PreviousPageAsync" disabled="@(_currentPage <= 1 || EffectiveLoading)"
+                    title="Previous page"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+            <span>Page <strong>@_currentPage</strong> of <strong>@TotalPages</strong></span>
+            <button type="button" @onclick="NextPageAsync" disabled="@(_currentPage >= TotalPages || EffectiveLoading)"
+                    title="Next page"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+            <button type="button" @onclick="LastPageAsync" disabled="@(_currentPage >= TotalPages || EffectiveLoading)"
+                    title="Last page"><i class="bi bi-chevron-bar-right" aria-hidden="true"></i></button>
+        </nav>
+    </footer>
+</section>

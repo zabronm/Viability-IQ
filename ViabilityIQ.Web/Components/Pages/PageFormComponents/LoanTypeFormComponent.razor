@@ -2,61 +2,54 @@
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="zab-form-wrapper mb-4">
+<div class="viq-form-shell">
     @if (isProcessingData)
     {
-        <div class="form-processing-overlay animate-fade-in">
-            <div class="spinner-container-box">
-                <div class="sleek-form-spinner"></div>
-                <p class="processing-text-alert">Synchronizing Workspace Dataset...</p>
-            </div>
-        </div>
+        <div class="viq-form-busy"><div class="viq-form-busy-card"><span class="viq-form-spinner"></span><div><strong>Saving loan type</strong><span>Synchronizing the workspace record...</span></div></div></div>
     }
 
-    <EditForm Model="@loanTypeModel" OnValidSubmit="HandleFormSubmissionAsync">
+    <EditForm Model="@loanTypeModel" OnValidSubmit="HandleFormSubmissionAsync" class="viq-data-form">
         <DataAnnotationsValidator />
+        <ValidationSummary class="viq-form-validation-summary" />
 
-        <ValidationSummary class="alert alert-danger p-2 small mb-3 list-unstyled" />
-
-        <div class="mb-3">
-            <label for="bankName" class="form-label-custom">Loan Type Name <span class="text-danger">*</span></label>
-            <InputText id="bankName" class="form-control-compact" @bind-Value="loanTypeModel.LoanTypeName" />
-            <ValidationMessage For="@(() => loanTypeModel.LoanTypeName)" class="text-danger small mt-1" />
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-cash-coin"></i></span>
+            <div><h2>Loan type</h2><p>Maintain funding product names and reference descriptions.</p></div>
         </div>
 
-        <div class="mb-3">
-            <label for="shortName" class="form-label-custom">Other Name/s <span class="text-danger">*</span></label>
-            <InputText id="shortName" class="form-control-compact" @bind-Value="loanTypeModel.ShortName" />
-            <ValidationMessage For="@(() => loanTypeModel.ShortName)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-4">
-            <label for="remarks" class="form-label-custom">Internal Notes & Description</label>
-            <InputTextArea id="remarks" class="form-control-compact form-control-compact-textarea" rows="2" @bind-Value="loanTypeModel.Remarks" />
-            <ValidationMessage For="@(() => loanTypeModel.Remarks)" class="text-danger small mt-1" />
-        </div>
-
-        <div class="mb-3 d-flex align-items-center justify-content-start ">
-            <label class="col-4 form-label-custom m-0 clickable-label" for="isActive">
-                @(isRowActive ? "Loan Type Active" : "Loan Type Not Active")
-            </label>
-            <div class="form-check form-switch p-0 m-0 d-flex align-items-center col-2">
-                <InputCheckbox id="isActive" class="form-check-input style-toggle-switch-right" @bind-Value="isRowActive" />
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-card-list"></i></span><div><h3>Loan classification</h3><p>Information used when capturing finance facilities.</p></div></div>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="bankName">Loan Type Name <span class="viq-required">*</span></label>
+                    <InputText id="bankName" class="viq-form-control" @bind-Value="loanTypeModel.LoanTypeName" />
+                    <ValidationMessage For="@(() => loanTypeModel.LoanTypeName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="shortName">Other Name/s</label>
+                    <InputText id="shortName" class="viq-form-control" @bind-Value="loanTypeModel.ShortName" />
+                    <ValidationMessage For="@(() => loanTypeModel.ShortName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="remarks">Internal Notes &amp; Description</label>
+                    <InputTextArea id="remarks" class="viq-form-control viq-form-textarea" rows="2" @bind-Value="loanTypeModel.Remarks" />
+                    <ValidationMessage For="@(() => loanTypeModel.Remarks)" class="viq-form-validation" />
+                </div>
             </div>
-        </div>       
+        </section>
 
-        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
-            <button type="submit" class="btn btn-primary btn-submit-compact w-100" disabled="@isProcessingData">
-                @if (isProcessingData)
-                {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span>Saving...</span>
-                }
-                else
-                {
-                    <i class="bi bi-check2-square me-1.5"></i>
-                    <span>@(LoanTypeId  == 0 ? "Commit Record" : "Apply Modifications")</span>
-                }
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-toggles"></i></span><div><h3>Availability</h3><p>Control whether this loan type can be selected.</p></div></div>
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span><strong>@(isRowActive ? "Loan type active" : "Loan type inactive")</strong><small>Inactive loan types remain visible on existing records.</small></span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
+            </label>
+        </section>
+
+        <div class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
+                @if (isProcessingData) { <span class="spinner-border spinner-border-sm" role="status"></span><span>Saving...</span> }
+                else { <i class="bi bi-check2-square"></i><span>@(LoanTypeId == 0 ? "Add Loan Type" : "Update Loan Type")</span> }
             </button>
         </div>
     </EditForm>

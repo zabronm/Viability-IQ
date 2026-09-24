@@ -67,6 +67,33 @@
     padding: .75rem
 }
 
+.ob-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .65rem .75rem .1rem;
+    color: #29475d
+}
+
+.ob-section-title span { font-size: .66rem; font-weight: 800 }
+.ob-section-title small { color: #81909d; font-size: .51rem }
+.ob-readonly-grid { grid-template-columns: repeat(2,minmax(0,1fr)) }
+.ob-readonly {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: .5rem;
+    padding: .55rem;
+    border: 1px solid #dbe5ec;
+    border-radius: .42rem;
+    background: #f8fafc
+}
+.ob-readonly > i { color: #218f80 }
+.ob-readonly div { display: grid }
+.ob-readonly span { color: #344f63; font-size: .6rem; font-weight: 750 }
+.ob-readonly small { color: #81909d; font-size: .48rem }
+.ob-readonly strong { color: #173d59; font-size: .64rem }
+
 .ob-field {
     display: grid;
     gap: .18rem;

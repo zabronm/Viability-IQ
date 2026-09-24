@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace ViabilityIQ.Shared.SharedModels;
 
-namespace ViabilityIQ.Shared.SharedModels
+public sealed class EmailReportRequest
 {
-    public class EmailReportRequest
-    {
-        public string RecipientAddress { get; set; } = string.Empty;
-        public string SubjectTitle { get; set; } = string.Empty;
-        public string MessageBodyText { get; set; } = string.Empty;
-
-        // Raw file binary data stream byte container for the attachment
-        public byte[]? AttachmentBytes { get; set; }
-        public string AttachmentName { get; set; } = "Report_Export.xlsx";
-    }
+    public string RecipientAddress { get; set; } = string.Empty;
+    public string SubjectTitle { get; set; } = string.Empty;
+    public string MessageBodyText { get; set; } = string.Empty;
+    public byte[]? AttachmentBytes { get; set; }
+    public string AttachmentName { get; set; } = "Report_Export.xlsx";
+    public string AttachmentContentType { get; set; } =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    public string AttachmentFormat { get; set; } = "Excel";
 }
+
+public sealed record EmailDeliveryResult(
+    bool Succeeded, string Reference, string? ErrorCategory, string? ErrorMessage);
+

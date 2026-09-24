@@ -11,7 +11,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
     public partial class BusinessFormComponent
     {
         [Inject] private IGenericDataRepository<Business>? businessRepository { get; set; }
-        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
+        [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;
+        [Inject] private ILogger<BusinessFormComponent> Logger { get; set; } = default!;
 
         [Parameter] public long BusinessId { get; set; } = 0;
 
@@ -91,11 +92,12 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Business save failed for business {BusinessId}", BusinessId);
                 var saveResult = new SaveResult()
                 {
                     Success = false,
                     ClosePanel = false,
-                    Message = $"Error: {ex.Message}"
+                    Message = "The business could not be saved. Please try again."
                 };
                 await OffcanvasService!.PublishResultAsync(saveResult);
             }
@@ -105,5 +107,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 StateHasChanged();
             }
         }
+
+        private Task CancelAsync() => OffcanvasService!.CloseAsync();
     }
 }

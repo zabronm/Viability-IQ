@@ -1,0 +1,341 @@
+.rr-document {
+    color: #243b4d;
+    background: #fff;
+    font-family: Inter,Segoe UI,sans-serif;
+    font-size: .75rem;
+}
+
+.rr-cover {
+    position: relative;
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 2px;
+    padding: 3px;
+    border-radius: .6rem .6rem 0 0;
+    background: linear-gradient(130deg,#566D7E,#9aadd8);
+    color: #fff;
+}
+
+.rr-brand {
+    display: flex;
+    align-items: flex-start
+}
+
+    .rr-brand img {
+        display: block;
+        width: auto;
+        max-width: 8rem;
+        height: 2.4rem;
+        object-fit: contain;
+        object-position: left center
+    }
+
+.rr-kicker {
+    color: #f5f7fc;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.rr-cover h1 {
+    margin: .12rem 0;
+    font-size: 1.45rem;
+}
+
+.rr-cover p {
+    margin: 0;
+    color: #f7f9fd
+}
+
+.rr-cover dl {
+    grid-column: 1/-1;
+    display: grid;
+    grid-template-columns: repeat(5,minmax(0,1fr));
+    gap: .45rem;
+    margin: 0;
+    padding-top: .8rem;
+    border-top: 1px solid rgba(255,255,255,.2);
+}
+
+    .rr-cover dl div {
+        min-width: 0
+    }
+
+.rr-cover dt {
+    margin-bottom: .2rem;
+    color: #f2f5fb;
+    font-size: .54rem;
+    text-transform: uppercase
+}
+
+.rr-cover dd {
+    margin: 0;
+    font-size: .67rem;
+    font-weight: 750;
+    overflow-wrap: anywhere
+}
+
+.rr-warning {
+    grid-column: 1/-1;
+    padding: .45rem .6rem;
+    border: 1px solid #f4ca76;
+    border-radius: .35rem;
+    background: #fff5d8;
+    color: #7a4b00
+}
+
+.rr-section {
+    padding: 1rem 1.2rem;
+    border: 1px solid #e0e9ef;
+    border-top: 0
+}
+
+    .rr-section h2 {
+        margin: 0 0 .55rem;
+        color: #163b55;
+        font-size: .9rem
+    }
+
+.rr-narrative {
+    max-width: 74rem;
+    margin: 0;
+    line-height: 1.65;
+    color: #455e70
+}
+
+.rr-metrics {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: .45rem
+}
+
+    .rr-metrics > div {
+        padding: .55rem;
+        border: 1px solid #dce8ed;
+        border-radius: .35rem;
+        background: #f8fbfc
+    }
+
+    .rr-metrics span {
+        display: block;
+        color: #708392;
+        font-size: .55rem;
+        font-weight: 750;
+        text-transform: uppercase
+    }
+
+    .rr-metrics strong {
+        display: block;
+        margin-top: .35rem;
+        color: #133c52;
+        font-size: .78rem
+    }
+
+.rr-table-frame {
+    border: 1px solid #d7e2e9;
+    border-radius: .35rem
+}
+
+.rr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums
+}
+
+    .rr-table th, .rr-table td {
+        padding: .38rem .45rem;
+        border-bottom: 1px solid #e4ebef;
+        white-space: nowrap;
+        text-align: right
+    }
+
+        .rr-table th:first-child {
+            text-align: left
+        }
+
+    .rr-table thead th {
+        background: #15394f;
+        color: #fff;
+        font-size: .58rem
+    }
+
+    .rr-table tbody th {
+        font-weight: 600
+    }
+
+    .rr-table td {
+        color: #354d5e
+    }
+
+    .rr-table .rr-heading th {
+        background: #e9f4f4;
+        color: #0c6668;
+        text-transform: uppercase
+    }
+
+    .rr-table .rr-total {
+        background: #f0f6f8;
+        font-weight: 800
+    }
+
+.rr-findings {
+    display: grid;
+    gap: .5rem
+}
+
+.rr-finding {
+    display: grid;
+    grid-template-columns: 1.8rem 1fr;
+    gap: .55rem;
+    padding: .6rem;
+    border: 1px solid #dae5ea;
+    border-left: 4px solid #e2a43b;
+    border-radius: .35rem
+}
+
+    .rr-finding.rr-critical, .rr-finding.rr-red {
+        border-left-color: #c93832
+    }
+
+    .rr-finding.rr-healthy, .rr-finding.rr-green {
+        border-left-color: #1a9b75
+    }
+
+.rr-priority {
+    display: grid;
+    width: 1.55rem;
+    height: 1.55rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #173c53;
+    color: #fff;
+    font-weight: 800
+}
+
+.rr-finding h3 {
+    margin: 0;
+    color: #213d50;
+    font-size: .72rem
+}
+
+    .rr-finding h3 small {
+        margin-left: .3rem;
+        color: #788b99;
+        font-size: .52rem;
+        text-transform: uppercase
+    }
+
+.rr-finding p {
+    margin: .25rem 0;
+    color: #516879;
+    font-size: .65rem
+}
+
+    .rr-finding p strong {
+        margin-right: .3rem
+    }
+
+.rr-notes {
+    padding: .8rem 1.2rem;
+    border: 1px solid #e0e9ef;
+    border-top: 0;
+    background: #f6f9fa;
+    color: #687d8c;
+    font-size: .58rem
+}
+
+    .rr-notes p {
+        margin: 0 0 .15rem
+    }
+
+.rr-summary .rr-section {
+    font-family: Arial,sans-serif
+}
+
+    .rr-summary .rr-section h2 {
+        font-family: Arial,sans-serif;
+        font-size: .99rem
+    }
+
+.rr-summary .rr-narrative {
+    font-size: .792rem
+}
+
+.rr-summary .rr-finding h3 {
+    font-size: .792rem
+}
+
+.rr-summary .rr-finding p {
+    font-size: .715rem
+}
+
+@media(max-width:900px) {
+    .rr-metrics {
+        grid-template-columns: repeat(2,1fr)
+    }
+
+    .rr-cover dl {
+        grid-template-columns: repeat(2,1fr)
+    }
+}
+
+@media print {
+    .rr-document {
+        font-size: 7.5pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact
+    }
+
+    .rr-cover dt {
+        margin-bottom: 2pt
+    }
+
+    .rr-metrics strong {
+        margin-top: 3pt
+    }
+
+    .rr-finding p strong {
+        margin-right: 3pt
+    }
+
+    .rr-summary .rr-section h2 {
+        font-size: 9.9pt
+    }
+
+    .rr-summary .rr-narrative {
+        font-size: 8.25pt
+    }
+
+    .rr-summary .rr-finding h3 {
+        font-size: 8.25pt
+    }
+
+    .rr-summary .rr-finding p {
+        font-size: 7.15pt
+    }
+
+    .rr-cover {
+        break-after: avoid
+    }
+
+    .rr-section {
+        break-inside: auto
+    }
+
+        .rr-section h2, .rr-metrics > div, .rr-finding {
+            break-inside: avoid
+        }
+
+    .rr-table-frame {
+        overflow: visible
+    }
+
+    .rr-table {
+        font-size: 6.5pt
+    }
+
+        .rr-table thead {
+            display: table-header-group
+        }
+}

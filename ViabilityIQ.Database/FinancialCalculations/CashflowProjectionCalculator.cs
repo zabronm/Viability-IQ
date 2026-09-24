@@ -126,7 +126,9 @@ public static class CashflowProjectionCalculator
                     : Value(x.MonthlyValues, index));
 
             var vat = input.VatProjection.FirstOrDefault(x => x.Period == month);
-            var vatPayable = vat?.VatPayable ?? 0m;
+            var vatPayable = (vat?.VatPayable ?? 0m)
+                + (month == 1 ? input.Assessment.OpeningVatPayable : 0m)
+                - (month == 1 ? input.Assessment.OpeningVatRefundable : 0m);
             var expected = LoanMetric(input.LoanRepayments, 1, index);
             var loanInterest = LoanMetric(input.LoanRepayments, 2, index);
             var extra = LoanMetric(input.LoanRepayments, 3, index);
@@ -202,7 +204,9 @@ public static class CashflowProjectionCalculator
                 ClosingCreditors = accountsMonth?.ClosingCreditors ?? 0m,
                 ClosingStock = runningStock,
                 ClosingFixedAssets = closingFixedAssets,
-                ClosingLoanBalance = runningLoan
+                ClosingLoanBalance = runningLoan,
+                OtherCurrentAssets = input.Assessment.OpeningOtherCurrentAssets,
+                OtherCurrentLiabilities = input.Assessment.OpeningOtherCurrentLiabilities
             });
             runningBank = closingBank;
         }

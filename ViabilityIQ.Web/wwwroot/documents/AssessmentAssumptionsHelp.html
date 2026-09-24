@@ -1,22 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><title>Assessment Assumptions & Baseline Help</title>
+<meta charset="utf-8">
+<title>Assessment Assumptions, Baseline &amp; Sensitivity Analysis Help</title>
 <style>
-@page{size:A4;margin:16mm}body{font-family:Arial,sans-serif;color:#243b4a;font-size:10pt;line-height:1.45}h1{color:#173d59;font-size:24pt;margin-bottom:4px}h2{color:#176b63;border-bottom:2px solid #8bd3c7;padding-bottom:4px;margin-top:22px}h3{color:#245a73;margin-bottom:3px}p{margin:4px 0 9px}.lead{color:#587080;font-size:12pt}.note{padding:10px;border-left:4px solid #2ba88f;background:#eefaf7}.warning{padding:10px;border-left:4px solid #d97706;background:#fff8e8}table{width:100%;border-collapse:collapse;margin:8px 0 15px}th,td{padding:7px;border:1px solid #d8e3ec;vertical-align:top}th{background:#173d59;color:#fff;text-align:left}.tag{display:inline-block;padding:2px 7px;border-radius:12px;background:#e5f4f1;color:#176b63;font-weight:bold}.page{page-break-before:always}footer{margin-top:20px;color:#718294;font-size:8pt}
-</style></head>
+@page{size:A4;margin:16mm}
+body{font-family:Arial,sans-serif;color:#243b4a;font-size:10pt;line-height:1.45}
+h1{color:#173d59;font-size:24pt;margin-bottom:4px}
+h2{color:#176b63;border-bottom:2px solid #8bd3c7;padding-bottom:4px;margin-top:22px}
+h3{color:#245a73;margin:14px 0 3px}
+h4{color:#173d59;margin:11px 0 3px}
+p{margin:4px 0 9px}
+ol,ul{margin-top:5px}
+.lead{color:#587080;font-size:12pt}
+.note{padding:10px;border-left:4px solid #2ba88f;background:#eefaf7}
+.warning{padding:10px;border-left:4px solid #d97706;background:#fff8e8}
+.danger{padding:10px;border-left:4px solid #c2414b;background:#fff1f2}
+table{width:100%;border-collapse:collapse;margin:8px 0 15px}
+th,td{padding:7px;border:1px solid #d8e3ec;vertical-align:top}
+th{background:#173d59;color:#fff;text-align:left}
+.tag{display:inline-block;padding:2px 7px;border-radius:12px;background:#e5f4f1;color:#176b63;font-weight:bold}
+.green{color:#136a4b;font-weight:bold}.amber{color:#9a5a02;font-weight:bold}.red{color:#a12631;font-weight:bold}
+.page{page-break-before:always}
+.keep{page-break-inside:avoid}
+footer{margin-top:20px;color:#718294;font-size:8pt}
+</style>
+</head>
 <body>
-<h1>Assessment Assumptions &amp; Baseline</h1>
-<p class="lead">Practical guidance for preparing a credible 12-month SME projection.</p>
-<p>This module brings together the minimum facts and assumptions needed to interpret Sales, costs, working capital, funding and assets consistently. It supports government-programme assessment and management discussion; it is not a substitute for audited accounts or professional tax advice.</p>
-<div class="note"><strong>How to use it:</strong> capture verified opening facts first, enter the most reasonable baseline assumptions, attach or reference supporting evidence, review the readiness checklist, and confirm the baseline before using it for decisions or sensitivity analysis.</div>
+<h1>Assessment Assumptions, Baseline &amp; Sensitivity Analysis</h1>
+<p class="lead">Practical guidance for preparing and testing a credible 12-month SME projection.</p>
+<p>This guide explains how to prepare the assessment baseline and use Sensitivity Analysis to test how changes in key assumptions could affect profitability, liquidity and viability. It supports government-programme assessment and management discussion; it is not a substitute for audited accounts, professional tax advice or a guarantee of future performance.</p>
+<div class="note"><strong>Recommended sequence:</strong> capture verified opening facts, enter reasonable baseline assumptions, review readiness, confirm the baseline, and then use Sensitivity Analysis to test uncertainty without changing the approved assessment records.</div>
 
 <h2>1. Opening Position</h2>
 <table><tr><th>Setting</th><th>How it supports projections</th></tr>
-<tr><td>Opening stock / current assets</td><td>Establishes the stock or current-asset value carried into Month 1 and supports working-capital and balance-sheet calculations.</td></tr>
+<tr><td>Opening stock, debtors and creditors</td><td>Read-only totals calculated from active Sales Categories. Update the underlying category records rather than entering duplicate totals.</td></tr>
 <tr><td>Opening bank balance</td><td>Sets the initial cash available. Every projected receipt and payment builds from this amount.</td></tr>
 <tr><td>Overdraft interest</td><td>Provides the annual financing rate applied where projected cash becomes overdrawn.</td></tr>
-<tr><td>Projected depreciation</td><td>Provides the opening depreciation allowance used where detailed asset calculations do not supply the complete amount.</td></tr></table>
+<tr><td>Gross assets, accumulated and projected depreciation</td><td>Read-only totals calculated from active asset records and the asset depreciation engine.</td></tr>
+<tr><td>Other current assets and liabilities</td><td>Captures prepayments, non-trade receivables, accruals and short-term obligations not represented by trade debtors or creditors. These remain on the projected balance sheet unless reclassified outside this lightweight model.</td></tr>
+<tr><td>Opening VAT payable</td><td>VAT already owed at the start date and treated as a Month 1 cash outflow.</td></tr>
+<tr><td>Opening VAT refundable</td><td>A confirmed VAT refund receivable at the start date and treated as a Month 1 cash inflow.</td></tr></table>
 <p><strong>Evidence:</strong> recent bank statement, stock count, management accounts, aged debtors/creditors, asset register and loan statements. A genuine zero should be confirmed rather than left unknown.</p>
 
 <h2>2. Sales Categories</h2>
@@ -28,7 +52,7 @@
 <div class="page"></div>
 <h2>3. Debtors &amp; Creditors Profiles</h2>
 <p><span class="tag">Percentage mode</span> Enter the expected distribution across ageing buckets. The 0–30 day bucket balances the total to 100%.</p>
-<p><span class="tag">Actual values mode</span> Enter known Rand balances such as R90,000 in 0–30 days and R35,000 in 31–60 days. The application converts each bucket to a percentage of the total and saves those percentages for projections.</p>
+<p><span class="tag">Actual values mode</span> Enter known balances such as R90,000 in 0–30 days and R35,000 in 31–60 days. The application converts each bucket to a percentage of the total and saves those percentages for projections.</p>
 <table><tr><th>Setting</th><th>Projection use</th></tr>
 <tr><td>Debtor profile</td><td>Determines when credit Sales are expected to be collected, shifting cash receipts into later months.</td></tr>
 <tr><td>Creditor profile</td><td>Determines when supplier purchases are paid, shifting cash payments into later months.</td></tr>
@@ -50,7 +74,7 @@
 <tr><td>VAT payment frequency</td><td>Controls whether net VAT cash settlement is expected monthly or every two months.</td></tr>
 <tr><td>Expense increase and start month</td><td>Escalates operating expenses from the selected month without changing earlier baseline months.</td></tr>
 <tr><td>Contingency</td><td>Adds a modest allowance for foreseeable but unallocated operating costs. It should not conceal known expenses.</td></tr>
-<tr><td>Director wages</td><td>Number of directors × monthly wage becomes the recurring management remuneration cash outflow.</td></tr>
+<tr><td>Director wages</td><td>Number of directors multiplied by monthly wage becomes the recurring management remuneration cash outflow.</td></tr>
 <tr><td>Director wage increase</td><td>Applies the expected change to director remuneration during the projection period.</td></tr></table>
 
 <div class="page"></div>
@@ -65,11 +89,147 @@
 
 <h2>7. Readiness, Notes &amp; Confirmation</h2>
 <p>The readiness score checks whether essential opening facts, Sales Categories, monthly Sales, working-capital profiles, expenses, VAT, loans, asset depreciation and baseline assumptions are available. <strong>Incomplete</strong> means a required check failed. <strong>Ready with warnings</strong> means core data is available but an advisory item remains. <strong>Ready</strong> means the minimum automated checks pass.</p>
-<p><strong>Assumption notes</strong> should record the source, date, owner and reason for each material estimate—for example “based on signed orders” or “average of the last six VAT returns.”</p>
+<p><strong>Assumption notes</strong> should record the source, date, owner and reason for each material estimate—for example, “based on signed orders” or “average of the last six VAT returns.”</p>
 <p><strong>Confirmation</strong> records that the baseline has been reviewed and is reasonable for the assessment. It does not prove that the forecast will occur.</p>
 <div class="warning"><strong>Important cautions:</strong> avoid double-counting assumptions already represented by monthly source data; use fallback cost of Sales only when required; distinguish Sales from grants or disposals; keep VAT treatment consistent; and rerun readiness after changing material source data.</div>
 
-<h2>Recommended review sequence</h2>
-<ol><li>Verify the opening date and balances.</li><li>Check income classification and monthly Sales.</li><li>Confirm debtor, creditor and stock behavior.</li><li>Review expenses, VAT and wages.</li><li>Reconcile loans and assets to supporting statements.</li><li>Review warnings, document sources and confirm the baseline.</li></ol>
-<footer>Viability.IQ — Assessment Assumptions &amp; Baseline Help — September 2026</footer>
-</body></html>
+<div class="page"></div>
+<h2>8. Using Sensitivity Analysis</h2>
+<p>Sensitivity Analysis tests how the approved 12-month projection responds when important assumptions change. It does not edit Sales, expenses, assets, loans or any other source record. Every analysis begins with a fresh copy of the authoritative baseline and applies temporary adjustments in memory.</p>
+<div class="note"><strong>Purpose:</strong> use the module to understand downside risk, test opportunities, estimate funding pressure and explain which assumptions have the greatest influence on viability. It should support professional judgement rather than replace it.</div>
+
+<h3>8.1 Before starting</h3>
+<ol>
+<li>Open the correct assessment and confirm that its opening position and monthly source data are current.</li>
+<li>Review Projection Readiness and resolve material missing information.</li>
+<li>Confirm that the baseline projection is reasonable before testing alternatives.</li>
+<li>Select <strong>Sensitivity Analysis</strong> immediately after <strong>Assessment Reports</strong> in the assessment menu.</li>
+</ol>
+<p>If Sales or expense information is incomplete, the page displays a <strong>Draft baseline</strong> warning. Analysis can still be run, but its conclusions must be treated as provisional.</p>
+
+<h3>8.2 Scenario Builder</h3>
+<p>The Scenario Builder combines one or more changes into a practical alternative case. Start with a preset or enter a name, description and individual adjustments.</p>
+<table><tr><th>Control</th><th>How to use it</th></tr>
+<tr><td>Scenario name and description</td><td>Use a clear name and explain the event being tested, such as “Municipal contract delayed” or “Supplier increase from Month 4.”</td></tr>
+<tr><td>Driver</td><td>Select the financial assumption to change.</td></tr>
+<tr><td>Adjustment</td><td>Enter a positive value for an increase or delay and a negative value for a decrease or acceleration, according to the driver.</td></tr>
+<tr><td>Effective month</td><td>Select Month 1–12 when the change begins. Earlier months remain unchanged.</td></tr>
+<tr><td>Duration</td><td>Select <strong>Ongoing</strong> for the rest of the projection or clear it and enter a limited number of months.</td></tr>
+<tr><td>Add adjustment</td><td>Add the change to the scenario. Several adjustments may be combined before calculation.</td></tr>
+<tr><td>Run scenario</td><td>Calculates the scenario and compares its main results with the baseline.</td></tr></table>
+
+<h4>Scenario presets</h4>
+<table><tr><th>Preset</th><th>Question it helps answer</th></tr>
+<tr><td>Sales Decline</td><td>What happens if demand is weaker than expected?</td></tr>
+<tr><td>Cost Inflation</td><td>Can the enterprise absorb increases in inputs and overheads?</td></tr>
+<tr><td>Slow Collections</td><td>How does a customer-payment delay affect cash?</td></tr>
+<tr><td>Interest Rate Increase</td><td>How sensitive is profitability to higher finance costs?</td></tr>
+<tr><td>Asset Acquisition</td><td>Can the planned capital expenditure be funded?</td></tr>
+<tr><td>Combined Downside</td><td>What happens when lower Sales, higher costs and slower collections occur together?</td></tr>
+<tr><td>Growth Opportunity</td><td>Does additional Sales justify the extra operating expenditure?</td></tr></table>
+<p>Presets are starting points only. Review and amend every adjustment so that it reflects the enterprise being assessed.</p>
+
+<div class="page"></div>
+<h3>8.3 Understanding sensitivity drivers</h3>
+<table><tr><th>Driver</th><th>Meaning and interpretation</th></tr>
+<tr><td>Sales / revenue</td><td>Changes projected true Sales by the selected percentage. A value of −10% tests Sales that are 10% below baseline.</td></tr>
+<tr><td>Cost of Sales — relative</td><td>Changes baseline cost of Sales by a percentage. A value of +10% makes the existing cost amount 10% higher.</td></tr>
+<tr><td>Cost of Sales — percentage points</td><td>Changes cost of Sales as a share of revenue. If baseline cost is 60% of Sales, +5 percentage points tests 65%.</td></tr>
+<tr><td>Operating expenses</td><td>Changes recurring operating expenses by the entered percentage for the selected period.</td></tr>
+<tr><td>Bad debt</td><td>Adds percentage points to the uncollectible portion of Sales and reduces expected customer receipts.</td></tr>
+<tr><td>Debtor collection timing</td><td>Moves projected customer receipts by whole months. A positive value delays receipts; a negative value accelerates them.</td></tr>
+<tr><td>Creditor payment timing</td><td>Moves projected supplier payments by whole months. A positive value delays payment; consider whether suppliers would permit it.</td></tr>
+<tr><td>Loan interest</td><td>Changes projected loan-interest expense by a relative percentage. It does not amend contractual principal repayments.</td></tr>
+<tr><td>Asset purchases</td><td>Changes baseline projected asset-purchase cash outflows by the entered percentage.</td></tr>
+<tr><td>Minimum cash reserve</td><td>Sets the management buffer used to identify funding shortfalls. It is a risk threshold, not an additional expense.</td></tr></table>
+<div class="warning"><strong>Percentage versus percentage points:</strong> these are different. Increasing a 60% cost-of-Sales ratio by 10% produces 66%; increasing it by 10 percentage points produces 70%.</div>
+
+<h3>8.4 Reading Scenario Builder results</h3>
+<table><tr><th>Measure</th><th>What to assess</th></tr>
+<tr><td>Revenue</td><td>Total true Sales over Months 1–12 after scenario adjustments.</td></tr>
+<tr><td>Gross profit</td><td>Revenue less cost of Sales. Review both the amount and gross-margin percentage.</td></tr>
+<tr><td>Profit before tax (PBT)</td><td>Profit after operating expenses, depreciation and interest, before tax.</td></tr>
+<tr><td>Closing cash</td><td>Cash remaining at Month 12. A positive closing balance can still conceal an earlier shortfall.</td></tr>
+<tr><td>Minimum cash</td><td>The lowest monthly closing cash balance and the month in which it occurs.</td></tr>
+<tr><td>Variance from baseline</td><td>The amount by which the scenario result improves or deteriorates relative to the approved baseline.</td></tr></table>
+<p>The deterministic explanation lists the largest adjustments and the resulting movement in profit and closing cash. Expand <strong>Calculation scope</strong> to review modelling limitations.</p>
+
+<h3>8.5 Sensitivity Results</h3>
+<p>This tab changes one driver at a time while holding all others at baseline. It is the best place to identify which assumption has the greatest effect.</p>
+<ol>
+<li>Select the driver.</li>
+<li>Enter the minimum and maximum adjustment.</li>
+<li>Enter the step between test points. For example, −30 to +20 with a step of 5 tests −30%, −25%, −20% and so on.</li>
+<li>Select the effective month and choose <strong>Run range</strong>.</li>
+<li>Compare the baseline row with each test point and review the status colour and warning flags.</li>
+</ol>
+<p>The chart shows closing cash across the range. The table adds revenue, gross margin, EBITDA, PBT, minimum cash, funding gap, current ratio and interest cover. Use <strong>CSV</strong> to download the detailed results for further review.</p>
+
+<div class="page"></div>
+<h3>8.6 Scenario Comparison</h3>
+<p>This tab compares the baseline with up to three named scenarios. Select the scenarios to display their KPI variances and M1–M12 revenue, PBT and closing-cash movements.</p>
+<ul>
+<li>Review amount and percentage variances, not only final totals.</li>
+<li>Identify the first month in which cash or profit becomes unacceptable.</li>
+<li>Compare the cause descriptions to distinguish operational risk from financing risk.</li>
+<li>Export the comparison to CSV when the evidence must be shared or retained.</li>
+</ul>
+
+<h3>8.7 Risk &amp; Break-even</h3>
+<p>Enter management’s minimum cash reserve and recalculate. The module progressively tests the baseline to estimate practical limits.</p>
+<table><tr><th>Threshold</th><th>Interpretation</th></tr>
+<tr><td>Maximum Sales decline</td><td>The first tested decline that produces a loss or breaches the selected cash reserve.</td></tr>
+<tr><td>Maximum operating-expense increase</td><td>The first tested increase that produces a loss or breaches the reserve.</td></tr>
+<tr><td>Minimum gross margin</td><td>An approximate annual margin required to cover operating expenses, depreciation and interest.</td></tr>
+<tr><td>Collection-delay tolerance</td><td>The first whole-month customer-payment delay that breaches the reserve.</td></tr>
+<tr><td>Minimum projected cash</td><td>The lowest monthly cash balance in the baseline and the month in which it occurs.</td></tr></table>
+<p>Findings are prioritised and paired with a practical management action. They are prompts for investigation and must be considered together with contracts, security, funding terms and management capacity.</p>
+
+<h3>8.8 Status colours</h3>
+<table><tr><th>Status</th><th>Meaning</th><th>Suggested response</th></tr>
+<tr><td><span class="green">Green</span></td><td>No tested key threshold is breached.</td><td>Continue monitoring and retain contingency plans.</td></tr>
+<tr><td><span class="amber">Amber</span></td><td>A cash reserve or coverage warning exists.</td><td>Investigate the affected month and agree a mitigation before approval.</td></tr>
+<tr><td><span class="red">Red</span></td><td>The scenario produces negative cash or a projected loss.</td><td>Do not rely on the case without corrective action, additional funding or revised assumptions.</td></tr></table>
+
+<h3>8.9 Printing and exports</h3>
+<p>Select <strong>Print / Save PDF</strong> to open the browser print dialogue and save the active analysis view as a PDF. The Sensitivity Results and Scenario Comparison tabs also provide CSV exports. Record the assessment, baseline date, scenario name, adjustments and calculation date when sharing results.</p>
+
+<h3>8.10 Important calculation limitations</h3>
+<div class="danger">
+<ul>
+<li>Scenarios are held in memory for the current page session and are not saved to the database.</li>
+<li>The baseline remains unchanged; update source data on the appropriate assessment page when a change is intended to become permanent.</li>
+<li>Existing VAT schedules remain at baseline during sensitivity overlays.</li>
+<li>Collection or supplier payments shifted beyond Month 12 fall outside the analysis horizon.</li>
+<li>Asset-purchase sensitivity changes the projected purchase cash outflow; it does not rebuild a new detailed asset register or depreciation schedule.</li>
+<li>Thresholds are tested estimates and may be rounded to the selected increment or whole month.</li>
+<li>Sensitivity results show what could happen under stated assumptions; they do not assign probabilities or predict which scenario will occur.</li>
+</ul>
+</div>
+
+<h3>8.11 Recommended sensitivity review</h3>
+<ol>
+<li>Run the baseline and confirm that no material data is missing.</li>
+<li>Run a Sales range to understand demand risk.</li>
+<li>Run cost-of-Sales and operating-expense ranges to understand margin pressure.</li>
+<li>Test slower collections and review the minimum-cash month.</li>
+<li>Run the Combined Downside preset and adapt it to the enterprise.</li>
+<li>Compare baseline, optimistic and pessimistic cases.</li>
+<li>Set the required cash reserve and review risk thresholds.</li>
+<li>Document management actions, supporting evidence and unresolved uncertainties.</li>
+<li>Export or print the final analysis for the assessment record.</li>
+</ol>
+
+<h2>Recommended overall review sequence</h2>
+<ol>
+<li>Verify the opening date and balances.</li>
+<li>Check income classification and monthly Sales.</li>
+<li>Confirm debtor, creditor and stock behaviour.</li>
+<li>Review expenses, VAT and wages.</li>
+<li>Reconcile loans and assets to supporting statements.</li>
+<li>Review warnings, document sources and confirm the baseline.</li>
+<li>Run sensitivity scenarios and record the principal risks and mitigations.</li>
+</ol>
+<footer>Viability.IQ — Assessment Assumptions, Baseline &amp; Sensitivity Analysis Help — September 2026</footer>
+</body>
+</html>
