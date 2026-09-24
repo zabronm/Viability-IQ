@@ -1,7 +1,38 @@
+.assessment-kpi-shell {
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 16px;
+}
+
+.assessment-kpi-section-header {
+    margin-bottom: .35rem; /* (1) Tightened section header bottom margin */
+}
+
+.assessment-kpi-section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin: 0;
+    color: #526477;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.assessment-kpi-section-header h2 i {
+    color: #1d4ed8;
+}
+
+.assessment-kpi-section-header > span {
+    display: block;
+    padding-left: 1.5rem;
+    color: #7b8794;
+    font-size: .6rem;
+}
+
 .assessment-kpi-grid {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: .75rem;
+    gap: .5rem; /* (1) Reduced grid gap */
     width: 100%;
 }
 
@@ -11,63 +42,64 @@
     position: relative;
     display: flex;
     min-width: 0;
-    min-height: 5.2rem; /* Reduced card height */
+    min-height: 6.0rem; /* (1) Reduced overall minimum card height */
     flex-direction: column;
     justify-content: center;
-    gap: .25rem; /* Tighter gap */
+    gap: .25rem; /* (1) Reduced internal vertical gap between elements */
     overflow: hidden;
-    padding: 0.5rem 0.6rem 0.5rem 0.8rem; /* Minimized inside padding */
+    padding: .30rem .85rem .7rem 1rem; /* (1) Reduced card internal paddings */
     border: 1px solid #dbe4ec;
     border-left: .2rem solid var(--kpi-accent);
-    border-radius: .8rem;
+    border-radius: 10px;
     background: linear-gradient(145deg, #fff, #fbfcfe);
-    box-shadow: 0 .2rem .6rem rgba(30, 58, 95, .04);
+    box-shadow: 0 .2rem .7rem rgba(30, 58, 95, .05);
     isolation: isolate;
-    /* Smoother, more gradual on-hover transition */
-    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1), border-color 350ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 350ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1), /* (2) Increased smoothness */
+                border-color 350ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-    .assessment-kpi-card:hover {
-        border-color: #29465B; /* Marble border on hover */
-        transform: translateY(-.2rem);
-        box-shadow: 0 .6rem 1.4rem rgba(41, 70, 91, .15);
-    }
+.assessment-kpi-card:hover {
+    border-color: #728fce;
+    transform: translateY(-.2rem);
+    box-shadow: 0 .6rem 1.4rem rgba(71, 101, 157, .15);
+}
 
 .assessment-kpi-heading {
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: .4rem;
-    color: #566D7E;
-    font-size: .56rem; /* Reduced header font size */
-    font-weight: 700;
+    gap: .5rem;
+    color: #53667d;
+    font-size: .54rem; /* (3) Reduced header font size */
+    font-weight: 600;
     letter-spacing: .045em;
     text-transform: uppercase;
 }
 
 .assessment-kpi-icon {
     display: grid;
-    width: 1.7rem; /* Smaller icon container */
-    height: 1.7rem;
+    width: 1.85rem; /* (1) Slightly more compact icon container */
+    height: 1.85rem;
     flex: 0 0 auto;
     place-items: center;
     border-radius: .5rem;
     background: var(--kpi-soft);
     color: var(--kpi-accent);
-    font-size: .85rem;
-    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: .9rem;
+    transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1); /* (2) Smooth icon transition */
 }
 
 .assessment-kpi-card:hover .assessment-kpi-icon {
-    transform: scale(1.06) rotate(-2deg);
+    transform: scale(1.08) rotate(-3deg);
 }
 
 .assessment-kpi-value {
     z-index: 1;
     overflow: hidden;
-    color: #657383;
-    font-size: clamp(.82rem, 1.05vw, 1.02rem); /* Reduced value font size */
+    color: #526b80;
+    font-size: clamp(.65rem, 0.9vw, 0.85rem); /* (3) Reduced value font size range */
     font-weight: 600;
     line-height: 1.1;
     text-overflow: ellipsis;
@@ -78,7 +110,7 @@
     z-index: 1;
     overflow: hidden;
     color: #7a8ba0;
-    font-size: .58rem; /* Scaled down caption slightly for harmony */
+    font-size: .6rem; /* (1) Scaled down to match reduced layout */
     font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -88,64 +120,35 @@
     position: absolute;
     right: -.8rem;
     bottom: -.9rem;
-    width: 2.4rem; /* Reduced semi-circle background size */
-    height: 2.4rem; /* Reduced semi-circle background size */
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     background: var(--kpi-soft);
-    opacity: .85;
-    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: .9;
+    transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .assessment-kpi-card:hover .assessment-kpi-decoration {
-    transform: scale(1.15);
+    transform: scale(1.2);
 }
 
-.kpi-blue {
-    --kpi-accent: #2563eb;
-    --kpi-soft: #e8efff;
-}
-
-.kpi-teal {
-    --kpi-accent: #0f8a7b;
-    --kpi-soft: #e2f3f0;
-}
-
-.kpi-purple {
-    --kpi-accent: #7c3aed;
-    --kpi-soft: #f1e8ff;
-}
-
-.kpi-slate {
-    --kpi-accent: #607586;
-    --kpi-soft: #e9eef2;
-}
-
-.kpi-cyan {
-    --kpi-accent: #0891b2;
-    --kpi-soft: #e3f5f9;
-}
-
-.kpi-red {
-    --kpi-accent: #ca2f3b;
-    --kpi-soft: #fbe7e9;
-}
+.kpi-blue { --kpi-accent: #2563eb; --kpi-soft: #e8efff; }
+.kpi-teal { --kpi-accent: #0f8a7b; --kpi-soft: #e2f3f0; }
+.kpi-purple { --kpi-accent: #7c3aed; --kpi-soft: #f1e8ff; }
+.kpi-slate { --kpi-accent: #607586; --kpi-soft: #e9eef2; }
+.kpi-cyan { --kpi-accent: #0891b2; --kpi-soft: #e3f5f9; }
+.kpi-red { --kpi-accent: #ca2f3b; --kpi-soft: #fbe7e9; }
 
 @media (max-width: 1280px) {
-    .assessment-kpi-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+    .assessment-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 720px) {
-    .assessment-kpi-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    .assessment-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 460px) {
-    .assessment-kpi-grid {
-        grid-template-columns: 1fr;
-    }
+    .assessment-kpi-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -67,10 +67,10 @@ namespace ViabilityIQ.Web.Components.Pages
                         builder.CloseElement();
                     }
                 },
-                new() {
-                    Title = "Case Type", ServerField = nameof(AssessmentDto.AssessmentTypeName),
-                    Value = x => x.AssessmentTypeName ?? "", Filterable = true
-                },
+                //new() {
+                //    Title = "Case Type", ServerField = nameof(AssessmentDto.AssessmentTypeName),
+                //    Value = x => x.AssessmentTypeName ?? "", Filterable = true
+                //},
                 
                 // COLUMN 2: Business Name Link-Button
                 new() {
@@ -109,10 +109,10 @@ namespace ViabilityIQ.Web.Components.Pages
                     Title = "Start Date", ServerField = nameof(AssessmentDto.AssessmentStartDate),
                     Value = x => x.AssessmentStartDate, FormatString = "yyyy-MM-dd", Searchable = false
                 },
-                new() {
-                    Title = "End Date", ServerField = nameof(AssessmentDto.AssessmentFinishDate),
-                    Value = x => x.AssessmentFinishDate, FormatString = "yyyy-MM-dd", Searchable = false
-                },
+                //new() {
+                //    Title = "End Date", ServerField = nameof(AssessmentDto.AssessmentFinishDate),
+                //    Value = x => x.AssessmentFinishDate, FormatString = "yyyy-MM-dd", Searchable = false
+                //},
                 new() {
                     Title = "Status",
                     ServerField = nameof(AssessmentDto.StatusId),

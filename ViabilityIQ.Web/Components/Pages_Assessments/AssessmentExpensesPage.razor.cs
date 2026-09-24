@@ -236,7 +236,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             await zabCanvasService!.ShowAsync(new CanvasRequest
             {
                 Title = stream.Id == 0 ? "Add Expense Stream" : "Edit Expense Stream",
-                Width = 400,
+                Width = 450,
                 ComponentType = typeof(AssessmentExpensesFormComponent),
                 Parameters = new { ExpenseContext = expense },
                 ResultCallback = OnSaveComplete

@@ -1,18 +1,28 @@
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents
 
-<section class="assessment-kpi-grid mb-4" aria-label="@AriaLabel">
-    @foreach (var item in Items)
-    {
-        <article class="assessment-kpi-card @item.AccentClass">
-            <div class="assessment-kpi-heading">
-                <span>@item.Title</span>
-                <span class="assessment-kpi-icon" aria-hidden="true">
-                    <i class="@item.Icon"></i>
-                </span>
-            </div>
-            <strong class="assessment-kpi-value">@item.Value</strong>
-            <span class="assessment-kpi-caption">@item.Caption</span>
-            <span class="assessment-kpi-decoration" aria-hidden="true"></span>
-        </article>
-    }
+<section class="assessment-kpi-shell" aria-labelledby="@HeaderId">
+    <header class="assessment-kpi-section-header">
+        <h2 id="@HeaderId">
+            <i class="bi @HeaderIcon" aria-hidden="true"></i>
+            @HeaderTitle
+        </h2>
+        <span>@HeaderSubtitle</span>
+    </header>
+
+    <div class="assessment-kpi-grid" aria-label="@AriaLabel">
+        @foreach (var item in Items)
+        {
+            <article class="assessment-kpi-card @item.AccentClass">
+                <div class="assessment-kpi-heading">
+                    <span>@item.Title</span>
+                    <span class="assessment-kpi-icon" aria-hidden="true">
+                        <i class="@item.Icon"></i>
+                    </span>
+                </div>
+                <strong class="assessment-kpi-value">@item.Value</strong>
+                <span class="assessment-kpi-caption">@item.Caption</span>
+                <span class="assessment-kpi-decoration" aria-hidden="true"></span>
+            </article>
+        }
+    </div>
 </section>

@@ -1,0 +1,67 @@
+.viq-stock-distribution {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: .65rem;
+    padding: .75rem;
+}
+
+.viq-stock-apply { min-width: 7rem; }
+
+.viq-stock-month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+    padding: .75rem;
+}
+
+.viq-stock-month {
+    display: grid;
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    align-items: center;
+    gap: .4rem;
+    margin: 0;
+    padding: .38rem;
+    border: 1px solid #e0e7ec;
+    border-radius: .45rem;
+    background: #fbfcfd;
+}
+
+.viq-stock-month > span {
+    color: #526173;
+    font-size: .68rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.viq-stock-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .72rem .8rem;
+    border: 1px solid #bfdcd0;
+    border-radius: .55rem;
+    background: linear-gradient(90deg, #eff9f4, #f9fcfb);
+}
+
+.viq-stock-total span {
+    color: #496458;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.viq-stock-total strong {
+    color: #146c43;
+    font-size: .9rem;
+}
+
+@media (max-width: 720px) {
+    .viq-stock-month-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 520px) {
+    .viq-stock-distribution,
+    .viq-stock-month-grid { grid-template-columns: 1fr; }
+    .viq-stock-apply { width: 100%; }
+}

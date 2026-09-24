@@ -6,13 +6,13 @@
               class="viq-data-form" aria-label="Loan repayment allocation">
         <DataAnnotationsValidator />
 
-        <div class="viq-form-intro">
+        @* <div class="viq-form-intro">
             <span class="viq-form-intro-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
             <div>
                 <h2>Loan repayment allocation</h2>
                 <p>Review the calculated schedule and allocate extra or balloon repayments by month.</p>
             </div>
-        </div>
+        </div> *@
 
         <ValidationSummary class="viq-form-validation-summary" />
 
@@ -52,14 +52,14 @@
                 </div>
             </header>
 
-            <div class="viq-form-grid viq-form-grid-2">
+            <div class="viq-repayment-tools">
                 <div class="viq-form-field">
                     <label for="bulkExtraAmount">Bulk extra amount</label>
                     <input id="bulkExtraAmount" type="number" step="0.01"
                            class="viq-form-control text-end" placeholder="0.00"
                            @bind="BulkExtraAmount" />
                 </div>
-                <div class="viq-form-actions">
+                <div class="viq-repayment-tool-actions">
                     <button type="button" class="viq-button viq-button-secondary"
                             @onclick="ClearBulkExtraAllocation" title="Clear all extra amounts">
                         Clear
@@ -72,10 +72,10 @@
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered align-middle mb-0">
+            <div class="viq-repayment-table-wrap">
+                <table class="viq-repayment-table">
                     <thead>
-                        <tr>
+                        <tr class="viq-repayment-row">
                             <th scope="col">Month</th>
                             <th scope="col" class="text-end">Expected (R)</th>
                             <th scope="col" class="text-end">Interest (R)</th>
@@ -97,27 +97,27 @@
                                     <th scope="row">M@(idx + 1)</th>
                                     <td>
                                         <input type="text" readonly
-                                               class="viq-form-control text-end font-monospace"
+                                               class="viq-repayment-value viq-repayment-readonly"
                                                value="@ActiveRepaymentModel.MonthlyLines[idx].Expected.ToString("N2")" />
                                     </td>
                                     <td>
                                         <input type="text" readonly
-                                               class="viq-form-control text-end font-monospace"
+                                               class="viq-repayment-value viq-repayment-readonly"
                                                value="@ActiveRepaymentModel.MonthlyLines[idx].Interest.ToString("N2")" />
                                     </td>
                                     <td>
                                         <input type="number"
-                                               class="viq-form-control text-end font-monospace"
+                                               class="viq-repayment-value viq-repayment-extra"
                                                @bind="ActiveRepaymentModel.MonthlyLines[idx].Extra"
                                                @bind:event="oninput" min="0" step="0.01" />
                                     </td>
-                                    <td class="text-end font-monospace fw-bold">
+                                    <td class="viq-repayment-total">
                                         @rowTotal.ToString("N2")
                                     </td>
                                 </tr>
                             }
 
-                            <tr class="fw-bold">
+                            <tr class="viq-repayment-grand-total">
                                 <th scope="row">Total</th>
                                 <td class="text-end font-monospace">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Expected).ToString("N2")</td>
                                 <td class="text-end font-monospace">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Interest).ToString("N2")</td>

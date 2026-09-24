@@ -248,7 +248,7 @@ public partial class AssessmentAssetSummaryPage : ComponentBase, IAsyncDisposabl
         await ZabCanvasService.ShowAsync(new CanvasRequest
         {
             Title = asset.AssessmentAssetId == 0 ? "Add Asset" : "Edit Asset",
-            Width = 400,
+            Width = 450,
             ComponentType = typeof(AssessmentAssetFormComponent),
             Parameters = new Dictionary<string, object>
             {

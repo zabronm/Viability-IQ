@@ -1,162 +1,225 @@
-﻿@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.CommonComponents
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
 
-<EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
-    <DataAnnotationsValidator />
-    <div class="p-1 aaf-container">
+<div class="viq-form-shell">
+    @if (IsSubmitting)
+    {
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Saving asset</strong>
+                    <span>Please wait while the asset and movement profile are updated.</span>
+                </div>
+            </div>
+        </div>
+    }
 
-        <!-- ================= ASSET INCEPTION SECTION ================= -->
-        <div class="card bg-white border-0 mb-2 p-1 rounded-3">
-            <h6 class="fw-bold mb-2 text-dark aaf-section-title">Asset Ownership Period</h6>
+    <EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync"
+              class="viq-data-form" aria-label="Assessment asset registration">
+        <DataAnnotationsValidator />
 
-            <!-- Inception Type Toggle Buttons -->
-            <div class="mb-2">
-                <div class="aaf-btn-group-wrapper" role="group" aria-label="Asset status">
+        @* <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-building" aria-hidden="true"></i></span>
+            <div>
+                <h2>@(AssessmentAssetId == 0 ? "New assessment asset" : "Assessment asset")</h2>
+                <p>Capture ownership timing, valuation and the depreciation profile used by projections.</p>
+            </div>
+        </div> *@
+
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-calendar-range" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Ownership period</h3>
+                    <p>Asset existed at assessment start or acquired during the projection period?</p>
+                </div>
+            </header>
+
+            <div class="aaf-ownership-body">
+                <div class="aaf-ownership-options" role="group" aria-label="Asset ownership period">
                     <button type="button"
-                            class="aaf-inception-btn @(FormModel.AcquisitionStartMonth == 0 ? "aaf-inception-btn-active" : "aaf-inception-btn-inactive")"
+                            class="aaf-ownership-option @(FormModel.AcquisitionStartMonth == 0 ? "active" : null)"
+                            aria-pressed="@(FormModel.AcquisitionStartMonth == 0)"
                             @onclick="() => OnInceptionTypeChanged(true)">
-                        <i class="bi bi-check-circle me-1"></i> Existing Asset
+                        <i class="bi bi-check-circle" aria-hidden="true"></i>
+                        <span>
+                            <strong>Existing asset</strong>
+                            <small>Owned at assessment start</small>
+                        </span>
                     </button>
                     <button type="button"
-                            class="aaf-inception-btn @(FormModel.AcquisitionStartMonth > 0 ? "aaf-inception-btn-active" : "aaf-inception-btn-inactive")"
+                            class="aaf-ownership-option @(FormModel.AcquisitionStartMonth > 0 ? "active" : null)"
+                            aria-pressed="@(FormModel.AcquisitionStartMonth > 0)"
                             @onclick="() => OnInceptionTypeChanged(false)">
-                        <i class="bi bi-plus-circle me-1"></i> Acquired During Period
+                        <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                        <span>
+                            <strong>Acquired in period</strong>
+                            <small>Purchased in Months 1–12</small>
+                        </span>
                     </button>
                 </div>
-                <small class="aaf-helper-text">
-                    <em>@(FormModel.AcquisitionStartMonth == 0 ? "Asset was owned at the assessment start date" : "Asset will be acquired during the assessment period")</em>
-                </small>
-            </div>
 
-            <!-- Acquisition Month Selection (Only if Acquired) -->
-            @if (FormModel.AcquisitionStartMonth > 0)
-            {
-                <div class="mb-1">
-                    <label class="aaf-form-label">Acquisition Month</label>
-                    <select class="aaf-form-select" @bind="FormModel.AcquisitionStartMonth">
-                        <option value="0">-- Select Month --</option>
-                        @for (int month = 1; month <= 12; month++)
-                        {
-                            <option value="@month">Month @month</option>
-                        }
-                    </select>
-                    <small class="aaf-helper-text">
-                        <em>This asset will appear in the projection from Month @FormModel.AcquisitionStartMonth onwards</em>
+                @if (FormModel.AcquisitionStartMonth > 0)
+                {
+                    <div class="viq-form-field">
+                        <label for="assetAcquisitionMonth">Acquisition month <span class="viq-required">*</span></label>
+                        <select id="assetAcquisitionMonth" class="viq-form-control"
+                                @bind="FormModel.AcquisitionStartMonth">
+                            @for (int month = 1; month <= 12; month++)
+                            {
+                                <option value="@month">Month @month</option>
+                            }
+                        </select>
+                        <small class="aaf-field-note">
+                            The asset becomes active in Month @FormModel.AcquisitionStartMonth; earlier months remain inactive.
+                        </small>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-card-heading" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Asset identity</h3>
+                    <p>Name and classify the asset for reporting and projection.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="assetName">Asset name <span class="viq-required">*</span></label>
+                    <input id="assetName" type="text" class="viq-form-control"
+                           @bind="FormModel.AssetName"
+                           placeholder="e.g., Factory Building" />
+                    <ValidationMessage For="@(() => FormModel.AssetName)" class="viq-form-validation" />
+                </div>
+
+                <div class="viq-form-field">
+                    <label>Asset type <span class="viq-required">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.AssetTypes"
+                                       @bind-Value="FormModel.AssetTypeId"
+                                       Placeholder="Select Asset Type" />
+                    <ValidationMessage For="@(() => FormModel.AssetTypeId)" class="viq-form-validation" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-cash-coin" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Opening valuation</h3>
+                    <p>Record gross cost and depreciation accumulated before projection period.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="assetOpeningValue">
+                        @(FormModel.AcquisitionStartMonth == 0 ? "Opening value" : "Acquisition price")
+                        <span class="viq-required">*</span>
+                    </label>
+                    <div class="aaf-input-group">
+                        <span>R</span>
+                        <input id="assetOpeningValue" type="number" min="0" step="0.01"
+                               class="viq-form-control text-end"
+                               @bind="FormModel.OpeningBalanceValue"
+                               placeholder="0.00" />
+                    </div>
+                    <small class="aaf-field-note">
+                        @(FormModel.AcquisitionStartMonth == 0
+                            ? "Gross value at assessment start."
+                            : $"Purchase price recognized in Month {FormModel.AcquisitionStartMonth}.")
                     </small>
                 </div>
-            }
-        </div>
 
-        <!-- ================= ASSET DETAILS SECTION ================= -->
-        <div class="card bg-white border-0 mb-2 p-1 rounded-3">
-            <!-- Asset Name -->
-            <div class="mb-2">
-                <label class="aaf-form-label">Asset Name</label>
-                <input type="text" class="aaf-form-control"
-                       @bind="FormModel.AssetName"
-                       placeholder="e.g., Factory Building, Company Vehicle" />
-            </div>
-
-            <!-- Asset Type Lookup -->
-            <div class="mb-2">
-                <label class="aaf-form-label">Asset Type</label>
-                <DDLookupComponent SourceKey="DDLookupEnums.AssetTypes"
-                                   @bind-Value="FormModel.AssetTypeId"
-                                   Placeholder="Select Asset Type" />
-            </div>
-
-            <!-- Opening Value -->
-            <div class="mb-2">
-                <label class="aaf-form-label">Opening Value / Acquisition Price</label>
-                <div class="aaf-input-group">
-                    <span class="aaf-input-group-text">$</span>
-                    <input type="number" class="aaf-form-control aaf-text-end"
-                           @bind="FormModel.OpeningBalanceValue"
-                           placeholder="0.00"
-                           step="0.01" />
+                <div class="viq-form-field">
+                    <label for="assetOpeningDepreciation">Opening accumulated depreciation</label>
+                    <div class="aaf-input-group">
+                        <span>R</span>
+                        <input id="assetOpeningDepreciation" type="number" min="0" step="0.01"
+                               class="viq-form-control text-end"
+                               @bind="FormModel.OpeningAccumulatedDepreciation"
+                               placeholder="0.00"
+                               disabled="@(FormModel.AcquisitionStartMonth > 0)" />
+                    </div>
+                    <small class="aaf-field-note">
+                        @(FormModel.AcquisitionStartMonth == 0
+                            ? "Depreciation accumulated before Month 1."
+                            : "Automatically zero for assets acquired during the projection.")
+                    </small>
                 </div>
-                <small class="aaf-helper-text">
-                    <em>@(FormModel.AcquisitionStartMonth == 0 ? "Gross value at assessment start" : $"Acquisition price in Month {FormModel.AcquisitionStartMonth}")</em>
-                </small>
             </div>
+        </section>
 
-            <!-- Opening Accumulated Depreciation -->
-            <div class="mb-2">
-                <label class="aaf-form-label">Opening Accumulated Depreciation</label>
-                <div class="aaf-input-group">
-                    <span class="aaf-input-group-text">$</span>
-                    <input type="number" class="aaf-form-control aaf-text-end"
-                           @bind="FormModel.OpeningAccumulatedDepreciation"
-                           placeholder="0.00"
-                           step="0.01"
-                           disabled="@(FormModel.AcquisitionStartMonth > 0)" />
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-graph-down-arrow" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Depreciation profile</h3>
+                    <p>Define how depreciation method across the twelve-month projection.</p>
                 </div>
-                <small class="aaf-helper-text">
-                    <em>@(FormModel.AcquisitionStartMonth == 0 ? "Accumulated depreciation to date" : "Not applicable for acquired assets (automatically $0)")</em>
-                </small>
-            </div>
+            </header>
 
-            <!-- Depreciation Rate -->
-            <div class="mb-2">
-                <label class="aaf-form-label">Annual Depreciation Rate</label>
-                <div class="aaf-input-group">
-                    <input type="number" class="aaf-form-control aaf-text-end"
-                           @bind="FormModel.DepreciationRate"
-                           placeholder="10"
-                           step="0.01"
-                           min="0"
-                           max="100" />
-                    <span class="aaf-input-group-text">%</span>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="assetDepreciationRate">Annual depreciation rate (%)</label>
+                    <div class="aaf-input-group aaf-input-group-suffix">
+                        <input id="assetDepreciationRate" type="number" min="0" max="100" step="0.01"
+                               class="viq-form-control text-end"
+                               @bind="FormModel.DepreciationRate"
+                               placeholder="10.00" />
+                        <span>%</span>
+                    </div>
+                    <small class="aaf-field-note">
+                        Estimated monthly charge: @((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2")
+                    </small>
                 </div>
-                <small class="aaf-helper-text">
-                    <em>Monthly depreciation: @((FormModel.OpeningBalanceValue * (FormModel.DepreciationRate) / 100m) / 12m).ToString("C0")</em>
-                </small>
-            </div>
 
-            <!-- Depreciation Method -->
-            <div class="mb-1">
-                <label class="aaf-form-label">Depreciation Method</label>
-                <select class="aaf-form-select" @bind="FormModel.DepreciationMethod">
-                    <option value="">-- Select Method --</option>
-                    <option value="Straight-Line">Straight-Line</option>
-                    <option value="Declining-Balance">Declining-Balance</option>
-                    <option value="Units-of-Production">Units-of-Production</option>
-                </select>
-                <small class="aaf-helper-text">
-                    <em>@GetDepreciationMethodDescription(FormModel.DepreciationMethod)</em>
+                <div class="viq-form-field">
+                    <label for="assetDepreciationMethod">Depreciation method</label>
+                    <select id="assetDepreciationMethod" class="viq-form-control"
+                            @bind="FormModel.DepreciationMethod">
+                        <option value="">Select method</option>
+                        <option value="Straight-Line">Straight-Line</option>
+                        <option value="Declining-Balance">Declining-Balance</option>
+                        <option value="Units-of-Production">Units-of-Production</option>
+                    </select>
+                    <small class="aaf-field-note">@GetDepreciationMethodDescription(FormModel.DepreciationMethod)</small>
+                </div>
+            </div>
+        </section>
+
+        <div class="aaf-status-summary" role="status">
+            <span><i class="@FormModel.StatusIcon" aria-hidden="true"></i></span>
+            <div>
+                <strong>@(FormModel.AcquisitionStartMonth == 0 ? "Pre-existing asset" : $"Acquired in Month {FormModel.AcquisitionStartMonth}")</strong>
+                <small>
+                    @(FormModel.AcquisitionStartMonth == 0
+                        ? "Active for all 12 projection months."
+                        : $"Active from Month {FormModel.AcquisitionStartMonth}; Months 1–{FormModel.AcquisitionStartMonth - 1} remain inactive.")
                 </small>
             </div>
         </div>
 
-        <!-- ================= STATUS SUMMARY ================= -->
-        <div class="aaf-status-summary">
-            <i class="@FormModel.StatusIcon me-1"></i>
-            <span>
-                @if (FormModel.AcquisitionStartMonth == 0)
-                {
-                    <span>Pre-existing Asset (All 12 months active)</span>
-                }
-                else
-                {
-                    <span>Active from Month @FormModel.AcquisitionStartMonth (Months 1-@(FormModel.AcquisitionStartMonth - 1) inactive)</span>
-                }
-            </span>
-        </div>
-
-        <!-- ================= FORM ACTIONS ================= -->
-        <div class="aaf-form-actions">
-            <button type="submit" class="aaf-btn-submit" disabled="@IsSubmitting">
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
                 @if (IsSubmitting)
                 {
-                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    <span>Saving...</span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Saving asset…</span>
                 }
                 else
                 {
-                    <i class="bi bi-check2-circle"></i>
-                    <span>&nbsp; Save Asset</span>
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>Save asset</span>
                 }
             </button>
-        </div>
-    </div>
-</EditForm>
+        </footer>
+    </EditForm>
+</div>

@@ -201,13 +201,14 @@
 
 .clickable-cell {
     cursor: pointer;
-    color: #003366;
+    color: #357EC7;
     transition: box-shadow 0.3s;
 }
 
     .clickable-cell :hover {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        text-decoration: underline;
+        text-decoration: underline !important;
+        background-color: #C2DFFF !important;
     }
 
 .cell-val-size {

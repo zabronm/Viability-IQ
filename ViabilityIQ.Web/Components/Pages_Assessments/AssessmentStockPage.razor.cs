@@ -204,7 +204,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             {
                 Title = stockId == 0 ? "Add Monthly Stock Movement" : "Edit Monthly Stock Movement",
                 ComponentType = typeof(AssessmentStockFormComponent),
-                Width = 350,
+                Width = 400,
                 Parameters = new
                 {
                     AssessmentId = sessionService!.AssessmentId,

@@ -9,7 +9,7 @@
 @using ViabilityIQ.Application.Dtos
 
 <div class="asset-summary-component">
-    @if (ShowAlertsContainer)
+    @* @if (ShowAlertsContainer)
     {
         <section class="asset-summary-alerts" aria-labelledby="asset-summary-alert-heading">
             <div class="asset-summary-alert-heading">
@@ -39,9 +39,9 @@
                 }
             </div>
         </section>
-    }
+    } *@
 
-    <div class="row bg-white g-3 my-1 py-1 px-2" style="border-radius: 6px;">
+    <div class="row bg-white g-3 my-0 py-1 px-2" style="border-radius: 6px;">
         <div class="col-12 py-2">
             <div class="w-100 p-2 asset-summary-kpis">
                 <AssetSummaryKpiCardsComponent TotalAssetsCount="TotalAssetsCount"
@@ -55,7 +55,7 @@
             <div class="px-0 my-3 asset-summary-toolbar">
                 <div class="row g-2 align-items-center">
                     <div class="col-md-6 d-flex gap-2">
-                        <button class="btn btn-success btn-sm text-xs shadow-sm" @onclick="AddAsset">
+                        <button class="btn btn-success  text-xs shadow-sm" @onclick="AddAsset">
                             <i class="bi bi-plus-circle me-1"></i>
                             Add Asset
                         </button>

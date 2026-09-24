@@ -85,4 +85,7 @@
 <ReportEmailModal Visible="ShowEmail" ReportName="@(Document?.Definition.Name ?? "Report")"
     DefaultRecipient="@Session.UserEmail" Sending="IsEmailBusy" StatusMessage="EmailStatus"
     Succeeded="EmailSucceeded" OnClose="CloseEmail" OnSubmit="SendEmailAsync" />
-<BFooter />
+
+<footer class="py-0 bg-light mt-3">
+    <BFooter />
+</footer>
