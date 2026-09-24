@@ -1,74 +1,120 @@
 ﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 @using ViabilityIQ.Shared.DataModels
 
-<div class="p-3">
+<div class="viq-form-shell">
     @if (FormModel != null)
     {
-        <EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
+        <EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync"
+                  class="viq-data-form" aria-label="Sales income projection">
             <DataAnnotationsValidator />
-            <ValidationSummary />
 
-            <div class="mb-2 mt-0">
-                <label class="form-label-custom  mb-1">Income Type Category</label>
-                <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes" @bind-Value="FormModel.IncomeTypeId" />
-            </div>
-
-            <div class="mb-2">
-                <label class="form-label-custom mb-1">Income Description</label>
-                <input type="text" class="form-control-compact form-control" @bind="FormModel.Description" />
-            </div>            
-
-            <div class="form-check form-switch mb-2 mt-0 d-flex gap-2">
-                <input class="form-check-input" type="checkbox" checked="@(FormModel.IncludeVAT > 0)"
-                       @onchange="@(e => FormModel.IncludeVAT = (bool)e.Value! ? 1 : 0)" value="true" />
-                <label class="form-check-label fw-semibold text-muted">Include VAT (+15%)</label>
-            </div>
-
-            <div class="card bg-light border-0 mb-3 p-1.5 rounded">
-                <div class="input-group input-group-sm">
-                    <input type="number" class="form-control" @bind="BulkAnnualValueTarget" />
-                    <button class="btn btn-outline-success" type="button" @onclick="DistributeAnnualValueEvenly">Apply Split</button>
+            <div class="viq-form-intro">
+                <span class="viq-form-intro-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Sales income projection</h2>
+                    <p>Configure the income classification, VAT treatment and monthly sales forecast.</p>
                 </div>
             </div>
 
-            <h6 class="text-xs fw-bold text-secondary mb-1 uppercase">Assessment Period Sales Projections</h6>
-            <div class="sales-input-pane" style="max-height:260px; overflow-y:auto;">
-                @for (int i = 0; i < 12; i++)
-                {
-                    int index = i;
+            <ValidationSummary class="viq-form-validation-summary" />
 
-                    <div class="d-flex align-items-center mb-2">
-                        <label class="me-2 mb-0" style="width:100px;">
-                            Month-@(index + 1)
-                        </label>
-
-                        <input type="number"
-                               class="form-control form-control-sm text-end"
-                               @bind="MonthlyValues[index]"
-                               @bind:event="oninput" />
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-tags" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Income details</h3>
+                        <p>Classify and describe this projected income stream.</p>
                     </div>
-                }
-            </div>
-            @* <div class="sales-input-pane" style="max-height: 260px; overflow-y: auto;">
-                @for (int i = 0; i < 12; i++)
-                {
-                    int index = i;                   
-                    <div class="input-group input-group-sm mb-1">
-                        
-                        <span class="input-group-text text-xs">Month-@(index + 1)</span>
-                        <input type="number" class="form-control-compact text-end" @bind="MonthlyValues[index]" @bind:event="oninput" />
+                </header>
+                <div class="viq-form-grid">
+                    <div class="viq-form-field">
+                        <label>Income type category</label>
+                        <DDLookupComponent SourceKey="DDLookupEnums.IncomeTypes"
+                                           @bind-Value="FormModel.IncomeTypeId" />
                     </div>
-                }
-            </div> *@
+                    <div class="viq-form-field">
+                        <label for="incomeDescription">Income description</label>
+                        <input id="incomeDescription" type="text" class="viq-form-control"
+                               @bind="FormModel.Description" />
+                    </div>
+                    <label class="viq-toggle-card" for="incomeVatSwitch">
+                        <span>
+                            <strong>Include VAT (+15%)</strong>
+                            <small>Add VAT to the projected sales total.</small>
+                        </span>
+                        <input id="incomeVatSwitch" class="viq-switch" type="checkbox"
+                               checked="@(FormModel.IncludeVAT > 0)"
+                               @onchange="@(e => FormModel.IncludeVAT = (bool)e.Value! ? 1 : 0)"
+                               value="true" />
+                    </label>
+                </div>
+            </section>
 
-            <div class="p-2 bg-light rounded mt-3">
-                <div class="d-flex justify-content-between text-xs"><span>Total:</span> <b>R @GrandCalculatedTotalSum.ToString("N2")</b></div>
-            </div>
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-distribute-horizontal" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Quick distribution</h3>
+                        <p>Split an annual amount evenly across all months.</p>
+                    </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="salesAnnualTarget">Annual target amount</label>
+                        <input id="salesAnnualTarget" type="number" class="viq-form-control"
+                               @bind="BulkAnnualValueTarget" />
+                    </div>
+                    <div class="viq-form-field">
+                        <label>Distribution action</label>
+                        <button class="viq-button viq-button-secondary" type="button"
+                                @onclick="DistributeAnnualValueEvenly">
+                            <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                            <span>Apply split</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-            <div class="mt-3 border-top pt-2 d-flex gap-2">
-                <button class="btn btn-primary btn-sm flex-fill" @onclick="ExecuteSaveWorkflowAsync">Save</button>
-                <button class="btn btn-outline-secondary btn-sm" @onclick="CancelFormAsync">Cancel</button>
-            </div>
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Assessment period sales projections</h3>
+                        <p>Enter the projected sales value for each month.</p>
+                    </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        int index = i;
+                        <div class="viq-form-field">
+                            <label for="@($"salesMonth{index + 1}")">Month @(index + 1)</label>
+                            <input id="@($"salesMonth{index + 1}")" type="number"
+                                   class="viq-form-control"
+                                   @bind="MonthlyValues[index]"
+                                   @bind:event="oninput" />
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Total</h3>
+                        <p>R @GrandCalculatedTotalSum.ToString("N2")</p>
+                    </div>
+                </header>
+            </section>
+
+            <footer class="viq-form-actions">
+                <button class="viq-button viq-button-primary" @onclick="ExecuteSaveWorkflowAsync">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>Save</span>
+                </button>
+                <button class="viq-button viq-button-secondary" @onclick="CancelFormAsync">Cancel</button>
+            </footer>
         </EditForm>
     }
 </div>

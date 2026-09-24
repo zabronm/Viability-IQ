@@ -41,138 +41,26 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                 _logger.LogInformation("Fetching KPI metrics for userId: {UserId}", userId);
 
                 var query = @"
-                    DECLARE @CurrentMonth INT = MONTH(GETUTCDATE());
-                    DECLARE @PreviousMonth INT = MONTH(DATEADD(MONTH, -1, GETUTCDATE()));
-                    DECLARE @CurrentYear INT = YEAR(GETUTCDATE());
-                    DECLARE @PreviousYear INT = YEAR(DATEADD(MONTH, -1, GETUTCDATE()));
-
                     SELECT
-                        -- Current Month Metrics
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'InProgress'
-                            AND MONTH(CreatedDate) = @CurrentMonth
-                            AND YEAR(CreatedDate) = @CurrentYear), 0
-                        ) AS ActiveAssessments,
-                        
-                        -- Active Assessments Trend (vs Previous Month)
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'InProgress'
-                            AND MONTH(CreatedDate) = @CurrentMonth
-                            AND YEAR(CreatedDate) = @CurrentYear), 0
-                        ) - COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'InProgress'
-                            AND MONTH(CreatedDate) = @PreviousMonth
-                            AND YEAR(CreatedDate) = @PreviousYear), 0
-                        ) AS ActiveAssessmentsChange,
-                        
-                        -- Completed This Month
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'Completed'
-                            AND MONTH(CompletedDate) = @CurrentMonth
-                            AND YEAR(CompletedDate) = @CurrentYear), 0
-                        ) AS CompletedAssessments,
-                        
-                        -- Completed Trend
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'Completed'
-                            AND MONTH(CompletedDate) = @CurrentMonth
-                            AND YEAR(CompletedDate) = @CurrentYear), 0
-                        ) - COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'Completed'
-                            AND MONTH(CompletedDate) = @PreviousMonth
-                            AND YEAR(CompletedDate) = @PreviousYear), 0
-                        ) AS CompletedAssessmentsChange,
-                        
-                        -- Pending Reviews (for current user)
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE (ReviewedByUserId = @UserId OR ApprovedByUserId IS NULL)
-                            AND Status = 'Pending'), 0
-                        ) AS PendingReviews,
-                        
-                        -- Pending Reviews Trend (today vs yesterday)
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE (ReviewedByUserId = @UserId OR ApprovedByUserId IS NULL)
-                            AND Status = 'Pending'
-                            AND CAST(ModifiedDate AS DATE) = CAST(GETUTCDATE() AS DATE)), 0
-                        ) - COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE (ReviewedByUserId = @UserId OR ApprovedByUserId IS NULL)
-                            AND Status = 'Pending'
-                            AND CAST(ModifiedDate AS DATE) = CAST(DATEADD(DAY, -1, GETUTCDATE()) AS DATE)), 0
-                        ) AS PendingReviewsChange,
-                        
-                        -- Your Workload (all assessments assigned)
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId), 0
-                        ) AS YourWorkload,
-                        
-                        -- Workload Trend
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId
-                            AND MONTH(CreatedDate) = @CurrentMonth
-                            AND YEAR(CreatedDate) = @CurrentYear), 0
-                        ) AS YourWorkloadChange,
-                        
-                        -- Total Client Base (unique businesses user is associated with)
-                        COALESCE(
-                            (SELECT COUNT(DISTINCT b.BusinessId) 
-                            FROM tblBusiness b
-                            INNER JOIN tblAssessments a ON b.BusinessId = a.BusinessId
-                            WHERE a.AssignedToUserId = @UserId OR a.CreatedByUserId = @UserId), 0
-                        ) AS TotalClientBase,
-                        
-                        -- Client Base Trend (YoY)
-                        COALESCE(
-                            (SELECT COUNT(DISTINCT b.BusinessId) 
-                            FROM tblBusiness b
-                            INNER JOIN tblAssessments a ON b.BusinessId = a.BusinessId
-                            WHERE (a.AssignedToUserId = @UserId OR a.CreatedByUserId = @UserId)
-                            AND YEAR(b.CreatedDate) = @CurrentYear), 0
-                        ) - COALESCE(
-                            (SELECT COUNT(DISTINCT b.BusinessId) 
-                            FROM tblBusiness b
-                            INNER JOIN tblAssessments a ON b.BusinessId = a.BusinessId
-                            WHERE (a.AssignedToUserId = @UserId OR a.CreatedByUserId = @UserId)
-                            AND YEAR(b.CreatedDate) = @PreviousYear), 0
-                        ) AS TotalClientBaseChange,
-                        
-                        -- Branch Assessments
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments a
-                            WHERE a.AssignedToUserId = @UserId
-                            AND MONTH(a.CreatedDate) = @CurrentMonth
-                            AND YEAR(a.CreatedDate) = @CurrentYear), 0
-                        ) AS BranchAssessments,
-                        
-                        -- Branch Assessments Trend
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments a
-                            WHERE a.AssignedToUserId = @UserId
-                            AND MONTH(a.CreatedDate) = @CurrentMonth
-                            AND YEAR(a.CreatedDate) = @CurrentYear), 0
-                        ) - COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments a
-                            WHERE a.AssignedToUserId = @UserId
-                            AND MONTH(a.CreatedDate) = @PreviousMonth
-                            AND YEAR(a.CreatedDate) = @PreviousYear), 0
-                        ) AS BranchAssessmentsChange
-                ";
+                        COUNT(*) AS TotalAssessments,
+                        SUM(CASE WHEN StatusId = 1 THEN 1 ELSE 0 END) AS DraftAssessments,
+                        SUM(CASE WHEN StatusId = 2 THEN 1 ELSE 0 END) AS InProgressAssessments,
+                        SUM(CASE WHEN StatusId = 3 THEN 1 ELSE 0 END) AS ReadyForReviewAssessments,
+                        SUM(CASE WHEN ProgressPercentage >= 100 AND StatusId <> 4 THEN 1 ELSE 0 END) AS ProjectionReadyAssessments,
+                        SUM(CASE WHEN StatusId = 4 THEN 1 ELSE 0 END) AS CompletedAssessments,
+                        SUM(CASE WHEN StatusId IN (2, 3) THEN 1 ELSE 0 END) AS ActiveAssessments,
+                        0 AS ActiveAssessmentsChange,
+                        0 AS CompletedAssessmentsChange,
+                        SUM(CASE WHEN StatusId = 3 THEN 1 ELSE 0 END) AS PendingReviews,
+                        0 AS PendingReviewsChange,
+                        COUNT(*) AS YourWorkload,
+                        0 AS YourWorkloadChange,
+                        COUNT(DISTINCT BusinessId) AS TotalClientBase,
+                        0 AS TotalClientBaseChange,
+                        COUNT(*) AS BranchAssessments,
+                        0 AS BranchAssessmentsChange
+                    FROM tblAssessments
+                    WHERE CreatedBy = @UserId AND Active = 1;";
 
                 using var connection = _dbConnectionFactory.CreateConnection();
                 var kpiMetrics = await connection.QueryFirstOrDefaultAsync<KPIMetricsModel>(
@@ -212,7 +100,8 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                             WHERE b.BranchId = @BranchId
-                            AND a.Status = 'InProgress'
+                            AND a.Active = 1
+                            AND a.StatusId = 2
                             AND MONTH(a.CreatedDate) = @CurrentMonth
                             AND YEAR(a.CreatedDate) = @CurrentYear), 0
                         ) AS ActiveAssessments,
@@ -222,14 +111,16 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                             WHERE b.BranchId = @BranchId
-                            AND a.Status = 'InProgress'
+                            AND a.Active = 1
+                            AND a.StatusId = 2
                             AND MONTH(a.CreatedDate) = @CurrentMonth
                             AND YEAR(a.CreatedDate) = @CurrentYear), 0
                         ) - COALESCE(
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                             WHERE b.BranchId = @BranchId
-                            AND a.Status = 'InProgress'
+                            AND a.Active = 1
+                            AND a.StatusId = 2
                             AND MONTH(a.CreatedDate) = @PreviousMonth
                             AND YEAR(a.CreatedDate) = @PreviousYear), 0
                         ) AS ActiveAssessmentsChange,
@@ -239,7 +130,8 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                             WHERE b.BranchId = @BranchId
-                            AND a.Status = 'Completed'
+                            AND a.Active = 1
+                            AND a.StatusId = 4
                             AND MONTH(a.CompletedDate) = @CurrentMonth
                             AND YEAR(a.CompletedDate) = @CurrentYear), 0
                         ) AS CompletedAssessments,

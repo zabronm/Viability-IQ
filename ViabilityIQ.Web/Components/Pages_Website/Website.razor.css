@@ -1,0 +1,569 @@
+﻿:root {
+    --vi-primary-green: #0f8a7b;
+    --vi-dark-green: #0b665c;
+    --vi-accent-orange: #d97706;
+    --vi-slate: #29465B;
+    --vi-bg: #f8fafc;
+    --vi-border: #e2e8f0;
+    --vi-text: #334155;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--vi-bg);
+    color: var(--vi-text);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+}
+
+.vi-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.vi-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--vi-border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.vi-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.vi-logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--vi-primary-green);
+    letter-spacing: -0.5px;
+}
+
+    .vi-logo span {
+        color: var(--vi-accent-orange);
+    }
+
+.vi-nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+    .vi-nav-links a {
+        text-decoration: none;
+        color: var(--vi-slate);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+        .vi-nav-links a:hover {
+            color: var(--vi-primary-green);
+        }
+
+.vi-nav-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Buttons */
+.vi-btn-primary {
+    background: linear-gradient(135deg, var(--vi-primary-green), var(--vi-dark-green));
+    color: #ffffff;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 4px 12px rgba(15, 138, 123, 0.2);
+}
+
+.vi-btn-secondary {
+    background: transparent;
+    color: var(--vi-slate);
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.vi-btn-outline {
+    background: #ffffff;
+    color: var(--vi-slate);
+    border: 1px solid var(--vi-border);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.vi-btn-lg {
+    padding: 12px 24px;
+    font-size: 1rem;
+}
+
+/* Hero Section */
+.vi-hero {
+    padding: 80px 0 60px;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, var(--vi-bg) 100%);
+}
+
+.vi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e2f3f0;
+    color: var(--vi-primary-green);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.vi-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--vi-slate);
+    max-width: 800px;
+    margin: 0 auto 20px;
+    line-height: 1.2;
+}
+
+    .vi-hero h1 .highlight {
+        color: var(--vi-primary-green);
+    }
+
+.vi-hero p {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 650px;
+    margin: 0 auto 30px;
+}
+
+.vi-hero-btns {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+}
+
+/* Mockup */
+.vi-mockup-card {
+    background: #ffffff;
+    border: 1px solid var(--vi-border);
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    box-shadow: 0 20px 40px rgba(41, 70, 91, 0.08);
+    overflow: hidden;
+    text-align: left;
+}
+
+.vi-mockup-header {
+    background: #f1f5f9;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--vi-border);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+    .dot.red {
+        background: #ef4444;
+    }
+
+    .dot.yellow {
+        background: #f59e0b;
+    }
+
+    .dot.green {
+        background: #10b981;
+    }
+
+.vi-mockup-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-left: 10px;
+}
+
+.vi-mockup-body {
+    padding: 24px;
+}
+
+.vi-mockup-kpi {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+    .vi-mockup-kpi div {
+        background: #f8fafc;
+        padding: 14px;
+        border-radius: 8px;
+        border: 1px solid var(--vi-border);
+    }
+
+    .vi-mockup-kpi span {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 700;
+        display: block;
+    }
+
+    .vi-mockup-kpi strong {
+        font-size: 1.1rem;
+        color: var(--vi-slate);
+    }
+
+.vi-mockup-table-placeholder {
+    background: #f8fafc;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px dashed var(--vi-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px;
+}
+
+.row-line {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    width: 100%;
+}
+
+    .row-line.short {
+        width: 40%;
+    }
+
+    .row-line.medium {
+        width: 70%;
+    }
+
+/* Features Grid */
+.vi-features {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.vi-section-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+    .vi-section-title h2 {
+        font-size: 2rem;
+        color: var(--vi-slate);
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .vi-section-title p {
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+.vi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.vi-card {
+    background: var(--vi-bg);
+    border: 1px solid var(--vi-border);
+    padding: 24px;
+    border-radius: 12px;
+}
+
+.vi-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+}
+
+    .vi-card-icon.green {
+        background: #e2f3f0;
+        color: var(--vi-primary-green);
+    }
+
+    .vi-card-icon.orange {
+        background: #fef3c7;
+        color: var(--vi-accent-orange);
+    }
+
+.vi-card h3 {
+    font-size: 1.05rem;
+    color: var(--vi-slate);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.vi-card p {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* Pricing */
+.vi-pricing {
+    padding: 80px 0;
+    background: var(--vi-bg);
+}
+
+.vi-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.vi-price-card {
+    background: #ffffff;
+    border: 1px solid var(--vi-border);
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+    .vi-price-card.featured {
+        border-color: var(--vi-primary-green);
+        box-shadow: 0 15px 35px rgba(15, 138, 123, 0.12);
+        transform: scale(1.03);
+    }
+
+.vi-popular-badge {
+    position: absolute;
+    top: -12px;
+    right: 24px;
+    background: var(--vi-accent-orange);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.vi-price-card h3 {
+    font-size: 1.25rem;
+    color: var(--vi-slate);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.vi-price-desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+    min-height: 40px;
+}
+
+.vi-price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--vi-slate);
+    margin-bottom: 20px;
+}
+
+    .vi-price span {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+.vi-price-features {
+    list-style: none;
+    margin-bottom: 30px;
+    flex-grow: 1;
+}
+
+    .vi-price-features li {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .vi-price-features i {
+        color: var(--vi-primary-green);
+    }
+
+/* Contact Form Section */
+.vi-contact-section {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.vi-contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+    background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+    border: 1px solid var(--vi-border);
+    border-radius: 16px;
+    padding: 50px;
+}
+
+.vi-contact-info h2 {
+    font-size: 2rem;
+    color: var(--vi-slate);
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.vi-contact-info p {
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.vi-contact-perks {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+    .vi-contact-perks li {
+        font-weight: 600;
+        color: var(--vi-slate);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .vi-contact-perks i {
+        background: var(--vi-primary-green);
+        color: #fff;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 0.75rem;
+    }
+
+.vi-form-card {
+    background: #ffffff;
+    border: 1px solid var(--vi-border);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+    .vi-form-card h3 {
+        font-size: 1.3rem;
+        color: var(--vi-slate);
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+.vi-form-group {
+    margin-bottom: 16px;
+}
+
+    .vi-form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+.vi-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--vi-border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--vi-text);
+    background: #f8fafc;
+    outline: none;
+}
+
+    .vi-input:focus {
+        border-color: var(--vi-primary-green);
+        background: #ffffff;
+    }
+
+/* Footer */
+.vi-footer {
+    background: var(--vi-slate);
+    color: #ffffff;
+    padding: 40px 0;
+    text-align: center;
+}
+
+.vi-footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.vi-footer p {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.vi-socials {
+    display: flex;
+    gap: 20px;
+    font-size: 1.2rem;
+}
+
+    .vi-socials a {
+        color: #94a3b8;
+    }
+
+        .vi-socials a:hover {
+            color: #ffffff;
+        }
+
+@media (max-width: 1024px) {
+    .vi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vi-pricing-grid, .vi-contact-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .vi-price-card.featured {
+        transform: none;
+    }
+}

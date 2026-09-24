@@ -37,8 +37,13 @@
         else
         {
             <!-- KPI Widgets Section -->
-            <div class="p-0 mt-0 mb-1">
+            <div class="p-0 mt-0 mb-0">
                 <KPIWidgetsSectionComponent KPIMetrics="KPIData" OnKPIDrill="HandleKPIDrill" />
+            </div>
+                        
+            <!-- Recent Assessments Section -->
+            <div class="dashboard-component-wrapper" style="box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.7), 0 20px 35px -8px rgba(37, 99, 235, 0.4);">
+                <RecentAssessmentsSnapshotComponent Assessments="RecentAssessments" />
             </div>
 
             <!-- Row Two: Recent Activity (col-5) + Important Alerts (col-5) + Quick Actions (col-2) -->
@@ -55,10 +60,6 @@
                 </div>
             </div>
 
-            <!-- Recent Assessments Section -->
-            <div class="dashboard-component-wrapper" style="box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.7), 0 20px 35px -8px rgba(37, 99, 235, 0.4);">
-                <RecentAssessmentsSnapshotComponent Assessments="RecentAssessments" />
-            </div>
 
             <!-- Full-Width System Insights Section -->
             <div class="full-width-insight-container">

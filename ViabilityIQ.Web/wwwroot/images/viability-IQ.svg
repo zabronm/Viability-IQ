@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 110" width="460" height="110">
+  <style>
+    .brand { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-weight: 800; font-size: 44px; }
+    .viability { fill: #0f8a7b; }
+    .dot-iq { fill: #d97706; font-style: italic; }
+    .tagline { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-weight: 600; font-size: 13px; fill: #475569; letter-spacing: 3px; }
+  </style>
+  <text x="10" y="50" class="brand">
+    <tspan class="viability">Viability</tspan><tspan class="dot-iq">.IQ</tspan>
+  </text>
+  <text x="12" y="88" class="tagline">UNDERSTAND &#160;|&#160; PROJECT &#160;|&#160; DECIDE</text>
+</svg>

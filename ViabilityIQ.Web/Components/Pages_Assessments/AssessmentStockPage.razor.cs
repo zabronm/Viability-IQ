@@ -13,6 +13,7 @@ using ViabilityIQ.Web.Services;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments;
+using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
@@ -62,6 +63,27 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         #region Properties
 
         private decimal GrandTotalStockValue => FilteredStockList?.Sum(x => x.MonthlyValues.Sum()) ?? 0;
+        private decimal[] StockMonthlyTotals => Enumerable.Range(1, 12)
+            .Select(month => StockDataList.Sum(item => GetStockMonthValue(item, month)))
+            .ToArray();
+        private decimal TotalStockValue => StockMonthlyTotals.Sum();
+        private decimal AverageMonthlyStock => TotalStockValue / 12m;
+        private decimal OpeningStock => StockMonthlyTotals[0];
+        private decimal ClosingStock => StockMonthlyTotals[11];
+        private decimal PeakStock => StockMonthlyTotals.Max();
+        private int PeakStockMonth => Array.IndexOf(StockMonthlyTotals, PeakStock) + 1;
+        private decimal VatInclusiveStock => StockDataList
+            .Where(item => item.blIncludeVAT)
+            .Sum(item => Enumerable.Range(1, 12).Sum(month => GetStockMonthValue(item, month)));
+        private IReadOnlyList<AssessmentKpiCardItem> StockKpis =>
+        [
+            new("Total Stock Value", Money(TotalStockValue), "Projected 12-month inventory", "bi bi-boxes", "kpi-blue"),
+            new("Average Monthly Stock", Money(AverageMonthlyStock), "Average inventory value", "bi bi-calendar3", "kpi-teal"),
+            new("Opening Stock", Money(OpeningStock), "Month 1 inventory", "bi bi-box-arrow-in-right", "kpi-purple"),
+            new("Closing Stock", Money(ClosingStock), "Month 12 inventory", "bi bi-box-arrow-right", "kpi-slate"),
+            new("Peak Stock Month", Money(PeakStock), $"Highest value in Month {PeakStockMonth}", "bi bi-graph-up", "kpi-cyan"),
+            new("VAT-inclusive Stock", Money(VatInclusiveStock), "Inventory marked VAT inclusive", "bi bi-percent", "kpi-red")
+        ];
 
         #endregion
 
@@ -152,6 +174,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal GetTotalForMonth(int month) => FilteredStockList.Sum(x => x.MonthlyValues[month - 1]);
 
         private decimal GetGrandTotalStockValue() => FilteredStockList.Sum(x => x.MonthlyValues.Sum());
+
+        private static decimal GetStockMonthValue(AssessmentStockDto item, int month) => month switch
+        {
+            1 => item.Month_1, 2 => item.Month_2, 3 => item.Month_3, 4 => item.Month_4,
+            5 => item.Month_5, 6 => item.Month_6, 7 => item.Month_7, 8 => item.Month_8,
+            9 => item.Month_9, 10 => item.Month_10, 11 => item.Month_11, 12 => item.Month_12,
+            _ => 0m
+        };
+
+        private static string Money(decimal value) => $"R {value:N0}";
 
         private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
         {

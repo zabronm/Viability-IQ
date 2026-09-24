@@ -1,156 +1,179 @@
 @using ViabilityIQ.Shared.SharedModels
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
-<div class="vat-adjustment-container">
-    <div class="vat-adjustment-header mb-3">
-        <h6 class="mb-1 fw-bold">Bulk VAT Adjustments &amp; Overrides</h6>
-        <small class="text-muted">Assessment ID: @AssessmentId</small>
-    </div>
-
-    <div class="alert alert-info py-2 px-3 mb-3 text-xs">
-        <i class="bi bi-info-circle-fill me-1"></i>
-        These entries adjust the live VAT calculation without changing the underlying sales,
-        stock, or expense records.
-    </div>
-
-    <div class="row g-2 mb-3">
-        <div class="col-md-4">
-            <label class="form-label fw-semibold">Reason</label>
-            <select class="form-select form-select-sm" @bind="selectedReasonCode" disabled="@isLoading">
-                <option value="">Manual adjustment</option>
-                <option value="Bad Debt Relief">Bad Debt Relief</option>
-                <option value="Apportionment">Apportionment Adjustment</option>
-                <option value="Capital Goods">Capital Goods Correction</option>
-                <option value="Rounding">Manual Rounding</option>
-            </select>
-        </div>
-        <div class="col-md-8">
-            <label class="form-label fw-semibold">
-                Audit justification <span class="text-danger">*</span>
-            </label>
-            <input type="text"
-                   class="form-control form-control-sm"
-                   @bind="auditJustification"
-                   maxlength="350"
-                   disabled="@isLoading"
-                   placeholder="Explain why this adjustment is required" />
-        </div>
-    </div>
-
-    @if (isLoading)
+<div class="viq-form-shell">
+    @if (isLoading || isSaving)
     {
-        <div class="d-flex align-items-center justify-content-center py-5">
-            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-            <span>Loading VAT adjustments...</span>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive mb-3 vat-adjustments-table">
-            <table class="table table-sm mb-0 borderless-table align-middle">
-                <thead class="table-light sticky-top">
-                    <tr>
-                        <th class="col-month text-uppercase text-secondary" style="width: 90px;">Month</th>
-                        <th class="col-output text-uppercase text-secondary">Output VAT Adj (+/-)</th>
-                        <th class="col-input text-uppercase text-secondary">Input VAT Adj (+/-)</th>
-                        <th class="text-uppercase text-secondary">Month note</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (var index = 0; index < 12; index++)
-                    {
-                        var monthIndex = index;
-                        <tr>
-                            <td class="fw-semibold align-middle text-muted month-cell">
-                                @($"M{monthIndex + 1}")
-                            </td>
-                            <td class="p-1">
-                                <input type="number"
-                                       class="form-control form-control-sm text-end"
-                                       @bind="outputAdjustments[monthIndex]"
-                                       step="0.01"
-                                       placeholder="0.00" />
-                            </td>
-                            <td class="p-1">
-                                <input type="number"
-                                       class="form-control form-control-sm text-end"
-                                       @bind="inputAdjustments[monthIndex]"
-                                       step="0.01"
-                                       placeholder="0.00" />
-                            </td>
-                            <td class="p-1">
-                                <input type="text"
-                                       class="form-control form-control-sm"
-                                       @bind="monthNotes[monthIndex]"
-                                       maxlength="100"
-                                       placeholder="Optional" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="p-2 bg-light border rounded mb-3 totals-summary">
-            <div class="row g-2 text-xs fw-bold">
-                <div class="col-4">
-                    <small class="text-muted">Output Total:</small>
-                    <div>@GetTotalOutputAdjustments().ToString("C2")</div>
-                </div>
-                <div class="col-4">
-                    <small class="text-muted">Input Total:</small>
-                    <div>@GetTotalInputAdjustments().ToString("C2")</div>
-                </div>
-                <div class="col-4">
-                    <small class="text-muted">Net VAT Adjustment:</small>
-                    <div>@GetNetVatAdjustment().ToString("C2")</div>
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>@(isSaving ? "Saving VAT adjustments" : "Loading VAT adjustments")</strong>
+                    <span>@(isSaving ? "Please wait while the adjustments are committed." : "Please wait while existing entries are prepared.")</span>
                 </div>
             </div>
         </div>
     }
 
-    <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-        <button type="button"
-                class="btn btn-sm btn-outline-secondary px-4"
-                @onclick="HandleCancel"
-                disabled="@isSaving">
-            <i class="bi bi-x-circle me-1"></i>
-            <span>Cancel</span>
-        </button>
-        <button type="button"
-                class="btn btn-sm btn-primary px-4"
-                @onclick="HandleSave"
-                disabled="@(isSaving || isLoading)">
-            @if (isSaving)
+    <div class="viq-data-form" aria-label="VAT adjustments">
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+            <div>
+                <h2>Bulk VAT adjustments and overrides</h2>
+                <p>Assessment @AssessmentId · Adjust the live VAT calculation without changing source transactions.</p>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="status">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                @successMessage
+                <button type="button" class="btn-close"
+                        aria-label="Dismiss success message"
+                        @onclick="() => successMessage = string.Empty"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="viq-form-validation-summary" role="alert">
+                <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                @errorMessage
+                <button type="button" class="btn-close"
+                        aria-label="Dismiss error message"
+                        @onclick="() => errorMessage = string.Empty"></button>
+            </div>
+        }
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Adjustment context</h3>
+                    <p>Classify the change and provide the justification required for the audit trail.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="vatReason">Reason</label>
+                    <select id="vatReason" class="viq-form-control"
+                            @bind="selectedReasonCode" disabled="@isLoading">
+                        <option value="">Manual adjustment</option>
+                        <option value="Bad Debt Relief">Bad Debt Relief</option>
+                        <option value="Apportionment">Apportionment Adjustment</option>
+                        <option value="Capital Goods">Capital Goods Correction</option>
+                        <option value="Rounding">Manual Rounding</option>
+                    </select>
+                </div>
+
+                <div class="viq-form-field">
+                    <label for="auditJustification">Audit justification <span class="viq-required">*</span></label>
+                    <input id="auditJustification" type="text" class="viq-form-control"
+                           @bind="auditJustification" maxlength="350" disabled="@isLoading"
+                           placeholder="Explain why this adjustment is required" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Monthly adjustments</h3>
+                    <p>Enter positive or negative output and input VAT corrections for each month.</p>
+                </div>
+            </header>
+
+            @if (!isLoading)
             {
-                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                <span>Saving...</span>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Month</th>
+                                <th scope="col" class="text-end">Output VAT adjustment (+/-)</th>
+                                <th scope="col" class="text-end">Input VAT adjustment (+/-)</th>
+                                <th scope="col">Month note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var index = 0; index < 12; index++)
+                            {
+                                var monthIndex = index;
+                                <tr>
+                                    <th scope="row">M@(monthIndex + 1)</th>
+                                    <td>
+                                        <input type="number" class="viq-form-control text-end"
+                                               @bind="outputAdjustments[monthIndex]" step="0.01"
+                                               placeholder="0.00" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="viq-form-control text-end"
+                                               @bind="inputAdjustments[monthIndex]" step="0.01"
+                                               placeholder="0.00" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="viq-form-control"
+                                               @bind="monthNotes[monthIndex]" maxlength="100"
+                                               placeholder="Optional" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
-            else
-            {
-                <i class="bi bi-check-circle me-1"></i>
-                <span>Save Adjustments</span>
-            }
-        </button>
+        </section>
+
+        @if (!isLoading)
+        {
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Adjustment totals</h3>
+                        <p>Review the combined impact before saving.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label>Output total</label>
+                        <strong>@GetTotalOutputAdjustments().ToString("C2")</strong>
+                    </div>
+                    <div class="viq-form-field">
+                        <label>Input total</label>
+                        <strong>@GetTotalInputAdjustments().ToString("C2")</strong>
+                    </div>
+                    <div class="viq-form-field viq-form-span-2">
+                        <label>Net VAT adjustment</label>
+                        <strong>@GetNetVatAdjustment().ToString("C2")</strong>
+                    </div>
+                </div>
+            </section>
+        }
+
+        <footer class="viq-form-actions">
+            <button type="button" class="viq-button viq-button-secondary"
+                    @onclick="HandleCancel" disabled="@isSaving">
+                <i class="bi bi-x-circle" aria-hidden="true"></i>
+                <span>Cancel</span>
+            </button>
+            <button type="button" class="viq-button viq-button-primary"
+                    @onclick="HandleSave" disabled="@(isSaving || isLoading)">
+                @if (isSaving)
+                {
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span>Saving…</span>
+                }
+                else
+                {
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span>Save adjustments</span>
+                }
+            </button>
+        </footer>
     </div>
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="alert alert-success alert-dismissible fade show py-2 text-xs mt-3 mb-0">
-            <i class="bi bi-check-circle me-2"></i>@successMessage
-            <button type="button"
-                    class="btn-close btn-sm"
-                    @onclick="() => successMessage = string.Empty"></button>
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show py-2 text-xs mt-3 mb-0">
-            <i class="bi bi-exclamation-circle me-2"></i>@errorMessage
-            <button type="button"
-                    class="btn-close btn-sm"
-                    @onclick="() => errorMessage = string.Empty"></button>
-        </div>
-    }
 </div>

@@ -5,9 +5,9 @@
 }
 
 .settings-section-card {
-    background-color: #f8fafc; /* Theme off-blue/whitish background color matching main layout container */
+    background-color: #fff; /* #f8fafc; Theme off-blue/whitish background color matching main layout container */
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 24px;
     height: 100%;
 }

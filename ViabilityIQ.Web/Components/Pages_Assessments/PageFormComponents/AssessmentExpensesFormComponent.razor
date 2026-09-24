@@ -2,78 +2,129 @@
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Web.Components.CommonComponents
 
-<div class="px-1">
+<div class="viq-form-shell">
     @if (FormModel != null)
     {
-        <EditForm Model="@FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
+        <EditForm Model="@FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync"
+                  class="viq-data-form" aria-label="Assessment expense projection">
             <DataAnnotationsValidator />
 
-            <!-- Expense Category Row -->
-            <div class="row mb-2 align-items-center">
-                <div class="col-4"><label class="form-label text-xs fw-bold text-secondary mb-0">Expense Type</label></div>
-                <div class="col-8"><DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes" @bind-Value="FormModel.ExpenseTypeId" /></div>
-            </div>
-
-            <!-- Expense Item Lookup Row -->
-            <div class="row mb-2 align-items-center">
-                <div class="col-4"><label class="form-label text-xs fw-bold text-secondary mb-0">Expense Item</label></div>
-                <div class="col-8"><DDLookupComponent SourceKey="DDLookupEnums.ExpenseItems" @bind-Value="FormModel.ExpenseItemId" /></div>
-            </div>
-
-            <!-- Post to cashbook Row -->
-            <div class="row mb-3 align-items-center">
-                <div class="col-5"><label class="form-label text-xs fw-bold text-primary mb-0">Post to Cashbook?</label></div>
-                <div class="col-5"><InputCheckbox class="form-check-input" @bind-Value="FormModel.blSendToCashBook" /></div>
-            </div>
-
-            <!-- % of Sales Checkbox and Conditional Percentage Row -->
-            <div class="row mb-3 align-items-center">
-                <div class="col-5">
-                    <div class="form-check">
-                        <InputCheckbox class="form-check-input" id="salesCheck" @bind-Value="FormModel.blPercentageOfSalesUsed" @onclick="ToggleSalesPercentage" />
-                        <label class="form-check-label text-xs fw-bold text-primary" for="salesCheck">Use % of Sales?</label>
-                    </div>
-                </div>
-                @if (FormModel.blPercentageOfSalesUsed)
-                {
-                    <div class="col-4">
-                        <InputNumber class="form-control form-control-sm text-xs" style="width: 80px;" placeholder="%" @bind-Value="FormModel.PercentageOfSalesRate" />
-                    </div>
-                }
-            </div>
-
-            <!-- Allocation tool -->
-            <div class="card bg-light border-0 mb-3 p-2 rounded shadow-sm">
-                <label class="form-label text-xs fw-bold text-navy-brand uppercase">Apply Allocation (Amount to all months)</label>
-                <div class="input-group input-group-sm">
-                    <input type="number" class="form-control text-xs" @bind="FormModel.SameMonthlyAmount" />
-                    <button class="btn btn-outline-success text-xxs px-2" type="button" @onclick="ApplyMonthlyAllocation">Apply Allocation</button>
+            <div class="viq-form-intro">
+                <span class="viq-form-intro-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Expense projection</h2>
+                    <p>Configure expense classification, cashbook treatment and monthly allocations.</p>
                 </div>
             </div>
 
-            <!-- Projection Grid -->
-            <h6 class="text-xxs fw-bold text-secondary mb-1 uppercase">12-Month Projection</h6>
-            <div class="pe-1 border p-1.5 pt-1 rounded bg-light-subtle mb-2" style="max-height: 240px; overflow-y: auto;">
-                @for (int i = 0; i < 12; i++)
-                {
-                    int index = i;
-                    <div class="row align-items-center mb-1 g-2 mx-0">
-                        <div class="col-4 ps-4"><span class="small text-muted">Month @(index + 1)</span></div>
-                        <div class="col-8"><InputNumber class="form-control form-control-sm text-end text-xs" @bind-Value="MonthlyValues[index]" /></div>
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-tags" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Expense details</h3>
+                        <p>Classify the expense and choose how it is calculated.</p>
                     </div>
-                }
-            </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label>Expense type</label>
+                        <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes"
+                                           @bind-Value="FormModel.ExpenseTypeId" />
+                    </div>
+                    <div class="viq-form-field">
+                        <label>Expense item</label>
+                        <DDLookupComponent SourceKey="DDLookupEnums.ExpenseItems"
+                                           @bind-Value="FormModel.ExpenseItemId" />
+                    </div>
+                    <label class="viq-toggle-card" for="cashbookSwitch">
+                        <span>
+                            <strong>Post to cashbook?</strong>
+                            <small>Include this expense in cashbook projections.</small>
+                        </span>
+                        <InputCheckbox id="cashbookSwitch" class="viq-switch"
+                                       @bind-Value="FormModel.blSendToCashBook" />
+                    </label>
+                    <label class="viq-toggle-card" for="salesCheck">
+                        <span>
+                            <strong>Use % of sales?</strong>
+                            <small>Calculate the expense from projected sales.</small>
+                        </span>
+                        <InputCheckbox id="salesCheck" class="viq-switch"
+                                       @bind-Value="FormModel.blPercentageOfSalesUsed"
+                                       @onclick="ToggleSalesPercentage" />
+                    </label>
+                    @if (FormModel.blPercentageOfSalesUsed)
+                    {
+                        <div class="viq-form-field viq-form-span-2">
+                            <label for="salesPercentage">Percentage of sales</label>
+                            <InputNumber id="salesPercentage" class="viq-form-control"
+                                         placeholder="%" @bind-Value="FormModel.PercentageOfSalesRate" />
+                        </div>
+                    }
+                </div>
+            </section>
 
-            <!-- Total allocation row -->
-            <div class="d-flex justify-content-between p-2 rounded text-xs fw-bold mb-3" style="background-color: #e0f2fe; color: #1e3a8a;">
-                <span>TOTAL ALLOCATION</span>
-                <span>@MonthlyValues.Sum().ToString("N2")</span>
-            </div>
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-distribute-horizontal" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Apply allocation</h3>
+                        <p>Apply the same amount to every month.</p>
+                    </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="monthlyAllocation">Monthly amount</label>
+                        <input id="monthlyAllocation" type="number" class="viq-form-control"
+                               @bind="FormModel.SameMonthlyAmount" />
+                    </div>
+                    <div class="viq-form-field">
+                        <label>Allocation action</label>
+                        <button class="viq-button viq-button-secondary" type="button"
+                                @onclick="ApplyMonthlyAllocation">
+                            <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                            <span>Apply allocation</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-            <div class="d-flex gap-2 border-top pt-2">
-                <button type="submit" class="btn btn-primary btn-sm flex-fill">Save Changes</button>
-                @* <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CancelFormAsync">Cancel</button> *@
-            </div>
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>12-month projection</h3>
+                        <p>Enter the expense allocation for each month.</p>
+                    </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        int index = i;
+                        <div class="viq-form-field">
+                            <label for="@($"expenseProjectionMonth{index + 1}")">Month @(index + 1)</label>
+                            <InputNumber id="@($"expenseProjectionMonth{index + 1}")"
+                                         class="viq-form-control"
+                                         @bind-Value="MonthlyValues[index]" />
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Total allocation</h3>
+                        <p>@MonthlyValues.Sum().ToString("N2")</p>
+                    </div>
+                </header>
+            </section>
+
+            <footer class="viq-form-actions">
+                <button type="submit" class="viq-button viq-button-primary">Save changes</button>
+                @* <button type="button" class="viq-button viq-button-secondary" @onclick="CancelFormAsync">Cancel</button> *@
+            </footer>
         </EditForm>
     }
 </div>

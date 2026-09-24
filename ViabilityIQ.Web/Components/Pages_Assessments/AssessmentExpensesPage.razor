@@ -4,55 +4,50 @@
 
 @using ViabilityIQ.Shared.UtilityServices
 @using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents
 
-<div class="p-0 position-relative dashboard-workspace container-fluid mt-0 pt-0 assessment-print-page">
+<div class="p-0 position-relative dashboard-workspace container-fluid assessment-print-page">
     <PageHeading_Assessment _pageTitle="Expenses" PageTitle="Expenses & Outflow Management" CurrentPage="PageType.Expenses" />
 
-    <div class="row bg-white g-3 mt-1 mb-1 py-0 px-2" style="border-radius: 6px;">
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
-        <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12 mt-0 pt-0">          
-            <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
+        <div class="col-12 mt-0 pt-0">
+            <AssessmentKpiCardsComponent Items="@ExpenseKpis" AriaLabel="Expense key performance indicators" />
         </div>
 
         <!-- Expenses Data Entry Section -->
-        <div class="col-12 py-2">
+        <div class="col-12 py-1 mt-1">
             <div class="px-0 mb-3">
-                <div class="row g-2 align-items-center">
-                    <div class="row align-items-center mb-2 assessment-page-toolbar">
+                <div class="row g-2 align-items-center assessment-page-toolbar expenses-page-toolbar">
+                    <div class="col-xl-5 col-12 d-flex gap-2 expenses-toolbar-primary">
+                        <button class="btn btn-success btn-sm text-xs"
+                                @onclick="AddExpenseStream">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Add Expense Stream
+                        </button>
 
-                        <!-- Left -->
-                        <div class="col-md-6 d-flex gap-2">
-                            <button class="btn btn-success btn-sm text-xs"
-                                    @onclick="AddExpenseStream">
-                                <i class="bi bi-plus-circle me-1"></i>
-                                Add Expense Stream
-                            </button>
+                        <button class="btn btn-outline-success btn-sm text-xs"
+                                @onclick="OpenBulkImport">
+                            <i class="bi bi-upload me-1"></i>
+                            Bulk Expenses Import
+                        </button>
+                    </div>
 
-                            <button class="btn btn-outline-success btn-sm text-xs"
-                                    @onclick="OpenBulkImport">
-                                <i class="bi bi-upload me-1"></i>
-                                Bulk Expenses Import
-                            </button>
+                    <div class="col-xl-7 col-12 d-flex justify-content-end align-items-center gap-2 expenses-toolbar-actions">
+                        <AssessmentPrintButton />
+                        <div class="assessment-page-filter">
+                            <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes"
+                                               @bind-Value="SelectedFilterId"
+                                               Placeholder="All Expense Types" />
                         </div>
 
-                        <!-- Right -->
-                        <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
-                            <AssessmentPrintButton />
-                            <div class="assessment-page-filter">
-                                <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes"
-                                                   @bind-Value="SelectedFilterId"
-                                                   Placeholder="All Expense Types" />
-                            </div>
-
-                            <label class="assessment-page-search">
-                                <i class="bi bi-search"></i>
-                                <input type="search"
-                                       placeholder="Search expenses..."
-                                       @bind="SearchQuery"
-                                       @bind:event="oninput" />
-                            </label>
-                        </div>
+                        <label class="assessment-page-search">
+                            <i class="bi bi-search"></i>
+                            <input type="search"
+                                   placeholder="Search expenses..."
+                                   @bind="SearchQuery"
+                                   @bind:event="oninput" />
+                        </label>
                     </div>
                 </div>
             </div>

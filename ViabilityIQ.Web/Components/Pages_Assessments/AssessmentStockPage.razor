@@ -3,26 +3,27 @@
 @layout MainLayout_Assessment
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents
 @using ViabilityIQ.Shared.UtilityServices
 
 <div class="p-0 position-relative dashboard-workspace container-fluid assessment-print-page">
     <PageHeading_Assessment _pageTitle="Stock" PageTitle="Stock Management & Valuation" CurrentPage="PageType.Stock" />
 
-    <div class="row bg-white g-3 mt-2 py-2 px-2" style="border-radius: 6px;">
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
-        
-        <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
         <div class="col-12 mt-0 pt-0">
-            <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
+            <AssessmentKpiCardsComponent Items="@StockKpis" AriaLabel="Stock key performance indicators" />
         </div>
 
         <!-- Search and Add Row -->
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center gap-3 assessment-page-toolbar">
-                <button type="button" class="btn btn-success btn-sm" @onclick="() => OpenStockDataEntryPanel(0)">
-                    <i class="bi bi-plus-circle me-1"></i> Add Inventory
-                </button>
-                <div class="d-flex justify-content-end align-items-center gap-2">
+                <div class="col-md-4">
+                    @* <button type="button" class="btn btn-success btn-sm" @onclick="() => OpenStockDataEntryPanel(0)">
+                        <i class="bi bi-plus-circle me-1"></i> Add Inventory
+                    </button> *@
+                </div>                
+                <div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
                     <AssessmentPrintButton />
                     <label class="assessment-page-search">
                         <i class="bi bi-search"></i>

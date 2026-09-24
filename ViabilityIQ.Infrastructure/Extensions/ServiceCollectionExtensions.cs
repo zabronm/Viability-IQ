@@ -52,6 +52,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDashboardDataService, DashboardDataService>();
         services.AddScoped<INotificationItemRepository, NotificationItemRepository>();
 
+
+        //=========== LEAD SUBMISSION REPOSITORY ===========
+        services.AddScoped<ILeadRepository, LeadRepository>();
+
+        //=========== 
+        services.AddScoped<IAssessmentReadinessService, AssessmentReadinessService>();
+
         return services;
     }
 }

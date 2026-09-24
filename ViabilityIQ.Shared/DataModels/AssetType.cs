@@ -17,8 +17,7 @@ namespace ViabilityIQ.Shared.DataModels
         [ForeignKey(nameof(AssetCategory))]
         public long AssetCategoryId { get; set; }
 
-        public string TypeName { get; set; } = string.Empty;
-        public string? Description { get; set; }
+        public string TypeName { get; set; } = string.Empty;        
         public decimal DefaultDepreciationRate { get; set; }  // Default % for this type
         public int? DefaultUsefulLifeYears { get; set; }
         public bool IsDepreciable { get; set; }

@@ -1,1 +1,183 @@
-﻿
+@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+
+<div class="viq-form-shell">
+    @if (isLoading || isSaving)
+    {
+        <div class="viq-form-busy">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner"></span>
+                <div>
+                    <strong>@(isSaving ? "Saving asset type" : "Loading asset type")</strong>
+                    <span>Synchronizing the workspace record...</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!isLoading)
+    {
+        <EditForm Model="@type" OnSubmit="@(_ => HandleSubmit())" class="viq-data-form">
+            <DataAnnotationsValidator />
+
+            @if (validationErrors.Any())
+            {
+                <div class="viq-form-validation-summary" role="alert">
+                    <strong>Review the following:</strong>
+                    <ul class="mb-0">
+                        @foreach (var error in validationErrors.Values)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <section class="viq-form-section">
+                <div class="viq-form-section-heading">
+                    <span><i class="bi bi-card-list"></i></span>
+                    <div>
+                        <h3>Asset classification</h3>
+                        <p>Information used when registering and grouping business assets.</p>
+                    </div>
+                </div>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="assetTypeName">Asset Type Name <span class="viq-required">*</span></label>
+                        <InputText id="assetTypeName"
+                                   class="@($"viq-form-control {(HasError(nameof(type.TypeName)) ? "invalid" : string.Empty)}")"
+                                   @bind-Value="type.TypeName" />
+                        @if (HasError(nameof(type.TypeName)))
+                        {
+                            <div class="viq-form-validation">@GetError(nameof(type.TypeName))</div>
+                        }
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="assetCategory">Asset Category <span class="viq-required">*</span></label>
+                        <InputSelect id="assetCategory"
+                                     class="@($"viq-form-control {(HasError(nameof(type.AssetCategoryId)) ? "invalid" : string.Empty)}")"
+                                     @bind-Value="type.AssetCategoryId">
+                            <option value="0">Select an asset category</option>
+                            @foreach (var category in categoriesList.Where(item => item.Active))
+                            {
+                                <option value="@category.AssetCategoryId">@category.CategoryName</option>
+                            }
+                        </InputSelect>
+                        @if (HasError(nameof(type.AssetCategoryId)))
+                        {
+                            <div class="viq-form-validation">@GetError(nameof(type.AssetCategoryId))</div>
+                        }
+                    </div>
+
+                    @* <div class="viq-form-field viq-form-span-2">
+                        <label for="assetTypeDescription">Description</label>
+                        <InputTextArea id="assetTypeDescription"
+                                       class="viq-form-control viq-form-textarea"
+                                       rows="2"
+                                       @bind-Value="type.Description" />
+                    </div> *@
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <div class="viq-form-section-heading">
+                    <span><i class="bi bi-graph-down-arrow"></i></span>
+                    <div>
+                        <h3>Depreciation settings</h3>
+                        <p>Set the asset class and defaults used in financial projections.</p>
+                    </div>
+                </div>
+
+                <div class="viq-toggle-grid">
+                    <label class="viq-toggle-card" for="isCurrent">
+                        <span>
+                            <strong>@(type.IsCurrent ? "Current asset" : "Fixed asset")</strong>
+                            <small>Current assets usually convert to cash within one year.</small>
+                        </span>
+                        <InputCheckbox id="isCurrent" class="viq-switch" @bind-Value="type.IsCurrent" />
+                    </label>
+
+                    <label class="viq-toggle-card" for="isDepreciable">
+                        <span>
+                            <strong>@(IsDepreciable ? "Depreciable asset" : "Non-depreciable asset")</strong>
+                            <small>Indicate if this asset type is depriciable.</small>
+                        </span>
+                        <InputCheckbox id="isDepreciable" class="viq-switch" @bind-Value="IsDepreciable" />
+                    </label>
+                </div>
+
+                @if (IsDepreciable)
+                {
+                    <div class="viq-form-grid viq-form-grid-2">
+                        <div class="viq-form-field">
+                            <label for="depreciationRate">Default Depreciation Rate (%)</label>
+                            <InputNumber id="depreciationRate"
+                                         class="@($"viq-form-control {(HasError(nameof(type.DefaultDepreciationRate)) ? "invalid" : string.Empty)}")"
+                                         @bind-Value="type.DefaultDepreciationRate" />
+                            @if (HasError(nameof(type.DefaultDepreciationRate)))
+                            {
+                                <div class="viq-form-validation">@GetError(nameof(type.DefaultDepreciationRate))</div>
+                            }
+                        </div>
+
+                        <div class="viq-form-field">
+                            <label for="usefulLife">Default Useful Life (Years)</label>
+                            <InputNumber id="usefulLife"
+                                         class="@($"viq-form-control {(HasError(nameof(type.DefaultUsefulLifeYears)) ? "invalid" : string.Empty)}")"
+                                         @bind-Value="type.DefaultUsefulLifeYears" />
+                            @if (HasError(nameof(type.DefaultUsefulLifeYears)))
+                            {
+                                <div class="viq-form-validation">@GetError(nameof(type.DefaultUsefulLifeYears))</div>
+                            }
+                        </div>
+                    </div>
+                }
+            </section>
+
+            <section class="viq-form-section">
+                <div class="viq-form-section-heading">
+                    <span><i class="bi bi-toggles"></i></span>
+                    <div>
+                        <h3>Availability</h3>
+                        <p>Control whether this asset type can be selected for new records.</p>
+                    </div>
+                </div>
+
+                <div class="viq-form-grid">
+                    <div class="viq-form-field">
+                        <label for="assetTypeRemarks">Internal Notes &amp; Description</label>
+                        <InputTextArea id="assetTypeRemarks"
+                                       class="viq-form-control viq-form-textarea"
+                                       rows="2"
+                                       @bind-Value="type.Remarks" />
+                    </div>
+                </div>
+
+                <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                    <span>
+                        <strong>@(type.Active ? "Asset type active" : "Asset type inactive")</strong>
+                        <small>Inactive asset types remain visible on existing records.</small>
+                    </span>
+                    <InputCheckbox id="isActive" class="viq-switch" @bind-Value="type.Active" />
+                </label>
+            </section>
+
+            <div class="viq-form-actions">
+                <button type="submit" class="viq-button viq-button-primary" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2-square"></i>
+                        <span>@(AssetTypeId == 0 ? "Add Asset Type" : "Update Asset Type")</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    }
+</div>

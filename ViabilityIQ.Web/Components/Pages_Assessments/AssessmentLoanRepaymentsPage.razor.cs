@@ -12,6 +12,7 @@ using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Services;
 using static ViabilityIQ.Web.Components.CommonComponents.ViqAlertComponent;
+using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
@@ -48,6 +49,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private List<LoanRepaymentRowViewModel> LoanProfilesDataset { get; set; } = new();
         private List<AssessmentLoanRepaymentDto> LoanTypeLookupList { get; set; } = new();
+        private decimal TotalLoanValue => LoanProfilesDataset.Sum(loan => loan.LoanAmount);
+        private decimal ExpectedRepayments => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Expected));
+        private decimal InterestCost => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Interest));
+        private decimal ExtraRepayments => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Extra));
+        private decimal ScheduledOutflow => ExpectedRepayments + InterestCost + ExtraRepayments;
+        private IReadOnlyList<AssessmentKpiCardItem> LoanKpis =>
+        [
+            new("Total Loan Value", Money(TotalLoanValue), "Original principal value", "bi bi-bank", "kpi-blue"),
+            new("Scheduled Outflow", Money(ScheduledOutflow), "Total projected repayments", "bi bi-cash-stack", "kpi-teal"),
+            new("Expected Repayments", Money(ExpectedRepayments), "Scheduled principal repayments", "bi bi-calendar-check", "kpi-purple"),
+            new("Interest Cost", Money(InterestCost), "Projected finance cost", "bi bi-percent", "kpi-red"),
+            new("Extra Repayments", Money(ExtraRepayments), "Additional repayments", "bi bi-plus-circle", "kpi-cyan"),
+            new("Active Loans", LoanProfilesDataset.Count.ToString("N0"), "Active loan profiles", "bi bi-list-check", "kpi-slate")
+        ];
 
         // Sorting State for Loan Profile Type
         private bool isLoanProfileAscending = true;
@@ -166,6 +181,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                             return new LoanRepaymentRowViewModel
                             {
                                 LoanId = group.Key,
+                                LoanAmount = firstRow.LoanAmount,
                                 LoanTypeName = firstRow.LoanTypeName ?? "Unnamed Loan Profile",
                                 BankName = firstRow.BankName ?? "Unknown Institution",
                                 StartMonth = firstRow.StartMonth,
@@ -421,6 +437,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             return LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(x => x.Total));
         }
 
+        private static string Money(decimal value) => $"R {value:N0}";
+
         #endregion
 
         #region Disposal
@@ -451,6 +469,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
     public class LoanRepaymentRowViewModel
     {
         public long LoanId { get; set; }
+        public decimal LoanAmount { get; set; }
         public string LoanTypeName { get; set; } = string.Empty;
         public int StartMonth { get; set; }
         public string BankName { get; set; } = string.Empty;

@@ -1,88 +1,141 @@
 ﻿@using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Shared.SharedModels
 
-<div class="p-3 bg-white">
+<div class="viq-form-shell">
     @if (IsLoading)
     {
-        <div class="p-5 d-flex flex-column align-items-center justify-content-center text-center">
-            <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
-            <div>Synchronizing assessment matrix parameters...</div>
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Loading assessment settings</strong>
+                    <span>Please wait while the assessment parameters are prepared.</span>
+                </div>
+            </div>
         </div>
     }
     else if (Model != null)
     {
-        <EditForm Model="@Model" OnValidSubmit="ExecuteSaveWorkflow">
+        <EditForm Model="@Model" OnValidSubmit="ExecuteSaveWorkflow"
+                  class="viq-data-form" aria-label="Assessment settings">
             <DataAnnotationsValidator />
-            <ValidationSummary class="alert alert-danger p-2 rounded mb-3" style="font-size: 0.85rem;" />
 
-            <div class="row g-2">
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Case Number</label>
-                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.CaseNumber" readonly disabled />
+            <div class="viq-form-intro">
+                <span class="viq-form-intro-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Assessment settings</h2>
+                    <p>Review the assessment identity and configure projection-wide financial assumptions.</p>
                 </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Assessment Start Date</label>
-                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Created Date</label>
-                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")" readonly disabled />
-                </div>
-
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">VAT Rate (%)</label>
-                    <input type="number" class="form-control form-control-sm" @bind-value="Model.VATRate" />
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Opening Balance: Assets (R)</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light">R</span>
-                        <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.OpeningBalance_Assets" />
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Opening Balance: Bank (R)</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light">R</span>
-                        <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.OpeningBalance_Bank" />
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Interest On Overdraft (%)</label>
-                    <input type="number" step="0.01" class="form-control form-control-sm" @bind-value="Model.InterestOnOverDraft" />
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label text-muted mb-0">Depreciation Projected Amount (R)</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light">R</span>
-                        <input type="number" step="0.01" class="form-control text-end" @bind-value="Model.DepreciationProjectedAmount" />
-                    </div>
-                </div>
-
             </div>
 
-            <div class="mt-4 pt-2 d-flex justify-content-end align-items-center">
-                @if (IsSubmitting)
-                {
-                    <button type="button" class="btn btn-sm btn-secondary px-4 style-opacity-75" disabled>
-                        <span class="spinner-border spinner-border-sm me-1" role="status"></span> Storing Buffers...
-                    </button>
-                }
-                else
-                {
-                    <button type="submit" class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm">
-                        <i class="bi bi-save me-1"></i> Save Changes
-                    </button>
-                }
-            </div>
+            <ValidationSummary class="viq-form-validation-summary" />
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-fingerprint" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Assessment identity</h3>
+                        <p>System-managed reference and date information.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field viq-form-span-2">
+                        <label for="caseNumber">Case number</label>
+                        <input id="caseNumber" type="text" class="viq-form-control"
+                               value="@Model.CaseNumber" readonly disabled />
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="assessmentStartDate">Assessment start date</label>
+                        <input id="assessmentStartDate" type="text" class="viq-form-control"
+                               value="@Model.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="assessmentCreatedDate">Created date</label>
+                        <input id="assessmentCreatedDate" type="text" class="viq-form-control"
+                               value="@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")" readonly disabled />
+                    </div>
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-percent" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Tax and finance</h3>
+                        <p>Set the VAT rate and overdraft interest applied to projections.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="vatRate">VAT rate (%)</label>
+                        <input id="vatRate" type="number" class="viq-form-control"
+                               @bind-value="Model.VATRate" />
+                        <ValidationMessage For="@(() => Model.VATRate)" class="viq-form-validation" />
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="overdraftInterest">Interest on overdraft (%)</label>
+                        <input id="overdraftInterest" type="number" step="0.01"
+                               class="viq-form-control" @bind-value="Model.InterestOnOverDraft" />
+                        <ValidationMessage For="@(() => Model.InterestOnOverDraft)" class="viq-form-validation" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-wallet2" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Opening balances</h3>
+                        <p>Enter the asset and bank positions at the start of the assessment.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="openingAssets">Opening balance: assets (R)</label>
+                        <input id="openingAssets" type="number" step="0.01"
+                               class="viq-form-control text-end"
+                               @bind-value="Model.OpeningBalance_Assets" />
+                        <ValidationMessage For="@(() => Model.OpeningBalance_Assets)" class="viq-form-validation" />
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="openingBank">Opening balance: bank (R)</label>
+                        <input id="openingBank" type="number" step="0.01"
+                               class="viq-form-control text-end"
+                               @bind-value="Model.OpeningBalance_Bank" />
+                        <ValidationMessage For="@(() => Model.OpeningBalance_Bank)" class="viq-form-validation" />
+                    </div>
+
+                    <div class="viq-form-field viq-form-span-2">
+                        <label for="projectedDepreciation">Depreciation projected amount (R)</label>
+                        <input id="projectedDepreciation" type="number" step="0.01"
+                               class="viq-form-control text-end"
+                               @bind-value="Model.DepreciationProjectedAmount" />
+                        <ValidationMessage For="@(() => Model.DepreciationProjectedAmount)" class="viq-form-validation" />
+                    </div>
+                </div>
+            </section>
+
+            <footer class="viq-form-actions">
+                <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
+                    @if (IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Storing settings…</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-save" aria-hidden="true"></i>
+                        <span>Save changes</span>
+                    }
+                </button>
+            </footer>
         </EditForm>
     }
 </div>

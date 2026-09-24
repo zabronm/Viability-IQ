@@ -37,154 +37,34 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                 _logger.LogInformation("Fetching insights for userId: {UserId}", userId);
 
                 var query = @"
-                    DECLARE @CurrentMonth INT = MONTH(GETUTCDATE());
-                    DECLARE @CurrentYear INT = YEAR(GETUTCDATE());
-                    DECLARE @PreviousMonth INT = MONTH(DATEADD(MONTH, -1, GETUTCDATE()));
-                    DECLARE @PreviousYear INT = YEAR(DATEADD(MONTH, -1, GETUTCDATE()));
-
-                    DECLARE @TotalAssessments INT = (
-                        SELECT COUNT(*) FROM tblAssessments 
-                        WHERE AssignedToUserId = @UserId 
-                        AND MONTH(CreatedDate) = @CurrentMonth 
-                        AND YEAR(CreatedDate) = @CurrentYear
-                    );
+                    DECLARE @Total INT = (SELECT COUNT(*) FROM tblAssessments WHERE CreatedBy = @UserId AND Active = 1);
+                    DECLARE @CurrentCompleted INT = (SELECT COUNT(*) FROM tblAssessments WHERE CreatedBy = @UserId AND Active = 1 AND StatusId = 4 AND CompletedDate >= DATEFROMPARTS(YEAR(GETUTCDATE()), MONTH(GETUTCDATE()), 1));
+                    DECLARE @PreviousCompleted INT = (SELECT COUNT(*) FROM tblAssessments WHERE CreatedBy = @UserId AND Active = 1 AND StatusId = 4 AND CompletedDate >= DATEADD(MONTH, -1, DATEFROMPARTS(YEAR(GETUTCDATE()), MONTH(GETUTCDATE()), 1)) AND CompletedDate < DATEFROMPARTS(YEAR(GETUTCDATE()), MONTH(GETUTCDATE()), 1));
+                    DECLARE @CurrentCreated INT = (SELECT COUNT(*) FROM tblAssessments WHERE CreatedBy = @UserId AND Active = 1 AND CreatedDate >= DATEFROMPARTS(YEAR(GETUTCDATE()), MONTH(GETUTCDATE()), 1));
+                    DECLARE @PreviousCreated INT = (SELECT COUNT(*) FROM tblAssessments WHERE CreatedBy = @UserId AND Active = 1 AND CreatedDate >= DATEADD(MONTH, -1, DATEFROMPARTS(YEAR(GETUTCDATE()), MONTH(GETUTCDATE()), 1)) AND CreatedDate < DATEFROMPARTS(YEAR(GETUTCDATE()), MONTH(GETUTCDATE()), 1));
 
                     SELECT
-                        -- Completion Rate
-                        CASE 
-                            WHEN @TotalAssessments = 0 THEN 0
-                            ELSE CAST(
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId 
-                                AND Status = 'Completed'
-                                AND MONTH(CompletedDate) = @CurrentMonth 
-                                AND YEAR(CompletedDate) = @CurrentYear) 
-                                * 100.0 / @TotalAssessments AS INT
-                            )
-                        END AS CompletionRatePercent,
-
-                        -- Completion Rate Trend
-                        CASE 
-                            WHEN (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND MONTH(CreatedDate) = @PreviousMonth 
-                            AND YEAR(CreatedDate) = @PreviousYear) = 0 THEN 0
-                            ELSE CAST(
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId 
-                                AND Status = 'Completed'
-                                AND MONTH(CompletedDate) = @CurrentMonth 
-                                AND YEAR(CompletedDate) = @CurrentYear) 
-                                * 100.0 / 
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId 
-                                AND MONTH(CreatedDate) = @PreviousMonth 
-                                AND YEAR(CreatedDate) = @PreviousYear) AS INT
-                            ) - 50
-                        END AS CompletionRateTrend,
-
-                        -- Average Completion Days (this month)
-                        COALESCE(
-                            CAST(AVG(DATEDIFF(DAY, a.CreatedDate, a.CompletedDate)) AS INT),
-                            0
-                        ) AS AverageCompletionDays,
-
-                        -- Previous Average Completion Days
-                        COALESCE(
-                            (SELECT CAST(AVG(DATEDIFF(DAY, CreatedDate, CompletedDate)) AS INT) 
-                            FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'Completed'
-                            AND MONTH(CompletedDate) = @PreviousMonth 
-                            AND YEAR(CompletedDate) = @PreviousYear),
-                            0
-                        ) AS PreviousCompletionDays,
-
-                        -- Completion Time Trend
-                        COALESCE(
-                            CAST(AVG(DATEDIFF(DAY, a.CreatedDate, a.CompletedDate)) AS INT),
-                            0
-                        ) - COALESCE(
-                            (SELECT CAST(AVG(DATEDIFF(DAY, CreatedDate, CompletedDate)) AS INT) 
-                            FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status = 'Completed'
-                            AND MONTH(CompletedDate) = @PreviousMonth 
-                            AND YEAR(CompletedDate) = @PreviousYear),
-                            0
-                        ) AS CompletionTimeTrend,
-
-                        -- Active Assessments Count
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId AND Status = 'InProgress'), 0
-                        ) AS ActiveCount,
-
-                        -- Active Percentage
-                        CASE 
-                            WHEN (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) = 0 THEN 0
-                            ELSE CAST(
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId AND Status = 'InProgress') 
-                                * 100 / (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) AS INT
-                            )
-                        END AS ActivePercentage,
-
-                        -- Completed Count
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId AND Status = 'Completed'), 0
-                        ) AS CompletedCount,
-
-                        -- Completed Percentage
-                        CASE 
-                            WHEN (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) = 0 THEN 0
-                            ELSE CAST(
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId AND Status = 'Completed') 
-                                * 100 / (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) AS INT
-                            )
-                        END AS CompletedPercentage,
-
-                        -- Pending Count
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId AND Status = 'Pending'), 0
-                        ) AS PendingCount,
-
-                        -- Pending Percentage
-                        CASE 
-                            WHEN (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) = 0 THEN 0
-                            ELSE CAST(
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId AND Status = 'Pending') 
-                                * 100 / (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) AS INT
-                            )
-                        END AS PendingPercentage,
-
-                        -- Other Count (Draft, Archived, etc)
-                        COALESCE(
-                            (SELECT COUNT(*) FROM tblAssessments 
-                            WHERE AssignedToUserId = @UserId 
-                            AND Status NOT IN ('InProgress', 'Completed', 'Pending')), 0
-                        ) AS OtherCount,
-
-                        -- Other Percentage
-                        CASE 
-                            WHEN (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) = 0 THEN 0
-                            ELSE CAST(
-                                (SELECT COUNT(*) FROM tblAssessments 
-                                WHERE AssignedToUserId = @UserId 
-                                AND Status NOT IN ('InProgress', 'Completed', 'Pending')) 
-                                * 100 / (SELECT COUNT(*) FROM tblAssessments WHERE AssignedToUserId = @UserId) AS INT
-                            )
-                        END AS OtherPercentage
-                    FROM tblAssessments a
-                    WHERE a.AssignedToUserId = @UserId 
-                    AND a.Status = 'Completed'
-                    AND MONTH(a.CompletedDate) = @CurrentMonth 
-                    AND YEAR(a.CompletedDate) = @CurrentYear
-                ";
+                        @Total AS TotalAssessments,
+                        CASE WHEN @Total = 0 THEN 0 ELSE CAST(SUM(CASE WHEN StatusId = 4 THEN 1 ELSE 0 END) * 100.0 / @Total AS INT) END AS CompletionRatePercent,
+                        (CASE WHEN @CurrentCreated = 0 THEN 0 ELSE CAST(@CurrentCompleted * 100.0 / @CurrentCreated AS INT) END)
+                          - (CASE WHEN @PreviousCreated = 0 THEN 0 ELSE CAST(@PreviousCompleted * 100.0 / @PreviousCreated AS INT) END) AS CompletionRateTrend,
+                        COALESCE(CAST(AVG(CASE WHEN StatusId = 4 THEN DATEDIFF(DAY, CreatedDate, CompletedDate) END) AS INT), 0) AS AverageCompletionDays,
+                        0 AS PreviousCompletionDays,
+                        0 AS CompletionTimeTrend,
+                        SUM(CASE WHEN StatusId IN (2, 3) THEN 1 ELSE 0 END) AS ActiveCount,
+                        CASE WHEN @Total = 0 THEN 0 ELSE CAST(SUM(CASE WHEN StatusId IN (2, 3) THEN 1 ELSE 0 END) * 100.0 / @Total AS INT) END AS ActivePercentage,
+                        SUM(CASE WHEN StatusId = 4 THEN 1 ELSE 0 END) AS CompletedCount,
+                        CASE WHEN @Total = 0 THEN 0 ELSE CAST(SUM(CASE WHEN StatusId = 4 THEN 1 ELSE 0 END) * 100.0 / @Total AS INT) END AS CompletedPercentage,
+                        SUM(CASE WHEN StatusId = 3 THEN 1 ELSE 0 END) AS PendingCount,
+                        CASE WHEN @Total = 0 THEN 0 ELSE CAST(SUM(CASE WHEN StatusId = 3 THEN 1 ELSE 0 END) * 100.0 / @Total AS INT) END AS PendingPercentage,
+                        SUM(CASE WHEN StatusId IN (1, 5) THEN 1 ELSE 0 END) AS OtherCount,
+                        CASE WHEN @Total = 0 THEN 0 ELSE CAST(SUM(CASE WHEN StatusId IN (1, 5) THEN 1 ELSE 0 END) * 100.0 / @Total AS INT) END AS OtherPercentage,
+                        COALESCE(CAST(AVG(CAST(ProgressPercentage AS DECIMAL(10,2))) AS INT), 0) AS AverageReadinessPercent,
+                        SUM(CASE WHEN ProgressPercentage >= 100 THEN 1 ELSE 0 END) AS ProjectionReadyCount,
+                        SUM(CASE WHEN ProgressPercentage >= 100 AND StatusId <> 4 THEN 1 ELSE 0 END) AS ReadyButIncompleteCount,
+                        SUM(CASE WHEN StatusId IN (1, 2) AND ModifiedDate < DATEADD(DAY, -14, GETUTCDATE()) THEN 1 ELSE 0 END) AS StalledCount
+                    FROM tblAssessments
+                    WHERE CreatedBy = @UserId AND Active = 1;";
 
                 using var connection = _dbConnectionFactory.CreateConnection();
                 var insights = await connection.QueryFirstOrDefaultAsync<InsightsModel>(
@@ -192,11 +72,11 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                     new { UserId = userId }
                 );
 
-                // Get top performers
+                insights ??= new InsightsModel();
                 insights.TopPerformers = (await GetTopPerformersAsync(3)).ToList();
 
                 _logger.LogInformation("Insights retrieved for userId: {UserId}", userId);
-                return insights ?? new InsightsModel();
+                return insights;
             }
             catch (Exception ex)
             {
@@ -231,7 +111,8 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                                 (SELECT COUNT(*) FROM tblAssessments a
                                 INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                                 WHERE b.BranchId = @BranchId
-                                AND a.Status = 'Completed'
+                                AND a.Active = 1
+                                AND a.StatusId = 4
                                 AND MONTH(a.CompletedDate) = @CurrentMonth 
                                 AND YEAR(a.CompletedDate) = @CurrentYear) 
                                 * 100.0 / 
@@ -249,19 +130,25 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                         COALESCE(
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                            WHERE b.BranchId = @BranchId AND a.Status = 'InProgress'), 0
+                            WHERE b.BranchId = @BranchId
+                            AND a.Active = 1
+                            AND a.StatusId = 2), 0
                         ) AS ActiveCount,
                         0 AS ActivePercentage,
                         COALESCE(
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                            WHERE b.BranchId = @BranchId AND a.Status = 'Completed'), 0
+                            WHERE b.BranchId = @BranchId
+                            AND a.Active = 1
+                            AND a.StatusId = 4), 0
                         ) AS CompletedCount,
                         0 AS CompletedPercentage,
                         COALESCE(
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                            WHERE b.BranchId = @BranchId AND a.Status = 'Pending'), 0
+                            WHERE b.BranchId = @BranchId
+                            AND a.Active = 1
+                            AND a.StatusId = 3), 0
                         ) AS PendingCount,
                         0 AS PendingPercentage,
                         COALESCE(
@@ -308,9 +195,9 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                         COUNT(a.AssessmentId) AS CompletedCount,
                         ROW_NUMBER() OVER (ORDER BY COUNT(a.AssessmentId) DESC) AS Rank,
                         0 AS Score
-                    FROM AspNetUsers u
-                    INNER JOIN tblAssessments a ON u.Id = a.AssignedToUserId
-                    WHERE a.Status = 'Completed'
+                    FROM tblApplicationUsers u
+                    INNER JOIN tblAssessments a ON u.Id = a.CreatedBy
+                    WHERE a.StatusId = 4
                     AND MONTH(a.CompletedDate) = @CurrentMonth
                     AND YEAR(a.CompletedDate) = @CurrentYear
                     GROUP BY u.Id, u.FirstName, u.LastName

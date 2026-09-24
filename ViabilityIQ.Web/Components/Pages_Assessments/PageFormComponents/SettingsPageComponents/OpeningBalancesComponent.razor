@@ -1,60 +1,108 @@
-﻿@using ViabilityIQ.Application.Interfaces
-@using ViabilityIQ.Shared.FinancialModels
-@using ViabilityIQ.Infrastructure.Repositories
-@using ViabilityIQ.Shared.DataModels
-@inject IGenericDataRepository<AssessmentSalesCategory> CategoryRepository
-@inject IGenericDataRepository<AssessmentAsset> AssetRepository
-@inject IGenericDataRepository<AssessmentLoan> LoanRepository
-@inject IGenericDataRepository<IncomeType> IncomeTypeRepository
-@inject IAssetDepreciationEngine DepreciationEngine
+﻿@using ViabilityIQ.Infrastructure.Repositories
 
-@if (loadingStateActive)
-{
-    <FormLoadingComponent />
-}
-else
-{
-    <EditForm Model="@openingBalancesModel" OnValidSubmit="UpdateOpeningBalances">
-        <DataAnnotationsValidator />
-        <section class="ob-card">
-            <header class="ob-header">
-                <span class="ob-icon"><i class="bi bi-bank2"></i></span>
+<div class="viq-form-shell">
+    @if (loadingStateActive)
+    {
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
                 <div>
-                    <span>Opening position</span>
-                    <h3>Opening Balances</h3>
-                    <p>Calculated balances come from their detailed records; only independent balances remain editable.</p>
+                    <strong>Loading opening balances</strong>
+                    <span>Please wait while the assessment settings are prepared.</span>
                 </div>
-            </header>
-            <ValidationSummary class="ob-validation" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@openingBalancesModel" OnValidSubmit="UpdateOpeningBalances"
+                  class="viq-data-form" aria-label="Opening balances">
+            <DataAnnotationsValidator />
 
-            <div class="ob-section-title"><span>Calculated from detailed records</span><small>Read-only authoritative totals</small></div>
-            <div class="ob-grid ob-readonly-grid">
-                @ReadOnlyBalance("Opening stock", "Sum of active Sales Category opening stock.", OpeningStock, "bi-box-seam")
-                @ReadOnlyBalance("Opening debtors", "Sum of active category debtor balances.", OpeningDebtors, "bi-person-up")
-                @ReadOnlyBalance("Opening creditors", "Sum of active category creditor balances.", OpeningCreditors, "bi-person-down")
-                @ReadOnlyBalance("Opening loan balance", "Sum of active assessment loan balances.", OpeningLoans, "bi-bank")
-                @ReadOnlyBalance("Gross fixed assets", "Sum of registered asset opening costs.", OpeningGrossAssets, "bi-building")
-                @ReadOnlyBalance("Accumulated depreciation", "Sum already accumulated before Month 1.", OpeningAccumulatedDepreciation, "bi-graph-down-arrow")
-                @ReadOnlyBalance("Net fixed assets", "Gross assets less accumulated depreciation.", OpeningNetAssets, "bi-calculator")
-                @ReadOnlyBalance("Projected depreciation", "12-month total calculated by the asset engine.", ProjectedDepreciation, "bi-calendar3")
+            <div class="viq-form-intro">
+                <span class="viq-form-intro-icon"><i class="bi bi-bank2" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Opening balances</h2>
+                    <p>Capture the balances carried into Month 1 of the assessment projection.</p>
+                </div>
             </div>
 
-            <div class="ob-section-title"><span>Balances requiring confirmation</span><small>Enter from opening statements or reconciliations</small></div>
-            <div class="ob-grid">
-                @MoneyInput("Opening bank balance", "Use a negative value for an opening overdraft.", openingBalancesModel.OpeningBalance_Bank, value => openingBalancesModel.OpeningBalance_Bank = value, true)
-                @PercentInput("Overdraft interest", "Annual interest rate applied while cash is negative.", openingBalancesModel.InterestOnOverDraft, value => openingBalancesModel.InterestOnOverDraft = value)
-                @MoneyInput("Other current assets", "Prepayments, staff loans or receivables not captured as trade debtors.", openingBalancesModel.OpeningOtherCurrentAssets, value => openingBalancesModel.OpeningOtherCurrentAssets = value)
-                @MoneyInput("Other current liabilities", "Accruals or short-term obligations not captured as trade creditors.", openingBalancesModel.OpeningOtherCurrentLiabilities, value => openingBalancesModel.OpeningOtherCurrentLiabilities = value)
-                @MoneyInput("Opening VAT payable", "VAT already owed at the projection start; settled in Month 1.", openingBalancesModel.OpeningVatPayable, value => openingBalancesModel.OpeningVatPayable = value)
-                @MoneyInput("Opening VAT refundable", "VAT refund already receivable; collected in Month 1.", openingBalancesModel.OpeningVatRefundable, value => openingBalancesModel.OpeningVatRefundable = value)
-            </div>
-            <footer class="ob-footer">
-                <span><i class="bi bi-info-circle"></i> Opening equity is calculated automatically as assets less liabilities.</span>
-                <button class="btn btn-success" type="submit" disabled="@IsSubmitting"><i class="bi bi-check2-circle"></i> Update Opening Balances</button>
+            <ValidationSummary class="viq-form-validation-summary" />
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-wallet2" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Opening position</h3>
+                        <p>Assets and cash available at the start of the projection.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="openingAssets">Opening stock / current assets (R)</label>
+                        <input id="openingAssets" class="viq-form-control" type="number" step="0.01"
+                               value="@FormatDecimal(openingBalancesModel.OpeningBalance_Assets)"
+                               @onchange="e => openingBalancesModel.OpeningBalance_Assets = ParseDecimal(e.Value)" />
+                        <span>Starting stock or other opening current-asset value.</span>
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="openingBank">Opening bank balance (R)</label>
+                        <input id="openingBank" class="viq-form-control" type="number" step="0.01"
+                               value="@FormatDecimal(openingBalancesModel.OpeningBalance_Bank)"
+                               @onchange="e => openingBalancesModel.OpeningBalance_Bank = ParseDecimal(e.Value)" />
+                        <span>Cash available at the beginning of Month 1.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-graph-down-arrow" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Projection adjustments</h3>
+                        <p>Rates and allowances applied to the opening position.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="overdraftInterest">Overdraft interest (%)</label>
+                        <input id="overdraftInterest" class="viq-form-control" type="number" step="0.01" min="0"
+                               value="@FormatDecimal(openingBalancesModel.InterestOnOverDraft)"
+                               @onchange="e => openingBalancesModel.InterestOnOverDraft = ParseDecimal(e.Value)" />
+                        <span>Annual rate applied when the bank balance is overdrawn.</span>
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="projectedDepreciation">Projected depreciation (R)</label>
+                        <input id="projectedDepreciation" class="viq-form-control" type="number" step="0.01"
+                               value="@FormatDecimal(openingBalancesModel.DepreciationProjectedAmount)"
+                               @onchange="e => openingBalancesModel.DepreciationProjectedAmount = ParseDecimal(e.Value)" />
+                        <span>Opening depreciation allowance used by the assessment.</span>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="viq-form-actions">
+                <span><i class="bi bi-info-circle" aria-hidden="true"></i> These values establish the projection's starting financial position.</span>
+                <button class="viq-button viq-button-primary" type="submit" disabled="@IsSubmitting">
+                    @if (IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Updating…</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                        <span>Update opening balances</span>
+                    }
+                </button>
             </footer>
-        </section>
-    </EditForm>
-}
+        </EditForm>
+    }
+</div>
 
 @code {
     [Inject] private MasterDataService? ViqCrudService { get; set; }
@@ -63,68 +111,47 @@ else
     private SaveResult? result = new();
     private bool IsSubmitting;
     private bool loadingStateActive;
-    private decimal OpeningStock, OpeningDebtors, OpeningCreditors, OpeningLoans;
-    private decimal OpeningGrossAssets, OpeningAccumulatedDepreciation, ProjectedDepreciation;
-    private decimal OpeningNetAssets => OpeningGrossAssets - OpeningAccumulatedDepreciation;
+    private static string FormatDecimal(decimal value) => value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    private static decimal ParseDecimal(object? value) => decimal.TryParse(Convert.ToString(value), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var parsed) ? parsed : 0m;
 
     protected override async Task OnParametersSetAsync() => await RefreshAsync();
 
     public async Task RefreshAsync()
     {
         loadingStateActive = true;
-        try
-        {
-            var id = openingBalancesModel.AssessmentId;
-            var categoriesTask = CategoryRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
-            var assetsTask = AssetRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
-            var loansTask = LoanRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
-            var incomeTypesTask = IncomeTypeRepository.GetAllAsync();
-            var depreciationTask = DepreciationEngine.CalculateAnnualDepreciationAsync(id);
-            await Task.WhenAll(categoriesTask, assetsTask, loansTask, incomeTypesTask, depreciationTask);
-            var categories = (await categoriesTask).ToArray();
-            var assets = (await assetsTask).ToArray();
-            var classifier = new IncomeTypeClassifier(await incomeTypesTask);
-            OpeningStock = categories
-                .Where(x => classifier.Classify(x) == IncomeSourceKind.Sales)
-                .Sum(x => x.OpeningStock);
-            OpeningDebtors = categories.Sum(x => x.OpeningDebtorsAmount);
-            OpeningCreditors = categories.Sum(x => x.OpeningCreditorsAmount);
-            OpeningLoans = (await loansTask).Sum(x => x.LoanBalanceAtAssessmentDate);
-            OpeningGrossAssets = assets.Sum(x => x.OpeningBalanceValue);
-            OpeningAccumulatedDepreciation = assets.Sum(x => x.OpeningAccumulatedDepreciation);
-            ProjectedDepreciation = (await depreciationTask).Values.Sum();
-        }
-        finally { loadingStateActive = false; }
+        await Task.Delay(150);
+        loadingStateActive = false;
+        StateHasChanged();
     }
-
-    private RenderFragment ReadOnlyBalance(string label, string note, decimal value, string icon) => @<div class="ob-readonly">
-        <i class="bi @icon"></i><div><span>@label</span><small>@note</small></div><strong>R @value.ToString("N2")</strong>
-    </div>;
-
-    private RenderFragment MoneyInput(string label, string note, decimal value, Action<decimal> setter, bool allowNegative = false) => @<label class="ob-field">
-        <span>@label</span><small>@note</small><div class="ob-input"><span>R</span><input type="number" min="@(allowNegative ? null : "0")" step="0.01" value="@FormatDecimal(value)" @onchange="e => setter(ParseDecimal(e.Value, allowNegative))" /></div>
-    </label>;
-
-    private RenderFragment PercentInput(string label, string note, decimal value, Action<decimal> setter) => @<label class="ob-field">
-        <span>@label</span><small>@note</small><div class="ob-input ob-suffix"><input type="number" min="0" step="0.01" value="@FormatDecimal(value)" @onchange="e => setter(ParseDecimal(e.Value))" /><span>%</span></div>
-    </label>;
-
-    private static string FormatDecimal(decimal value) => value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
-    private static decimal ParseDecimal(object? value, bool allowNegative = false) => decimal.TryParse(Convert.ToString(value), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var parsed) ? (allowNegative ? parsed : Math.Max(0m, parsed)) : 0m;
 
     private async Task UpdateOpeningBalances()
     {
         IsSubmitting = true;
-        const string sql = @"UPDATE tblAssessments SET OpeningBalance_Bank=@OpeningBalance_Bank,
-            InterestOnOverDraft=@InterestOnOverDraft, OpeningOtherCurrentAssets=@OpeningOtherCurrentAssets,
-            OpeningOtherCurrentLiabilities=@OpeningOtherCurrentLiabilities, OpeningVatPayable=@OpeningVatPayable,
-            OpeningVatRefundable=@OpeningVatRefundable WHERE AssessmentId=@AssessmentId";
+        const string sql = @"UPDATE tblAssessments SET OpeningBalance_Assets=@OpeningBalance_Assets,
+            OpeningBalance_Bank=@OpeningBalance_Bank, InterestOnOverDraft=@InterestOnOverDraft,
+            DepreciationProjectedAmount=@DepreciationProjectedAmount WHERE AssessmentId=@AssessmentId";
         try
         {
-            var rows = await ViqCrudService!.ExecuteCommandAsync(sql, openingBalancesModel);
-            result = rows > 0 ? new SaveResult { Message = "Opening balances updated successfully", Success = true } : SaveResult.Failed("Opening balances were not updated.");
+            var rows = await ViqCrudService!.ExecuteCommandAsync(sql, new
+            {
+                openingBalancesModel.OpeningBalance_Assets,
+                openingBalancesModel.OpeningBalance_Bank,
+                openingBalancesModel.InterestOnOverDraft,
+                openingBalancesModel.DepreciationProjectedAmount,
+                openingBalancesModel.AssessmentId
+            });
+            result = rows > 0
+                ? new SaveResult { Message = "Opening balances updated successfully", Success = true }
+                : SaveResult.Failed("Opening balances were not updated. Please retry.");
         }
-        catch (Exception ex) { result = SaveResult.Failed($"Opening balances could not be updated: {ex.Message}"); }
-        finally { IsSubmitting = false; if (OnUpdate.HasDelegate) await OnUpdate.InvokeAsync(result!); }
+        catch (Exception ex)
+        {
+            result = SaveResult.Failed($"Opening balances could not be updated: {ex.Message}");
+        }
+        finally
+        {
+            IsSubmitting = false;
+            if (OnUpdate.HasDelegate) await OnUpdate.InvokeAsync(result!);
+        }
     }
 }

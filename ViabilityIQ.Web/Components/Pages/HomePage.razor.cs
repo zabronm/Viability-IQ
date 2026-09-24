@@ -336,23 +336,23 @@ namespace ViabilityIQ.Web.Components.Pages
 
             switch (kpiType)
             {
-                case "ActiveAssessments":
-                    NavigationManager.NavigateTo("/assessments?status=InProgress");
+                case "TotalAssessments":
+                    NavigationManager.NavigateTo("/settings/assessments");
+                    break;
+                case "DraftAssessments":
+                    NavigationManager.NavigateTo("/settings/assessments?status=1");
+                    break;
+                case "InProgressAssessments":
+                    NavigationManager.NavigateTo("/settings/assessments?status=2");
+                    break;
+                case "ReadyForReviewAssessments":
+                    NavigationManager.NavigateTo("/settings/assessments?status=3");
+                    break;
+                case "ProjectionReadyAssessments":
+                    NavigationManager.NavigateTo("/settings/assessments?readiness=100");
                     break;
                 case "CompletedAssessments":
-                    NavigationManager.NavigateTo("/assessments?status=Completed");
-                    break;
-                case "PendingReviews":
-                    NavigationManager.NavigateTo("/assessments?status=Pending");
-                    break;
-                case "YourWorkload":
-                    NavigationManager.NavigateTo("/assessments?assigned=me");
-                    break;
-                case "TotalClientBase":
-                    NavigationManager.NavigateTo("/businesses");
-                    break;
-                case "BranchAssessments":
-                    NavigationManager.NavigateTo($"/assessments?branch={CurrentUser?.BranchId}");
+                    NavigationManager.NavigateTo("/settings/assessments?status=4");
                     break;
                 default:
                     Logger.LogWarning("HandleKPIDrill: Unknown KPI type: {KPIType}", kpiType);

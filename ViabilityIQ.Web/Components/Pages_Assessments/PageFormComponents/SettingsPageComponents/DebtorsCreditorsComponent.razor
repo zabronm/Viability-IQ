@@ -1,273 +1,251 @@
 ﻿@using ViabilityIQ.Shared.DataModels
 
-@if (loadingStateActive)
-{
-    <FormLoadingComponent />
-}
-else if (debtorsCreditorsModel is not null)
-{
-    <EditForm Model="@debtorsCreditorsModel" OnValidSubmit="UpdateDebtorsCreditors">
-        <DataAnnotationsValidator />
-
-        <section class="dc-profile-card">
-            <header class="dc-profile-header">
-                <div class="dc-profile-title">
-                    <span class="dc-profile-icon"><i class="bi bi-calendar3-range"></i></span>
-                    <div>
-                        <span>Working capital assumptions</span>
-                        <h2>Debtors &amp; Creditors Ageing Profiles</h2>
-                        <p>Capture the ageing information you know. The saved projection profile is always stored as percentages.</p>
-                    </div>
+<div class="viq-form-shell">
+    @if (loadingStateActive)
+    {
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Loading ageing profiles</strong>
+                    <span>Please wait while the working capital assumptions are prepared.</span>
                 </div>
-                <button type="submit" class="dc-save-button" disabled="@IsSubmitting">
-                    @if (IsSubmitting)
+            </div>
+        </div>
+    }
+    else if (debtorsCreditorsModel is not null)
+    {
+        <EditForm Model="@debtorsCreditorsModel" OnValidSubmit="UpdateDebtorsCreditors"
+                  class="viq-data-form" aria-label="Debtors and creditors ageing profiles">
+            <DataAnnotationsValidator />
+
+            <div class="viq-form-intro">
+                <span class="viq-form-intro-icon"><i class="bi bi-calendar3-range" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Debtors &amp; creditors ageing profiles</h2>
+                    <p>Capture the ageing information you know. The saved projection profile is always stored as percentages.</p>
+                </div>
+            </div>
+
+            <ValidationSummary class="viq-form-validation-summary" />
+
+            @if (ValidationMessages.Count > 0)
+            {
+                <div class="viq-form-validation-summary" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                    <ul>
+                        @foreach (var message in ValidationMessages)
+                        {
+                            <li>@message</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Entry mode</h3>
+                        <p>@ModeDescription</p>
+                    </div>
+                </header>
+
+                <div class="viq-toggle-grid" role="radiogroup" aria-label="Ageing profile entry mode">
+                    <label class="viq-toggle-card" for="percentageEntryMode">
+                        <span>
+                            <strong>Percentages</strong>
+                            <small>Enter the expected percentage distribution.</small>
+                        </span>
+                        <input id="percentageEntryMode" class="viq-switch" type="radio"
+                               name="dc-entry-mode" value="percentage"
+                               checked="@(!debtorsCreditorsModel.EntryMode)"
+                               @onchange="() => SetEntryMode(false)" />
+                    </label>
+
+                    <label class="viq-toggle-card" for="actualValueEntryMode">
+                        <span>
+                            <strong>Actual values</strong>
+                            <small>Enter known ageing balances in Rand.</small>
+                        </span>
+                        <input id="actualValueEntryMode" class="viq-switch" type="radio"
+                               name="dc-entry-mode" value="amount"
+                               checked="@debtorsCreditorsModel.EntryMode"
+                               @onchange="() => SetEntryMode(true)" />
+                    </label>
+                </div>
+
+                <div class="viq-form-field">
+                    @if (debtorsCreditorsModel.EntryMode)
                     {
-                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                        <span>Saving...</span>
+                        <span><i class="bi bi-arrow-left-right" aria-hidden="true"></i> Enter actual ageing balances. Percentages update automatically and are the values used by projections.</span>
                     }
                     else
                     {
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Save Profiles</span>
+                        <span><i class="bi bi-calculator" aria-hidden="true"></i> Enter the 31+ day buckets. The 0–30 day bucket is automatically calculated as the balance to 100%.</span>
+                    }
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-box-arrow-in-down-left" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Creditors profile</h3>
+                        <p>Expected timing of supplier payments. Current total: @FormatCurrency(TotalCreditorsValue)</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    @foreach (var bucket in AgeBuckets)
+                    {
+                        <div class="viq-form-field">
+                            <label for="@($"creditor-{bucket.Index}")">
+                                @bucket.Label — @(debtorsCreditorsModel.EntryMode ? "Actual value (R)" : "Percentage (%)")
+                            </label>
+                            @if (debtorsCreditorsModel.EntryMode)
+                            {
+                                <input id="@($"creditor-{bucket.Index}")" class="viq-form-control"
+                                       type="number" min="0" step="0.01"
+                                       value="@GetValue(false, bucket.Index)"
+                                       @onchange="eventArgs => SetValue(false, bucket.Index, eventArgs.Value)" />
+                            }
+                            else
+                            {
+                                <input id="@($"creditor-{bucket.Index}")" class="viq-form-control"
+                                       type="number" min="0" max="100" step="0.01"
+                                       value="@GetPercentage(false, bucket.Index)"
+                                       disabled="@(bucket.Index == 0)"
+                                       @onchange="eventArgs => SetPercentage(false, bucket.Index, eventArgs.Value)" />
+                            }
+                            <span>@bucket.Description</span>
+                        </div>
+
+                        <div class="viq-form-field">
+                            <label>Projection profile</label>
+                            <output class="viq-form-control">
+                                @GetPercentage(false, bucket.Index).ToString("N2")%
+                                @if (!debtorsCreditorsModel.EntryMode && TotalCreditorsValue > 0m)
+                                {
+                                    <span> — @FormatCurrency(GetValue(false, bucket.Index))</span>
+                                }
+                            </output>
+                        </div>
+                    }
+
+                    <div class="viq-form-field viq-form-span-2">
+                        <label>Total creditors</label>
+                        <output class="viq-form-control">
+                            @FormatCurrency(TotalCreditorsValue) — @TotalCreditorsPercentage.ToString("N2")%
+                        </output>
+                    </div>
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-box-arrow-in-up-right" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Debtors profile</h3>
+                        <p>Expected timing of customer collections. Current total: @FormatCurrency(TotalDebtorsValue)</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    @foreach (var bucket in AgeBuckets)
+                    {
+                        <div class="viq-form-field">
+                            <label for="@($"debtor-{bucket.Index}")">
+                                @bucket.Label — @(debtorsCreditorsModel.EntryMode ? "Actual value (R)" : "Percentage (%)")
+                            </label>
+                            @if (debtorsCreditorsModel.EntryMode)
+                            {
+                                <input id="@($"debtor-{bucket.Index}")" class="viq-form-control"
+                                       type="number" min="0" step="0.01"
+                                       value="@GetValue(true, bucket.Index)"
+                                       @onchange="eventArgs => SetValue(true, bucket.Index, eventArgs.Value)" />
+                            }
+                            else
+                            {
+                                <input id="@($"debtor-{bucket.Index}")" class="viq-form-control"
+                                       type="number" min="0" max="100" step="0.01"
+                                       value="@GetPercentage(true, bucket.Index)"
+                                       disabled="@(bucket.Index == 0)"
+                                       @onchange="eventArgs => SetPercentage(true, bucket.Index, eventArgs.Value)" />
+                            }
+                            <span>@bucket.Description</span>
+                        </div>
+
+                        <div class="viq-form-field">
+                            <label>Projection profile</label>
+                            <output class="viq-form-control">
+                                @GetPercentage(true, bucket.Index).ToString("N2")%
+                                @if (!debtorsCreditorsModel.EntryMode && TotalDebtorsValue > 0m)
+                                {
+                                    <span> — @FormatCurrency(GetValue(true, bucket.Index))</span>
+                                }
+                            </output>
+                        </div>
+                    }
+
+                    <div class="viq-form-field viq-form-span-2">
+                        <label>Total debtors</label>
+                        <output class="viq-form-control">
+                            @FormatCurrency(TotalDebtorsValue) — @TotalDebtorsPercentage.ToString("N2")%
+                        </output>
+                    </div>
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Collection policy</h3>
+                        <p>Supporting settings used when interpreting the debtor profile.</p>
+                    </div>
+                </header>
+
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="badDebtPercentage">Expected bad debts (%)</label>
+                        <input id="badDebtPercentage" class="viq-form-control"
+                               type="number" min="0" max="100" step="0.01"
+                               @bind="debtorsCreditorsModel.BadDebtPercentage" />
+                    </div>
+
+                    <div class="viq-form-field">
+                        <label for="averagePaymentDays">Average payment days</label>
+                        <input id="averagePaymentDays" class="viq-form-control"
+                               type="number" min="0" max="365"
+                               @bind="debtorsCreditorsModel.AveragePaymentDays" />
+                    </div>
+                </div>
+
+                <label class="viq-toggle-card viq-toggle-card-wide" for="includeVat">
+                    <span>
+                        <strong>Include VAT</strong>
+                        <small>Ageing balances are VAT inclusive.</small>
+                    </span>
+                    <input id="includeVat" class="viq-switch" type="checkbox"
+                           @bind="debtorsCreditorsModel.IncludeVAT" />
+                </label>
+            </section>
+
+            <footer class="viq-form-actions">
+                <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
+                    @if (IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Saving…</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                        <span>Save profiles</span>
                     }
                 </button>
-            </header>
-
-            <div class="dc-profile-body">
-                <ValidationSummary class="dc-validation-summary" />
-
-                @if (ValidationMessages.Count > 0)
-                {
-                    <div class="dc-validation-summary" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <ul>
-                            @foreach (var message in ValidationMessages)
-                            {
-                                <li>@message</li>
-                            }
-                        </ul>
-                    </div>
-                }
-
-                <div class="dc-mode-panel">
-                    <div>
-                        <strong>Entry mode</strong>
-                        <span>@ModeDescription</span>
-                    </div>
-                    <div class="dc-mode-options" role="radiogroup" aria-label="Ageing profile entry mode">
-                        <label class="@(!debtorsCreditorsModel.EntryMode ? "active" : null)">
-                            <input type="radio"
-                                   name="dc-entry-mode"
-                                   value="percentage"
-                                   checked="@(!debtorsCreditorsModel.EntryMode)"
-                                   @onchange="() => SetEntryMode(false)" />
-                            <i class="bi bi-percent"></i>
-                            Percentages
-                        </label>
-                        <label class="@(debtorsCreditorsModel.EntryMode ? "active" : null)">
-                            <input type="radio"
-                                   name="dc-entry-mode"
-                                   value="amount"
-                                   checked="@debtorsCreditorsModel.EntryMode"
-                                   @onchange="() => SetEntryMode(true)" />
-                            <i class="bi bi-cash-stack"></i>
-                            Actual values
-                        </label>
-                    </div>
-                </div>
-
-                @if (debtorsCreditorsModel.EntryMode)
-                {
-                    <div class="dc-conversion-note">
-                        <i class="bi bi-arrow-left-right"></i>
-                        Enter actual ageing balances. Percentages update automatically and are the values used by projections.
-                    </div>
-                }
-                else
-                {
-                    <div class="dc-conversion-note">
-                        <i class="bi bi-calculator"></i>
-                        Enter the 31+ day buckets. The 0–30 day bucket is automatically calculated as the balance to 100%.
-                    </div>
-                }
-
-                <div class="dc-profile-grid">
-                    <article class="dc-ageing-panel dc-creditors-panel">
-                        <div class="dc-panel-heading">
-                            <div>
-                                <span class="dc-panel-icon"><i class="bi bi-box-arrow-in-down-left"></i></span>
-                                <div>
-                                    <h3>Creditors profile</h3>
-                                    <p>Expected timing of supplier payments</p>
-                                </div>
-                            </div>
-                            <span class="dc-total-badge">@FormatCurrency(TotalCreditorsValue)</span>
-                        </div>
-
-                        <div class="dc-table-heading">
-                            <span>Age bucket</span>
-                            <span>@(debtorsCreditorsModel.EntryMode ? "Actual value" : "Percentage")</span>
-                            <span>Projection profile</span>
-                        </div>
-
-                        @foreach (var bucket in AgeBuckets)
-                        {
-                            <div class="dc-ageing-row">
-                                <label for="@($"creditor-{bucket.Index}")">
-                                    <strong>@bucket.Label</strong>
-                                    <small>@bucket.Description</small>
-                                </label>
-                                <div>
-                                    @if (debtorsCreditorsModel.EntryMode)
-                                    {
-                                        <div class="dc-input-with-prefix">
-                                            <span>R</span>
-                                            <input id="@($"creditor-{bucket.Index}")"
-                                                   type="number"
-                                                   min="0"
-                                                   step="0.01"
-                                                   value="@GetValue(false, bucket.Index)"
-                                                   @onchange="eventArgs => SetValue(false, bucket.Index, eventArgs.Value)" />
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="dc-input-with-suffix">
-                                            <input id="@($"creditor-{bucket.Index}")"
-                                                   type="number"
-                                                   min="0"
-                                                   max="100"
-                                                   step="0.01"
-                                                   value="@GetPercentage(false, bucket.Index)"
-                                                   disabled="@(bucket.Index == 0)"
-                                                   @onchange="eventArgs => SetPercentage(false, bucket.Index, eventArgs.Value)" />
-                                            <span>%</span>
-                                        </div>
-                                    }
-                                </div>
-                                <div class="dc-converted-value">
-                                    <strong>@GetPercentage(false, bucket.Index).ToString("N2")%</strong>
-                                    @if (!debtorsCreditorsModel.EntryMode && TotalCreditorsValue > 0m)
-                                    {
-                                        <small>@FormatCurrency(GetValue(false, bucket.Index))</small>
-                                    }
-                                </div>
-                            </div>
-                        }
-
-                        <footer>
-                            <span>Total creditors</span>
-                            <span>@FormatCurrency(TotalCreditorsValue)</span>
-                            <strong>@TotalCreditorsPercentage.ToString("N2")%</strong>
-                        </footer>
-                    </article>
-
-                    <article class="dc-ageing-panel dc-debtors-panel">
-                        <div class="dc-panel-heading">
-                            <div>
-                                <span class="dc-panel-icon"><i class="bi bi-box-arrow-in-up-right"></i></span>
-                                <div>
-                                    <h3>Debtors profile</h3>
-                                    <p>Expected timing of customer collections</p>
-                                </div>
-                            </div>
-                            <span class="dc-total-badge">@FormatCurrency(TotalDebtorsValue)</span>
-                        </div>
-
-                        <div class="dc-table-heading">
-                            <span>Age bucket</span>
-                            <span>@(debtorsCreditorsModel.EntryMode ? "Actual value" : "Percentage")</span>
-                            <span>Projection profile</span>
-                        </div>
-
-                        @foreach (var bucket in AgeBuckets)
-                        {
-                            <div class="dc-ageing-row">
-                                <label for="@($"debtor-{bucket.Index}")">
-                                    <strong>@bucket.Label</strong>
-                                    <small>@bucket.Description</small>
-                                </label>
-                                <div>
-                                    @if (debtorsCreditorsModel.EntryMode)
-                                    {
-                                        <div class="dc-input-with-prefix">
-                                            <span>R</span>
-                                            <input id="@($"debtor-{bucket.Index}")"
-                                                   type="number"
-                                                   min="0"
-                                                   step="0.01"
-                                                   value="@GetValue(true, bucket.Index)"
-                                                   @onchange="eventArgs => SetValue(true, bucket.Index, eventArgs.Value)" />
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="dc-input-with-suffix">
-                                            <input id="@($"debtor-{bucket.Index}")"
-                                                   type="number"
-                                                   min="0"
-                                                   max="100"
-                                                   step="0.01"
-                                                   value="@GetPercentage(true, bucket.Index)"
-                                                   disabled="@(bucket.Index == 0)"
-                                                   @onchange="eventArgs => SetPercentage(true, bucket.Index, eventArgs.Value)" />
-                                            <span>%</span>
-                                        </div>
-                                    }
-                                </div>
-                                <div class="dc-converted-value">
-                                    <strong>@GetPercentage(true, bucket.Index).ToString("N2")%</strong>
-                                    @if (!debtorsCreditorsModel.EntryMode && TotalDebtorsValue > 0m)
-                                    {
-                                        <small>@FormatCurrency(GetValue(true, bucket.Index))</small>
-                                    }
-                                </div>
-                            </div>
-                        }
-
-                        <footer>
-                            <span>Total debtors</span>
-                            <span>@FormatCurrency(TotalDebtorsValue)</span>
-                            <strong>@TotalDebtorsPercentage.ToString("N2")%</strong>
-                        </footer>
-                    </article>
-                </div>
-
-                <section class="dc-policy-panel">
-                    <div class="dc-policy-heading">
-                        <i class="bi bi-sliders"></i>
-                        <div>
-                            <h3>Collection policy</h3>
-                            <p>Supporting settings used when interpreting the debtor profile.</p>
-                        </div>
-                    </div>
-                    <div class="dc-policy-fields">
-                        <label>
-                            <span>Expected bad debts</span>
-                            <div class="dc-input-with-suffix">
-                                <input type="number" min="0" max="100" step="0.01"
-                                       @bind="debtorsCreditorsModel.BadDebtPercentage" />
-                                <span>%</span>
-                            </div>
-                        </label>
-                        <label>
-                            <span>Average payment days</span>
-                            <div class="dc-input-with-suffix">
-                                <input type="number" min="0" max="365"
-                                       @bind="debtorsCreditorsModel.AveragePaymentDays" />
-                                <span>days</span>
-                            </div>
-                        </label>
-                        <label class="dc-vat-option">
-                            <input type="checkbox" @bind="debtorsCreditorsModel.IncludeVAT" />
-                            <span>
-                                <strong>Include VAT</strong>
-                                <small>Ageing balances are VAT inclusive</small>
-                            </span>
-                        </label>
-                    </div>
-                </section>
-            </div>
-        </section>
-    </EditForm>
-}
+            </footer>
+        </EditForm>
+    }
+</div>

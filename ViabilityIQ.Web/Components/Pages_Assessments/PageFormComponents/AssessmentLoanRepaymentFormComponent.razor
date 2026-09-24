@@ -1,137 +1,154 @@
 ﻿@namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 @using Microsoft.AspNetCore.Components.Forms
 
-<div class="p-1 m-1 bg-white h-100">
-    <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync">
+<div class="viq-form-shell">
+    <EditForm Model="ActiveRepaymentModel" OnValidSubmit="SubmitFormWorkflowAsync"
+              class="viq-data-form" aria-label="Loan repayment allocation">
         <DataAnnotationsValidator />
-        <ValidationSummary />
 
-        <!-- Loan Description -->
-        <div class="mb-2 mt-0">
-            <label class="form-label-custom mb-1">Loan Description</label>
-            <input type="text" class="form-control-compact bg-light fw-semibold text-dark"
-                   value="@ActiveRepaymentModel.LoanTypeName" disabled />
-        </div>
-
-        <!-- Send to Cashbook Checkbox -->
-        <div class="row g-2 mb-2">
-            <div class="col-6 d-flex align-items-end">
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="sendToCashbookChild" @bind="ActiveRepaymentModel.SendToCashbook" />
-                    <label class="form-check-label text-xs fw-bold text-secondary" for="sendToCashbookChild">Send to Cashbook</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Heading with Bulk Allocation Controls -->
-        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2 bg-light p-2 rounded border">
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
             <div>
-                <h6 class="text-xs fw-bold text-dark tracking-wider mb-0">
-                    <i class="bi bi-grid-3x3-gap me-1 text-primary"></i>Monthly Extra (Balloon) Repayments
-                </h6>
-                <small class="text-muted text-xxs">Pre-calculated Expected & Interest are locked. Enter custom extra amounts below.</small>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-                <div class="input-group input-group-sm" style="width: 170px;">
-                    <input type="number" step="0.01" class="form-control text-end text-xs"
-                           placeholder="Bulk amount..." @bind="BulkExtraAmount" />
-                </div>
-                <button type="button" class="btn btn-outline-success btn-sm text-xs px-2 text-nowrap shadow-sm"
-                        @onclick="ApplyBulkExtraAllocation" title="Apply to all months">
-                    <i class="bi bi-lightning-charge me-1"></i>Apply All
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm text-xs px-2 text-nowrap"
-                        @onclick="ClearBulkExtraAllocation" title="Clear all extra amounts">
-                    Clear
-                </button>
+                <h2>Loan repayment allocation</h2>
+                <p>Review the calculated schedule and allocate extra or balloon repayments by month.</p>
             </div>
         </div>
 
-        <!-- Monthly Schedule Matrix Table -->
-        <div class="border rounded bg-white p-1 text-nowrap mb-3" style="overflow-x: auto; max-height: 380px; overflow-y: auto;">
-            <table class="table table-sm table-bordered align-middle mb-0 text-xxs">
-                <thead>
-                    <tr class="bg-light fw-bold border-bottom text-center">
-                        <th class="ps-1 align-middle" style="width: 45px;">Month</th>
-                        <th class="text-end pe-2">Expected (R)</th>
-                        <th class="text-end pe-2">Interest (R)</th>
-                        <th class="text-end pe-2 text-primary">Extra / Balloon (R)</th>
-                        <th class="text-end pe-2 text-navy-brand bg-light-subtle">Month Total (R)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (ActiveRepaymentModel?.MonthlyLines != null && ActiveRepaymentModel.MonthlyLines.Count == 12)
-                    {
-                        @for (int i = 0; i < 12; i++)
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-bank" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Loan details</h3>
+                    <p>Confirm the loan profile and cashbook treatment.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid">
+                <div class="viq-form-field">
+                    <label for="repaymentLoanDescription">Loan description</label>
+                    <input id="repaymentLoanDescription" type="text" class="viq-form-control"
+                           value="@ActiveRepaymentModel.LoanTypeName" disabled />
+                </div>
+            </div>
+
+            <label class="viq-toggle-card viq-toggle-card-wide" for="sendToCashbookChild">
+                <span>
+                    <strong>Send to cashbook</strong>
+                    <small>Include this repayment schedule in cashbook projections.</small>
+                </span>
+                <input id="sendToCashbookChild" class="viq-switch" type="checkbox"
+                       @bind="ActiveRepaymentModel.SendToCashbook" />
+            </label>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Monthly extra repayments</h3>
+                    <p>Expected repayments and interest are locked. Enter additional amounts below.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="bulkExtraAmount">Bulk extra amount</label>
+                    <input id="bulkExtraAmount" type="number" step="0.01"
+                           class="viq-form-control text-end" placeholder="0.00"
+                           @bind="BulkExtraAmount" />
+                </div>
+                <div class="viq-form-actions">
+                    <button type="button" class="viq-button viq-button-secondary"
+                            @onclick="ClearBulkExtraAllocation" title="Clear all extra amounts">
+                        Clear
+                    </button>
+                    <button type="button" class="viq-button viq-button-primary"
+                            @onclick="ApplyBulkExtraAllocation" title="Apply to all months">
+                        <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                        <span>Apply all</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Month</th>
+                            <th scope="col" class="text-end">Expected (R)</th>
+                            <th scope="col" class="text-end">Interest (R)</th>
+                            <th scope="col" class="text-end">Extra / balloon (R)</th>
+                            <th scope="col" class="text-end">Month total (R)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ActiveRepaymentModel?.MonthlyLines != null && ActiveRepaymentModel.MonthlyLines.Count == 12)
                         {
-                            var idx = i;
-                            var rowTotal = ActiveRepaymentModel.MonthlyLines[idx].Expected +
-                                           ActiveRepaymentModel.MonthlyLines[idx].Interest +
-                                           ActiveRepaymentModel.MonthlyLines[idx].Extra;
+                            @for (int i = 0; i < 12; i++)
+                            {
+                                var idx = i;
+                                var rowTotal = ActiveRepaymentModel.MonthlyLines[idx].Expected +
+                                               ActiveRepaymentModel.MonthlyLines[idx].Interest +
+                                               ActiveRepaymentModel.MonthlyLines[idx].Extra;
 
-                            <tr class="border-bottom">
-                                <td class="fw-bold text-dark text-center bg-light-subtle">M@(idx + 1)</td>
+                                <tr>
+                                    <th scope="row">M@(idx + 1)</th>
+                                    <td>
+                                        <input type="text" readonly
+                                               class="viq-form-control text-end font-monospace"
+                                               value="@ActiveRepaymentModel.MonthlyLines[idx].Expected.ToString("N2")" />
+                                    </td>
+                                    <td>
+                                        <input type="text" readonly
+                                               class="viq-form-control text-end font-monospace"
+                                               value="@ActiveRepaymentModel.MonthlyLines[idx].Interest.ToString("N2")" />
+                                    </td>
+                                    <td>
+                                        <input type="number"
+                                               class="viq-form-control text-end font-monospace"
+                                               @bind="ActiveRepaymentModel.MonthlyLines[idx].Extra"
+                                               @bind:event="oninput" min="0" step="0.01" />
+                                    </td>
+                                    <td class="text-end font-monospace fw-bold">
+                                        @rowTotal.ToString("N2")
+                                    </td>
+                                </tr>
+                            }
 
-                                <!-- Expected Repayment (Read-only) -->
-                                <td>
-                                    <input type="text" readonly class="form-control form-control-sm text-end font-monospace py-0.5 bg-light-subtle text-muted border-0 shadow-none"
-                                           style="font-size: 11px;" value="@ActiveRepaymentModel.MonthlyLines[idx].Expected.ToString("N2")" />
-                                </td>
-
-                                <!-- Interest (Read-only) -->
-                                <td>
-                                    <input type="text" readonly class="form-control form-control-sm text-end font-monospace py-0.5 bg-light-subtle text-muted border-0 shadow-none"
-                                           style="font-size: 11px;" value="@ActiveRepaymentModel.MonthlyLines[idx].Interest.ToString("N2")" />
-                                </td>
-
-                                <!-- Extra / Balloon Repayment (Editable) -->
-                                <td>
-                                    <input type="number" class="form-control form-control-sm text-end font-monospace py-0.5 text-primary fw-semibold"
-                                           style="font-size: 11px;"
-                                           @bind="ActiveRepaymentModel.MonthlyLines[idx].Extra"
-                                           @bind:event="oninput" min="0" step="0.01" />
-                                </td>
-
-                                <!-- Row Total (Read-only) -->
-                                <td class="text-end font-monospace fw-bold text-navy-brand pe-2 bg-light-subtle">
-                                    @rowTotal.ToString("N2")
-                                </td>
+                            <tr class="fw-bold">
+                                <th scope="row">Total</th>
+                                <td class="text-end font-monospace">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Expected).ToString("N2")</td>
+                                <td class="text-end font-monospace">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Interest).ToString("N2")</td>
+                                <td class="text-end font-monospace">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Extra).ToString("N2")</td>
+                                <td class="text-end font-monospace">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Expected + x.Interest + x.Extra).ToString("N2")</td>
                             </tr>
                         }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">Loading schedule months…</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-                        <!-- Column Grand Totals Row -->
-                        <tr class="fw-bold bg-light border-top border-dark">
-                            <td class="text-center text-uppercase text-xxs">Total</td>
-                            <td class="text-end font-monospace pe-2">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Expected).ToString("N2")</td>
-                            <td class="text-end font-monospace pe-2">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Interest).ToString("N2")</td>
-                            <td class="text-end font-monospace pe-2 text-primary">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Extra).ToString("N2")</td>
-                            <td class="text-end font-monospace pe-2 text-navy-brand">@ActiveRepaymentModel.MonthlyLines.Sum(x => x.Expected + x.Interest + x.Extra).ToString("N2")</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center p-3 text-muted">Loading schedule months...</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Form Actions -->
-        <div class="d-flex align-items-center gap-2 pt-2 border-top">
-            <button type="submit" class="btn btn-primary flex-fill text-xs fw-bold shadow-sm" disabled="@IsSubmitting">
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
                 @if (IsSubmitting)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span>Saving repayments...</span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Saving repayments…</span>
                 }
                 else
                 {
-                    <i class="bi bi-save me-1"></i>
-                    <span>Commit Repayments</span>
+                    <i class="bi bi-save" aria-hidden="true"></i>
+                    <span>Commit repayments</span>
                 }
             </button>
-        </div>
+        </footer>
     </EditForm>
 </div>

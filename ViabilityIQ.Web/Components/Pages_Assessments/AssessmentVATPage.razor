@@ -29,15 +29,86 @@
                     </div>
                 </div>
 
-                <div class="vat-table-card">
-                    <div class="table-responsive">
+                @if (IsLoading)
+                {
+                    <div class="vat-table-card p-4 text-center" role="status" aria-live="polite">
+                        <span class="spinner-border spinner-border-sm text-primary me-2" aria-hidden="true"></span>
+                        <span class="text-muted">Loading VAT projections...</span>
+                    </div>
+                }
+                else
+                {
+                    <section class="vat-kpi-grid" aria-label="VAT performance indicators">
+                        <article class="vat-kpi-card vat-kpi-output">
+                            <div class="vat-kpi-heading">
+                                <span>Output VAT</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-receipt-cutoff"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalOutputVat.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">VAT charged on taxable sales</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-input">
+                            <div class="vat-kpi-heading">
+                                <span>Input VAT</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-box-arrow-in-down"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalInputVat.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Recoverable VAT on purchases</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-sales">
+                            <div class="vat-kpi-heading">
+                                <span>VATable Sales</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalVatAbleSales.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Annual taxable revenue</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-net">
+                            <div class="vat-kpi-heading">
+                                <span>Net VAT Payable</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-calculator"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalNetVatPayable.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Output VAT less input VAT</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-purchases">
+                            <div class="vat-kpi-heading">
+                                <span>VATable Purchases</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-cart-check"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalVatAblePurchases.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Annual taxable purchases</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-recovery">
+                            <div class="vat-kpi-heading">
+                                <span>VAT Recovery Rate</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-percent"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">@VatRecoveryRate.ToString("N1")%</strong>
+                            <span class="vat-kpi-caption">Input VAT as % of output VAT</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+                    </section>
+
+                    <div class="vat-table-card">
+                        <div class="table-responsive">
                         <table class="table vat-schedule-table">
                             <thead>
                                 <tr>
                                     <th class="col-line-item">Line Item</th>
                                     @for (int i = 1; i <= 12; i++)
                                     {
-                                        <th class="text-end">M@i</th>
+                                        <th class="text-end">M-@i</th>
                                     }
                                     <th class="text-end">Total</th>
                                     <th class="text-center col-action">Actions</th>
@@ -49,27 +120,27 @@
                                     <td class="fw-semibold text-dark">Gross Sales (Revenue)</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end text-muted">@Sales[i].ToString("N0")</td>
+                                        <td class="text-end text-muted">@GetMonthlyValue(Sales, i).ToString("N0")</td>
                                     }
-                                    <td class="text-end fw-bold text-dark">@Sales.Sum().ToString("N0")</td>
+                                    <td class="text-end fw-bold text-dark">@GetTotal(Sales).ToString("N0")</td>
                                     <td></td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold text-dark">Taxable Purchases</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end text-muted">@Purchases[i].ToString("N0")</td>
+                                        <td class="text-end text-muted">@GetMonthlyValue(Purchases, i).ToString("N0")</td>
                                     }
-                                    <td class="text-end fw-bold text-dark">@Purchases.Sum().ToString("N0")</td>
+                                    <td class="text-end fw-bold text-dark">@GetTotal(Purchases).ToString("N0")</td>
                                     <td></td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold text-dark">Operating Expenses</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
-                                        <td class="text-end text-muted">@Expenses[i].ToString("N0")</td>
+                                        <td class="text-end text-muted">@GetMonthlyValue(Expenses, i).ToString("N0")</td>
                                     }
-                                    <td class="text-end fw-bold text-dark">@Expenses.Sum().ToString("N0")</td>
+                                    <td class="text-end fw-bold text-dark">@GetTotal(Expenses).ToString("N0")</td>
                                     <td></td>
                                 </tr>
 
@@ -142,8 +213,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
 
         </div>
@@ -161,4 +233,3 @@
     <footer class="py-2 bg-light mt-3">
         <BFooter />
     </footer>
-

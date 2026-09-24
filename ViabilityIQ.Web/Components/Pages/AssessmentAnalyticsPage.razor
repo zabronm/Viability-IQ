@@ -1,0 +1,67 @@
+@page "/analytics"
+@using ViabilityIQ.Web.Components.Pages.HomePageComponents
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<PageTitle>Assessment Analytics</PageTitle>
+
+<div class="analytics-page">
+    <PageHeading _pageTitle="Assessment Analytics" CurrentPage="PageType.Assessments" _pageHeading="Assessment Analytics" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:6px;">
+        @if (IsLoading)
+        {
+            <div class="analytics-state"><span class="spinner-border text-primary"></span> Preparing assessment metrics...</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
+        }
+        else
+        {
+            <KPIWidgetsSectionComponent KPIMetrics="@Metrics" OnKPIDrill="OpenAssessments" />
+
+            <section class="analytics-summary">
+                <header>
+                    <div><span>Portfolio health</span><h2>Assessment workflow and projection readiness</h2></div>
+                    <a href="/settings/assessments" class="btn btn-primary btn-sm px-3">Open Assessment Registry &nbsp;<i class="bi bi-box-arrow-up-right"></i></a>
+                </header>
+
+                <div class="analytics-grid">
+                    <article>
+                        <span>Completion rate</span>
+                        <strong>@Insights.CompletionRatePercent%</strong>
+                        <p>@Insights.CompletedCount of @Insights.TotalAssessments active assessments are complete.</p>
+                    </article>
+                    <article>
+                        <span>Average readiness</span>
+                        <strong>@Insights.AverageReadinessPercent%</strong>
+                        <p>@Insights.ProjectionReadyCount assessment(s) have complete projection inputs.</p>
+                    </article>
+                    <article>
+                        <span>Ready but incomplete</span>
+                        <strong>@Insights.ReadyButIncompleteCount</strong>
+                        <p>Projection-ready assessments awaiting formal completion.</p>
+                    </article>
+                    <article>
+                        <span>Stalled assessments</span>
+                        <strong>@Insights.StalledCount</strong>
+                        <p>Draft or in-progress records unchanged for at least 14 days.</p>
+                    </article>
+                    <article>
+                        <span>Average completion time</span>
+                        <strong>@Insights.AverageCompletionDays days</strong>
+                        <p>Elapsed days from creation to the latest completion transition.</p>
+                    </article>
+                    <article>
+                        <span>Ready for review</span>
+                        <strong>@Metrics.ReadyForReviewAssessments</strong>
+                        <p>Assessments currently awaiting review or final approval.</p>
+                    </article>
+                </div>
+            </section>
+        }
+    </main>
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

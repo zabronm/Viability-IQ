@@ -1,0 +1,14 @@
+.ala-cell { min-width: 245px; display: grid; gap: .45rem; }
+.ala-readiness-copy { display: flex; justify-content: space-between; color: #64748b; font-size: .67rem; }
+.ala-readiness-copy strong { color: #172554; }
+.ala-progress { height: .38rem; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+.ala-progress > span { display: block; height: 100%; border-radius: inherit; transition: width .25s ease; }
+.ala-progress-ready { background: #198754; }
+.ala-progress-warning { background: #d99a16; }
+.ala-progress-incomplete { background: #b94a48; }
+.ala-actions { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ala-button { padding: .25rem .45rem; border: 1px solid; border-radius: .35rem; background: #fff; font-size: .64rem; font-weight: 700; white-space: nowrap; }
+.ala-button-secondary { border-color: #9eb0c1; color: #475569; }
+.ala-button-complete { border-color: #198754; color: #157347; }
+.ala-button-reopen { border-color: #b7791f; color: #8a5a14; }
+.ala-button:hover { transform: translateY(-1px); box-shadow: 0 .15rem .35rem rgba(15, 23, 42, .12); }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -7,19 +8,29 @@ using System.Linq;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Application.Interfaces.HomePageInterfaces;
+using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages.PageFormComponents;
+using ViabilityIQ.Web.Components.Pages_Assessments.AssumptionComponents;
+using ViabilityIQ.Web.Models.Dashboard;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages
 {
     public partial class AssessmentsPage : IAsyncDisposable
     {
+        [SupplyParameterFromQuery(Name = "status")] public long? StatusFilter { get; set; }
+        [SupplyParameterFromQuery(Name = "readiness")] public int? ReadinessFilter { get; set; }
         [Inject] private IReadOnlyRepository<AssessmentDto, long> assessmentDtoRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<Assessment> coreAssessmentRepository { get; set; } = default!;
         [Inject] private IAssessmentDataValidationService dataValidationService { get; set; } = default!;
+        [Inject] private IAssessmentReadinessService readinessService { get; set; } = default!;
+        [Inject] private IDashboardDataService DashboardDataService { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        [Inject] private IAuthenticationService AuthenticationService { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
@@ -27,13 +38,16 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
+        [Inject] private ILogger<AssessmentsPage> Logger { get; set; } = default!;
 
         private List<ZabDataTableAdvanced<AssessmentDto>.ColumnDefinition<AssessmentDto>> tableColumns = new();
         private ZabDataTableAdvanced<AssessmentDto>? assessmentTable;
+        private ZabConfirmDialogComponent? LifecycleConfirmDialog;
+        private KPIMetricsModel LifecycleMetrics { get; set; } = new();
 
         private bool loadingStateActive = false;
 
-        protected override Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
         {
             OffcanvasService!.OnShow += HandleCanvasShow;
 
@@ -106,9 +120,26 @@ namespace ViabilityIQ.Web.Components.Pages
                     Searchable = false,
                     UseBadge = true,
                     BadgeClass = x => GetStatusBadgeClass(x.StatusId)
+                },
+                new() {
+                    Title = "Readiness & Actions",
+                    Searchable = false,
+                    CellTemplate = context => builder => {
+                        builder.OpenComponent<AssessmentLifecycleActionsComponent>(0);
+                        builder.AddAttribute(1, nameof(AssessmentLifecycleActionsComponent.Assessment), context);
+                        builder.AddAttribute(2, nameof(AssessmentLifecycleActionsComponent.OnViewReadiness),
+                            EventCallback.Factory.Create<AssessmentDto>(this, ViewReadinessAsync));
+                        builder.AddAttribute(3, nameof(AssessmentLifecycleActionsComponent.OnComplete),
+                            EventCallback.Factory.Create<AssessmentDto>(this, MarkCompleteAsync));
+                        builder.AddAttribute(4, nameof(AssessmentLifecycleActionsComponent.OnReopen),
+                            EventCallback.Factory.Create<AssessmentDto>(this, ReopenAsync));
+                        builder.AddAttribute(5, nameof(AssessmentLifecycleActionsComponent.OnSubmitForReview),
+                            EventCallback.Factory.Create<AssessmentDto>(this, SubmitForReviewAsync));
+                        builder.CloseComponent();
+                    }
                 }
             };
-            return Task.CompletedTask;
+            await RefreshLifecycleMetricsAsync();
         }
 
         // ✅ Handle when canvas opens
@@ -119,8 +150,25 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private Task<DataTablePage<AssessmentDto>> LoadAssessmentPageAsync(
             DataTableQuery query,
-            CancellationToken cancellationToken) =>
-            assessmentDtoRepository.GetPageAsync(query, cancellationToken);
+            CancellationToken cancellationToken)
+        {
+            var filters = new Dictionary<string, string>(query.Filters, StringComparer.OrdinalIgnoreCase);
+            if (StatusFilter.HasValue)
+                filters[nameof(AssessmentDto.StatusId)] = StatusFilter.Value.ToString();
+            if (ReadinessFilter.HasValue)
+                filters[nameof(AssessmentDto.ProgressPercentage)] = ReadinessFilter.Value.ToString();
+
+            return assessmentDtoRepository.GetPageAsync(new DataTableQuery
+            {
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize,
+                SearchText = query.SearchText,
+                SearchFields = query.SearchFields,
+                SortField = query.SortField,
+                SortDescending = query.SortDescending,
+                Filters = filters
+            }, cancellationToken);
+        }
 
         private Task HandleTableLoadError(Exception exception)
         {
@@ -249,8 +297,9 @@ namespace ViabilityIQ.Web.Components.Pages
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
                 if (assessmentTable is not null)
                     await assessmentTable.RefreshAsync();
+                await RefreshLifecycleMetricsAsync();
             }
-            else
+            else if (!_result.Cancelled)
             {
                 _Toast!.ShowError(_result.Message, sessionService!.AppTitle);
             }
@@ -260,23 +309,223 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private string GetStatusText(long statusId) => statusId switch
         {
-            1 => "Draft/Setup",
-            2 => "In Progress",
-            3 => "Under Review",
-            4 => "Approved",
-            5 => "Closed/Archived",
-            _ => "Unknown State"
+            _ => AssessmentLifecycleStatus.GetName(statusId)
         };
 
         private string GetStatusBadgeClass(long statusId) => statusId switch
         {
             1 => "bg-secondary text-white small",
             2 => "bg-info text-black small",
-            3 => "bg-warning text-black small",
-            4 => "bg-success text-black small",
+            3 => "bg-warning text-dark small",
+            4 => "bg-success text-white small",
             5 => "bg-danger text-black small",
             _ => "bg-light text-black small",
         };
+
+        private async Task RefreshLifecycleMetricsAsync()
+        {
+            var userId = await ResolveAuthenticatedUserIdAsync();
+            if (userId <= 0)
+            {
+                LifecycleMetrics = new KPIMetricsModel();
+                Logger.LogWarning("Assessment lifecycle metrics were not loaded because the authenticated user could not be resolved.");
+                return;
+            }
+
+            // Use the same KPI source as HomePage so both pages always apply identical
+            // user scoping, active-record filtering, and status formulas.
+            LifecycleMetrics = await DashboardDataService.GetKPIMetricsAsync(userId);
+            await InvokeAsync(StateHasChanged);
+
+            var assessments = (await coreAssessmentRepository.GetAllAsync())
+                .Where(item => item.Active && item.CreatedBy == userId)
+                .ToArray();
+            var lifecycleChanged = false;
+
+            foreach (var item in assessments)
+            {
+                try
+                {
+                    var readiness = await readinessService.EvaluateAsync(item.AssessmentId);
+                    if (item.ProgressPercentage != readiness.Score
+                        || item.StatusId == AssessmentLifecycleStatus.Draft && readiness.Score > 0)
+                    {
+                        item.ProgressPercentage = readiness.Score;
+                        if (item.StatusId == AssessmentLifecycleStatus.Draft && readiness.Score > 0)
+                        {
+                            item.StatusId = AssessmentLifecycleStatus.InProgress;
+                        }
+
+                        item.ModifiedDate = DateTime.UtcNow;
+                        item.ModifiedBy = userId;
+                        await coreAssessmentRepository.SaveAsync(item);
+                        lifecycleChanged = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogError(
+                        exception,
+                        "Readiness could not be refreshed for assessment {AssessmentId}; other lifecycle metrics will continue loading.",
+                        item.AssessmentId);
+                }
+            }
+
+            if (lifecycleChanged)
+            {
+                LifecycleMetrics = await DashboardDataService.GetKPIMetricsAsync(userId);
+            }
+        }
+
+        private async Task<long> ResolveAuthenticatedUserIdAsync()
+        {
+            if (sessionService?.IsAuthenticated == true && sessionService.UserId > 0)
+            {
+                return sessionService.UserId;
+            }
+
+            var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authenticationState.User.Identity?.IsAuthenticated != true)
+            {
+                return 0;
+            }
+
+            var applicationUser = await AuthenticationService.GetCurrentUserAsync(authenticationState.User);
+            return applicationUser?.Id ?? 0;
+        }
+
+        private async Task ViewReadinessAsync(AssessmentDto assessment)
+        {
+            await OffcanvasService!.ShowAsync(new CanvasRequest
+            {
+                Title = $"Projection Readiness - {assessment.CaseNumber}",
+                Width = 850,
+                ComponentType = typeof(AssessmentProjectionReadinessComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(AssessmentProjectionReadinessComponent.AssessmentId), assessment.AssessmentId }
+                }
+            });
+        }
+
+        private async Task MarkCompleteAsync(AssessmentDto assessmentDto)
+        {
+            if (assessmentDto.StatusId != AssessmentLifecycleStatus.ReadyForReview)
+            {
+                _Toast!.ShowError("Submit the assessment for review before marking it complete.", "Workflow check");
+                return;
+            }
+
+            var readiness = await readinessService.EvaluateAsync(assessmentDto.AssessmentId);
+            await PersistReadinessAsync(assessmentDto.AssessmentId, readiness.Score);
+
+            if (!readiness.CanComplete)
+            {
+                _Toast!.ShowError(
+                    $"This assessment has {readiness.Checks.Count(item => item.Required && !item.Passed)} blocking readiness item(s).",
+                    "Assessment not ready");
+                await ViewReadinessAsync(assessmentDto);
+                return;
+            }
+
+            var confirmed = LifecycleConfirmDialog is not null
+                && await LifecycleConfirmDialog.ShowAsync(
+                    "Complete assessment?",
+                    $"{assessmentDto.CaseNumber} will be marked complete and treated as finalized in assessment metrics.",
+                    "Mark Complete",
+                    "Keep Open");
+            if (!confirmed)
+                return;
+
+            await UpdateStatusAsync(assessmentDto.AssessmentId, AssessmentLifecycleStatus.Completed, true);
+            _Toast!.ShowSuccess($"{assessmentDto.CaseNumber} has been marked complete.", sessionService!.AppTitle);
+            await RefreshAssessmentWorkspaceAsync();
+        }
+
+        private async Task SubmitForReviewAsync(AssessmentDto assessmentDto)
+        {
+            var readiness = await readinessService.EvaluateAsync(assessmentDto.AssessmentId);
+            await PersistReadinessAsync(assessmentDto.AssessmentId, readiness.Score);
+            if (!readiness.CanComplete)
+            {
+                _Toast!.ShowError("Required projection inputs are still incomplete.", "Assessment not ready");
+                await ViewReadinessAsync(assessmentDto);
+                return;
+            }
+
+            await UpdateStatusAsync(assessmentDto.AssessmentId, AssessmentLifecycleStatus.ReadyForReview);
+            _Toast!.ShowSuccess($"{assessmentDto.CaseNumber} is ready for review.", sessionService!.AppTitle);
+            await RefreshAssessmentWorkspaceAsync();
+        }
+
+        private async Task ReopenAsync(AssessmentDto assessmentDto)
+        {
+            var confirmed = LifecycleConfirmDialog is not null
+                && await LifecycleConfirmDialog.ShowAsync(
+                    "Re-open assessment?",
+                    $"{assessmentDto.CaseNumber} will return to In Progress and can be edited again.",
+                    "Re-open",
+                    "Cancel");
+            if (!confirmed)
+                return;
+
+            await UpdateStatusAsync(assessmentDto.AssessmentId, AssessmentLifecycleStatus.InProgress, false, true);
+            _Toast!.ShowSuccess($"{assessmentDto.CaseNumber} has been re-opened.", sessionService!.AppTitle);
+            await RefreshAssessmentWorkspaceAsync();
+        }
+
+        private async Task PersistReadinessAsync(long assessmentId, int score)
+        {
+            var assessment = await coreAssessmentRepository.GetByIdAsync(assessmentId);
+            if (assessment is null)
+                throw new InvalidOperationException($"Assessment {assessmentId} was not found.");
+
+            if (assessment.ProgressPercentage != score)
+            {
+                assessment.ProgressPercentage = score;
+                await coreAssessmentRepository.SaveAsync(assessment);
+            }
+        }
+
+        private async Task UpdateStatusAsync(
+            long assessmentId,
+            long statusId,
+            bool completing = false,
+            bool reopening = false)
+        {
+            var assessment = await coreAssessmentRepository.GetByIdAsync(assessmentId)
+                ?? throw new InvalidOperationException($"Assessment {assessmentId} was not found.");
+            assessment.StatusId = statusId;
+            assessment.ModifiedDate = DateTime.UtcNow;
+            assessment.ModifiedBy = sessionService?.UserId ?? assessment.ModifiedBy;
+            if (completing)
+            {
+                assessment.CompletedDate = assessment.ModifiedDate;
+                assessment.CompletedBy = sessionService?.UserId;
+            }
+            if (reopening)
+            {
+                assessment.ReopenedDate = assessment.ModifiedDate;
+                assessment.ReopenedBy = sessionService?.UserId;
+                assessment.CompletedDate = null;
+                assessment.CompletedBy = null;
+            }
+            await coreAssessmentRepository.SaveAsync(assessment);
+        }
+
+        private async Task RefreshAssessmentWorkspaceAsync()
+        {
+            await RefreshLifecycleMetricsAsync();
+            if (assessmentTable is not null)
+                await assessmentTable.RefreshAsync();
+            StateHasChanged();
+        }
+
+        private Task HandleLifecycleDrill(string kpiType)
+        {
+            _Toast!.ShowInfo($"{kpiType.Replace("Assessments", " assessments")} is shown in the registry below.", sessionService!.AppTitle);
+            return Task.CompletedTask;
+        }
 
         private async Task ExecutePrintFormatProcess(List<AssessmentDto> targetedDataset)
         {

@@ -13,6 +13,7 @@ using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Services;
 using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents;
+using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
 {
@@ -49,6 +50,33 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private string SearchQuery { get; set; } = string.Empty;
         private long SelectedFilterId { get; set; } = 0;
         private decimal GrandTotalExpenses => FilteredExpenseStreams?.Sum(c => c.MonthlyValues.Sum()) ?? 0;
+        private decimal[] ExpenseMonthlyTotals => ExpenseStreams.Aggregate(new decimal[12], (totals, stream) =>
+        {
+            for (var month = 0; month < Math.Min(12, stream.MonthlyValues.Length); month++)
+                totals[month] += stream.MonthlyValues[month];
+            return totals;
+        });
+        private decimal TotalExpenses => ExpenseMonthlyTotals.Sum();
+        private decimal AverageMonthlyExpense => TotalExpenses / 12m;
+        private decimal PeakMonthlyExpense => ExpenseMonthlyTotals.Max();
+        private decimal ExpenseGrowth => ExpenseMonthlyTotals[0] == 0m
+            ? 0m
+            : (ExpenseMonthlyTotals[11] - ExpenseMonthlyTotals[0]) / ExpenseMonthlyTotals[0] * 100m;
+        private decimal CashbookExpenses => ExpenseStreams
+            .Where(x => x.blSendToCashBook)
+            .Sum(x => x.MonthlyValues.Sum());
+        private decimal SalesLinkedExpenses => ExpenseStreams
+            .Where(x => x.blPercentageOfSalesUsed)
+            .Sum(x => x.MonthlyValues.Sum());
+        private IReadOnlyList<AssessmentKpiCardItem> ExpenseKpis =>
+        [
+            new("Total Expenses", Money(TotalExpenses), "Projected 12-month expenses", "bi bi-receipt", "kpi-blue"),
+            new("Expense Growth", Percent(ExpenseGrowth), "Month 1 to Month 12", "bi bi-arrow-up-right", "kpi-red"),
+            new("Average Monthly Expense", Money(AverageMonthlyExpense), "Average monthly outflow", "bi bi-calendar3", "kpi-purple"),
+            new("Peak Monthly Expense", Money(PeakMonthlyExpense), "Highest projected month", "bi bi-bar-chart", "kpi-slate"),
+            new("Cashbook Expenses", Money(CashbookExpenses), "Posted to cashflow", "bi bi-cash-stack", "kpi-teal"),
+            new("Sales-linked Expenses", Money(SalesLinkedExpenses), "Calculated from sales", "bi bi-percent", "kpi-cyan")
+        ];
 
         // Sorting State
         private string currentSortColumn = "Description";
@@ -188,6 +216,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
             await Task.CompletedTask;
         }
+
+        private static string Money(decimal value) => $"R {value:N0}";
+        private static string Percent(decimal value) => $"{value:N1}%";
 
         private async Task AddExpenseStream() => await OpenExpenseFormPanel(new UnifiedExpenseViewModel());
 

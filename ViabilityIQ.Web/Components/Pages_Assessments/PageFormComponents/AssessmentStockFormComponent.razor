@@ -1,68 +1,125 @@
 ﻿@using ViabilityIQ.Web.Components.CommonComponents
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
-<EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
-    <DataAnnotationsValidator />
-    <div class="p-2">
-
-        <!-- Sales Category Lookup -->
-        <div class="mb-3 mt-1">
-            <label class="form-label fw-bold text-xs text-secondary uppercase pb-1">Sales Category</label>
-            <DDLookupComponent SourceKey="DDLookupEnums.AssessmentSalesCategories"
-                               @bind-Value="FormModel.AssessmentSalesCategoryId"
-                               Placeholder="Select Sales Category" />
+<div class="viq-form-shell">
+    @if (IsSubmitting)
+    {
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Saving stock changes</strong>
+                    <span>Please wait while the monthly values are saved.</span>
+                </div>
+            </div>
         </div>
+    }
 
-        <!-- Include VAT Switch -->
-        <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="vatSwitch" @bind="FormModel.blIncludeVAT">
-            <label class="form-check-label text-xs fw-bold text-secondary ps-2 pt-2" for="vatSwitch">Include VAT</label>
-        </div>
+    <EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync"
+              class="viq-data-form" aria-label="Assessment expense values">
+        <DataAnnotationsValidator />
 
-        <!-- Quick Distribution Engine -->
-        <div class="card bg-light border-0 mb-3 p-1.5 rounded pb-0">
-            <label class="form-label fw-bold text-xs pt-1">Quick Even Distribution</label>
-            <div class="input-group input-group-sm pt-0">
-                <input type="number" class="form-control" @bind="BulkTargetValue" />
-                <button class="btn btn-outline-success" type="button" @onclick="DistributeStockValuesEvenly">Apply</button>
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+            <div>
+                <h2>Assessment expense values</h2>
+                <p>Configure the sales category, VAT treatment and monthly stock values.</p>
             </div>
         </div>
 
-        <!-- 12-Month Horizon -->
-        <div style="max-height: 280px; overflow-y: auto;">
-            @for (int i = 0; i < 12; i++)
-            {
-                int idx = i;
-                <div class="row mb-1 align-items-center">
-                    <div class="col-4"><span class="text-xs fw-semibold text-muted">M@(idx + 1)</span></div>
-                    <div class="col-8">
-                        <input type="number" class="form-control form-control-sm text-end font-monospace text-xs"
-                               @bind="MonthlyValues[idx]"
-                               @bind:event="oninput" />
-                    </div>
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-tags" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Stock settings</h3>
+                    <p>Select the reporting category and VAT treatment.</p>
                 </div>
-            }
-        </div>
+            </header>
+            <div class="viq-form-grid">
+                <div class="viq-form-field">
+                    <label>Sales category</label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.AssessmentSalesCategories"
+                                       @bind-Value="FormModel.AssessmentSalesCategoryId"
+                                       Placeholder="Select Sales Category" />
+                </div>
+                <label class="viq-toggle-card" for="vatSwitch">
+                    <span>
+                        <strong>Include VAT</strong>
+                        <small>Include VAT in the projected values.</small>
+                    </span>
+                    <input class="viq-switch" type="checkbox" id="vatSwitch" @bind="FormModel.blIncludeVAT">
+                </label>
+            </div>
+        </section>
 
-        <!-- Total allocation row -->
-        <div class="d-flex align-items-center gap-2 mt-3 p-2 rounded text-xs fw-bold mb-3" style="background-color: #e0f2fe; color: #1e3a8a;">
-            <span>TOTAL STOCK VALUE</span>
-            <span class="ms-auto">@MonthlyValues.Sum().ToString("N2")</span>
-        </div>
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-distribute-horizontal" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Quick even distribution</h3>
+                    <p>Apply one value evenly across the twelve-month horizon.</p>
+                </div>
+            </header>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="expenseBulkTarget">Distribution value</label>
+                    <input id="expenseBulkTarget" type="number" class="viq-form-control" @bind="BulkTargetValue" />
+                </div>
+                <div class="viq-form-field">
+                    <label>Distribution action</label>
+                    <button class="viq-button viq-button-secondary" type="button"
+                            @onclick="DistributeStockValuesEvenly">
+                        <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                        <span>Apply</span>
+                    </button>
+                </div>
+            </div>
+        </section>
 
-        <div class="d-flex gap-2 border-top pt-2">
-            <button type="submit" class="btn btn-primary btn-sm w-100 py-1.5 text-xs fw-bold" disabled="@IsSubmitting">
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                <div>
+                    <h3>12-month horizon</h3>
+                    <p>Enter the projected value for each month.</p>
+                </div>
+            </header>
+            <div class="viq-form-grid viq-form-grid-2">
+                @for (int i = 0; i < 12; i++)
+                {
+                    int idx = i;
+                    <div class="viq-form-field">
+                        <label for="@($"expenseMonth{idx + 1}")">Month @(idx + 1)</label>
+                        <input id="@($"expenseMonth{idx + 1}")" type="number" class="viq-form-control"
+                               @bind="MonthlyValues[idx]" @bind:event="oninput" />
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Total stock value</h3>
+                    <p>@MonthlyValues.Sum().ToString("N2")</p>
+                </div>
+            </header>
+        </section>
+
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
                 @if (IsSubmitting)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span>Saving stock changes...</span>
                 }
                 else
                 {
-                    <i class="bi bi-check2-circle"></i>
-                    <span>&nbsp; Save Stock Changes</span>
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>Save stock changes</span>
                 }
             </button>
-        </div>
-    </div>
-</EditForm>
+        </footer>
+    </EditForm>
+</div>

@@ -21,35 +21,58 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         // ====================================================
         // INJECTIONS
         // ====================================================
-        [Inject]        private MasterDataService? ViqCrudService { get; set; }
-        [Inject]        private ISessionService? sessionService { get; set; }
-        [Inject]        private ZabOffCanvasService? zabCanvasService { get; set; }
-        [Inject]        private ToastService? _Toast { get; set; }
-        [Inject]        private IProjectionStateManager? projectionStateManager { get; set; }
-        [Inject]        private ILogger<AssessmentSalesPage>? Logger { get; set; }
+        [Inject]
+        private MasterDataService? ViqCrudService { get; set; }
+
+        [Inject]
+        private ISessionService? sessionService { get; set; }
+
+        [Inject]
+        private ZabOffCanvasService? zabCanvasService { get; set; }
+
+        [Inject]
+        private ToastService? _Toast { get; set; }
+
+        [Inject]
+        private IProjectionStateManager? projectionStateManager { get; set; }
+
+        [Inject]
+        private ILogger<AssessmentSalesPage>? Logger { get; set; }
 
         // ====================================================
         // PARAMETERS
         // ====================================================
-        [Parameter]        public long AssessmentId { get; set; } = 1;
-        [Parameter]        public EventCallback<SaveResult> OnSaveComplete { get; set; }
+        [Parameter]
+        public long AssessmentId { get; set; } = 1;
+
+        [Parameter]
+        public EventCallback<SaveResult> OnSaveComplete { get; set; }
 
         // ====================================================
         // PRIVATE FIELDS - DATA
         // ====================================================
         // Sample Data Arrays for 12 Months
-        private decimal[] Sales;                // = { 150000, 165000, 180000, 170000, 190000, 200000, 210000, 195000, 215000, 220000, 230000, 250000 };
-        private decimal[] Purchases;            // = { 80000, 85000, 95000, 90000, 100000, 105000, 110000, 100000, 110000, 115000, 120000, 130000 };
-        private decimal[] Expenses;             // = { 30000, 30000, 35000, 32000, 35000, 38000, 40000, 37000, 39000, 41000, 42000, 45000 };
+        private decimal[] Sales = { 150000, 165000, 180000, 170000, 190000, 200000, 210000, 195000, 215000, 220000, 230000, 250000 };
+        private decimal[] Purchases = { 80000, 85000, 95000, 90000, 100000, 105000, 110000, 100000, 110000, 115000, 120000, 130000 };
+        private decimal[] Expenses = { 30000, 30000, 35000, 32000, 35000, 38000, 40000, 37000, 39000, 41000, 42000, 45000 };
 
-        private decimal[] CalcOutput => Sales.Select(s => s * 0.15m).ToArray();
-        private decimal[] CalcInput => Purchases.Select(p => p * 0.15m).ToArray();
+        private decimal[] CalcOutput => NormalizeProjection(Sales).Select(s => s * 0.15m).ToArray();
+        private decimal[] CalcInput => NormalizeProjection(Purchases).Select(p => p * 0.15m).ToArray();
         private decimal[] CalcNet => CalcOutput.Zip(CalcInput, (o, i) => o - i).ToArray();
 
         // Adjusted arrays (with sample overrides for demo)
         private decimal[] AdjOutput => CalcOutput.Select((val, idx) => idx == 1 ? val + 500m : val).ToArray();
         private decimal[] AdjInput => CalcInput.Select((val, idx) => idx == 2 ? val - 250m : val).ToArray();
         private decimal[] AdjNet => AdjOutput.Zip(AdjInput, (o, i) => o - i).ToArray();
+
+        private decimal TotalVatAbleSales => GetTotal(Sales);
+        private decimal TotalVatAblePurchases => GetTotal(Purchases);
+        private decimal TotalOutputVat => GetTotal(CalcOutput);
+        private decimal TotalInputVat => GetTotal(CalcInput);
+        private decimal TotalNetVatPayable => GetTotal(CalcNet);
+        private decimal VatRecoveryRate => TotalOutputVat == 0m
+            ? 0m
+            : TotalInputVat / TotalOutputVat * 100m;
 
         // ====================================================
         // PRIVATE FIELDS - STATE
@@ -67,6 +90,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             try
             {
+                EnsureProjectionArrays();
                 AssessmentId = sessionService?.AssessmentId ?? 0;
 
                 Logger?.LogInformation(
@@ -238,7 +262,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         }
 
         
-        /// Handle projection state changes        
+        /// Handle projection state changes
+        
         private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             try
@@ -253,6 +278,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     InvokeAsync(async () =>
                     {
                         // await LoadAndMapVATData();
+                        EnsureProjectionArrays();
                         StateHasChanged();
                     });
                 }
@@ -302,9 +328,45 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
         }
 
+        private void EnsureProjectionArrays()
+        {
+            Sales = NormalizeProjection(Sales);
+            Purchases = NormalizeProjection(Purchases);
+            Expenses = NormalizeProjection(Expenses);
+        }
+
+        private static decimal[] NormalizeProjection(decimal[]? values)
+        {
+            if (values?.Length == 12)
+            {
+                return values;
+            }
+
+            var normalized = new decimal[12];
+            if (values is not null)
+            {
+                Array.Copy(values, normalized, Math.Min(values.Length, normalized.Length));
+            }
+
+            return normalized;
+        }
+
+        private static decimal GetMonthlyValue(decimal[]? values, int monthIndex)
+        {
+            return values is not null && monthIndex >= 0 && monthIndex < values.Length
+                ? values[monthIndex]
+                : 0m;
+        }
+
+        private static decimal GetTotal(decimal[]? values)
+        {
+            return values?.Sum() ?? 0m;
+        }
+
         // ====================================================
         // CLEANUP
         // ====================================================
+
         async ValueTask IAsyncDisposable.DisposeAsync()
         {
             // Unsubscribe from events
