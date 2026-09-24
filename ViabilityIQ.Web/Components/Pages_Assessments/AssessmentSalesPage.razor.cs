@@ -11,6 +11,7 @@ using ViabilityIQ.Shared.DataModels.FinCalculations;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
+using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments
@@ -25,6 +26,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         [Inject] ToastService? _Toast { get; set; }
         [Inject] IProjectionStateManager? projectionStateManager { get; set; }
         [Inject] ILogger<AssessmentSalesPage>? Logger { get; set; }
+        [Inject] IGenericDataRepository<AssessmentProjectionAssumptions> AssumptionsRepository { get; set; } = default!;
 
         #endregion
 
@@ -36,6 +38,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private ZabConfirmDialogComponent? ConfirmDeleteDialog { get; set; } = default!;
         private AssessmentFinancialsDto ConsolidatedAssessmentData { get; set; } = new();
         private List<UnifiedIncomeViewModel> IncomeStreams { get; set; } = new();
+        private AssessmentProjectionAssumptions ProjectionAssumptions { get; set; } = new();
         private bool IsLoading { get; set; } = true;
         private bool blAlert { get; set; } = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity { get; set; } = ViqAlertComponent.AlertSeverity.Warning;
@@ -46,6 +49,32 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private string SearchQuery { get; set; } = string.Empty;
         private long SelectedFilterId { get; set; } = 0;
         private decimal GrandTotalRevenue => FilteredIncomeStreams?.Sum(c => c.MonthlyValues.Sum()) ?? 0;
+        private decimal[] SalesMonthlyTotals => IncomeStreams
+            .Where(x => x.TypeId is 1 or 2)
+            .Aggregate(new decimal[12], (totals, stream) =>
+            {
+                for (var month = 0; month < Math.Min(12, stream.MonthlyValues.Length); month++)
+                    totals[month] += stream.MonthlyValues[month];
+                return totals;
+            });
+        private decimal TotalSales => SalesMonthlyTotals.Sum();
+        private decimal AverageMonthlySales => TotalSales / 12m;
+        private decimal SalesGrowth => SalesMonthlyTotals[0] == 0m
+            ? 0m
+            : (SalesMonthlyTotals[11] - SalesMonthlyTotals[0]) / SalesMonthlyTotals[0] * 100m;
+        private decimal CostOfSalesRate => Math.Clamp(ProjectionAssumptions.CostOfSalesPercentage ?? 0m, 0m, 100m);
+        private decimal GrossProfit => TotalSales * (1m - CostOfSalesRate / 100m);
+        private decimal GrossMargin => TotalSales == 0m ? 0m : GrossProfit / TotalSales * 100m;
+        private decimal CreditSales => TotalSales * (1m - Math.Clamp(ProjectionAssumptions.CashSalesPercentage, 0m, 100m) / 100m);
+        private IReadOnlyList<AssessmentKpiCardItem> SalesKpis =>
+        [
+            new("Total Sales", Money(TotalSales), "Projected 12-month revenue", "bi bi-graph-up-arrow", "kpi-blue"),
+            new("Sales Growth", Percent(SalesGrowth), "Month 1 to Month 12", "bi bi-arrow-up-right", "kpi-teal"),
+            new("Average Monthly Sales", Money(AverageMonthlySales), "Average projected revenue", "bi bi-calendar3", "kpi-purple"),
+            new("Gross Profit", Money(GrossProfit), $"After {CostOfSalesRate:N1}% cost of sales", "bi bi-bar-chart-line", "kpi-slate"),
+            new("Gross Margin", Percent(GrossMargin), "Gross profit as % of sales", "bi bi-pie-chart", "kpi-cyan"),
+            new("Credit Sales", Money(CreditSales), $"{100m - ProjectionAssumptions.CashSalesPercentage:N1}% of sales", "bi bi-credit-card", "kpi-red")
+        ];
 
         // Sorting State
         private string currentSortColumn = "Description";
@@ -85,6 +114,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     AssessmentId);
 
                 await LoadAndMapSalesData();
+                await LoadProjectionAssumptionsAsync();
                 await CreateSummaries();
                 IsLoading = false;
 
@@ -165,6 +195,18 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 Logger.LogError(ex, "Error loading sales data for assessment {AssessmentId}", AssessmentId);
             }
         }
+
+        private async Task LoadProjectionAssumptionsAsync()
+        {
+            ProjectionAssumptions = (await AssumptionsRepository.GetAllAsync(item =>
+                    item.AssessmentId == AssessmentId && item.Active))
+                .OrderByDescending(item => item.AssessmentProjectionAssumptionsId)
+                .FirstOrDefault()
+                ?? new AssessmentProjectionAssumptions { AssessmentId = AssessmentId };
+        }
+
+        private static string Money(decimal value) => $"R {value:N0}";
+        private static string Percent(decimal value) => $"{value:N1}%";
 
         private async Task CreateSummaries()
         {

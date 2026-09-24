@@ -1,5 +1,4 @@
-﻿
-.vat-page-container {
+﻿.vat-page-container {
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -30,6 +29,142 @@
 .vat-actions {
     display: flex;
     gap: 10px;
+}
+
+.vat-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.vat-kpi-card {
+    --vat-kpi-accent: #728fce;
+    --vat-kpi-soft: #eaf0fb;
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 82px; /* Reduced height */
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px; /* Tighter gap */
+    overflow: hidden;
+    padding: 10px 12px 10px 14px; /* Removed/reduced inside padding */
+    border: 1px solid #dbe4ec;
+    border-left: 4px solid var(--vat-kpi-accent);
+    border-radius: 10px;
+    background: linear-gradient(145deg, #ffffff 0%, #fbfcfe 100%);
+    box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
+    isolation: isolate;
+    /* Smoother, more gradual on-hover transition */
+    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1), border-color 350ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+    .vat-kpi-card:hover {
+        border-color: #566D7E;
+        transform: translateY(-2.5px);
+        box-shadow: 0 8px 20px rgba(71, 101, 157, 0.12);
+    }
+
+    .vat-kpi-card:focus-within {
+        border-color: #566D7E;
+        box-shadow: 0 0 0 3px rgba(114, 143, 206, 0.2);
+    }
+
+.vat-kpi-heading {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #566D7E;
+    font-size: 0.57rem; /* Reduced font size */
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.vat-kpi-icon {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--vat-kpi-soft);
+    color: var(--vat-kpi-accent);
+    font-size: 0.8rem;
+    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vat-kpi-card:hover .vat-kpi-icon {
+    transform: scale(1.06) rotate(-2deg);
+}
+
+.vat-kpi-value {
+    z-index: 1;
+    overflow: hidden;
+    color: #566D7E;
+    font-size: clamp(0.85rem, 1.1vw, 1.05rem); /* Reduced font size */
+    font-weight: 700;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vat-kpi-caption {
+    z-index: 1;
+    overflow: hidden;
+    color: #7a8ba0;
+    font-size: 0.6rem; /* Scaled down slightly for harmony */
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vat-kpi-decoration {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    width: 36px; /* Reduced size of semi-circle background */
+    height: 36px; /* Reduced size of semi-circle background */
+    border-radius: 50%;
+    background: var(--vat-kpi-soft);
+    opacity: 0.85;
+    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vat-kpi-card:hover .vat-kpi-decoration {
+    transform: scale(1.15);
+}
+
+.vat-kpi-output {
+    --vat-kpi-accent: #2563eb;
+    --vat-kpi-soft: #e8efff;
+}
+
+.vat-kpi-input {
+    --vat-kpi-accent: #0f8a7b;
+    --vat-kpi-soft: #e2f3f0;
+}
+
+.vat-kpi-sales {
+    --vat-kpi-accent: #7c3aed;
+    --vat-kpi-soft: #f1e8ff;
+}
+
+.vat-kpi-net {
+    --vat-kpi-accent: #607586;
+    --vat-kpi-soft: #e9eef2;
+}
+
+.vat-kpi-purchases {
+    --vat-kpi-accent: #0891b2;
+    --vat-kpi-soft: #e3f5f9;
+}
+
+.vat-kpi-recovery {
+    --vat-kpi-accent: #ca2f3b;
+    --vat-kpi-soft: #fbe7e9;
 }
 
 .btn-vat-primary {
@@ -139,3 +274,35 @@
         background-color: #29465B;
         color: #ffffff;
     }
+
+@media (max-width: 1280px) {
+    .vat-kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .vat-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .vat-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 460px) {
+    .vat-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vat-kpi-card,
+    .vat-kpi-icon,
+    .vat-kpi-decoration {
+        transition: none;
+    }
+}

@@ -1,0 +1,81 @@
+﻿@using ViabilityIQ.Infrastructure.Repositories
+@using ViabilityIQ.Shared.DataModels
+@inject ILeadRepository LeadRepository
+@inject ILogger<DemoRequestComponent> Logger
+
+<div class="vi-form-card">
+    <h3>Request a Live Demo</h3>
+
+    @if (!string.IsNullOrEmpty(_statusMessage))
+    {
+        <div class="vi-alert @(_isSuccess ? "alert-success" : "alert-error")">
+            @_statusMessage
+        </div>
+    }
+
+    <EditForm Model="_leadModel" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="vi-form-group">
+            <label>Full Name</label>
+            <InputText @bind-Value="_leadModel.FullName" placeholder="e.g. Sarah Jenkins" class="vi-input" required />
+        </div>
+
+        <div class="vi-form-group">
+            <label>Work Email</label>
+            <InputText @bind-Value="_leadModel.Email" type="email" placeholder="sarah@company.com" class="vi-input" required />
+        </div>
+
+        <div class="vi-form-group">
+            <label>Organization / Company</label>
+            <InputText @bind-Value="_leadModel.CompanyName" placeholder="Enterprise Name or Municipality" class="vi-input" required />
+        </div>
+
+        <div class="vi-form-group">
+            <label>Asset Volume Scale</label>
+            <InputSelect @bind-Value="_leadModel.AssetVolumeScale" class="vi-input">
+                <option value="Under 500 assets">Under 500 assets</option>
+                <option value="500 - 5,000 assets">500 - 5,000 assets</option>
+                <option value="5,000+ assets">5,000+ assets</option>
+            </InputSelect>
+        </div>
+
+        <button type="submit" class="vi-btn-primary" disabled="@_isSubmitting" style="width: 100%; border: none; cursor: pointer; padding: 12px; font-size: 1rem;">
+            @(_isSubmitting ? "Submitting..." : "Submit Demo Request")
+        </button>
+    </EditForm>
+</div>
+
+
+@code {
+    private LeadSubmission _leadModel = new();
+    private bool _isSubmitting = false;
+    private bool _isSuccess = false;
+    private string _statusMessage = string.Empty;
+
+    private async Task HandleSubmit()
+    {
+        _isSubmitting = true;
+        _statusMessage = string.Empty;
+
+        try
+        {
+            // Directly call the repository in your infrastructure project!
+            await LeadRepository.InsertLeadAsync(_leadModel);
+
+            _isSuccess = true;
+            _statusMessage = "Thank you! Your demo request has been submitted successfully.";
+            _leadModel = new(); // Reset the form
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving lead submission.");
+            _isSuccess = false;
+            _statusMessage = "An error occurred while saving your request. Please try again.";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

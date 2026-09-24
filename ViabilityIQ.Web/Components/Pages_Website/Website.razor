@@ -1,0 +1,796 @@
+﻿@page "/viabilityiq"
+@layout MainLayout_Empty
+
+@using ViabilityIQ.Infrastructure.Repositories
+@using ViabilityIQ.Shared.DataModels
+@inject ILeadRepository LeadRepository
+@inject ILogger<Website> Logger
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viability.IQ - Financial Viability & Asset Intelligence</title>
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/website.css">
+
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="vi-header">
+        <div class="vi-container vi-nav">
+            <div class="vi-logo">
+                Viability<span>.IQ</span>
+            </div>
+            <nav class="vi-nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#demo">Contact</a>
+            </nav>
+            <div class="vi-nav-actions">
+                <a href="#demo" class="vi-btn-secondary">Sign In</a>
+                <a href="#demo" class="vi-btn-primary">Request Demo</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="vi-hero">
+        <div class="vi-container vi-hero-content">
+            <span class="vi-badge"><i class="bi bi-lightning-charge-fill"></i> Enterprise Financial Modeling & Asset Intelligence</span>
+            <h1>Next-Generation Viability & <span class="highlight">Asset Management</span></h1>
+            <p>Empower your finance team with automated asset tracking, accurate depreciation registers, and real-time financial projection workflows.</p>
+            <div class="vi-hero-btns">
+                <a href="#demo" class="vi-btn-primary vi-btn-lg">Get Started Free <i class="bi bi-arrow-right"></i></a>
+                <a href="#features" class="vi-btn-outline vi-btn-lg">Explore Features</a>
+            </div>
+
+            <!-- App Preview Mockup Container -->
+            <div class="vi-mockup-card">
+                <div class="vi-mockup-header">
+                    <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                    <span class="vi-mockup-title">ViabilityIQ Dashboard - Live Preview</span>
+                </div>
+                <div class="vi-mockup-body">
+                    <div class="vi-mockup-kpi">
+                        <div><span>Total Asset Value</span><strong>R 24,500,000</strong></div>
+                        <div><span>Net VAT Payable</span><strong>R 412,300</strong></div>
+                        <div><span>Depreciation YTD</span><strong>R 1,850,400</strong></div>
+                    </div>
+                    <div class="vi-mockup-table-placeholder">
+                        <div class="row-line"></div>
+                        <div class="row-line short"></div>
+                        <div class="row-line medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="vi-features">
+        <div class="vi-container">
+            <div class="vi-section-title">
+                <h2>Built for Precision Financial Control</h2>
+                <p>Everything your enterprise needs to manage complex assets, schedules, and compliance in one unified workspace.</p>
+            </div>
+            <div class="vi-grid">
+                <div class="vi-card">
+                    <div class="vi-card-icon green"><i class="bi bi-box-seam"></i></div>
+                    <h3>Lifecycle Asset Tracking</h3>
+                    <p>Monitor assets seamlessly from acquisition through deployment to disposal with automated depreciation schedules.</p>
+                </div>
+                <div class="vi-card">
+                    <div class="vi-card-icon orange"><i class="bi bi-calculator"></i></div>
+                    <h3>Advanced VAT Modeling</h3>
+                    <p>Dynamic 12-month tax modeling with automated output/input calculations and cashflow adjustments.</p>
+                </div>
+                <div class="vi-card">
+                    <div class="vi-card-icon green"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h3>Financial Projections</h3>
+                    <p>Build robust loan calculations, debtors/creditors engines, and comprehensive cashflow viability forecasts.</p>
+                </div>
+                <div class="vi-card">
+                    <div class="vi-card-icon orange"><i class="bi bi-shield-check"></i></div>
+                    <h3>Audit & Activity Logs</h3>
+                    <p>Maintain complete transparency with real-time internal notification drawers, activity logging, and secure tracking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="vi-pricing">
+        <div class="vi-container">
+            <div class="vi-section-title">
+                <h2>Transparent, Scalable Pricing</h2>
+                <p>Choose the plan that fits your corporate asset volume and reporting requirements.</p>
+            </div>
+            <div class="vi-pricing-grid">
+                <!-- Tier 1 -->
+                <div class="vi-price-card">
+                    <h3>Professional</h3>
+                    <p class="vi-price-desc">Ideal for growing teams managing single-entity books and standard asset registers.</p>
+                    <div class="vi-price"><span>R</span>2,490<span>/mo</span></div>
+                    <ul class="vi-price-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Up to 1,000 Active Assets</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Standard Depreciation Engine</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Monthly VAT Models</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Email Support</li>
+                    </ul>
+                    <a href="#demo" class="vi-btn-outline" style="width: 100%; text-align: center; display: block;">Select Plan</a>
+                </div>
+                <!-- Tier 2 (Featured) -->
+                <div class="vi-price-card featured">
+                    <span class="vi-popular-badge">Most Popular</span>
+                    <h3>Enterprise</h3>
+                    <p class="vi-price-desc">Full suite capabilities for comprehensive multi-department tracking and robust auditing.</p>
+                    <div class="vi-price"><span>R</span>5,990<span>/mo</span></div>
+                    <ul class="vi-price-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Unlimited Active Assets</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Advanced Loan & Cashflow Projections</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Activity Logs & Notification Drawer</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Priority 24/7 Support</li>
+                    </ul>
+                    <a href="#demo" class="vi-btn-primary" style="width: 100%; text-align: center; display: block;">Get Started</a>
+                </div>
+                <!-- Tier 3 -->
+                <div class="vi-price-card">
+                    <h3>Custom / Government</h3>
+                    <p class="vi-price-desc">Custom integration, on-premise options, and localized regulatory reporting setup.</p>
+                    <div class="vi-price">Custom</div>
+                    <ul class="vi-price-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Tailored Council / Enterprise Setup</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Dedicated Account Manager</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Custom VBA / SQL Integrations</li>
+                        <li><i class="bi bi-check-circle-fill"></i> On-Premise Deployment Available</li>
+                    </ul>
+                    <a href="#demo" class="vi-btn-outline" style="width: 100%; text-align: center; display: block;">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Demo Request Form Section -->
+    <section id="demo" class="vi-contact-section">
+        <div class="vi-container">
+            <div class="vi-contact-wrapper">
+                <div class="vi-contact-info">
+                    <h2>Ready to elevate your financial intelligence?</h2>
+                    <p>Schedule a personalized walk-through with our team to see how Viability.IQ handles your organization's assets and forecasting.</p>
+                    <ul class="vi-contact-perks">
+                        <li><i class="bi bi-check2"></i> Live custom data demonstration</li>
+                        <li><i class="bi bi-check2"></i> Security & compliance Q&A</li>
+                        <li><i class="bi bi-check2"></i> No-obligation consultation</li>
+                    </ul>
+                </div>
+
+                <div class="vi-form-card">
+                    <h3>Request a Live Demo</h3>
+
+                    @if (!string.IsNullOrEmpty(_statusMessage))
+                    {
+                        <div class="vi-alert" style="padding: 10px; margin-bottom: 15px; border-radius: 6px; background: @(_isSuccess ? "#e2f3f0" : "#fee2e2"); color: @(_isSuccess ? "#0f8a7b" : "#991b1b"); font-size: 0.9rem;">
+                            @_statusMessage
+                        </div>
+                    }
+
+                    <EditForm Model="_leadModel" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="vi-form-group">
+                            <label>Full Name</label>
+                            <InputText @bind-Value="_leadModel.FullName" placeholder="e.g. Sarah Jenkins" class="vi-input" required />
+                        </div>
+
+                        <div class="vi-form-group">
+                            <label>Work Email</label>
+                            <InputText @bind-Value="_leadModel.Email" type="email" placeholder="sarah@company.com" class="vi-input" required />
+                        </div>
+
+                        <div class="vi-form-group">
+                            <label>Organization / Company</label>
+                            <InputText @bind-Value="_leadModel.CompanyName" placeholder="Enterprise Name or Municipality" class="vi-input" required />
+                        </div>
+
+                        <div class="vi-form-group">
+                            <label>Asset Volume Scale</label>
+                            <InputSelect @bind-Value="_leadModel.AssetVolumeScale" class="vi-input">
+                                <option value="Under 500 assets">Under 500 assets</option>
+                                <option value="500 - 5,000 assets">500 - 5,000 assets</option>
+                                <option value="5,000+ assets">5,000+ assets</option>
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="vi-btn-primary" disabled="@_isSubmitting" style="width: 100%; border: none; cursor: pointer; padding: 12px; font-size: 1rem; margin-top: 10px;">
+                            @(_isSubmitting ? "Submitting..." : "Submit Demo Request")
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="vi-footer">
+        <div class="vi-container vi-footer-content">
+            <div class="vi-logo">Viability<span>.IQ</span></div>
+            <p>&copy; 2026 Viability.IQ. All rights reserved. Enterprise Financial Software Solutions.</p>
+            <div class="vi-socials">
+                <a href="#"><i class="bi bi-linkedin"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <a href="#"><i class="bi bi-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
+
+        <style type="text/css">
+        :root {
+    --vi-primary-green: #0f8a7b;
+    --vi-dark-green: #0b665c;
+    --vi-accent-orange: #d97706;
+    --vi-slate: #29465B;
+    --vi-bg: #f8fafc;
+    --vi-border: #e2e8f0;
+    --vi-text: #334155;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+/* Ensure html and body are allowed to grow and trigger the scrollbar */
+html {
+    scroll-behavior: smooth;
+    height: auto;
+    overflow-y: scroll; /* Forces the scrollbar track to stay visible */
+}
+
+
+body {
+      background-color: var(--vi-bg);
+        color: var(--vi-text);
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden; /* Prevents horizontal overflow */
+
+.vi-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.vi-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--vi-border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.vi-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.vi-logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--vi-primary-green);
+    letter-spacing: -0.5px;
+}
+
+    .vi-logo span {
+        color: var(--vi-accent-orange);
+    }
+
+.vi-nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+    .vi-nav-links a {
+        text-decoration: none;
+        color: var(--vi-slate);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+        .vi-nav-links a:hover {
+            color: var(--vi-primary-green);
+        }
+
+.vi-nav-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Buttons */
+.vi-btn-primary {
+    background: linear-gradient(135deg, var(--vi-primary-green), var(--vi-dark-green));
+    color: #ffffff;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 4px 12px rgba(15, 138, 123, 0.2);
+}
+
+.vi-btn-secondary {
+    background: transparent;
+    color: var(--vi-slate);
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.vi-btn-outline {
+    background: #ffffff;
+    color: var(--vi-slate);
+    border: 1px solid var(--vi-border);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.vi-btn-lg {
+    padding: 12px 24px;
+    font-size: 1rem;
+}
+
+/* Hero Section */
+.vi-hero {
+    padding: 80px 0 60px;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, var(--vi-bg) 100%);
+}
+
+.vi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e2f3f0;
+    color: var(--vi-primary-green);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.vi-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--vi-slate);
+    max-width: 800px;
+    margin: 0 auto 20px;
+    line-height: 1.2;
+}
+
+    .vi-hero h1 .highlight {
+        color: var(--vi-primary-green);
+    }
+
+.vi-hero p {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 650px;
+    margin: 0 auto 30px;
+}
+
+.vi-hero-btns {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+}
+
+/* Mockup */
+.vi-mockup-card {
+    background: #ffffff;
+    border: 1px solid var(--vi-border);
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    box-shadow: 0 20px 40px rgba(41, 70, 91, 0.08);
+    overflow: hidden;
+    text-align: left;
+}
+
+.vi-mockup-header {
+    background: #f1f5f9;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--vi-border);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+    .dot.red {
+        background: #ef4444;
+    }
+
+    .dot.yellow {
+        background: #f59e0b;
+    }
+
+    .dot.green {
+        background: #10b981;
+    }
+
+.vi-mockup-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-left: 10px;
+}
+
+.vi-mockup-body {
+    padding: 24px;
+}
+
+.vi-mockup-kpi {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+    .vi-mockup-kpi div {
+        background: #f8fafc;
+        padding: 14px;
+        border-radius: 8px;
+        border: 1px solid var(--vi-border);
+    }
+
+    .vi-mockup-kpi span {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 700;
+        display: block;
+    }
+
+    .vi-mockup-kpi strong {
+        font-size: 1.1rem;
+        color: var(--vi-slate);
+    }
+
+.vi-mockup-table-placeholder {
+    background: #f8fafc;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px dashed var(--vi-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px;
+}
+
+.row-line {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    width: 100%;
+}
+
+    .row-line.short {
+        width: 40%;
+    }
+
+    .row-line.medium {
+        width: 70%;
+    }
+
+/* Features Grid */
+.vi-features {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.vi-section-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+    .vi-section-title h2 {
+        font-size: 2rem;
+        color: var(--vi-slate);
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .vi-section-title p {
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+.vi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.vi-card {
+    background: var(--vi-bg);
+    border: 1px solid var(--vi-border);
+    padding: 24px;
+    border-radius: 12px;
+}
+
+.vi-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+}
+
+    .vi-card-icon.green {
+        background: #e2f3f0;
+        color: var(--vi-primary-green);
+    }
+
+    .vi-card-icon.orange {
+        background: #fef3c7;
+        color: var(--vi-accent-orange);
+    }
+
+.vi-card h3 {
+    font-size: 1.05rem;
+    color: var(--vi-slate);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.vi-card p {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* Pricing */
+.vi-pricing {
+    padding: 80px 0;
+    background: var(--vi-bg);
+}
+
+.vi-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.vi-price-card {
+    background: #ffffff;
+    border: 1px solid var(--vi-border);
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+    .vi-price-card.featured {
+        border-color: var(--vi-primary-green);
+        box-shadow: 0 15px 35px rgba(15, 138, 123, 0.12);
+        transform: scale(1.03);
+    }
+
+.vi-popular-badge {
+    position: absolute;
+    top: -12px;
+    right: 24px;
+    background: var(--vi-accent-orange);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.vi-price-card h3 {
+    font-size: 1.25rem;
+    color: var(--vi-slate);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.vi-price-desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+    min-height: 40px;
+}
+
+.vi-price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--vi-slate);
+    margin-bottom: 20px;
+}
+
+    .vi-price span {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+.vi-price-features {
+    list-style: none;
+    margin-bottom: 30px;
+    flex-grow: 1;
+}
+
+    .vi-price-features li {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .vi-price-features i {
+        color: var(--vi-primary-green);
+    }
+
+/* Contact Form Section */
+.vi-contact-section {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.vi-contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+    background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+    border: 1px solid var(--vi-border);
+    border-radius: 16px;
+    padding: 50px;
+}
+
+.vi-contact-info h2 {
+    font-size: 2rem;
+    color: var(--vi-slate);
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.vi-contact-info p {
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.vi-contact-perks {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+    .vi-contact-perks li {
+        font-weight: 600;
+        color: var(--vi-slate);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .vi-contact-perks i {
+        background: var(--vi-primary-green);
+        color: #fff;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 0.75rem;
+    }
+
+.vi-form-card {
+    background: #ffffff;
+    border: 1px solid var(--vi-border);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+    .vi-form-card h3 {
+        font-size: 1.3rem;
+        color: var(--vi-slate);
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+.vi-form-group {
+    margin-bottom: 16px;
+}
+
+    .vi-form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+.vi-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--vi-border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--vi-text);
+    background: #f8fafc;
+    outline: none;
+}
+
+    .vi-input:focus {
+        border-color: var(--vi-primary-green);
+        background: #ffffff;
+    }
+
+/* Footer */
+.vi-footer {
+    background: var(--vi-slate);
+    color: #ffffff;
+    padding: 40px 0;
+    text-align: center;
+}
+
+.vi-footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.vi-footer p {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.vi-socials {
+    display: flex;
+    gap: 20px;
+    font-size: 1.2rem;
+}
+
+    .vi-socials a {
+        color: #94a3b8;
+    }
+
+        .vi-socials a:hover {
+            color: #ffffff;
+        }
+
+    
+        </style>

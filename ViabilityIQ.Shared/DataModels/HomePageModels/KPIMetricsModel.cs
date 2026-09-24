@@ -6,6 +6,12 @@
     
     public class KPIMetricsModel
     {
+        public int TotalAssessments { get; set; }
+        public int DraftAssessments { get; set; }
+        public int InProgressAssessments { get; set; }
+        public int ReadyForReviewAssessments { get; set; }
+        public int ProjectionReadyAssessments { get; set; }
+
         #region Personal Metrics (Row 1)
 
         

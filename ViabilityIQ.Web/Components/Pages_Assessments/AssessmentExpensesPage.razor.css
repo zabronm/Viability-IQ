@@ -234,6 +234,54 @@
     cursor: not-allowed;
 }
 
+.expenses-page-toolbar {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.expenses-toolbar-primary,
+.expenses-toolbar-actions {
+    min-width: 0;
+}
+
+.expenses-toolbar-primary .btn {
+    white-space: nowrap;
+}
+
+.expenses-toolbar-actions {
+    flex-wrap: nowrap;
+}
+
+.expenses-toolbar-actions .assessment-page-filter,
+.expenses-toolbar-actions .assessment-page-search {
+    flex: 0 0 auto;
+}
+
+.expenses-toolbar-actions ::deep .assessment-print-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+    .expenses-toolbar-primary,
+    .expenses-toolbar-actions {
+        justify-content: flex-start !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .expenses-toolbar-primary,
+    .expenses-toolbar-actions {
+        align-items: stretch !important;
+        flex-direction: column;
+    }
+
+    .expenses-toolbar-actions .assessment-page-filter,
+    .expenses-toolbar-actions .assessment-page-search {
+        width: 100%;
+    }
+}
+
 
 
 @keyframes fadeIn {

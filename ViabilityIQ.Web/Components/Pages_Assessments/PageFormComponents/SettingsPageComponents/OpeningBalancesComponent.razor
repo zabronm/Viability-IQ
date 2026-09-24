@@ -29,14 +29,14 @@ else
 
             <div class="ob-section-title"><span>Calculated from detailed records</span><small>Read-only authoritative totals</small></div>
             <div class="ob-grid ob-readonly-grid">
-                @ReadOnlyBalance("Opening stock", "Sum of active Sales Category opening stock.", OpeningStock, "bi-box-seam")
+                @ReadOnlyBalance("Opening stock", "Read-only total from active Sales Category opening balances; used as Month 1 opening stock.", OpeningStock, "bi-box-seam")
                 @ReadOnlyBalance("Opening debtors", "Sum of active category debtor balances.", OpeningDebtors, "bi-person-up")
                 @ReadOnlyBalance("Opening creditors", "Sum of active category creditor balances.", OpeningCreditors, "bi-person-down")
                 @ReadOnlyBalance("Opening loan balance", "Sum of active assessment loan balances.", OpeningLoans, "bi-bank")
                 @ReadOnlyBalance("Gross fixed assets", "Sum of registered asset opening costs.", OpeningGrossAssets, "bi-building")
-                @ReadOnlyBalance("Accumulated depreciation", "Sum already accumulated before Month 1.", OpeningAccumulatedDepreciation, "bi-graph-down-arrow")
+                @ReadOnlyBalance("Accumulated depreciation", "Read-only total captured on registered pre-existing assets.", OpeningAccumulatedDepreciation, "bi-graph-down-arrow")
                 @ReadOnlyBalance("Net fixed assets", "Gross assets less accumulated depreciation.", OpeningNetAssets, "bi-calculator")
-                @ReadOnlyBalance("Projected depreciation", "12-month total calculated by the asset engine.", ProjectedDepreciation, "bi-calendar3")
+                @ReadOnlyBalance("Projected depreciation", "Read-only 12-month total calculated by the asset engine and used in profit projections.", ProjectedDepreciation, "bi-calendar3")
             </div>
 
             <div class="ob-section-title"><span>Balances requiring confirmation</span><small>Enter from opening statements or reconciliations</small></div>

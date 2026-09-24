@@ -4,6 +4,7 @@
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using ViabilityIQ.Web.Components.CommonComponents
 @using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents
 @using ViabilityIQ.Shared.UtilityServices
 
 
@@ -12,18 +13,17 @@
 
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
-        <!-- ✅ BUSINESS HEALTH ALERTS (FIRST) -->
-        <div class="col-12 mt-0 pt-0">            
-            <BusinessHealthAlertsAccordionComponent AssessmentId="@AssessmentId" MaxAlerts="3" />
+        <div class="col-12 mt-0 pt-0">
+            <AssessmentKpiCardsComponent Items="@SalesKpis" AriaLabel="Sales key performance indicators" />
         </div>
 
         <div class="col-12 py-1 mt-1">
             <div class="px-0 mb-3">
                 <div class="row g-2 align-items-center assessment-page-toolbar">
                     <div class="col-md-4">
-                        <button class="btn btn-success btn-sm text-xs" @onclick="() => AddIncomeStream()">
+                        @* <button class="btn btn-success btn-sm text-xs" @onclick="() => AddIncomeStream()">
                             <i class="bi bi-plus-circle me-1"></i>&nbsp;Add Revenue Stream
-                        </button>
+                        </button> *@
                     </div>
                     <div class="col-md-8 d-flex gap-2 justify-content-end">
                         <AssessmentPrintButton />

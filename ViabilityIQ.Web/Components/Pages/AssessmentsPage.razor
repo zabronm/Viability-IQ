@@ -5,6 +5,7 @@
 @using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Application.Dtos
 @using ViabilityIQ.Web.Components.Pages.PageFormComponents
+@using ViabilityIQ.Web.Components.Pages.HomePageComponents
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
 
@@ -12,6 +13,8 @@
     <PageHeading _pageTitle="Assessments" CurrentPage="PageType.Assessments" _pageHeading="My Assessments" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:6px;">
+        <KPIWidgetsSectionComponent KPIMetrics="@LifecycleMetrics" OnKPIDrill="HandleLifecycleDrill" />
+
         <div class="app-workspace-shell">
 
             <ZabDataTableAdvanced TItem="AssessmentDto"
@@ -34,6 +37,8 @@
                                   OnEmailList="ExecuteEmailDistributionProcess" />
 
         </div>
+
+        <ZabConfirmDialogComponent @ref="LifecycleConfirmDialog" />
     </main>
 
     <footer class="py-4 bg-light mt-auto">

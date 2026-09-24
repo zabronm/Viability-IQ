@@ -97,11 +97,11 @@ namespace ViabilityIQ.Web.Components.Pages
                     Title = "Balance Sheet Section",
                     Value = x => x.BalanceSheetSection ?? "N/A"
                 },
-                new()
-                {
-                    Title = "Description",
-                    Value = x => x.Description ?? ""
-                },
+                //new()
+                //{
+                //    Title = "Description",
+                //    Value = x => x.Description ?? ""
+                //},
                 new()
                 {
                     Title = "Display Order",
@@ -165,7 +165,7 @@ namespace ViabilityIQ.Web.Components.Pages
             await OffcanvasService!.ShowAsync(new CanvasRequest
             {
                 Title = formTitle,
-                Width = 500,
+                Width = 400,
                 ComponentType = typeof(AssetCategoryFormComponent),
                 Parameters = new Dictionary<string, object>
                 {
@@ -232,7 +232,7 @@ namespace ViabilityIQ.Web.Components.Pages
                     CategoryName = item.CategoryName,
                     CategoryType = item.IsCurrentAsset ? "Current Asset" : "Fixed Asset",
                     BalanceSheetSection = item.BalanceSheetSection,
-                    Description = item.Description,
+                    //Description = item.Description,
                     DisplayOrder = item.DisplayOrder,
                     Status = item.Active ? "Active" : "Inactive"
                 }).ToList();

@@ -49,21 +49,28 @@
                 <NavLink class="fa-nav-item bd-bottom" href="/settings/assessments">
                     <div class="nav-icon-avatar-round"><i class="bi bi-stack"></i></div>
                     <span class="strong">My Assessments</span>
+                    <span class="viq-nav-count" aria-label="@($"{AssessmentCount} assessments")">@FormatCount(AssessmentCount)</span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item bd-bottom" href="/settings/businesses">
                     <div class="nav-icon-avatar-round"><i class="bi bi-buildings"></i></div>
                     <span class="strong">Businesses</span>
+                    <span class="viq-nav-count" aria-label="@($"{BusinessCount} businesses")">@FormatCount(BusinessCount)</span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item bd-bottom" href="/settings/client-contacts">
                     <div class="nav-icon-avatar-round"><i class="bi bi-people"></i></div>
                     <span class="strong">Client Contacts</span>
+                    <span class="viq-nav-count" aria-label="@($"{ClientCount} client contacts")">@FormatCount(ClientCount)</span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item bd-bottom" href="/settings/notifications">
                     <div class="nav-icon-avatar-round"><i class="bi bi-bell-fill"></i></div>
                     <span class="strong">Notifications</span>
+                    <span class="viq-nav-count viq-nav-count--notification"
+                          aria-label="@($"{UnreadNotificationCount} unread notifications")">
+                        @FormatCount(UnreadNotificationCount)
+                    </span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item bd-bottom" href="/settings/reports">

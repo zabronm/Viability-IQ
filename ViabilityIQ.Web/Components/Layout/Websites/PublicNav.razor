@@ -1,0 +1,161 @@
+﻿@rendermode InteractiveServer
+
+<header class="viq-site-header">
+
+    <div class="viq-nav-container">
+
+        <!-- Logo -->
+        <div class="viq-nav-brand">
+
+            <a href="/" class="viq-logo" aria-label="Viability.IQ">
+
+                <span class="viq-logo-name">
+                    Viability<span class="viq-logo-dot">.</span><span class="viq-logo-iq">IQ</span>
+                </span>
+
+            </a>
+
+            <span class="viq-logo-tagline">
+                Understand | Project | Decide
+            </span>
+
+        </div>
+
+
+        <!-- Desktop Navigation -->
+        <nav class="viq-main-nav">
+
+            <a href="/website/features" class="viq-nav-link">
+                Features
+            </a>
+
+            @* <a href="/website/how-it-works" class="viq-nav-link">
+                How It Works
+            </a> *@
+
+            <a href="/sensitivity-analysis" class="viq-nav-link">
+                Is this for you?
+            </a>
+
+            <a href="/website/investors" class="viq-nav-link">
+                For Investors
+            </a>
+
+            <a href="/website/pricing" class="viq-nav-link">
+                Pricing
+            </a>
+
+            <a href="/website/contacts" class="viq-nav-link">
+                Contact Us
+            </a>
+
+        </nav>
+
+
+        <!-- Right Side -->
+        <div class="viq-nav-actions">
+
+            @* <a href="/request-demo"
+               class="viq-demo-link">
+                Request a Demo
+            </a> *@
+
+            <a href="/identity/login" class="viq-login-link btn btn-outline-success rounded-pill" title="You have an account? Sign In!!">
+                Sign In &nbsp;<i class="bi bi-box-arrow-up-right"></i>
+            </a>
+
+            <a href="/assessment/new"
+               class="viq-primary-button viq-nav-cta rounded-pill" title="Complete the form to request a FREE demo.">
+                Request A Demo &nbsp;<i class="bi bi-magic"></i>
+            </a>
+
+        </div>
+
+
+        <!-- Mobile Menu Button -->
+        <button class="viq-mobile-menu-button"
+                type="button"
+                @onclick="ToggleMobileMenu"
+                aria-label="Toggle navigation">
+
+            <i class="bi @(mobileMenuOpen
+                            ? "bi-x-lg"
+                            : "bi-list")"></i>
+
+        </button>
+
+    </div>
+
+
+    <!-- Mobile Navigation -->
+    @if (mobileMenuOpen)
+    {
+        <div class="viq-mobile-menu">
+
+            <a href="/features"
+               class="viq-mobile-nav-link"
+               @onclick="CloseMobileMenu">
+                Features
+            </a>
+
+            <a href="/how-it-works"
+               class="viq-mobile-nav-link"
+               @onclick="CloseMobileMenu">
+                How It Works
+            </a>
+
+            <a href="/sensitivity-analysis"
+               class="viq-mobile-nav-link"
+               @onclick="CloseMobileMenu">
+                Sensitivity Analysis
+            </a>
+
+            <a href="/investors"
+               class="viq-mobile-nav-link"
+               @onclick="CloseMobileMenu">
+                For Investors
+            </a>
+
+            <a href="/pricing"
+               class="viq-mobile-nav-link"
+               @onclick="CloseMobileMenu">
+                Pricing
+            </a>
+
+            <div class="viq-mobile-divider"></div>
+
+            <a href="/request-demo"
+               class="viq-mobile-nav-link viq-mobile-demo">
+                Request a Demo
+            </a>
+
+            <a href="/account/login"
+               class="viq-mobile-nav-link">
+                Sign In
+            </a>
+
+            <a href="/assessment/new"
+               class="viq-primary-button viq-mobile-cta">
+                Start Assessment
+            </a>
+
+        </div>
+    }
+
+</header>
+
+
+@code {
+
+    private bool mobileMenuOpen;
+
+    private void ToggleMobileMenu()
+    {
+        mobileMenuOpen = !mobileMenuOpen;
+    }
+
+    private void CloseMobileMenu()
+    {
+        mobileMenuOpen = false;
+    }
+}

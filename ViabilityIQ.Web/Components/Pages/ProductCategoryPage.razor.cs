@@ -8,6 +8,7 @@ using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.PageFormComponents;
 using ViabilityIQ.Web.Services;
 using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
@@ -18,6 +19,7 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IGenericDataRepository<ProductCategoryDto> productCategoryRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
+        [Inject] private OffCanvasStateService OffcanvasService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
@@ -33,11 +35,6 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<ProductCategoryDto> productCategoryList = new();
         private List<ZabDataTableAdvanced<ProductCategoryDto>.ColumnDefinition<ProductCategoryDto>> tableColumns = new();
 
-        // State Machine parameters for modal canvas controls
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
-        private string formTitle = "Product Category";
-        private long activeRecordId = 0;
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
@@ -82,22 +79,21 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            activeRecordId = extractedRecordId;
-            formTitle = extractedRecordId == 0 ? "Add Product/Service Category" : "Modify Product/Service Category";
+            var formTitle = extractedRecordId == 0
+                ? "Add Product/Service Category"
+                : "Modify Product/Service Category";
 
-            if (canvasShell != null)
+            await OffcanvasService.ShowAsync(new CanvasRequest
             {
-                await canvasShell.OpenAsync(formTitle);
-            }
-        }
-
-        private async Task RefreshWorkspaceGridData()
-        {
-            if (canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
-            await LoadGridDatasetAsync();
+                Title = formTitle,
+                Width = 500,
+                ComponentType = typeof(ProductCategoryFormComponent),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(ProductCategoryFormComponent.ProductCategoryId), extractedRecordId }
+                },
+                ResultCallback = ProcessExecutionFeedback
+            });
         }
 
         private async Task DeleteSelectedBank(ProductCategoryDto targetCategory)
@@ -115,19 +111,12 @@ namespace ViabilityIQ.Web.Components.Pages
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
+                await LoadGridDatasetAsync();
             }
-            else
+            else if (!_result.Cancelled)
             {
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }
-
-            if (_result.ClosePanel)
-            {
-                if (canvasShell != null) await canvasShell!.CloseAsync();
-            }
-
-            await LoadGridDatasetAsync();
-            StateHasChanged();
         }
 
 

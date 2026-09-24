@@ -1,22 +1,82 @@
 ﻿@using ViabilityIQ.Infrastructure.Repositories
-<EditForm Model="@directorWagesModel" OnValidSubmit="UpdateDirectorWages">
-    <DataAnnotationsValidator />
-    <section class="dw-card">
-        <header><span class="dw-icon"><i class="bi bi-people"></i></span><div><span>Management costs</span><h3>Director Wages</h3><p>Monthly remuneration included in operating cash outflows.</p></div></header>
-        <ValidationSummary class="dw-validation" />
-        <div class="dw-fields">
-            <label><span>Number of directors</span><input type="number" min="1" max="100" @bind-value="directorWagesModel.NumberOfDirectors" @bind-value:event="oninput" /></label>
-            <label><span>Monthly wage per director</span><div class="dw-input"><span>R</span><input type="number" step="0.01" @bind-value="directorWagesModel.MonthlyDirectorWagesAmount" @bind-value:event="oninput" /></div></label>
-            <label><span>Combined monthly impact</span><div class="dw-input"><span>R</span><input value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled /></div></label>
+
+<div class="viq-form-shell">
+    @if (loadingStateActive)
+    {
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Loading director wages</strong>
+                    <span>Please wait while the assessment settings are prepared.</span>
+                </div>
+            </div>
         </div>
-        <footer>
-            <span><i class="bi bi-calculator"></i> Total is recalculated from directors × wage.</span>
-            <button type="submit" disabled="@IsSubmitting">
-                <i class="bi bi-check2-circle"></i> Update Director Wages
+    }
+
+    <EditForm Model="@directorWagesModel" OnValidSubmit="UpdateDirectorWages"
+              class="viq-data-form" aria-label="Director wages">
+        <DataAnnotationsValidator />
+
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+            <div>
+                <h2>Director wages</h2>
+                <p>Capture the monthly remuneration included in operating cash outflows.</p>
+            </div>
+        </div>
+
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-cash-coin" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Management costs</h3>
+                    <p>Set the number of directors and monthly wage per director.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="directorCount">Number of directors</label>
+                    <input id="directorCount" class="viq-form-control" type="number" min="1" max="100"
+                           @bind-value="directorWagesModel.NumberOfDirectors" @bind-value:event="oninput" />
+                </div>
+
+                <div class="viq-form-field">
+                    <label for="directorWage">Monthly wage per director (R) <span class="viq-required">*</span></label>
+                    <input id="directorWage" class="viq-form-control" type="number" step="0.01"
+                           @bind-value="directorWagesModel.MonthlyDirectorWagesAmount" @bind-value:event="oninput" />
+                    <ValidationMessage For="@(() => directorWagesModel.MonthlyDirectorWagesAmount)"
+                                       class="viq-form-validation" />
+                </div>
+
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="directorWagesTotal">Combined monthly impact (R)</label>
+                    <input id="directorWagesTotal" class="viq-form-control"
+                           value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled />
+                    <span><i class="bi bi-calculator" aria-hidden="true"></i> Total is recalculated from directors × wage.</span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Updating…</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>Update director wages</span>
+                }
             </button>
         </footer>
-    </section>
-</EditForm>
+    </EditForm>
+</div>
 
 @code {
 

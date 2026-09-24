@@ -3,67 +3,101 @@
 @using ViabilityIQ.Application.Interfaces
 @inject ZabOffCanvasService zabCanvasService
 
+<div class="viq-form-shell">
+    <div class="viq-data-form" aria-label="Bulk expense import">
+        @if (AvailableExpenses == null)
+        {
+            <div class="viq-form-busy" role="status" aria-live="polite">
+                <div class="viq-form-busy-card">
+                    <span class="viq-form-spinner" aria-hidden="true"></span>
+                    <div>
+                        <strong>Loading expenses</strong>
+                        <span>Loading items...</span>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (!AvailableExpenses.Any())
+        {
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Expenses up to date</h3>
+                        <p>All available expense items have been added to this assessment.</p>
+                    </div>
+                </header>
+            </section>
+        }
+        else
+        {
+            <div class="viq-form-intro">
+                <span class="viq-form-intro-icon"><i class="bi bi-box-arrow-in-down" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Select expenses to import</h2>
+                    <p>Choose expense items and configure their posting behavior. Total selected: @SelectedCount</p>
+                </div>
+            </div>
 
-<div class="p-3">
-    @if (AvailableExpenses == null)
-    {
-        <div class="text-center p-3">Loading items...</div>
-    }
-    else if (!AvailableExpenses.Any())
-    {
-        <div class="alert alert-info">All available expense items have been added to this assessment.</div>
-    }
-    else
-    {
-        <!-- Header with Totals Feedback -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold text-navy-brand uppercase mb-0">Select Expenses to Import</h6>
-            <span class="badge bg-primary text-white">Total selected: @SelectedCount</span>
-        </div>
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-list-check" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Available expenses</h3>
+                        <p>Select items, cashbook posting, percentage-of-sales treatment and expense type.</p>
+                    </div>
+                </header>
 
-        <div class="table-responsive border rounded" style="max-height: 400px; overflow-y: auto;">
-            <table class="table table-sm table-hover align-middle mb-0">
-                <thead class="table-light text-xxs sticky-top">
-                    <tr>
-                        <th class="ps-2">Import</th>
-                        <th>Expense Item</th>
-                        <th class="text-center">Cashbook</th>
-                        <th class="text-center">% Sales</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody class="text-xs">
-                    @foreach (var item in AvailableExpenses)
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Import</th>
+                                <th>Expense item</th>
+                                <th>Cashbook</th>
+                                <th>% Sales</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in AvailableExpenses)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="viq-switch"
+                                               @bind="item.IsSelected" @bind:event="onchange" />
+                                    </td>
+                                    <td>@item.ExpenseItemName</td>
+                                    <td><input type="checkbox" class="viq-switch" @bind="item.PostToCashbook" /></td>
+                                    <td><input type="checkbox" class="viq-switch" @bind="item.UsePercentageOfSales" /></td>
+                                    <td>
+                                        <div class="viq-form-field">
+                                            <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes"
+                                                               @bind-Value="item.ExpenseTypeId" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="viq-form-actions">
+                <button type="button" class="viq-button viq-button-primary"
+                        @onclick="ImportSelected" disabled="@isSubmitting">
+                    @if (isSubmitting)
                     {
-                        <tr>
-                            <td class="ps-2"><input type="checkbox" @bind="item.IsSelected" @bind:event="onchange" /></td>
-                            <td class="text-muted fw-semibold">@item.ExpenseItemName</td>
-                            <td class="text-center"><input type="checkbox" @bind="item.PostToCashbook" /></td>
-                            <td class="text-center"><input type="checkbox" @bind="item.UsePercentageOfSales" /></td>
-                            <td style="width: 190px;">
-                                <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes" @bind-Value="item.ExpenseTypeId" />
-                            </td>
-                        </tr>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Importing @SelectedCount Items ...</span>
                     }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-3">
-            <button class="btn btn-primary w-100 fw-bold" @onclick="ImportSelected" disabled="@isSubmitting">
-                @if (isSubmitting)
-                {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span> Importing @SelectedCount Items ...</span>
-                }
-                else
-                {
-                    <i class="bi bi-check2-circle"></i>
-                    <span> &nbsp;Import @SelectedCount Items</span>
-                }
-            </button>
-
-
-        </div>
-    }
+                    else
+                    {
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                        <span>Import @SelectedCount Items</span>
+                    }
+                </button>
+            </footer>
+        }
+    </div>
 </div>

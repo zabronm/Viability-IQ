@@ -445,7 +445,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
         await OffCanvasService.ShowAsync(new CanvasRequest
         {
             Title = "Add Asset",
-            Width = 400,
+            Width = 450,
             ComponentType = typeof(AssessmentAssetFormComponent),
             Parameters = new Dictionary<string, object>
             {

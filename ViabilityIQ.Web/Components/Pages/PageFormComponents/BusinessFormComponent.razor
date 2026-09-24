@@ -20,14 +20,14 @@
     <EditForm Model="businessModel" OnValidSubmit="HandleFormSubmissionAsync"
               class="viq-data-form" aria-label="Business details">
         <DataAnnotationsValidator />
-
+@* 
         <div class="viq-form-intro">
             <span class="viq-form-intro-icon"><i class="bi bi-buildings" aria-hidden="true"></i></span>
             <div>
                 <h2>@(BusinessId == 0 ? "New business profile" : "Business profile")</h2>
                 <p>Capture the organisation, compliance, address and contact information used by assessments.</p>
             </div>
-        </div>
+        </div> *@
 
         <ValidationSummary class="viq-form-validation-summary" />
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,37 +9,26 @@ using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Services;
 
+
 namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
-    
     /// AssetTypeFormComponent - Form for adding and editing asset types
     /// Asset types are specific classifications within categories with default depreciation settings
-    
+
     public partial class AssetTypeFormComponent : ComponentBase
     {
-        // ====================================================
-        // PARAMETERS
-        // ====================================================
-        
-        /// The AssetType ID to edit. If 0, creates a new type
-        
-        [Parameter]
-        public long AssetTypeId { get; set; }
+
+        [Parameter] public long AssetTypeId { get; set; }
 
         // ====================================================
         // INJECTIONS
-        // ====================================================
-        [Inject]
-        private IGenericDataRepository<AssetType> typeRepository { get; set; } = default!;
 
-        [Inject]
-        private IGenericDataRepository<AssetCategory> categoryRepository { get; set; } = default!;
-
-        [Inject]
-        private ISessionService? sessionService { get; set; }
-
-        [Inject]
-        private ToastService? _Toast { get; set; }
+        [Inject] private IGenericDataRepository<AssetType> typeRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<AssetCategory> categoryRepository { get; set; } = default!;
+        [Inject] private ISessionService? sessionService { get; set; }
+        [Inject] private ToastService? _Toast { get; set; }
+        [Inject] private OffCanvasStateService OffcanvasService { get; set; } = default!;
+        [Inject] private ILogger<BusinessFormComponent> Logger { get; set; } = default!;
 
         // ====================================================
         // PRIVATE FIELDS - FORM DATA
@@ -53,14 +43,27 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         private bool isLoading = false;
         private bool isSaving = false;
         private string successMessage = string.Empty;
+        private bool IsDepreciable
+        {
+            get => type.IsDepreciable;
+            set
+            {
+                type.IsDepreciable = value;
+                if (!value)
+                {
+                    type.DefaultDepreciationRate = 0M;
+                    type.DefaultUsefulLifeYears = null;
+                }
+            }
+        }
 
         // ====================================================
         // LIFECYCLE METHODS
         // ====================================================
 
-        
+
         /// Initialize component - load categories and existing type if editing
-        
+
         protected override async Task OnInitializedAsync()
         {
             isLoading = true;
@@ -115,10 +118,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         // PUBLIC EVENT HANDLERS - Invoked from Razor Markup
         // ====================================================
 
-        
+
         /// Handle depreciable checkbox change
         /// Shows/hides depreciation settings
-        
+
         public void OnDepreciableChanged(ChangeEventArgs e)
         {
             type.IsDepreciable = (bool)e.Value!;
@@ -131,20 +134,20 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             StateHasChanged();
         }
 
-        
+
         /// Handle current asset checkbox change
-        
+
         public void OnAssetClassChanged(ChangeEventArgs e)
         {
             type.IsCurrent = (bool)e.Value!;
             StateHasChanged();
         }
 
-        
+
         /// Handle form submission
         /// Validates data and saves type to database
         /// PUBLIC - invoked from form @onsubmit event
-        
+
         public async Task HandleSubmit()
         {
             validationErrors.Clear();
@@ -181,27 +184,44 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 if (success)
                 {
                     // ✅ STEP 4: SHOW SUCCESS MESSAGE
-                    successMessage = type.AssetTypeId == 0
-                        ? "Asset type added successfully!"
-                        : "Asset type updated successfully!";
+                    //successMessage = type.AssetTypeId == 0
+                    //    ? "Asset type added successfully!"
+                    //    : "Asset type updated successfully!";
 
-                    _Toast?.ShowSuccess(successMessage, sessionService?.AppTitle ?? "Success");
+                    //_Toast?.ShowSuccess(successMessage, sessionService?.AppTitle ?? "Success");
+                    var saveResult = new SaveResult()
+                    {
+                        Success = true,
+                        RefreshGrid = true,
+                        ClosePanel = true,  // ✅ Always close on success
+                        Message = AssetTypeId == 0
+                            ? $"{type.TypeName} added successfully"
+                            : $"{type.TypeName} updated successfully"
+                    };
 
                     System.Diagnostics.Debug.WriteLine($"[AssetTypeFormComponent] Type saved successfully. ID: {type.AssetTypeId}, Name: {type.TypeName}");
 
                     // ✅ STEP 5: RETURN SUCCESS TO CALLER
-                    await Task.Delay(500);  // Brief delay to show success message
-                    ReturnSuccess($"Asset type '{type.TypeName}' saved successfully.");
+                    await ReturnSuccessAsync($"Asset type '{type.TypeName}' saved successfully.");
                 }
                 else
                 {
-                    _Toast?.ShowError("Failed to save asset type. Please try again.", "Error");
+                    var saveResult = new SaveResult()
+                    {
+                        Success = false,
+                        RefreshGrid = false,
+                        ClosePanel = false,
+                        Message = "Asset Type not saved/updated"
+                    };
+                    await ReturnSuccessAsync($"Asset type '{type.TypeName}' not saved/updated.");
                 }
             }
             catch (Exception ex)
             {
-                _Toast?.ShowError($"Error saving asset type: {ex.Message}", "Error");
+                await ReturnSuccessAsync($"Error saving/updating Asset type '{type.TypeName}'; not saved/updated.");
+                Logger.LogError(ex, $"Business save failed for Asset Type {type.TypeName}");
                 System.Diagnostics.Debug.WriteLine($"[AssetTypeFormComponent] Exception in HandleSubmit: {ex}");
+
             }
             finally
             {
@@ -210,33 +230,33 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
         }
 
-        
+
         /// Handle form cancellation
         /// Closes the form without saving
         /// PUBLIC - invoked from button @onclick event
-        
-        public void HandleCancel()
+
+        public async Task HandleCancel()
         {
-            ReturnCancel();
+            await ReturnCancelAsync();
         }
 
         // ====================================================
         // PUBLIC VALIDATION HELPERS - Invoked from Razor Markup
         // ====================================================
 
-        
+
         /// Check if a field has a validation error
         /// PUBLIC - invoked from Razor markup conditional rendering
-        
+
         public bool HasError(string fieldName)
         {
             return validationErrors.ContainsKey(fieldName);
         }
 
-        
+
         /// Get the validation error message for a field
         /// PUBLIC - invoked from Razor markup to display error text
-        
+
         public string GetError(string fieldName)
         {
             return validationErrors.ContainsKey(fieldName) ? validationErrors[fieldName] : string.Empty;
@@ -246,9 +266,9 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         // PUBLIC UI HELPER METHODS - Invoked from Razor Markup
         // ====================================================
 
-        
+
         /// Get category name for display in preview
-        
+
         public string GetCategoryName()
         {
             var category = categoriesList.FirstOrDefault(c => c.AssetCategoryId == type.AssetCategoryId);
@@ -259,9 +279,9 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         // PRIVATE VALIDATION METHODS
         // ====================================================
 
-        
+
         /// Validate all form fields
-        
+
         private bool ValidateForm()
         {
             bool isValid = true;
@@ -314,28 +334,24 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         // PRIVATE CALLBACK METHODS
         // ====================================================
 
-        
+
         /// Return success result to the OffCanvasService
-        
-        private void ReturnSuccess(string message)
+
+        private async Task ReturnSuccessAsync(string message)
         {
             try
             {
-                // Create success result
                 var result = new SaveResult
                 {
                     Success = true,
+                    ClosePanel = true,
+                    RefreshGrid = true,
                     Message = message,
                     Data = type
                 };
 
                 System.Diagnostics.Debug.WriteLine($"[AssetTypeFormComponent] ReturnSuccess called. Message: {message}");
-
-                // In production, this would be dispatched through OffCanvasService
-                Task.Run(async () =>
-                {
-                    await Task.CompletedTask;
-                });
+                await OffcanvasService.PublishResultAsync(result);
             }
             catch (Exception ex)
             {
@@ -344,28 +360,15 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
         }
 
-        
+
         /// Return cancel result to the OffCanvasService
-        
-        private void ReturnCancel()
+
+        private async Task ReturnCancelAsync()
         {
             try
             {
-                // Create cancel result
-                var result = new SaveResult
-                {
-                    Success = false,
-                    Message = "Operation cancelled by user",
-                    Data = null
-                };
-
                 System.Diagnostics.Debug.WriteLine("[AssetTypeFormComponent] ReturnCancel called - Operation cancelled");
-
-                // In production, this would be dispatched through OffCanvasService
-                Task.Run(async () =>
-                {
-                    await Task.CompletedTask;
-                });
+                await OffcanvasService.PublishResultAsync(SaveResult.Cancel());
             }
             catch (Exception ex)
             {

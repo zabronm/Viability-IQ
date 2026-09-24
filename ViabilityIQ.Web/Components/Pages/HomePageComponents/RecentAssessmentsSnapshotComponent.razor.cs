@@ -14,6 +14,7 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
     private const int MaximumAssessmentCount = 10;
 
     [Inject] private IGenericDataRepository<AssessmentDto> AssessmentRepository { get; set; } = default!;
+    [Inject] private IAssessmentDataValidationService AssessmentDataValidationService { get; set; } = default!;
     [Inject] private ISessionService? SessionService { get; set; }
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ToastService Toast { get; set; } = default!;
@@ -81,7 +82,16 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
 
         try
         {
-            SessionService?.SetActiveAssessment(
+            if (SessionService == null)
+            {
+                Toast.ShowError("Session service is not available.", "Assessment");
+                return;
+            }
+
+            var dataStatus = await AssessmentDataValidationService.ValidateAssessmentDataAsync(
+                selectedRecord.AssessmentId);
+
+            SessionService.SetActiveAssessment(
                 caseNumber: selectedRecord.CaseNumber ?? string.Empty,
                 assessmentId: selectedRecord.AssessmentId,
                 businessId: selectedRecord.BusinessId,
@@ -89,15 +99,15 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
                 clientId: selectedRecord.ClientId,
                 clientName: selectedRecord.BusinessOwner ?? string.Empty,
                 assessmentType: selectedRecord.AssessmentTypeName ?? string.Empty,
-                HasAssetsData: true,
-                HasExpensesData: true,
-                HasSalesData: true,
-                HasStockData: selectedRecord.blStock,
-                HasReportsData: false,
-                HasReviewsData: false,
-                HasReviews: false,
-                HasDebtorsCreditorsData: selectedRecord.blDebtorsCreditors,
-                HasLoansData: true);
+                HasAssetsData: dataStatus.HasAssets,
+                HasExpensesData: dataStatus.HasExpenses,
+                HasSalesData: dataStatus.HasSales,
+                HasStockData: dataStatus.HasStock,
+                HasReportsData: dataStatus.HasReports,
+                HasReviewsData: dataStatus.HasReviews,
+                HasReviews: dataStatus.HasReviews,
+                HasDebtorsCreditorsData: dataStatus.HasDebtorsCreditors,
+                HasLoansData: dataStatus.HasLoans);
 
             Navigation.NavigateTo($"/assessment/dashboards/{selectedRecord.AssessmentId}");
         }
@@ -109,8 +119,6 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
                 selectedRecord.AssessmentId);
             Toast.ShowError($"Workspace redirection failed: {ex.Message}", "Routing Error");
         }
-
-        await Task.CompletedTask;
     }
 
     private Task HandleRowKeyDownAsync(KeyboardEventArgs args, long assessmentId) =>

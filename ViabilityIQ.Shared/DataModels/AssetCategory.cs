@@ -16,8 +16,7 @@ namespace ViabilityIQ.Shared.DataModels
         [Dapper.Contrib.Extensions.Key] public long AssetCategoryId { get; set; }
 
         [Required(ErrorMessage = "Asset Category Name is required.")]
-        public string CategoryName { get; set; } = string.Empty;
-        public string? Description { get; set; }
+        public string CategoryName { get; set; } = string.Empty;       
         public int DisplayOrder { get; set; }
         public bool IsCurrentAsset { get; set; }  // TRUE for current, FALSE for non-current
         public string? BalanceSheetSection { get; set; }  // For balance sheet grouping

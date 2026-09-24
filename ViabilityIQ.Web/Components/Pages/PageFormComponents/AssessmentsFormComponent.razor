@@ -21,14 +21,14 @@
               class="viq-data-form" aria-label="Assessment details">
         <DataAnnotationsValidator />
 
-        <div class="viq-form-intro">
+        @* <div class="viq-form-intro">
             <span class="viq-form-intro-icon"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i></span>
             <div>
                 <h2>@(AssessmentId == 0 ? "New assessment" : "Assessment details")</h2>
                 <p>Define the business, assessment type and review period for this case.</p>
             </div>
         </div>
-
+ *@
         <ValidationSummary class="viq-form-validation-summary" />
 
         <section class="viq-form-section">
@@ -47,18 +47,18 @@
                                @bind-Value="assessmentModel.CaseNumber"
                                placeholder="SYSTEM GENERATED" disabled />
                 </div>
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label>Business name <span class="viq-required">*</span></label>
                     <DDLookupComponent SourceKey="DDLookupEnums.Businesses"
                                        @bind-Value="assessmentModel.BusinessId" />
                     <ValidationMessage For="() => assessmentModel.BusinessId" class="viq-form-validation" />
                 </div>
-                <div class="viq-form-field">
+                @* <div class="viq-form-field">
                     <label>Assessment type <span class="viq-required">*</span></label>
                     <DDLookupComponent SourceKey="DDLookupEnums.AssessmentTypes"
                                        @bind-Value="assessmentModel.AssessmentTypeId" />
                     <ValidationMessage For="() => assessmentModel.AssessmentTypeId" class="viq-form-validation" />
-                </div>
+                </div> *@
             </div>
         </section>
 
@@ -100,6 +100,13 @@
                                @bind-Value="assessmentModel.Remarks"
                                placeholder="Enter diagnostic assignment metadata background statements..." />
             </div>
+        </section>
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-toggles"></i></span><div><h3>Availability</h3><p>Control whether this assessment can be selected.</p></div></div>
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span><strong>@(isRowActive ? "Assessment active" : "Assessment inactive")</strong><small>Inactive assessments remain visible on existing records.</small></span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
+            </label>
         </section>
 
         <footer class="viq-form-actions">

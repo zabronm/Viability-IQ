@@ -12,10 +12,10 @@
     else
     {
         <form @onsubmit="HandleSubmit" class="viq-data-form">
-            <div class="viq-form-intro">
+            @* <div class="viq-form-intro">
                 <span class="viq-form-intro-icon"><i class="bi bi-boxes"></i></span>
                 <div><h2>Asset category</h2><p>Define classification, balance-sheet placement and display settings.</p></div>
-            </div>
+            </div> *@
 
             <section class="viq-form-section">
                 <div class="viq-form-section-heading"><span><i class="bi bi-tag"></i></span><div><h3>Category information</h3><p>Name and describe the assets grouped in this category.</p></div></div>
@@ -25,10 +25,10 @@
                         <input id="categoryName" type="text" class="viq-form-control @(HasError(nameof(category.CategoryName)) ? "invalid" : "")" @bind="category.CategoryName" placeholder="e.g. Land & Buildings, Plant & Machinery, Vehicles" />
                         @if (HasError(nameof(category.CategoryName))) { <div class="viq-form-validation">@GetError(nameof(category.CategoryName))</div> }
                     </div>
-                    <div class="viq-form-field">
+                    @* <div class="viq-form-field">
                         <label for="categoryDescription">Description</label>
                         <textarea id="categoryDescription" class="viq-form-control viq-form-textarea" rows="2" @bind="category.Description" placeholder="Describe the assets that belong in this category..."></textarea>
-                    </div>
+                    </div> *@
                 </div>
             </section>
 

@@ -25,6 +25,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         private string formattedStartDate = DateTime.Today.ToString("yyyy-MM-dd");
         private string formattedEndDate = DateTime.Today.AddMonths(1).ToString("yyyy-MM-dd");
 
+        private bool isRowActive = true;
         private bool boolStock { get; set; }
         private bool boolDebtors { get; set; }
         private bool boolExpenses { get; set; }
@@ -114,6 +115,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
             isProcessingData = true;
             var finalResult = new SaveResult();
+            assessmentModel.Active = isRowActive;
 
             try
             {

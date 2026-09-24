@@ -11,6 +11,12 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
     
     public class InsightsModel
     {
+        public int TotalAssessments { get; set; }
+        public int AverageReadinessPercent { get; set; }
+        public int ProjectionReadyCount { get; set; }
+        public int ReadyButIncompleteCount { get; set; }
+        public int StalledCount { get; set; }
+
         #region Completion Rate Metrics
 
         
@@ -98,5 +104,4 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
         #endregion
     }
 }
-
 

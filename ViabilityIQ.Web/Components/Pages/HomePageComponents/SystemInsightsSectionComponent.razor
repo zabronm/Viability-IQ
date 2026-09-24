@@ -19,6 +19,30 @@
     else
     {
         <div class="insights-grid">
+            <div class="metric-card">
+                <div class="metric-header"><h4 class="metric-title">Average Projection Readiness</h4></div>
+                <div class="metric-body">
+                    <div class="metric-value-section"><span class="metric-value">@Insights.AverageReadinessPercent%</span></div>
+                    <div class="metric-detail">
+                        <span class="detail-label">@Insights.ProjectionReadyCount projection-ready</span>
+                        <span class="detail-value">@Insights.ReadyButIncompleteCount ready but incomplete</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header"><h4 class="metric-title">Stalled Assessments</h4></div>
+                <div class="metric-body">
+                    <div class="metric-value-section"><span class="metric-value">@Insights.StalledCount</span></div>
+                    <div class="metric-detail">
+                        <span class="detail-label">Draft or in progress without an update for 14 days</span>
+                        <span class="detail-value @(Insights.StalledCount == 0 ? "detail-success" : "detail-warning")">
+                            @(Insights.StalledCount == 0 ? "On Track" : "Needs Attention")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Completion Rate Metric -->
             <div class="metric-card">
                 <div class="metric-header">
