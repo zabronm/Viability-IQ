@@ -1,0 +1,99 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Models
+@using ViabilityIQ.Web.Services
+e
+
+<div class="contact-form">
+    @if (_submitted)
+    {
+        <div class="form-alert success">
+            <strong>Thanks, @_model.Name!</strong><br />
+            We've received your request and will get back to you within one business day.
+        </div>
+    }
+    else
+    {
+        <EditForm Model="_model" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="form-alert error">@_errorMessage</div>
+            }
+
+            <div>
+                <label for="name">Full name</label>
+                <InputText id="name" @bind-Value="_model.Name" placeholder="Jane Smith" />
+                <ValidationMessage For="() => _model.Name" class="field-error" />
+            </div>
+
+            <div>
+                <label for="email">Work email</label>
+                <InputText id="email" type="email" @bind-Value="_model.Email" placeholder="jane@company.com" />
+                <ValidationMessage For="() => _model.Email" class="field-error" />
+            </div>
+
+            <div>
+                <label for="company">Company</label>
+                <InputText id="company" @bind-Value="_model.Company" placeholder="Acme Inc." />
+                <ValidationMessage For="() => _model.Company" class="field-error" />
+            </div>
+
+            <div>
+                <label for="interest">What are you interested in?</label>
+                <InputSelect id="interest" @bind-Value="_model.Interest">
+                    <option value="">Select an option…</option>
+                    <option value="demo">Book a demo</option>
+                    <option value="trial">Start a free trial</option>
+                    <option value="pricing">Pricing question</option>
+                    <option value="partnership">Partnership</option>
+                    <option value="other">Something else</option>
+                </InputSelect>
+                <ValidationMessage For="() => _model.Interest" class="field-error" />
+            </div>
+
+            <div>
+                <label for="message">Tell us about your project</label>
+                <InputTextArea id="message" @bind-Value="_model.Message"
+                               placeholder="Briefly describe what you're trying to validate…" />
+                <ValidationMessage For="() => _model.Message" class="field-error" />
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@_submitting">
+                @(_submitting ? "Sending…" : "Send message")
+            </button>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    [Inject] IContactService ContactService { get; set; } = default!;
+
+    private ContactRequest _model = new();
+    private bool _submitting;
+    private bool _submitted;
+    private string? _errorMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        _submitting = true;
+        _errorMessage = null;
+        try
+        {
+            var ok = await ContactService.SubmitAsync(_model);
+            if (ok) _submitted = true;
+            else _errorMessage = "Something went wrong. Please try again.";
+        }
+        catch
+        {
+            _errorMessage = "Something went wrong. Please try again.";
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}

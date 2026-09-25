@@ -15,6 +15,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
         // Main working model instance bound to forms
         private Bank bankModel = new();
+        private bool blNewBank = false;
 
         // Track state variables cleanly
         private bool isProcessingData = false;
@@ -57,6 +58,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
         }
 
+
+        //===========  HANDLE SAVING/EDITING A FORM: Close Panel if Editing/Leave Panel Open if Adding ==============
         private async Task HandleFormSubmissionAsync()
         {
             isProcessingData = true;
@@ -65,6 +68,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             try
             {
                 bankModel.Active = isRowActive;
+                blNewBank = bankModel.BankId > 0 ? false : true;
 
                 // Fire singular service endpoint to decide Insert vs Update dynamically
                 bool executionOutcome = await MasterData!.SaveBankAsync(bankModel);
@@ -75,7 +79,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     {
                         Success = true,
                         RefreshGrid = true,
-                        ClosePanel = true,
+                        ClosePanel = !blNewBank,
                         ClearForm = true,
                         Message = BankId == 0 ?
                          $"{bankModel.BankName} added successfully" :

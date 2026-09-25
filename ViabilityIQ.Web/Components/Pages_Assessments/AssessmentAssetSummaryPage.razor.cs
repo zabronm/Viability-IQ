@@ -285,19 +285,27 @@ public partial class AssessmentAssetSummaryPage : ComponentBase, IAsyncDisposabl
 
     private async Task OnSaveComplete(SaveResult result)
     {
-        if (result.Success)
+        try
         {
-            Toast.ShowSuccess(result.Message, SessionService?.AppTitle);
-            if (result.RefreshGrid)
+            if (result.Success)
             {
-                await LoadAndMapAssetsData();
-                await ProjectionStateManager.InvalidateDataAsync("assets", AssessmentId, AssessmentId);
+                Toast.ShowSuccess(result.Message, SessionService?.AppTitle);
+                if (result.RefreshGrid)
+                {
+                    await LoadAndMapAssetsData();
+                    await ProjectionStateManager.InvalidateDataAsync("assets", AssessmentId, AssessmentId);
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                Toast.ShowError(result.Message, SessionService?.AppTitle);
             }
         }
-        else
-        {
-            Toast.ShowError(result.Message, SessionService?.AppTitle);
-        }
+        catch (Exception ex)
+        {            
+            Logger.LogError(ex, $"Error while clearing formand refreshing table after Asset Save: {ex.Message}");
+        }      
     }
 
     private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs args)

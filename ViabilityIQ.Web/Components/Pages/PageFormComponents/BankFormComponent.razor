@@ -28,12 +28,12 @@
                 <div><h3>Institution details</h3><p>Information used in funding and repayment records.</p></div>
             </div>
             <div class="viq-form-grid viq-form-grid-2">
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="bankName">Bank / Funder Name <span class="viq-required">*</span></label>
                     <InputText id="bankName" class="viq-form-control" @bind-Value="bankModel.BankName" />
                     <ValidationMessage For="@(() => bankModel.BankName)" class="viq-form-validation" />
                 </div>
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="shortName">Short Code Abbreviation</label>
                     <InputText id="shortName" class="viq-form-control" @bind-Value="bankModel.ShortName" />
                     <ValidationMessage For="@(() => bankModel.ShortName)" class="viq-form-validation" />
@@ -52,7 +52,7 @@
                 <div><h3>Availability</h3><p>Control whether this institution can be selected.</p></div>
             </div>
             <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
-                <span><strong>@(isRowActive ? "Bank active" : "Bank inactive")</strong><small>Inactive banks remain available in historical records.</small></span>
+                <span><strong>@(isRowActive ? "Bank/Funder Active" : "Bank/Funder In-Active")</strong><small>Inactive banks remain available in historical records.</small></span>
                 <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
             </label>
         </section>
@@ -60,7 +60,7 @@
         <div class="viq-form-actions">
             <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
                 @if (isProcessingData) { <span class="spinner-border spinner-border-sm" role="status"></span><span>Saving...</span> }
-                else { <i class="bi bi-check2-square"></i><span>@(BankId == 0 ? "Add Bank" : "Update Bank")</span> }
+                else { <i class="bi bi-check2-square"></i><span>@(BankId == 0 ? "Add Bank/Funder" : "Update Bank/Funder")</span> }
             </button>
         </div>
     </EditForm>

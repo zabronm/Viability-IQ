@@ -91,7 +91,7 @@
             </header>
 
             <div class="viq-form-grid viq-form-grid-2">
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="assetName">Asset name <span class="viq-required">*</span></label>
                     <input id="assetName" type="text" class="viq-form-control"
                            @bind="FormModel.AssetName"
@@ -99,7 +99,7 @@
                     <ValidationMessage For="@(() => FormModel.AssetName)" class="viq-form-validation" />
                 </div>
 
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label>Asset type <span class="viq-required">*</span></label>
                     <DDLookupComponent SourceKey="DDLookupEnums.AssetTypes"
                                        @bind-Value="FormModel.AssetTypeId"
@@ -119,7 +119,7 @@
             </header>
 
             <div class="viq-form-grid viq-form-grid-2">
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="assetOpeningValue">
                         @(FormModel.AcquisitionStartMonth == 0 ? "Opening value" : "Acquisition price")
                         <span class="viq-required">*</span>
@@ -138,8 +138,8 @@
                     </small>
                 </div>
 
-                <div class="viq-form-field">
-                    <label for="assetOpeningDepreciation">Opening accumulated depreciation</label>
+                <div class="viq-form-field viq-form-span-2 ">
+                    <label for="assetOpeningDepreciation">Opening Accumulated Depr.</label>
                     <div class="aaf-input-group">
                         <span>R</span>
                         <input id="assetOpeningDepreciation" type="number" min="0" step="0.01"
@@ -151,7 +151,7 @@
                     <small class="aaf-field-note">
                         @(FormModel.AcquisitionStartMonth == 0
                             ? "Depreciation accumulated before Month 1."
-                            : "Automatically zero for assets acquired during the projection.")
+                            : "Zero if acquired during projection period.")
                     </small>
                 </div>
             </div>
@@ -167,7 +167,7 @@
             </header>
 
             <div class="viq-form-grid viq-form-grid-2">
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="assetDepreciationRate">Annual depreciation rate (%)</label>
                     <div class="aaf-input-group aaf-input-group-suffix">
                         <input id="assetDepreciationRate" type="number" min="0" max="100" step="0.01"
@@ -177,11 +177,12 @@
                         <span>%</span>
                     </div>
                     <small class="aaf-field-note">
-                        Estimated monthly charge: @((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2")
+                        @* Estimated monthly charge: @((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2") *@
+                        Estimated monthly charge: @EstimatedMontlyDepreciation
                     </small>
                 </div>
 
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="assetDepreciationMethod">Depreciation method</label>
                     <select id="assetDepreciationMethod" class="viq-form-control"
                             @bind="FormModel.DepreciationMethod">
