@@ -12,6 +12,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
     {
         [Inject] private IGenericDataRepository<Client>? clientRepository { get; set; }
         [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;
+        [Inject] private ILogger<ClientFormComponent> Logger { get; set; } = default!;
 
         [Parameter] public long ClientId { get; set; } = 0;
 
@@ -28,29 +29,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         {
             if (ClientId == 0)
             {
-                clientModel = new()
-                {
-                    FullName = string.Empty,
-                    IDNumber = string.Empty,
-                    GenderId = 0,
-                    RaceId = 0,
-                    SA_ID = false,
-                    Telephone = string.Empty,
-                    Mobile = string.Empty,
-                    Email = string.Empty,
-                    Address_Street = string.Empty,
-                    Address_Surburb = string.Empty,
-                    Address_CityTown = string.Empty,
-                    ProvinceId = 0,
-                    Address_Postal = string.Empty,
-                    Address_PostalCity = string.Empty,
-                    Address_PostalCode = string.Empty,
-                    Address_PostalLocation = string.Empty,
-                    Country = string.Empty,
-                    Remarks = string.Empty,
-                    Active = true
-                };
-                isRowActive = true;
+                ResetForm();
             }
             else
             {
@@ -78,23 +57,27 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
             try
             {
+                var isNewRecord = clientModel.ClientId == 0;
                 clientModel.Active = isRowActive;
 
                 bool executionOutcome = await clientRepository!.SaveAsync(clientModel);
                 if (executionOutcome)
                 {
-                    var saveResult = new SaveResult()
-                    {
-                        Success = true,
-                        RefreshGrid = true,
-                        ClosePanel = true,  // ✅ Always close on success
-                        Message = ClientId == 0
-                            ? $"{clientModel.FullName} added successfully"
-                            : $"{clientModel.FullName} updated successfully"
-                    };
+                    var clientName = clientModel.FullName;
+                    var saveResult = isNewRecord
+                        ? SaveResult.SavedAndNew(
+                            clientModel,
+                            $"{clientName} added successfully")
+                        : SaveResult.SavedAndClose(
+                            clientModel,
+                            $"{clientName} updated successfully");
 
-                    // ✅ Publish result through service - this calls the callback in ClientPage
                     await OffcanvasService!.PublishResultAsync(saveResult);
+
+                    if (saveResult.ClearForm)
+                    {
+                        ResetForm();
+                    }
                 }
                 else
                 {
@@ -109,11 +92,12 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Client save failed for client {ClientId}", ClientId);
                 var saveResult = new SaveResult()
                 {
                     Success = false,
                     ClosePanel = false,
-                    Message = $"Error: {ex.Message}"
+                    Message = "The client could not be saved. Please try again."
                 };
                 await OffcanvasService!.PublishResultAsync(saveResult);
             }
@@ -122,6 +106,33 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 isProcessingData = false;
                 StateHasChanged();
             }
+        }
+
+        private void ResetForm()
+        {
+            clientModel = new Client
+            {
+                FullName = string.Empty,
+                IDNumber = string.Empty,
+                GenderId = 0,
+                RaceId = 0,
+                SA_ID = false,
+                Telephone = string.Empty,
+                Mobile = string.Empty,
+                Email = string.Empty,
+                Address_Street = string.Empty,
+                Address_Surburb = string.Empty,
+                Address_CityTown = string.Empty,
+                ProvinceId = 0,
+                Address_Postal = string.Empty,
+                Address_PostalCity = string.Empty,
+                Address_PostalCode = string.Empty,
+                Address_PostalLocation = string.Empty,
+                Country = string.Empty,
+                Remarks = string.Empty,
+                Active = true
+            };
+            isRowActive = true;
         }
     }
 }

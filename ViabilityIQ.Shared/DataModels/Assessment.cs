@@ -14,9 +14,10 @@ namespace ViabilityIQ.Shared.DataModels
 {
 
     [Table("tblAssessments")]
-    public class Assessment : IEntity, IAuditableEntity, ISortableEntity
+    public class Assessment : IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
     {
         [Dapper.Contrib.Extensions.Key] public long AssessmentId { get; set; }
+        public long? TenantId { get; set; }
         [Computed] public string? CaseNumber { get; set; }
 
         [Required(ErrorMessage ="Assessment type is required")]

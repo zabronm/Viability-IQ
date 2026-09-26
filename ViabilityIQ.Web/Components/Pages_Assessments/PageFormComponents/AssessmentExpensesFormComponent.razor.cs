@@ -112,6 +112,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             try
             {
                 IsSubmitting = true;
+                var isNewRecord = FormModel.AssessmentExpenseId == 0;
                 FormModel.MonthlyValues = MonthlyValues;
 
                 Logger?.LogInformation(
@@ -122,7 +123,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
                 if (isExecutionSuccess)
                 {
-                    var result = SaveResult.SavedAndNew("Expense details saved successfully.");
+                    var result = isNewRecord
+                        ? SaveResult.SavedAndNew(FormModel, "Expense details saved successfully.")
+                        : SaveResult.SavedAndClose(FormModel, "Expense details updated successfully.");
 
                     // ✅ TRIGGER CASHFLOW RECALCULATION
                     Logger?.LogInformation(

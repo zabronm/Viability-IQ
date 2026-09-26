@@ -8,9 +8,10 @@ namespace ViabilityIQ.Shared.DataModels
 {
 
     [Table("tblClient")]
-    public class Client: IEntity, IAuditableEntity, ISortableEntity
+    public class Client: IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
     {
         [Dapper.Contrib.Extensions.Key] public long ClientId { get; set; }
+        public long? TenantId { get; set; }
         [Required(ErrorMessage ="Business Owner/client name is required.")]
         public string? FullName { get; set; }
         [Required(ErrorMessage = "ID/Passport number is required")]        

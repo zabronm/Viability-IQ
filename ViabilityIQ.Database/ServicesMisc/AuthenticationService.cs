@@ -14,6 +14,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Dtos;
+using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
@@ -35,6 +36,7 @@ namespace ViabilityIQ.Application.ServicesMisc
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUserRepository _userRepository;  // ✅ Dapper-based repository      
+        private readonly ITenantService _tenantService;
 
         #endregion
 
@@ -51,7 +53,8 @@ namespace ViabilityIQ.Application.ServicesMisc
             ILogger<AuthenticationService> logger,
             HttpClient httpClient,
             IHttpContextAccessor httpContextAccessor,
-            IUserRepository userRepository)  // ✅ Inject the repository
+            IUserRepository userRepository,
+            ITenantService tenantService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
@@ -61,6 +64,7 @@ namespace ViabilityIQ.Application.ServicesMisc
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));  // ✅ Inject the repository
+            _tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
         }
 
         #endregion
@@ -106,6 +110,14 @@ namespace ViabilityIQ.Application.ServicesMisc
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     PhoneNumber = request.PhoneNumber,
+                    Department = request.Department,
+                    JobTitle = request.JobTitle,
+                    DateOfBirth = request.DateOfBirth ?? default,
+                    Address = request.Address,
+                    City = request.City,
+                    Country = request.Country,
+                    ProvinceId = request.ProvinceId,
+                    BranchId = request.BranchId > 0 ? request.BranchId : null,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true
                 };
@@ -129,14 +141,44 @@ namespace ViabilityIQ.Application.ServicesMisc
                 var roleAssignResult = await _userManager.AddToRoleAsync(user, "User");
                 if (!roleAssignResult.Succeeded)
                 {
+                    await _userManager.DeleteAsync(user);
                     result.Success = false;
                     result.Messages.Add("Failed to assign user role");
                     _logger.LogError("Failed to assign User role to: {Email}", request.Email);
                     return result;
                 }
 
+                var tenantResult = await _tenantService.ProvisionTenantAsync(
+                    new TenantProvisioningRequest
+                    {
+                        UserId = user.Id,
+                        FirstName = request.FirstName,
+                        LastName = request.LastName,
+                        PlanCode = request.PlanCode,
+                        OrganisationName = request.OrganisationName,
+                        RequestedSeats = request.RequestedSeats,
+                        ProvinceId = request.ProvinceId
+                    });
+
+                if (!tenantResult.Success)
+                {
+                    var deleteResult = await _userManager.DeleteAsync(user);
+                    if (!deleteResult.Succeeded)
+                    {
+                        _logger.LogCritical(
+                            "Tenant provisioning failed and user {UserId} could not be rolled back: {Errors}",
+                            user.Id,
+                            string.Join(", ", deleteResult.Errors.Select(error => error.Description)));
+                    }
+
+                    result.Success = false;
+                    result.Messages.Add(tenantResult.ErrorMessage);
+                    return result;
+                }
+
                 result.Success = true;
                 result.UserId = user.Id;  // ✅ Direct assignment (user.Id is long)
+                result.TenantId = tenantResult.TenantId;
                 result.Email = user.Email;
                 result.FirstName = user.FirstName;
                 result.Messages.Add("Registration successful. Please log in.");

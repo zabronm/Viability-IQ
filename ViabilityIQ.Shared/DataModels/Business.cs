@@ -12,9 +12,10 @@ namespace ViabilityIQ.Shared.DataModels
 {
 
     [Table("tblBusiness")]
-    public class Business: IEntity, IAuditableEntity, ISortableEntity
+    public class Business: IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
     {
         [Dapper.Contrib.Extensions.Key] public long BusinessId { get; set; }
+        public long? TenantId { get; set; }
         [Required(ErrorMessage = "Business Name is required.")]
         public string? BusinessName { get; set; }
 

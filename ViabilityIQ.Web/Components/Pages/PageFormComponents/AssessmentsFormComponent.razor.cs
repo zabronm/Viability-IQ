@@ -119,6 +119,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
             try
             {
+                var isNewRecord = AssessmentId == 0;
                 assessmentModel.blStock = boolStock ? 1 : 0;
                 assessmentModel.blDebtorsCreditors = boolDebtors ? 1 : 0;
                 assessmentModel.blExpenses = boolExpenses ? 1 : 0;
@@ -129,11 +130,9 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
                 if (operationSuccess)
                 {
-                    finalResult.Success = true;
-                    finalResult.ClosePanel = true;
-                    finalResult.Message = AssessmentId == 0
-                        ? "New assessment successfully deployed."
-                        : "Assessment modified successfully.";
+                    finalResult = isNewRecord
+                        ? SaveResult.SavedAndNew(assessmentModel, "New assessment successfully deployed.")
+                        : SaveResult.SavedAndClose(assessmentModel, "Assessment modified successfully.");
                 }
                 else
                 {
@@ -144,6 +143,11 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
                 // ✅ Use service to publish result
                 await OffcanvasService!.PublishResultAsync(finalResult);
+
+                if (finalResult.ClearForm)
+                {
+                    ResetForm();
+                }
             }
             catch (Exception ex)
             {
@@ -157,6 +161,20 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             {
                 isProcessingData = false;
             }
+        }
+
+        private void ResetForm()
+        {
+            assessmentModel = new Assessment
+            {
+                StatusId = 1,
+                AssessmentTypeId = 1,
+                Active = true
+            };
+            formattedStartDate = DateTime.Today.ToString("yyyy-MM-dd");
+            formattedEndDate = DateTime.Today.AddMonths(3).ToString("yyyy-MM-dd");
+            isRowActive = true;
+            boolStock = boolDebtors = boolExpenses = boolSales = boolVat = true;
         }
     }
 }

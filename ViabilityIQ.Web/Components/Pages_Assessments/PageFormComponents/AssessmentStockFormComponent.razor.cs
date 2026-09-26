@@ -100,6 +100,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             try
             {
                 IsSubmitting = true;
+                var isNewRecord = FormModel.AssessmentStockId == 0;
                 FormModel.MonthlyValues = MonthlyValues;
 
                 Logger?.LogInformation("Saving stock for assessment {AssessmentId}", FormModel.AssessmentId);
@@ -111,7 +112,22 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
                 await projectionStateManager!.InvalidateDataAsync("stock", FormModel.AssessmentId, FormModel.AssessmentId);
 
-                await zabCanvasService!.PublishResultAsync(SaveResult.SavedAndClose("Stock details saved successfully."));
+                var result = isNewRecord
+                    ? SaveResult.SavedAndNew(FormModel, "Stock details saved successfully.")
+                    : SaveResult.SavedAndClose(FormModel, "Stock details updated successfully.");
+
+                await zabCanvasService!.PublishResultAsync(result);
+
+                if (result.ClearForm)
+                {
+                    FormModel = new AssessmentStock
+                    {
+                        AssessmentId = AssessmentId,
+                        blIncludeVAT = true
+                    };
+                    MonthlyValues = new decimal[12];
+                    BulkTargetValue = 0m;
+                }
             }
             catch (Exception ex)
             {

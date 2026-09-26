@@ -11,9 +11,10 @@ using ViabilityIQ.Shared.DataModelsInterfaces;
 namespace ViabilityIQ.Shared.DataModels
 {
     [Table("tblCompany")]
-    public class Company: IEntity, IAuditableEntity, ISortableEntity
+    public class Company: IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
     {
         [Key] public long CompanyId { get; set; }
+        public long? TenantId { get; set; }
         public string? CompanyName { get; set; }
         public string? CompanyCustomerCode { get; set; }
         public string? CKNumber { get; set; }        

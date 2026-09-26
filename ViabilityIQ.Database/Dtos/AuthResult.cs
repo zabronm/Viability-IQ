@@ -11,6 +11,7 @@ namespace ViabilityIQ.Application.Dtos
         public bool Success { get; set; }
         //public long userId { get; set; }            //==========  If user Id is Guid, then use string
         public long UserId { get; set; }                //==========  If user ID is BigInt in the database, use long instead of string
+        public long TenantId { get; set; }
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; }= string.Empty;
         public List<string> Messages { get; set; } = new();

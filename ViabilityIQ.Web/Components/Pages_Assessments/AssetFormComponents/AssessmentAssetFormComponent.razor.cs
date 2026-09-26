@@ -34,18 +34,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
         // PARAMETERS
         // ====================================================
         
-        /// The Assessment ID        
+        /// The Assessment ID
+        
         [Parameter]        public long AssessmentId { get; set; }
+        
+        /// The Assessment Asset ID (for edit mode)
+        /// 0 or omitted = Create new asset        
         [Parameter]        public long AssessmentAssetId { get; set; }
 
         // ====================================================
         // PRIVATE FIELDS - FORM DATA
         // ====================================================
         private AssessmentAsset FormModel = new();
-        private bool blNewAsset = false;
+        private string EstimatedMontlyDepreciation => ((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2");      
         private bool IsSubmitting { get; set; }
-
-        private string EstimatedMontlyDepreciation => ((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2");
 
         // ====================================================
         // LIFECYCLE
@@ -58,7 +60,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
             }
             catch (Exception ex)
             {
-                Logger?.LogError(ex, $"Error loading asset for AssessmentAssetId {AssessmentAssetId}", AssessmentAssetId);
+                Logger?.LogError(ex, "Error loading asset for AssessmentAssetId {AssessmentAssetId}", AssessmentAssetId);
                 _Toast?.ShowError($"Error loading asset: {ex.Message}", "Error");
             }
         }
@@ -173,7 +175,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
 
 
         
-        /// Save the asset form        
+        /// Save the asset form
+        
         private async Task ExecuteSaveWorkflowAsync()
         {
             if (IsSubmitting)
@@ -184,6 +187,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
 
             try
             {
+                var isNewRecord = FormModel.AssessmentAssetId == 0;
                 Logger?.LogInformation("Starting asset save workflow for assessment {AssessmentId}", AssessmentId);
 
                 // ========== STEP 1: VALIDATION ==========
@@ -209,7 +213,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                     FormModel.DepreciationRate);
 
                 // ========== STEP 3: SAVE ASSET MASTER RECORD ==========
-                blNewAsset = FormModel.AssessmentAssetId > 0 ? false : true;
                 await DataRepository.SaveAsync(FormModel);
 
                 Logger?.LogInformation(
@@ -258,13 +261,25 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                             "Error recalculating assessment totals after asset save. Asset was saved successfully.");
                         // Don't throw - asset was saved successfully, just recalculation failed
                     }
-                }
+                }             
 
-                // ========== STEP 7: CLEAR THE FORM,  AND PASS RESULT MODEL BACK WITH A SUCCESS STATUS ==========
-                FormModel = new();          
+                // ========== STEP 7: PUBLISH RESULT ==========
                 await Task.Delay(500);
-                await zabCanvasService!.PublishResultAsync(
-                    SaveResult.SavedAndContinue($"Asset '{FormModel.AssetName}' saved successfully with movement template."));
+                var savedAssetName = FormModel.AssetName;
+                var result = isNewRecord
+                    ? SaveResult.SavedAndNew(
+                        FormModel,
+                        $"Asset '{savedAssetName}' saved successfully with movement template.")
+                    : SaveResult.SavedAndClose(
+                        FormModel,
+                        $"Asset '{savedAssetName}' updated successfully with movement template.");
+
+                await zabCanvasService!.PublishResultAsync(result);
+
+                if (result.ClearForm)
+                {
+                    ResetForm();
+                }
             }
             catch (Exception ex)
             {
@@ -277,6 +292,22 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                 IsSubmitting = false;
                 StateHasChanged();
             }
+        }
+
+        private void ResetForm()
+        {
+            FormModel = new AssessmentAsset
+            {
+                AssessmentId = AssessmentId,
+                AcquisitionStartMonth = 0,
+                OpeningBalanceValue = 0,
+                OpeningAccumulatedDepreciation = 0,
+                DepreciationRate = 10,
+                DepreciationMethod = "Straight-Line",
+                IsDepreciable = true,
+                IsTangible = true,
+                Active = true
+            };
         }
 
         

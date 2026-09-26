@@ -1,10 +1,14 @@
 ﻿@using ViabilityIQ.Web.Components.Pages.Identity
 @using ViabilityIQ.Web.Components.Shared
+@using ViabilityIQ.Web.Services
 @using ViabilityIQ.Application.Interfaces
 @inherits LayoutComponentBase
 @implements IDisposable
 
 @inject ISessionService SessionService
+@inject IAssessmentDataValidationService AssessmentDataValidationService
+@inject ZabOffCanvasService ZabOffCanvasService
+@inject ILogger<MainLayout_Assessment> Logger
 
 <div class="fa-layout-wrapper">
 
@@ -260,6 +264,7 @@
     protected override void OnInitialized()
     {
         SessionService!.OnSessionChanged += SynchronizeComponentViewLayout;
+        ZabOffCanvasService.OnSave += RefreshAssessmentIndicatorsAsync;
     }
 
     private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
@@ -285,9 +290,44 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private async Task RefreshAssessmentIndicatorsAsync(SaveResult result)
+    {
+        if (!result.RefreshDashboard || SessionService.AssessmentId is not long assessmentId || assessmentId <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var dataStatus = await AssessmentDataValidationService.ValidateAssessmentDataAsync(assessmentId);
+            SessionService.SetActiveAssessment(
+                SessionService.CaseNumber,
+                assessmentId,
+                SessionService.BusinessId ?? 0,
+                SessionService.BusinessName,
+                SessionService.ClientId ?? 0,
+                SessionService.ClientName,
+                SessionService.AssessmentType,
+                dataStatus.HasAssets,
+                dataStatus.HasExpenses,
+                dataStatus.HasSales,
+                dataStatus.HasStock,
+                dataStatus.HasReports,
+                dataStatus.HasReviews,
+                dataStatus.HasReviews,
+                dataStatus.HasDebtorsCreditors,
+                dataStatus.HasLoans);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Unable to refresh module indicators for assessment {AssessmentId}.", assessmentId);
+        }
+    }
+
     public void Dispose()
     {
         SessionService.OnSessionChanged -= SynchronizeComponentViewLayout;
+        ZabOffCanvasService.OnSave -= RefreshAssessmentIndicatorsAsync;
     }
 
     //=========== Main Dashboards Page ====================

@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAssessmentRepository, AssessmentRepository>();
         services.AddScoped<IInsightsRepository, InsightsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITenantService, TenantService>();
 
         services.AddScoped<IDDLookupService, DDLookupService>();
         services.AddScoped<IAssessmentDataValidationService, AssessmentDataValidationService>();

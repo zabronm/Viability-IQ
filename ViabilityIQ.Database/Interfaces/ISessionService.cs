@@ -22,6 +22,13 @@ namespace ViabilityIQ.Application.Interfaces
         long CompanyId { get; }
         long BranchId { get; }
         long ProvinceId { get; }
+        long TenantId { get; }
+        string TenantName { get; }
+        string TenantType { get; }
+        string SubscriptionPlanCode { get; }
+        string SubscriptionStatus { get; }
+        long TenantMembershipId { get; }
+        bool IsTenantOwner { get; }
 
         // ====================================================
         // ASSESSMENT CONTEXT
@@ -68,6 +75,15 @@ namespace ViabilityIQ.Application.Interfaces
             long companyId,
             long branchId,
             long provinceId);
+
+        void SetActiveTenant(
+            long tenantId,
+            string tenantName,
+            string tenantType,
+            string subscriptionPlanCode,
+            string subscriptionStatus,
+            long tenantMembershipId,
+            bool isTenantOwner);
 
         // ====================================================
         // ASSESSMENT

@@ -11,9 +11,10 @@ namespace ViabilityIQ.Shared.DataModels
 {
 
 	[Table("tblBranch")]
-	public class Branch : IEntity, IAuditableEntity, ISortableEntity
+	public class Branch : IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
 	{
 		[Key] public long BranchId { get; set; }
+        public long? TenantId { get; set; }
 		public string? BranchName { get; set; }
 	    public string? Address_Street { get; set; }
         public string? Address_Location { get; set; }
