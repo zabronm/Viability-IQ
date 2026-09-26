@@ -1,0 +1,123 @@
+SENSITIVITY REPORT - LATEST UPDATES ONLY
+Package date: 2026-09-26
+
+SCOPE
+-----
+This is an incremental package. It contains only the four files changed for the
+latest Sensitivity Analysis corrections:
+
+1. Correct Razor evaluation of scenario effective-month labels.
+2. Complete multi-page printing from both Print / Save PDF buttons.
+3. Financial grading colors for KPI values.
+
+Deploy the earlier GroqCloud Sensitivity AI package first if it has not already
+been deployed.
+
+FILES INCLUDED
+--------------
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor.cs
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor.css
+Files\ViabilityIQ.Web\wwwroot\scripts\assessmentPagePrint.js
+
+IMPLEMENTED CORRECTIONS
+-----------------------
+1. MONTH LABELS
+   Razor expressions following the literal "M" are now explicitly enclosed in
+   parentheses. Values render as "M1", "M4", and similar instead of showing
+   text such as "M@adjustment.EffectiveStartMonth".
+
+   This correction also covers minimum-cash month labels in KPI and sensitivity
+   result output.
+
+2. COMPLETE PRINT / SAVE PDF OUTPUT
+   Both the page-level and GroqCloud-tab Print / Save PDF buttons call the same
+   complete-report print implementation.
+
+   The print implementation creates an isolated print document containing the
+   complete active Sensitivity Analysis tab. It is therefore not constrained by
+   the application's fixed-height workspace or nested scroll position.
+
+   The result:
+   - Includes content below the visible screen.
+   - Paginates long reports.
+   - Removes navigation, controls, and scrollbars.
+   - Preserves component styling and financial status colors.
+   - Avoids splitting KPI cards, charts, summaries, and recommendation rows
+     where the browser supports print break rules.
+
+   "Complete report" means the complete currently selected tab. Hidden tabs are
+   not included because they represent different analyses and may not yet have
+   been calculated.
+
+3. KPI VALUE COLORS
+   Only the primary value is colored; card labels and explanations remain
+   neutral for readability.
+
+   Monetary performance KPIs:
+   - Red / critical: value is negative.
+   - Amber / average: value is non-negative but below 90% of baseline.
+   - Black / good: value is between 90% and below 110% of baseline.
+   - Green / very good: value is at least 110% of baseline.
+
+   Gross margin:
+   - Red / critical: below 0%.
+   - Amber / average: 0% to below 20%.
+   - Black / good: 20% to below 30%.
+   - Green / very good: 30% or higher.
+
+   Funding shortfall:
+   - Red / critical: a funding shortfall exists.
+   - Green / very good: no funding shortfall exists.
+
+   These rules are applied to KPI cards in both Scenario Builder results and
+   the GroqCloud report.
+
+DEPLOYMENT
+----------
+1. Back up the four target files listed above.
+2. Stop the application or IIS application pool.
+3. Open this package's Files directory.
+4. Copy each file to the matching production-relative path.
+5. If any target file contains later local changes, merge this package rather
+   than overwriting those changes.
+6. From the solution root, run:
+
+   dotnet build .\ViabilityIQ.sln --no-restore
+
+   Run dotnet restore first only if the build reports missing restored assets.
+
+7. Restart the application or recycle the IIS application pool.
+8. Perform a hard browser refresh so the updated JavaScript is loaded:
+
+   Ctrl+F5
+
+   If a reverse proxy or CDN caches static assets, purge or invalidate
+   /scripts/assessmentPagePrint.js.
+
+VALIDATION
+----------
+1. Open Sensitivity Analysis and select a scenario preset.
+2. Confirm every adjustment displays an evaluated month, for example:
+
+   +20 %, M1 onward
+
+3. Run the scenario.
+4. Confirm negative KPI values display in red.
+5. Confirm underperforming non-negative values display in amber.
+6. Confirm values close to baseline display in black.
+7. Confirm values materially above baseline display in green.
+8. Select a long tab, scroll partway down, and use the top Print / Save PDF
+   button.
+9. Confirm the print preview begins at the report heading and contains every
+   section of the active tab across all required pages.
+10. Open the GroqCloud AI tab and repeat the print test with its own button.
+11. Confirm there are no application scrollbars or clipped report sections in
+    either print preview.
+
+VALIDATION PERFORMED
+--------------------
+- JavaScript syntax check completed successfully.
+- Cumulative ViabilityIQ solution build completed with 0 errors.
+- Existing solution warnings are unrelated to these changes.
+

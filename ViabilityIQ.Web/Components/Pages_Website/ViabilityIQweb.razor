@@ -1,0 +1,159 @@
+﻿@page "/viq/index"
+@page "/viq-home"
+
+@layout MainLayout_Empty
+
+<PageTitle>Viability.IQ — Understand. Project. Decide.</PageTitle>
+
+<!-- HEADER -->
+<header class="site-header">
+    <div class="container">
+        <a href="/"><img src="images/ViabilityIQ_logo_0.png" alt="Viability.IQ" /></a>
+        <nav class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#audiences">Who it's for</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#contact">Contact</a>
+            <a href="#contact" class="btn btn-primary">Start free</a>
+        </nav>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container hero-grid">
+        <div>
+            <span class="hero-eyebrow">Understand · Project · Decide</span>
+            <h1>Validate a business idea before you spend money on it.</h1>
+            <p>
+                Viability.IQ combines AI-driven viability scoring, market analysis,
+                and financial modeling so you can see the real picture in minutes —
+                not weeks. zzzzzzzz
+            </p>
+            <div class="hero-cta">
+                <a href="#contact" class="btn btn-primary">Start free validation</a>
+                <a href="#contact" class="btn btn-secondary">Book a demo</a>
+            </div>
+            <p style="margin-top:20px; font-size:0.85rem;">No credit card required.</p>
+        </div>
+        <div class="hero-visual">
+            <img src="images/hero-dashboard.png"
+                 alt="Viability.IQ viability score dashboard"
+                 style="width:100%; border-radius:6px;" />
+        </div>
+    </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust-bar">
+    <div class="container">
+        <p>"Helped our team rule out three directions in two weeks that looked promising but weren't supported by the data." — Early access user</p>
+    </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="section section-soft">
+    <div class="container section-head">
+        <h2>Most ideas fail because the direction was wrong — not the execution.</h2>
+        <p>
+            By the time the numbers show a problem, the money is already spent.
+            Viability.IQ moves the data picture forward, so the decision comes
+            before the cost.
+        </p>
+    </div>
+</section>
+
+<!-- FEATURES / BENTO -->
+<section class="section" id="features">
+    <div class="container">
+        <div class="section-head">
+            <h2>Everything you need to make the call.</h2>
+            <p>Three core engines working together on a single view.</p>
+        </div>
+
+        <div class="bento">
+            <div class="bento-card large">
+                <div class="icon">1</div>
+                <h3>Viability Score</h3>
+                <p>
+                    A single, explainable score that aggregates market demand,
+                    financial headroom, competitive pressure, and execution risk
+                    into one decision-ready number.
+                </p>
+            </div>
+            <div class="bento-card">
+                <div class="icon">2</div>
+                <h3>Market Analysis</h3>
+                <p>Size, growth, and saturation signals from real datasets — not guesswork.</p>
+            </div>
+            <div class="bento-card">
+                <div class="icon">3</div>
+                <h3>Financial Forecast</h3>
+                <p>Scenario modeling for revenue, cost, and break-even timelines.</p>
+            </div>
+            <div class="bento-card">
+                <div class="icon">4</div>
+                <h3>Risk Flags</h3>
+                <p>Automatic identification of the constraints most likely to break the plan.</p>
+            </div>
+            <div class="bento-card">
+                <div class="icon">5</div>
+                <h3>Exportable Reports</h3>
+                <p>Share a clean, board-ready summary in one click.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AUDIENCES -->
+<section class="section section-soft" id="audiences">
+    <div class="container">
+        <div class="section-head">
+            <h2>Built for anyone who has to make the call.</h2>
+        </div>
+        <div class="audience-grid">
+            <div class="audience-card">
+                <h3>Founders</h3>
+                <p>Pressure-test an idea before committing savings, time, or a co-founder.</p>
+            </div>
+            <div class="audience-card">
+                <h3>Investors</h3>
+                <p>Screen more deals in less time with a consistent, comparable score.</p>
+            </div>
+            <div class="audience-card">
+                <h3>Strategy Teams</h3>
+                <p>Evaluate new business lines with the same rigor as your financial models.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+    <div class="container contact-grid">
+        <div>
+            <h2>Let's look at your idea together.</h2>
+            <p>
+                Tell us what you're trying to validate. We'll get back within one
+                business day with a walkthrough tailored to your case.
+            </p>
+            <p style="font-size:0.85rem; opacity:0.7;">
+                Viability.IQ provides analysis, not financial or legal advice.
+                Your data is encrypted in transit and at rest.
+            </p>
+        </div>
+        <ContactForm />
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <div class="container">
+        <div>© @DateTime.UtcNow.Year Viability.IQ — Understand · Project · Decide</div>
+        <div>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+</footer>

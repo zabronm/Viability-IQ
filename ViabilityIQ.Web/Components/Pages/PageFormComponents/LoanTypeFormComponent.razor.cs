@@ -16,6 +16,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
         // Main working model instance bound to forms
         private LoanType loanTypeModel = new();
+        private bool blNewLoanType = false;
 
         // Track state variables cleanly
         private bool isProcessingData = false;
@@ -68,6 +69,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             try
             {
                 loanTypeModel.Active = isRowActive;
+                blNewLoanType = loanTypeModel.LoanTypeId > 0 ? true : false;
 
                 // Fire singular service endpoint to decide Insert vs Update dynamically
                 bool executionOutcome = await MasterData!.SaveLoanTypeAsync(loanTypeModel);
@@ -76,7 +78,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 {
                     saveResult.Success = true;
                     saveResult.RefreshGrid = true;
-                    saveResult.ClosePanel = true;
+                    saveResult.ClosePanel = blNewLoanType;
                     saveResult.Message = LoanTypeId == 0
                         ? $"{loanTypeModel.LoanTypeName} added successfully"
                         : $"{loanTypeModel.LoanTypeName} updated successfully";
@@ -90,6 +92,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
                 // ✅ Use service to publish result
                 await OffcanvasService!.PublishResultAsync(saveResult);
+                loanTypeModel = new();               //== Re-Initialize model and leave form open for possible more entries
+
             }
             catch (Exception ex)
             {

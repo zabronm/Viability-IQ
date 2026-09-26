@@ -1,0 +1,39 @@
+GROQCLOUD SENSITIVITY AI PACKAGE MANIFEST
+Package date: 2026-09-26
+
+All paths below are relative to this package directory.
+SHA-256 values apply to the unpacked files.
+
+FILE                                                                                                                        BYTES   SHA-256
+DEPLOYMENT_INSTRUCTIONS.txt                                                                                                  7088   8A10A73B3A4080BBA57BCF6FEE5962BC1389476F30AEC8CC72DC042645F613E0
+Files\ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs                                                  6406   0E678C33D45E57D67C0661C35EC03BA188FFD9CC52F1CEFE4C5B751437F3C60C
+Files\ViabilityIQ.Database\FinancialCalculations\GroqSensitivityAiAnalysisService.cs                                        20094   717B81AC8200838670E3E7B0B02B12389CC13D4CD8063831E0BF6B5178DF529C
+Files\ViabilityIQ.Database\FinancialCalculations\GroqSensitivityAiOptions.cs                                                   594   B9255EC746B224C08C6FE2C087FB69739D5AB6B941017E5883F457AB0DEEA5A3
+Files\ViabilityIQ.Database\Interfaces\IGroqSensitivityAiAnalysisService.cs                                                     393   6D1C164282721A3281192303B8964AEA983E8DA60E2A66852F70161942947A1A
+Files\ViabilityIQ.Database\ViabilityIQ.Application.csproj                                                                    1161   74709237A27758AFC169E681F7C3F42C0138E628222CAB79A9366A375E6268CC
+Files\ViabilityIQ.Web\appsettings.json                                                                                        2833   658219453EEED16B4697A4289D36F9AF527D648A13A3A9505A0E590964ED1D22
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor                                          45865   D184C1D9457CAF3D42FAB42F6EBE6881B26DFCA0EAE06051C4881DEDED34C3AC
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor.cs                                       20657   385CD55CBBD4D7B9046D07282F2EE3F1EEF9F81A96FD7E414FCFDC9C2A5C3258
+Files\ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSensitivityPage.razor.css                                      15427   6A708C9A7C2711A11573EA20B734C8C3AABB8C6DCB511B4C70BF2D9D08DBA8FE
+
+IMPLEMENTATION SUMMARY
+- Preserves the existing Gemini service, dependency registration, state, and tab.
+- Adds an independent GroqCloud interface, options, typed HTTP client, and UI state.
+- Uses Groq's OpenAI-compatible chat-completions endpoint with Bearer authentication.
+- Uses strict JSON-schema output with server-side validation and evidence allow-listing.
+- Rejects non-HTTPS and non-api.groq.com endpoints before a credential can be sent.
+- Handles authentication, rate-limit, invalid-request, timeout, cancellation,
+  malformed-response, network, and provider-service errors explicitly.
+- Adds KPI cards, two monthly financial visualizations, baseline/current metrics,
+  executive summary, prioritized recommendations, and printable output.
+- Expands the application layout and nested scroll containers in print mode so
+  the complete active report is paginated instead of clipping to the viewport.
+- Keeps provider consent and cancellation independent from Gemini.
+- Does not persist AI output or send assessment/business identity fields.
+
+VALIDATION
+- Cumulative ViabilityIQ solution restore completed.
+- Cumulative ViabilityIQ solution build completed with 0 errors.
+- Complete-report print update build completed with 0 errors.
+- Existing repository warnings remain and are unrelated to this package.
+- Secret scan found no populated API key.

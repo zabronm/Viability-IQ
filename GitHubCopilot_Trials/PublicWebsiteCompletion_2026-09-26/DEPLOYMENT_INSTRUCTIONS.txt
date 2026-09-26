@@ -1,0 +1,162 @@
+VIABILITYIQ PUBLIC WEBSITE COMPLETION
+Package date: 2026-09-26
+Primary route: /website/index
+
+PURPOSE
+-------
+This package completes the existing public website as a responsive one-page
+experience and completes the live contact-submission service.
+
+The page now includes:
+- Branded navigation using /images/ViabilityIQ_logo_0.png.
+- Hero content and the existing dashboard preview image.
+- Platform capabilities based on implemented ViabilityIQ modules.
+- Four-step assessment workflow.
+- Target audience section.
+- Standard and Open Plan positioning.
+- Physical address and WhatsApp contact options.
+- Live contact form with subject selection, validation and consent.
+- Responsive navigation and footer.
+
+The form:
+- Stores every accepted submission in dbo.LeadSubmissions.
+- Sends an SMTP notification to the configured contact recipient.
+- Retains a stored submission if email delivery fails and reports that partial
+  outcome clearly to the user.
+- Uses parameterized SQL.
+- HTML-encodes all user content before placing it in an email.
+- Includes a honeypot field and a short client-side repeat-submission delay.
+- Does not log the submitted message or contact details.
+
+DEPENDENCIES
+------------
+Deploy the previously prepared SaaS tenancy and Broad Tenant Authorization
+packages first. This package's infrastructure service registration preserves
+those registrations and adds the completed contact service.
+
+BACKUP
+------
+Back up the database and every target file before deployment. Where a target
+file contains later local changes, merge the package changes instead of blindly
+overwriting the file.
+
+DATABASE DEPLOYMENT
+-------------------
+1. Connect to the ViabilityIQ application database using SQL Server Management
+   Studio, Azure Data Studio or sqlcmd.
+2. Run:
+
+   DatabaseScripts\2026-09-26_PublicWebsiteLeadSubmissions.sql
+
+3. Confirm dbo.LeadSubmissions contains these columns:
+
+   LeadSubmissionId
+   FullName
+   Email
+   PhoneNumber
+   CompanyName
+   Subject
+   Message
+   Status
+   SubmittedAtUtc
+   EmailSentAtUtc
+
+The migration creates the table when absent and safely adds/backfills the new
+contact fields when the table already exists.
+
+APPLICATION FILES
+-----------------
+1. Stop the application or recycle the IIS application pool.
+2. Copy the contents of this package's Files directory to the solution root,
+   preserving the relative paths.
+3. The package includes the requested logo and current dashboard preview under:
+
+   ViabilityIQ.Web\wwwroot\images
+
+4. Do not replace a production appsettings.json containing secrets. Merge only
+   the Website section shown in the packaged example.
+
+EMAIL CONFIGURATION
+-------------------
+The contact request is stored before email is attempted. Configure SMTP using
+environment variables or another production secret provider:
+
+  EmailSettings__SmtpServer
+  EmailSettings__Port
+  EmailSettings__SenderAddress
+  EmailSettings__SenderPassword
+  EmailSettings__EnableSsl
+  Website__ContactRecipient
+
+Website__ContactRecipient is the mailbox that should receive website enquiries.
+If it is omitted, the service uses EmailSettings__SenderAddress as the recipient.
+
+PowerShell example for the current process:
+
+  $env:EmailSettings__SmtpServer = "smtp.example.com"
+  $env:EmailSettings__Port = "587"
+  $env:EmailSettings__SenderAddress = "noreply@example.com"
+  $env:EmailSettings__SenderPassword = "<smtp-secret>"
+  $env:EmailSettings__EnableSsl = "true"
+  $env:Website__ContactRecipient = "enquiries@example.com"
+
+Never place the SMTP password in source control. For IIS, Azure App Service or a
+container platform, configure the same names in that platform's protected
+application settings or secret store and restart the application.
+
+BUILD
+-----
+From the solution root:
+
+  dotnet restore .\ViabilityIQ.sln
+  dotnet build .\ViabilityIQ.sln --no-restore
+
+Start the application and browse to:
+
+  /website/index
+
+CONTACT DETAILS INCLUDED
+------------------------
+Physical address:
+35 Mercedes Street
+5 Mamayila House
+Dawn Park 1539
+South Africa
+
+WhatsApp:
++27 79 075 7294
+
+The WhatsApp action opens:
+https://wa.me/27790757294
+
+VALIDATION
+----------
+1. Open /website/index on desktop and mobile widths.
+2. Confirm the ViabilityIQ image logo appears in the header and footer without
+   horizontal overflow.
+3. Confirm all navigation items scroll to sections on /website/index.
+4. Confirm Sign in and Register use the existing Identity routes.
+5. Confirm the physical address is correct.
+6. Confirm the WhatsApp link opens a conversation to +27 79 075 7294.
+7. Submit the empty contact form and confirm required-field messages appear
+   without a database insert.
+8. Submit each subject type:
+   Feedback, Support, Demo Request, Sales Enquiry, Partnership and Other.
+9. Confirm each accepted form creates one dbo.LeadSubmissions row.
+10. Confirm Status becomes Notified and EmailSentAtUtc is populated when SMTP
+    succeeds.
+11. Temporarily use an invalid SMTP setting and confirm the row remains stored
+    with Status New while the page reports that email delivery was delayed.
+12. Confirm the recipient receives an encoded email containing the reference,
+    subject, contact details and message.
+
+VALIDATION PERFORMED
+--------------------
+- Cumulative solution build: 0 errors.
+- Live /website/index HTTP response: 200.
+- Browser-level page and anchor inspection completed.
+- Header logo loaded successfully at its constrained display size.
+- No horizontal viewport overflow at 1280 x 720.
+- Contact form required-field validation completed without submitting data.
+- Existing solution warnings are unrelated to this package.
+

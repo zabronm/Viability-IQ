@@ -1,0 +1,37 @@
+BROAD TENANT AUTHORIZATION - FILE MANIFEST
+==========================================
+
+Database
+--------
+Files\DatabaseScripts\2026-09-26_BroadTenantAuthorization.sql
+
+Application contracts and models
+--------------------------------
+Files\ViabilityIQ.Database\Interfaces\ITenantAuthorizationService.cs
+Files\ViabilityIQ.Shared\DataModels\SecurityDataModels\TenantAuthorizationModels.cs
+
+Infrastructure
+--------------
+Files\ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+Files\ViabilityIQ.Infrastructure\Repositories\TenantAuthorizationService.cs
+Files\ViabilityIQ.Infrastructure\Repositories\GenericDataRepository.cs
+Files\ViabilityIQ.Infrastructure\Repositories\ReadOnlyRepository.cs
+Files\ViabilityIQ.Infrastructure\Repositories\DDLookupService.cs
+Files\ViabilityIQ.Infrastructure\Repositories\MasterDataService.cs
+Files\ViabilityIQ.Infrastructure\Repositories\AssetRepository.cs
+Files\ViabilityIQ.Infrastructure\Repositories\CashflowRepository.cs
+Files\ViabilityIQ.Infrastructure\Repositories\DebtorsCreditorsRepository.cs
+Files\ViabilityIQ.Infrastructure\Repositories\VatAdjustmentRepository.cs
+Files\ViabilityIQ.Infrastructure\Repositories\AssessmentDataValidationService.cs
+
+Documentation
+-------------
+DEPLOYMENT_INSTRUCTIONS.txt
+MANIFEST.txt
+
+Production source status
+------------------------
+This package was assembled under GitHubCopilot_Trials. Existing production files,
+including unrelated pending changes and the unresolved App.razor merge, were not
+modified.
+

@@ -293,7 +293,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     new CanvasRequest
                     {
                         Title = ActivePanelTitle,
-                        Width = 360,
+                        Width = 500,
                         ComponentType = typeof(AssessmentLoanFormComponent),
                         Parameters = new
                         {
@@ -324,7 +324,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     new CanvasRequest
                     {
                         Title = ActivePanelTitle,
-                        Width = 650,
+                        Width = 700,
                         ComponentType = typeof(AssessmentLoanRepaymentFormComponent),
                         Parameters = new
                         {

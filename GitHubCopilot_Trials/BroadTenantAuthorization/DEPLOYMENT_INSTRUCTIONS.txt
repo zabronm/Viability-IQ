@@ -1,0 +1,108 @@
+BROAD TENANT AUTHORIZATION
+==========================
+
+Purpose
+-------
+Adds server-side tenant isolation and role/record authorization for application data.
+It also makes shared reference-data combo boxes active-only.
+
+Prerequisite
+------------
+Deploy SaaSTenancyFoundation_2026-09-25 before this package.
+
+Deployment order
+----------------
+1. Back up the application database and deployed application.
+2. Run:
+   DatabaseScripts\2026-09-26_BroadTenantAuthorization.sql
+3. Copy the contents of Files to the application root, preserving directories.
+4. Rebuild and publish the application.
+5. Sign out and sign in again before testing so the active tenant session is current.
+
+Authorization model
+-------------------
+Tenant Owner
+  - Read, create, update, and delete all operational records in the active tenant.
+
+Tenant Administrator
+  - Read, create, update, and delete all operational records in the active tenant.
+
+Branch Manager
+  - Create operational records.
+  - Read and update records created by that user.
+  - Read/update/delete records explicitly granted through tblTenantRecordGrant.
+
+Viewer
+  - Read records created by that user or explicitly granted for viewing.
+  - Cannot create, update, or delete operational records.
+
+Billing Manager
+  - Has no operational-record access by virtue of the billing role.
+
+An account with multiple tenant roles receives the union of those permissions.
+Membership, tenant, and subscription must be active. Active and Trial subscriptions
+are accepted.
+
+Record grants
+-------------
+tblTenantRecordGrant supports explicit Assessment, Business, Client, Company, and
+Branch grants. Assessment grants also govern all child records for that assessment.
+
+Grant rows must use the active tenant membership ID, not the application user ID.
+CanView, CanEdit, and CanDelete are evaluated independently. A deactivated grant has
+no effect.
+
+Lookup rules
+------------
+Tenant-filtered and authorization-filtered:
+  - Assessments
+  - Businesses
+  - Clients
+  - Companies
+  - Tenant users
+  - Assessment sales categories
+  - Assessment loans
+
+Global but Active-only:
+  - Assessment types
+  - Asset categories and asset types
+  - Banks and loan types
+  - Business categories and sectors
+  - Client categories/types
+  - Expense types/items
+  - Genders and races
+  - Income types
+  - Product/service categories and products
+  - Provinces
+
+Callers can no longer supply arbitrary lookup filter columns. Only the trusted
+AssessmentId parent filter is accepted for assessment-child lookups.
+
+Server-side protections
+-----------------------
+- Generic entity reads, counts, updates, and deletes are scoped before data is returned
+  or modified.
+- Server-side data-table views for Assessments, Businesses, Clients, Companies, and
+  Branches are scoped through their underlying tenant-owned table.
+- Assessment child entities are authorised through their parent AssessmentId.
+- Direct SQL paths used by assets, cash flow, VAT, debtors/creditors, assessment data
+  validation, and MasterDataService are checked before execution.
+- TenantId and original CreatedBy/CreatedDate are preserved on updates.
+- Submitted BusinessId and ClientId values are checked against tenant access.
+- Submitted shared lookup IDs are checked against their Active flag.
+- Lookup results are not placed in a global user-agnostic cache.
+
+Validation
+----------
+The package was overlaid onto the cumulative SaaS tenancy validation solution and:
+
+  dotnet build .\ViabilityIQ.sln --no-restore --nologo --verbosity quiet
+
+completed with 0 errors. Existing solution warnings remain unchanged.
+
+Rollback
+--------
+1. Restore the replaced application files.
+2. Drop dbo.tblTenantRecordGrant only if no grants need to be retained.
+3. Rebuild and republish.
+

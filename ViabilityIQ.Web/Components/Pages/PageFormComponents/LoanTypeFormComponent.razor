@@ -12,20 +12,20 @@
         <DataAnnotationsValidator />
         <ValidationSummary class="viq-form-validation-summary" />
 
-        <div class="viq-form-intro">
+        @* <div class="viq-form-intro">
             <span class="viq-form-intro-icon"><i class="bi bi-cash-coin"></i></span>
             <div><h2>Loan type</h2><p>Maintain funding product names and reference descriptions.</p></div>
-        </div>
+        </div> *@
 
         <section class="viq-form-section">
             <div class="viq-form-section-heading"><span><i class="bi bi-card-list"></i></span><div><h3>Loan classification</h3><p>Information used when capturing finance facilities.</p></div></div>
             <div class="viq-form-grid viq-form-grid-2">
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="bankName">Loan Type Name <span class="viq-required">*</span></label>
                     <InputText id="bankName" class="viq-form-control" @bind-Value="loanTypeModel.LoanTypeName" />
                     <ValidationMessage For="@(() => loanTypeModel.LoanTypeName)" class="viq-form-validation" />
                 </div>
-                <div class="viq-form-field">
+                <div class="viq-form-field viq-form-span-2">
                     <label for="shortName">Other Name/s</label>
                     <InputText id="shortName" class="viq-form-control" @bind-Value="loanTypeModel.ShortName" />
                     <ValidationMessage For="@(() => loanTypeModel.ShortName)" class="viq-form-validation" />

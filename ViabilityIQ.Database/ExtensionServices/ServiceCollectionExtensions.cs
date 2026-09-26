@@ -96,6 +96,9 @@ namespace ViabilityIQ.Application.ExtensionServices
             services.AddScoped<IAssessmentReportService, AssessmentReportService>();
             services.AddSingleton<IReportWorkbookWriter, OpenXmlReportWorkbookWriter>();
 
+            //=============== CONTACT SERVICES FOR THE WEBSITE CONTACTS FORM ===============
+            services.AddScoped<IContactService, ContactService>();
+
 
 
             return services;
