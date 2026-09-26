@@ -12,7 +12,13 @@ namespace ViabilityIQ.Infrastructure.Repositories
 {
     public interface ILeadRepository
     {
-        Task InsertLeadAsync(LeadSubmission lead);
+        Task<long> InsertLeadAsync(
+            LeadSubmission lead,
+            CancellationToken cancellationToken = default);
+        Task MarkEmailSentAsync(
+            long leadSubmissionId,
+            DateTime sentAtUtc,
+            CancellationToken cancellationToken = default);
     }
 
     public class LeadRepository : ILeadRepository
@@ -24,33 +30,50 @@ namespace ViabilityIQ.Infrastructure.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task InsertLeadAsync(LeadSubmission lead)
+        public async Task<long> InsertLeadAsync(
+            LeadSubmission lead,
+            CancellationToken cancellationToken = default)
         {
+            const string sql = """
+                INSERT INTO dbo.LeadSubmissions
+                    (FullName, Email, PhoneNumber, CompanyName, Subject, Message,
+                     Status, SubmittedAtUtc)
+                OUTPUT INSERTED.LeadSubmissionId
+                VALUES
+                    (@FullName, @Email, @PhoneNumber, @CompanyName, @Subject,
+                     @Message, @Status, @SubmittedAtUtc);
+                """;
 
-            try
-            {
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.ExecuteScalarAsync<long>(
+                new CommandDefinition(
+                    sql,
+                    lead,
+                    cancellationToken: cancellationToken));
+        }
 
-                var sql = @"INSERT INTO LeadSubmissions (FullName, Email, CompanyName, AssetVolumeScale, SubmittedAt) 
-                        VALUES (@FullName, @Email, @CompanyName, @AssetVolumeScale, @SubmittedAt)";
+        public async Task MarkEmailSentAsync(
+            long leadSubmissionId,
+            DateTime sentAtUtc,
+            CancellationToken cancellationToken = default)
+        {
+            const string sql = """
+                UPDATE dbo.LeadSubmissions
+                SET EmailSentAtUtc = @SentAtUtc,
+                    Status = N'Notified'
+                WHERE LeadSubmissionId = @LeadSubmissionId;
+                """;
 
-                var parameters = new
-                {
-                    lead.FullName,
-                    lead.Email,
-                    lead.CompanyName,
-                    lead.AssetVolumeScale,
-                    SubmittedAt = DateTime.UtcNow
-                };
-
-                using var connection = _dbConnectionFactory.CreateConnection();
-                await connection.ExecuteAsync(sql, parameters);
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            using var connection = _dbConnectionFactory.CreateConnection();
+            await connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        LeadSubmissionId = leadSubmissionId,
+                        SentAtUtc = sentAtUtc
+                    },
+                    cancellationToken: cancellationToken));
         }
     }
 }

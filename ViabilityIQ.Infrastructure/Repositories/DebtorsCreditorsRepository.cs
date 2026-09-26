@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
 namespace ViabilityIQ.Infrastructure.Repositories
 {
@@ -17,17 +18,22 @@ namespace ViabilityIQ.Infrastructure.Repositories
     {
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly ILogger<DebtorsCreditorsRepository> _logger;
+        private readonly ITenantAuthorizationService _tenantAuthorizationService;
 
         public DebtorsCreditorsRepository(
             IDbConnectionFactory dbConnectionFactory,
-            ILogger<DebtorsCreditorsRepository> logger)
+            ILogger<DebtorsCreditorsRepository> logger,
+            ITenantAuthorizationService tenantAuthorizationService)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _logger = logger;
+            _tenantAuthorizationService = tenantAuthorizationService;
         }
 
         public async Task<DebtorsCreditorsProfile> GetConfigurationAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string sql = @"
@@ -65,6 +71,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<long> SetConfigurationAsync(DebtorsCreditorsProfile config)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                config.AssessmentId, TenantRecordAccess.Write);
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -127,6 +135,15 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task AddPaymentSchedulesAsync(List<DebtorPaymentSchedule> schedules)
         {
+            ArgumentNullException.ThrowIfNull(schedules);
+            foreach (var assessmentId in schedules
+                .Select(schedule => schedule.AssessmentId)
+                .Distinct())
+            {
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    assessmentId, TenantRecordAccess.Write);
+            }
+
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -172,6 +189,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<List<DebtorPaymentSchedule>> GetPaymentSchedulesAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string sql = @"
@@ -194,6 +213,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task DeletePaymentSchedulesAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Delete);
             try
             {
                 const string sql = "DELETE FROM tblDebtorPaymentSchedule WHERE AssessmentId = @AssessmentId";
@@ -213,6 +234,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<List<AssessmentSales>> GetAssessmentSalesAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string sql = @"

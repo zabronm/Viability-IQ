@@ -10,6 +10,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ViabilityIQ.Infrastructure.Repositories
@@ -20,6 +21,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly ILogger<CashflowRepository> _logger;
+        private readonly ITenantAuthorizationService _tenantAuthorizationService;
 
         #endregion
 
@@ -27,10 +29,12 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public CashflowRepository(
             IDbConnectionFactory dbConnectionFactory,
-            ILogger<CashflowRepository> logger)
+            ILogger<CashflowRepository> logger,
+            ITenantAuthorizationService tenantAuthorizationService)
         {
             _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _tenantAuthorizationService = tenantAuthorizationService;
         }
 
         #endregion
@@ -46,6 +50,14 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 _logger.LogWarning("No cashflow records to save");
                 return;
+            }
+
+            foreach (var assessmentId in cashflows
+                .Select(cashflow => cashflow.AssessmentId)
+                .Distinct())
+            {
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    assessmentId, TenantRecordAccess.Write);
             }
 
             try
@@ -104,6 +116,9 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 return;
             }
 
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                summary.AssessmentId, TenantRecordAccess.Write);
+
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -148,6 +163,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         /// Gets all monthly cashflow records for an assessment
         public async Task<List<AssessmentCashflow>> GetMonthlyCashflowAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string query = @"
@@ -203,6 +220,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<CashflowSummary> GetCashflowSummaryAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string query = @"
@@ -256,6 +275,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<AssessmentCashflow> GetMonthCashflowAsync(long assessmentId, int month)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string query = @"
@@ -313,6 +334,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task ClearCashflowAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Delete);
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -348,6 +371,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<bool> CashflowExistsAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 const string query = @"

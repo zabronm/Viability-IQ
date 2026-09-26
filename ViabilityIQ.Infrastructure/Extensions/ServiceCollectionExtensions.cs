@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IExcelEPPlusExportService, ExcelEPPlusExportService>();
         services.AddScoped<IEmailReportingService, EmailReportingService>();
         services.AddScoped<IPdfExportService, PdfExportService>();
+        services.AddScoped<IOperationalReportsService, OperationalReportsService>();
 
         //=========== GENERIC DATA HANDLING REPOSITORIES ===========
         services.AddScoped(typeof(IGenericDataRepository<>), typeof(GenericDataRepository<>));
@@ -44,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInsightsRepository, InsightsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITenantService, TenantService>();
+        services.AddScoped<ITenantAuthorizationService, TenantAuthorizationService>();
 
         services.AddScoped<IDDLookupService, DDLookupService>();
         services.AddScoped<IAssessmentDataValidationService, AssessmentDataValidationService>();
@@ -56,6 +58,7 @@ public static class ServiceCollectionExtensions
 
         //=========== LEAD SUBMISSION REPOSITORY ===========
         services.AddScoped<ILeadRepository, LeadRepository>();
+        services.AddScoped<IContactService, ContactService>();
 
         //=========== 
         services.AddScoped<IAssessmentReadinessService, AssessmentReadinessService>();

@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
 namespace ViabilityIQ.Infrastructure.Repositories
 {
     public class AssessmentDataValidationService: IAssessmentDataValidationService
     {
         private readonly MasterDataService _masterDataService;
+        private readonly ITenantAuthorizationService _tenantAuthorizationService;
 
 
         // ====================================================
@@ -32,9 +34,12 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // ====================================================
         // Constructor
         // ====================================================
-        public AssessmentDataValidationService(MasterDataService masterDataService)
+        public AssessmentDataValidationService(
+            MasterDataService masterDataService,
+            ITenantAuthorizationService tenantAuthorizationService)
         {
             _masterDataService = masterDataService ?? throw new ArgumentNullException(nameof(masterDataService));
+            _tenantAuthorizationService = tenantAuthorizationService;
         }
 
 
@@ -43,6 +48,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // ====================================================
         public async Task<int> GetDataTypeCountAsync(long assessmentId, string dataType)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             // This method USES the dictionary defined above
             string tableName = MapDataTypeToTableName(dataType);  // ← Calls the method below
 

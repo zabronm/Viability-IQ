@@ -1,0 +1,70 @@
+.viq-site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #dbe8e5;
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(14px);
+}
+
+.viq-nav-container {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    width: min(1180px, calc(100% - 40px));
+    min-height: 76px;
+    margin-inline: auto;
+}
+
+.viq-brand { display: inline-flex; flex: 0 0 auto; text-decoration: none; }
+.viq-brand img { display: block; width: auto; height: 48px; object-fit: contain; }
+
+.viq-main-nav { display: flex; align-items: center; justify-content: center; gap: 26px; margin-left: auto; }
+.viq-nav-link, .viq-login-link {
+    color: #334e68;
+    font-size: .82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.viq-nav-link:hover, .viq-login-link:hover { color: #087965; }
+
+.viq-nav-actions { display: flex; align-items: center; gap: 16px; }
+.viq-primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 8px;
+    color: #fff;
+    background: #087965;
+    font-size: .8rem;
+    font-weight: 750;
+    text-decoration: none;
+}
+.viq-primary-button:hover { color: #fff; background: #045b4d; }
+
+.viq-mobile-menu-button {
+    display: none;
+    width: 42px;
+    height: 42px;
+    margin-left: auto;
+    border: 1px solid #cbd9e4;
+    border-radius: 8px;
+    color: #102a43;
+    background: #fff;
+}
+
+.viq-mobile-menu { display: grid; gap: 2px; padding: 12px 20px 20px; border-top: 1px solid #e5efec; background: #fff; }
+.viq-mobile-menu > a:not(.viq-primary-button) { padding: 9px 0; color: #334e68; font-size: .85rem; font-weight: 700; text-decoration: none; }
+
+@media (max-width: 900px) {
+    .viq-main-nav, .viq-nav-actions { display: none; }
+    .viq-mobile-menu-button { display: grid; place-items: center; }
+}
+
+@media (max-width: 600px) {
+    .viq-nav-container { width: calc(100% - 28px); min-height: 68px; }
+    .viq-brand img { height: 41px; }
+}
+

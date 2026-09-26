@@ -2,20 +2,27 @@ using Dapper;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
 namespace ViabilityIQ.Infrastructure.Repositories;
 
 public sealed class VatAdjustmentRepository : IVatAdjustmentRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
+    private readonly ITenantAuthorizationService _tenantAuthorizationService;
 
-    public VatAdjustmentRepository(IDbConnectionFactory connectionFactory)
+    public VatAdjustmentRepository(
+        IDbConnectionFactory connectionFactory,
+        ITenantAuthorizationService tenantAuthorizationService)
     {
         _connectionFactory = connectionFactory;
+        _tenantAuthorizationService = tenantAuthorizationService;
     }
 
     public async Task<IReadOnlyList<VatAdjustmentMonth>> GetActiveAsync(long assessmentId)
     {
+        await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+            assessmentId, TenantRecordAccess.Read);
         const string sql = """
             SELECT
                 [Period],
@@ -44,6 +51,9 @@ public sealed class VatAdjustmentRepository : IVatAdjustmentRepository
         {
             throw new ArgumentOutOfRangeException(nameof(request.AssessmentId));
         }
+
+        await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+            request.AssessmentId, TenantRecordAccess.Write);
 
         if (request.Months.Any(x => x.Period is < 1 or > 12))
         {

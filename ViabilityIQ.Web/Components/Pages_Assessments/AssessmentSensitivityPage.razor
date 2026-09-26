@@ -5,7 +5,8 @@
 @using ViabilityIQ.Shared.FinancialModels
 @using System.Globalization
 
-<div class="sensitivity-page container-fluid p-0 position-relative dashboard-workspace">
+<div id="sensitivity-print-report"
+     class="sensitivity-page assessment-print-page container-fluid p-0 position-relative dashboard-workspace">
     <PageHeading_Assessment _pageTitle="Sensitivity Analysis"
                             PageTitle="Sensitivity Analysis"
                             CurrentPage="PageType.Reports" />
@@ -61,6 +62,11 @@
                         class="sensitivity-tab @(ActiveTab == SensitivityTab.AiAnalysis ? "active" : null)"
                         @onclick="() => SelectTab(SensitivityTab.AiAnalysis)">
                     <i class="bi bi-stars"></i><span>AI Analysis (Demo)</span>
+                </button>
+                <button type="button" role="tab" aria-selected="@(ActiveTab == SensitivityTab.GroqAiAnalysis)"
+                        class="sensitivity-tab @(ActiveTab == SensitivityTab.GroqAiAnalysis ? "active" : null)"
+                        @onclick="() => SelectTab(SensitivityTab.GroqAiAnalysis)">
+                    <i class="bi bi-cpu"></i><span>GroqCloud AI</span>
                 </button>
             </div>
 
@@ -143,7 +149,7 @@
                                         @foreach (var adjustment in WorkingScenario.Adjustments)
                                         {
                                             <div>
-                                                <span><strong>@DriverName(adjustment.Driver)</strong><small>@adjustment.Value.ToString("+0.##;-0.##;0") @DriverUnit(adjustment.Driver), M@adjustment.EffectiveStartMonth @(adjustment.DurationMonths.HasValue ? $"for {adjustment.DurationMonths} months" : "onward")</small></span>
+                                                <span><strong>@DriverName(adjustment.Driver)</strong><small>@adjustment.Value.ToString("+0.##;-0.##;0") @DriverUnit(adjustment.Driver), M@(adjustment.EffectiveStartMonth) @(adjustment.DurationMonths.HasValue ? $"for {adjustment.DurationMonths} months" : "onward")</small></span>
                                                 <button type="button" aria-label="Remove adjustment" @onclick="() => RemoveAdjustment(adjustment)"><i class="bi bi-x-lg"></i></button>
                                             </div>
                                         }
@@ -156,11 +162,11 @@
                     @if (CurrentResult is not null)
                     {
                         <div class="kpi-grid mt-3">
-                            <article class="kpi-card"><span>Revenue</span><strong>@CurrentResult.Metrics.Revenue.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") vs baseline</small></article>
-                            <article class="kpi-card"><span>Gross profit</span><strong>@CurrentResult.Metrics.GrossProfit.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit).ToString("+N0;-N0;0") vs baseline</small></article>
-                            <article class="kpi-card"><span>PBT</span><strong>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") vs baseline</small></article>
-                            <article class="kpi-card"><span>Closing cash</span><strong>@CurrentResult.Metrics.ClosingCash.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") vs baseline</small></article>
-                            <article class="kpi-card"><span>Minimum cash</span><strong>@CurrentResult.Metrics.MinimumCash.ToString("N0")</strong><small>M@CurrentResult.Metrics.MinimumCashMonth</small></article>
+                            <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue)"><span>Revenue</span><strong>@CurrentResult.Metrics.Revenue.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit)"><span>Gross profit</span><strong>@CurrentResult.Metrics.GrossProfit.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax)"><span>PBT</span><strong>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash)"><span>Closing cash</span><strong>@CurrentResult.Metrics.ClosingCash.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") vs baseline</small></article>
+                            <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.MinimumCash, BaselineResult.Metrics.MinimumCash)"><span>Minimum cash</span><strong>@CurrentResult.Metrics.MinimumCash.ToString("N0")</strong><small>M@(CurrentResult.Metrics.MinimumCashMonth)</small></article>
                         </div>
                         <div class="explanation-panel">
                             <h3>Deterministic explanation</h3>
@@ -214,10 +220,10 @@
                     <table class="table sensitivity-table">
                         <thead><tr><th>Adjustment</th><th>Revenue</th><th>Gross margin</th><th>EBITDA</th><th>PBT</th><th>Closing cash</th><th>Minimum cash (month)</th><th>Funding gap</th><th>Current ratio</th><th>Interest cover</th><th>Status</th></tr></thead>
                         <tbody>
-                            <tr class="baseline-row"><th>Baseline</th><td>@BaselineResult.Metrics.Revenue.ToString("N0")</td><td>@BaselineResult.Metrics.GrossMarginPercent?.ToString("N1")%</td><td>@BaselineResult.Metrics.EBITDA.ToString("N0")</td><td>@BaselineResult.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@BaselineResult.Metrics.ClosingCash.ToString("N0")</td><td>@BaselineResult.Metrics.MinimumCash.ToString("N0") (M@BaselineResult.Metrics.MinimumCashMonth)</td><td>@BaselineResult.Metrics.FundingShortfall.ToString("N0")</td><td>@BaselineResult.Metrics.CurrentRatio?.ToString("N2")</td><td>@BaselineResult.Metrics.InterestCover?.ToString("N2")</td><td><span class="status-pill green">Baseline</span></td></tr>
+                            <tr class="baseline-row"><th>Baseline</th><td>@BaselineResult.Metrics.Revenue.ToString("N0")</td><td>@BaselineResult.Metrics.GrossMarginPercent?.ToString("N1")%</td><td>@BaselineResult.Metrics.EBITDA.ToString("N0")</td><td>@BaselineResult.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@BaselineResult.Metrics.ClosingCash.ToString("N0")</td><td>@BaselineResult.Metrics.MinimumCash.ToString("N0") (M@(BaselineResult.Metrics.MinimumCashMonth))</td><td>@BaselineResult.Metrics.FundingShortfall.ToString("N0")</td><td>@BaselineResult.Metrics.CurrentRatio?.ToString("N2")</td><td>@BaselineResult.Metrics.InterestCover?.ToString("N2")</td><td><span class="status-pill green">Baseline</span></td></tr>
                             @foreach (var point in SweepResult.Points)
                             {
-                                <tr><th>@point.DriverValue.ToString("+0.##;-0.##;0") @DriverUnit(SweepResult.Request.Driver)</th><td>@point.Metrics.Revenue.ToString("N0")</td><td>@point.Metrics.GrossMarginPercent?.ToString("N1")%</td><td>@point.Metrics.EBITDA.ToString("N0")</td><td>@point.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@point.Metrics.ClosingCash.ToString("N0")</td><td>@point.Metrics.MinimumCash.ToString("N0") (M@point.Metrics.MinimumCashMonth)</td><td>@point.Metrics.FundingShortfall.ToString("N0")</td><td>@point.Metrics.CurrentRatio?.ToString("N2")</td><td>@point.Metrics.InterestCover?.ToString("N2")</td><td><span class="status-pill @point.Status.ToString().ToLowerInvariant()">@point.Status</span></td></tr>
+                                <tr><th>@point.DriverValue.ToString("+0.##;-0.##;0") @DriverUnit(SweepResult.Request.Driver)</th><td>@point.Metrics.Revenue.ToString("N0")</td><td>@point.Metrics.GrossMarginPercent?.ToString("N1")%</td><td>@point.Metrics.EBITDA.ToString("N0")</td><td>@point.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@point.Metrics.ClosingCash.ToString("N0")</td><td>@point.Metrics.MinimumCash.ToString("N0") (M@(point.Metrics.MinimumCashMonth))</td><td>@point.Metrics.FundingShortfall.ToString("N0")</td><td>@point.Metrics.CurrentRatio?.ToString("N2")</td><td>@point.Metrics.InterestCover?.ToString("N2")</td><td><span class="status-pill @point.Status.ToString().ToLowerInvariant()">@point.Status</span></td></tr>
                             }
                         </tbody>
                     </table>
@@ -471,6 +477,195 @@ case SensitivityTab.AiAnalysis:
         <div class="ai-disclaimer">
             <i class="bi bi-info-circle-fill"></i>
             <span><strong>Advisory and not saved.</strong> AI recommendations may be incomplete or wrong and must be checked against source records, deterministic calculations and professional judgement.</span>
+        </div>
+    </section>
+    break;
+
+case SensitivityTab.GroqAiAnalysis:
+    <section class="ai-analysis groq-report" aria-labelledby="groq-ai-analysis-heading">
+        <div class="section-heading">
+            <div>
+                <h2 id="groq-ai-analysis-heading">GroqCloud sensitivity report</h2>
+                <p>AI interpretation of the current deterministic sensitivity output, supported by authoritative application figures.</p>
+            </div>
+            <div class="ai-provider-state">
+                <strong>@GroqAiConfiguration.Provider</strong>
+                <span>@GroqAiConfiguration.Model</span>
+                <span class="configuration-pill @(GroqAiConfiguration.Configured ? "configured" : "not-configured")">
+                    @(GroqAiConfiguration.Configured ? "Configured" : "Not configured")
+                </span>
+            </div>
+        </div>
+
+        <div class="ai-disclosure" role="alert">
+            <i class="bi bi-shield-check"></i>
+            <div>
+                <strong>Only de-identified calculated results are sent to GroqCloud.</strong>
+                <span>Business identity, assessment ID, user details, names, notes and source records are excluded. The deterministic figures remain authoritative.</span>
+            </div>
+        </div>
+
+        @if (!GroqAiConfiguration.Enabled || !GroqAiConfiguration.Configured)
+        {
+            <div class="ai-configuration-panel">
+                <h3>GroqCloud configuration required</h3>
+                <p>Set <code>GroqSensitivityAI__Enabled=true</code> and <code>GroqSensitivityAI__ApiKey=&lt;your-key&gt;</code> as server environment variables, then restart the application. Never place the API key in source control.</p>
+            </div>
+        }
+        else
+        {
+            <div class="ai-controls-panel">
+                <div>
+                    <strong>Case being analysed: @(CurrentResult?.Scenario.IsBaseline == false ? "Current adjusted scenario" : "Baseline")</strong>
+                    <span>No scenario name or description is sent. Results are held only in this page session.</span>
+                </div>
+                <label class="ai-consent">
+                    <input type="checkbox" @bind="GroqAiConsentGiven" disabled="@IsGeneratingGroqAiAnalysis" />
+                    <span>I consent to sending the disclosed calculated data to GroqCloud for this assessment session.</span>
+                </label>
+                <div class="ai-buttons">
+                    <button type="button" class="btn btn-sm btn-primary"
+                            disabled="@(!GroqAiConsentGiven || IsGeneratingGroqAiAnalysis)"
+                            @onclick="GenerateGroqAiAnalysisAsync">
+                        @if (IsGeneratingGroqAiAnalysis)
+                        {
+                            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span>Generating…</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-cpu"></i>
+                            <span>@(GroqAiAnalysis?.IsSuccess == true ? "Regenerate" : "Generate GroqCloud Analysis")</span>
+                        }
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            disabled="@(GroqAiAnalysis is null && !IsGeneratingGroqAiAnalysis)"
+                            @onclick="ClearGroqAiAnalysis">
+                        Clear analysis
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="PrintAsync">
+                        <i class="bi bi-printer"></i> Print / Save PDF
+                    </button>
+                </div>
+            </div>
+        }
+
+        @if (CurrentResult is not null && BaselineResult is not null)
+        {
+            <div class="kpi-grid">
+                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue)"><span>Revenue</span><strong>@CurrentResult.Metrics.Revenue.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") vs baseline</small></article>
+                <article class="kpi-card @GrossMarginKpiClass(CurrentResult.Metrics.GrossMarginPercent)"><span>Gross margin</span><strong>@(CurrentResult.Metrics.GrossMarginPercent?.ToString("N1") ?? "n/a")%</strong><small>Profitability quality</small></article>
+                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA)"><span>EBITDA</span><strong>@CurrentResult.Metrics.EBITDA.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA).ToString("+N0;-N0;0") vs baseline</small></article>
+                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax)"><span>Profit before tax</span><strong>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") vs baseline</small></article>
+                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash)"><span>Closing cash</span><strong>@CurrentResult.Metrics.ClosingCash.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") vs baseline</small></article>
+                <article class="kpi-card @FundingShortfallKpiClass(CurrentResult.Metrics.FundingShortfall)"><span>Funding shortfall</span><strong>@CurrentResult.Metrics.FundingShortfall.ToString("N0")</strong><small>Minimum cash: @CurrentResult.Metrics.MinimumCash.ToString("N0") in M@(CurrentResult.Metrics.MinimumCashMonth)</small></article>
+            </div>
+
+            <div class="groq-chart-grid">
+                <article class="mini-chart">
+                    <h3>Monthly closing cash</h3>
+                    @foreach (var month in CurrentResult.Projection.Months.Take(12))
+                    {
+                        <div class="chart-row">
+                            <span>@month.MonthLabel</span>
+                            <div><i class="@(month.ClosingBank < 0 ? "red" : "green")" style="width:@(ChartWidth(month.ClosingBank, CurrentResult.Projection.Months.Select(x => x.ClosingBank)).ToString("0.##", CultureInfo.InvariantCulture))%"></i></div>
+                            <b>@month.ClosingBank.ToString("N0")</b>
+                        </div>
+                    }
+                </article>
+                <article class="mini-chart">
+                    <h3>Monthly profit before tax</h3>
+                    @foreach (var month in CurrentResult.Projection.Months.Take(12))
+                    {
+                        <div class="chart-row">
+                            <span>@month.MonthLabel</span>
+                            <div><i class="@(month.ProfitBeforeTax < 0 ? "red" : "green")" style="width:@(ChartWidth(month.ProfitBeforeTax, CurrentResult.Projection.Months.Select(x => x.ProfitBeforeTax)).ToString("0.##", CultureInfo.InvariantCulture))%"></i></div>
+                            <b>@month.ProfitBeforeTax.ToString("N0")</b>
+                        </div>
+                    }
+                </article>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table sensitivity-table groq-metrics-table">
+                    <thead>
+                        <tr><th>KPI</th><th>Baseline</th><th>Current case</th><th>Variance</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><th>Revenue</th><td>@BaselineResult.Metrics.Revenue.ToString("N0")</td><td>@CurrentResult.Metrics.Revenue.ToString("N0")</td><td>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0")</td></tr>
+                        <tr><th>Gross profit</th><td>@BaselineResult.Metrics.GrossProfit.ToString("N0")</td><td>@CurrentResult.Metrics.GrossProfit.ToString("N0")</td><td>@Variance(CurrentResult.Metrics.GrossProfit, BaselineResult.Metrics.GrossProfit).ToString("+N0;-N0;0")</td></tr>
+                        <tr><th>EBITDA</th><td>@BaselineResult.Metrics.EBITDA.ToString("N0")</td><td>@CurrentResult.Metrics.EBITDA.ToString("N0")</td><td>@Variance(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA).ToString("+N0;-N0;0")</td></tr>
+                        <tr><th>Profit before tax</th><td>@BaselineResult.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</td><td>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0")</td></tr>
+                        <tr><th>Closing cash</th><td>@BaselineResult.Metrics.ClosingCash.ToString("N0")</td><td>@CurrentResult.Metrics.ClosingCash.ToString("N0")</td><td>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0")</td></tr>
+                        <tr><th>Current ratio</th><td>@(BaselineResult.Metrics.CurrentRatio?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.CurrentRatio?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.CurrentRatio.HasValue && BaselineResult.Metrics.CurrentRatio.HasValue ? Variance(CurrentResult.Metrics.CurrentRatio.Value, BaselineResult.Metrics.CurrentRatio.Value).ToString("+N2;-N2;0") : "n/a")</td></tr>
+                        <tr><th>Interest cover</th><td>@(BaselineResult.Metrics.InterestCover?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.InterestCover?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.InterestCover.HasValue && BaselineResult.Metrics.InterestCover.HasValue ? Variance(CurrentResult.Metrics.InterestCover.Value, BaselineResult.Metrics.InterestCover.Value).ToString("+N2;-N2;0") : "n/a")</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (IsGeneratingGroqAiAnalysis)
+        {
+            <div class="sensitivity-state compact" role="status">
+                <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                <span>GroqCloud is interpreting the calculated result…</span>
+            </div>
+        }
+        else if (GroqAiConfiguration.Enabled && GroqAiConfiguration.Configured && GroqAiAnalysis is null)
+        {
+            <div class="sensitivity-state compact">Give explicit consent, then generate the advisory summary and prioritized recommendations.</div>
+        }
+        else if (GroqAiAnalysis is not null && !GroqAiAnalysis.IsSuccess)
+        {
+            <div class="sensitivity-alert red" role="alert">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+                <div>
+                    <strong>GroqCloud analysis unavailable</strong>
+                    <span>@GroqAiAnalysis.UserMessage Reference: @GroqAiAnalysis.CorrelationId</span>
+                </div>
+            </div>
+        }
+        else if (GroqAiAnalysis?.IsSuccess == true)
+        {
+            <div class="ai-summary">
+                <h3>Executive summary</h3>
+                <p>@GroqAiAnalysis.ExecutiveSummary</p>
+            </div>
+            <div class="table-responsive ai-table-wrap">
+                <table class="table sensitivity-table ai-table">
+                    <caption>Generated @GroqAiAnalysis.GeneratedAtUtc?.ToLocalTime().ToString("g") by @GroqAiAnalysis.Provider / @GroqAiAnalysis.Model. Advisory output; not saved.</caption>
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Area</th>
+                            <th>Severity</th>
+                            <th>Interpretation</th>
+                            <th>Authoritative evidence</th>
+                            <th>Recommended action</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var finding in GroqAiAnalysis.Findings)
+                        {
+                            <tr>
+                                <td>@finding.Priority</td>
+                                <td>@finding.Area</td>
+                                <td><span class="ai-severity @finding.Severity.ToLowerInvariant()">@finding.Severity</span></td>
+                                <td>@finding.Finding</td>
+                                <td>@finding.AuthoritativeEvidence</td>
+                                <td>@finding.RecommendedAction</td>
+                                <td>@finding.Confidence%</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div class="ai-disclaimer">
+            <i class="bi bi-info-circle-fill"></i>
+            <span><strong>Advisory and not saved.</strong> GroqCloud recommendations may be incomplete or wrong. Confirm them against source records, deterministic calculations and professional judgement before making decisions.</span>
         </div>
     </section>
     break;

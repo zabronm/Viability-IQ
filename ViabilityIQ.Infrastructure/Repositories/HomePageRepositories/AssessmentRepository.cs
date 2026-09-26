@@ -39,19 +39,26 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                 var query = @"
                     SELECT TOP (@Count)
                         a.AssessmentId AS Id,
-                        a.AssessmentName AS Name,
+                        COALESCE(a.CaseNumber, CONCAT('Assessment-', a.AssessmentId)) AS Name,
                         a.BusinessId,
                         b.BusinessName,
-                        a.Status,
+                        CASE a.StatusId
+                            WHEN 1 THEN 'Draft'
+                            WHEN 2 THEN 'In Progress'
+                            WHEN 3 THEN 'Ready for Review'
+                            WHEN 4 THEN 'Completed'
+                            WHEN 5 THEN 'Archived'
+                            ELSE 'Unknown'
+                        END AS Status,
                         CAST(ROUND(a.ProgressPercentage, 0) AS INT) AS ProgressPercentage,
                         a.ModifiedDate,
-                        a.DueDate,
-                        '/assessments/' + CAST(a.AssessmentId AS VARCHAR(50)) AS ViewUrl,
-                        '/assessments/' + CAST(a.AssessmentId AS VARCHAR(50)) + '/edit' AS EditUrl
+                        a.AssessmentFinishDate AS DueDate,
+                        '/assessment/dashboards/' + CAST(a.AssessmentId AS VARCHAR(50)) AS ViewUrl,
+                        '/assessment/dashboards/' + CAST(a.AssessmentId AS VARCHAR(50)) AS EditUrl
                     FROM tblAssessments a
                     INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                    WHERE a.AssignedToUserId = @UserId
-                    OR a.CreatedByUserId = @UserId
+                    WHERE a.CreatedBy = @UserId
+                      AND a.Active = 1
                     ORDER BY a.ModifiedDate DESC
                 ";
 
@@ -83,19 +90,34 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                 var query = @"
                     SELECT TOP (@Count)
                         a.AssessmentId AS Id,
-                        a.AssessmentName AS Name,
+                        COALESCE(a.CaseNumber, CONCAT('Assessment-', a.AssessmentId)) AS Name,
                         a.BusinessId,
                         b.BusinessName,
-                        a.Status,
+                        CASE a.StatusId
+                            WHEN 1 THEN 'Draft'
+                            WHEN 2 THEN 'In Progress'
+                            WHEN 3 THEN 'Ready for Review'
+                            WHEN 4 THEN 'Completed'
+                            WHEN 5 THEN 'Archived'
+                            ELSE 'Unknown'
+                        END AS Status,
                         CAST(ROUND(a.ProgressPercentage, 0) AS INT) AS ProgressPercentage,
                         a.ModifiedDate,
-                        a.DueDate,
-                        '/assessments/' + CAST(a.AssessmentId AS VARCHAR(50)) AS ViewUrl,
-                        '/assessments/' + CAST(a.AssessmentId AS VARCHAR(50)) + '/edit' AS EditUrl
+                        a.AssessmentFinishDate AS DueDate,
+                        '/assessment/dashboards/' + CAST(a.AssessmentId AS VARCHAR(50)) AS ViewUrl,
+                        '/assessment/dashboards/' + CAST(a.AssessmentId AS VARCHAR(50)) AS EditUrl
                     FROM tblAssessments a
                     INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                    WHERE (a.AssignedToUserId = @UserId OR a.CreatedByUserId = @UserId)
-                    AND a.Status = @Status
+                    WHERE a.CreatedBy = @UserId
+                      AND a.Active = 1
+                      AND CASE a.StatusId
+                            WHEN 1 THEN 'Draft'
+                            WHEN 2 THEN 'In Progress'
+                            WHEN 3 THEN 'Ready for Review'
+                            WHEN 4 THEN 'Completed'
+                            WHEN 5 THEN 'Archived'
+                            ELSE 'Unknown'
+                          END = @Status
                     ORDER BY a.ModifiedDate DESC
                 ";
 
@@ -127,18 +149,26 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                 var query = @"
                     SELECT
                         a.AssessmentId AS Id,
-                        a.AssessmentName AS Name,
+                        COALESCE(a.CaseNumber, CONCAT('Assessment-', a.AssessmentId)) AS Name,
                         a.BusinessId,
                         b.BusinessName,
-                        a.Status,
+                        CASE a.StatusId
+                            WHEN 1 THEN 'Draft'
+                            WHEN 2 THEN 'In Progress'
+                            WHEN 3 THEN 'Ready for Review'
+                            WHEN 4 THEN 'Completed'
+                            WHEN 5 THEN 'Archived'
+                            ELSE 'Unknown'
+                        END AS Status,
                         CAST(ROUND(a.ProgressPercentage, 0) AS INT) AS ProgressPercentage,
                         a.ModifiedDate,
-                        a.DueDate,
-                        '/assessments/' + CAST(a.AssessmentId AS VARCHAR(50)) AS ViewUrl,
-                        '/assessments/' + CAST(a.AssessmentId AS VARCHAR(50)) + '/edit' AS EditUrl
+                        a.AssessmentFinishDate AS DueDate,
+                        '/assessment/dashboards/' + CAST(a.AssessmentId AS VARCHAR(50)) AS ViewUrl,
+                        '/assessment/dashboards/' + CAST(a.AssessmentId AS VARCHAR(50)) AS EditUrl
                     FROM tblAssessments a
                     INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                     WHERE a.AssessmentId = @AssessmentId
+                      AND a.Active = 1
                 ";
 
                 using var connection = _dbConnectionFactory.CreateConnection();

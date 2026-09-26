@@ -1,107 +1,294 @@
-﻿using Dapper;
-using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Dapper;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 using ViabilityIQ.Shared.SharedModels;
 
+namespace ViabilityIQ.Infrastructure.Repositories;
 
-namespace ViabilityIQ.Infrastructure.Repositories
+public sealed class DDLookupService : IDDLookupService
 {
-    public class DDLookupService : IDDLookupService
-    {
-        private readonly IDbConnectionFactory _dbConnectionFactory;
-        private readonly IMemoryCache _cache;
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
+    private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ITenantAuthorizationService _tenantAuthorizationService;
+    private readonly ISessionService _sessionService;
 
-        // 1. Centralized hardcoded database mapping definitions mapping
-        //private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField)> _metadataRegistry = new()
-        private readonly Dictionary<DDLookupEnums, (string Table, string IdField, string DisplayField, string? ParentIdField)> _metadataRegistry = new()
+    private static readonly IReadOnlyDictionary<DDLookupEnums, LookupMetadata>
+        MetadataRegistry = new Dictionary<DDLookupEnums, LookupMetadata>
         {
-            //============= master data lookups  ======================================
+            [DDLookupEnums.AssessmentTypes] = Global(
+                "tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName"),
+            [DDLookupEnums.Genders] = Global("tblGender", "GenderId", "Gender"),
+            [DDLookupEnums.Races] = Global("tblRace", "RaceId", "Race"),
+            [DDLookupEnums.Banks] = Global("tblBank", "BankId", "BankName"),
+            [DDLookupEnums.LoanTypes] = Global(
+                "tblLoanType", "LoanTypeId", "LoanTypeName"),
+            [DDLookupEnums.BusinessCategories] = Global(
+                "tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName"),
+            [DDLookupEnums.AssetCategories] = Global(
+                "tblAssetCategory", "AssetCategoryId", "CategoryName"),
+            [DDLookupEnums.AssetTypes] = Global(
+                "tblAssetType", "AssetTypeId", "TypeName"),
+            [DDLookupEnums.ClientCategories] = Global(
+                "tblClientCategories", "ClientCategoryId", "ClientCategoryName"),
+            [DDLookupEnums.ProductServiceCategories] = Global(
+                "tblProductCategory", "ProductCategoryId", "ProductCategoryName"),
+            [DDLookupEnums.Products] = Global(
+                "tblProduct", "ProductServiceId", "ProductServiceName"),
+            [DDLookupEnums.Provinces] = Global(
+                "tblProvince", "ProvinceId", "ProvinceName"),
+            [DDLookupEnums.Sectors] = Global(
+                "tblBusinessSector", "BusinessSectorId", "BusinessSectorName"),
+            [DDLookupEnums.ClientTypes] = Global(
+                "tblClientType", "ClientTypeId", "ClientTypeName"),
+            [DDLookupEnums.IncomeTypes] = Global(
+                "tblIncomeType", "IncomeTypeId", "IncomeTypeName"),
+            [DDLookupEnums.ExpenseTypes] = Global(
+                "tblExpenseType", "ExpenseTypeId", "ExpenseTypeName"),
+            [DDLookupEnums.ExpenseItems] = Global(
+                "tblExpenseItems", "ExpenseItemId", "ExpenseItemName"),
 
-            { DDLookupEnums.AssessmentTypes, ("tblAssessmentType", "AssessmentTypeId", "AssessmentTypeName", null) },
-            { DDLookupEnums.Genders, ("tblGender", "GenderId", "Gender", null) },
-            { DDLookupEnums.Races, ("tblRace", "RaceId", "Race", null) },
-            { DDLookupEnums.Banks, ("tblBank", "BankId", "BankName", null) },
-            { DDLookupEnums.LoanTypes, ("tblLoanType", "LoanTypeId", "LoanTypeName", null) },
-            { DDLookupEnums.BusinessCategories, ("tblBusinessCategories", "BusinessCategoryId", "BusinessCategoryName", null) },
-            { DDLookupEnums.Businesses, ("tblBusiness", "BusinessId", "BusinessName", null) },
-            { DDLookupEnums.AssetCategories, ("tblAssetCategory", "AssetCategoryId", "CategoryName", null) },
-            { DDLookupEnums.AssetTypes, ("tblAssetType", "AssetTypeId", "TypeName", null) },
-            { DDLookupEnums.ClientCategories, ("tblClientCategories", "ClientCategoryId", "ClientCategoryName", null) },
-            { DDLookupEnums.ProductServiceCategories, ("tblProductCategory", "ProductCategoryId", "ProductCategoryName", null) },
-            { DDLookupEnums.Products, ("tblProduct", "ProductServiceId", "ProductServiceName", null) },
-            { DDLookupEnums.Provinces, ("tblProvince", "ProvinceId", "ProvinceName", null) },
-            { DDLookupEnums.Users, ("tblUsers", "UserId", "FullName", null) },
-            { DDLookupEnums.Sectors, ("tblBusinessSector", "BusinessSectorId", "BusinessSectorName", null) },
-            { DDLookupEnums.Clients, ("tblClient", "ClientId", "FullName", null) },
-            { DDLookupEnums.ClientTypes, ("tblClientType", "ClientTypeId", "ClientTypeName", null) },
-            { DDLookupEnums.IncomeTypes, ("tblIncomeType", "IncomeTypeId", "IncomeTypeName", null) },
-            { DDLookupEnums.ExpenseTypes, ("tblExpenseType", "ExpenseTypeId", "ExpenseTypeName", null) },
-            { DDLookupEnums.ExpenseItems, ("tblExpenseItems", "ExpenseItemId", "ExpenseItemName", null) },
+            [DDLookupEnums.Businesses] = Tenant(
+                "tblBusiness", "BusinessId", "BusinessName",
+                TenantRecordTypes.Business),
+            [DDLookupEnums.Clients] = Tenant(
+                "tblClient", "ClientId", "FullName",
+                TenantRecordTypes.Client),
+            [DDLookupEnums.Assessments] = Tenant(
+                "tblAssessments", "AssessmentId", "CaseNumber",
+                TenantRecordTypes.Assessment),
+            [DDLookupEnums.Company] = Tenant(
+                "tblCompany", "CompanyId", "CompanyName",
+                TenantRecordTypes.Company),
 
-
-            //============= assessment lookups =============================================================
-            //============= Usage =>(Table/View, IdField(bound field), DisplayField, ParentIdField(parameter field)):)  =======================
-            { DDLookupEnums.AssessmentSalesCategories, ("tblAssessmentSalesCategory", "AssessmentSalesCategoryId", "AssessmentSalesCategoryName", null) },
-            { DDLookupEnums.AssessmentLoans, ("vw_assessment_loans", "AssessmentLoanId", "LoanDescription", "AssessmentId") },
+            [DDLookupEnums.AssessmentSalesCategories] = AssessmentChild(
+                "tblAssessmentSalesCategory",
+                "AssessmentSalesCategoryId",
+                "AssessmentSalesCategoryName"),
+            [DDLookupEnums.AssessmentLoans] = AssessmentChild(
+                "vw_assessment_loans",
+                "AssessmentLoanId",
+                "LoanDescription")
         };
 
+    public DDLookupService(
+        IDbConnectionFactory dbConnectionFactory,
+        ITenantAuthorizationService tenantAuthorizationService,
+        ISessionService sessionService)
+    {
+        _dbConnectionFactory = dbConnectionFactory;
+        _tenantAuthorizationService = tenantAuthorizationService;
+        _sessionService = sessionService;
+    }
 
-        public DDLookupService(IDbConnectionFactory dbConnectionFactory, IMemoryCache cache)
+    public async Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(
+        DDLookupEnums lookupKey,
+        string? filterField = null,
+        object? filterValue = null)
+    {
+        if (lookupKey == DDLookupEnums.Users)
         {
-            _dbConnectionFactory = dbConnectionFactory;
-            _cache = cache;
+            return await GetTenantUsersAsync();
         }
 
-
-        public async Task<IEnumerable<LookupItem>> GetLookupOptionsAsync(DDLookupEnums lookupKey,
-                                                                         string? filterField = null,
-                                                                         object? filterValue = null)
+        if (!MetadataRegistry.TryGetValue(lookupKey, out var metadata))
         {
-            // Safeguard against missing registry settings keys
-            if (!_metadataRegistry.TryGetValue(lookupKey, out var meta))
-            {
-                throw new ArgumentException($"Configuration Missing: No table metadata mapped for LookupKey: {lookupKey}");
-            }
-
-            // Build unique cache key including field and value
-            string cacheKey = $"lookup_{lookupKey}" +
-                (!string.IsNullOrWhiteSpace(filterField) && filterValue != null ? $"_{filterField}_{filterValue}" : "").ToLower();
-
-            if (!_cache.TryGetValue(cacheKey, out IEnumerable<LookupItem>? cachedItems))
-            {
-                using var connection = _dbConnectionFactory.CreateConnection();
-
-                string query = $@"SELECT [{meta.IdField}] AS Id, [{meta.DisplayField}] AS Description 
-                          FROM {meta.Table}";
-
-                var parameters = new DynamicParameters();
-
-                // Apply dynamic WHERE clause if field and value are provided
-                if (!string.IsNullOrWhiteSpace(filterField) && filterValue != null)
-                {
-                    // Sanitize field name to avoid unsafe column identifiers
-                    string safeFieldName = Regex.Replace(filterField, @"[^\w]", "");
-                    query += $" WHERE [{safeFieldName}] = @FilterValue";
-                    parameters.Add("FilterValue", filterValue);
-                }
-
-                query += $" ORDER BY [{meta.DisplayField}] ASC;";
-
-                cachedItems = await connection.QueryAsync<LookupItem>(query, parameters);
-
-                var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(CacheDuration);
-                _cache.Set(cacheKey, cachedItems, cacheOptions);
-            }
-
-            return cachedItems ?? Array.Empty<LookupItem>();
+            throw new ArgumentException(
+                $"No trusted lookup metadata is configured for {lookupKey}.",
+                nameof(lookupKey));
         }
+
+        var parameters = new DynamicParameters();
+        var predicates = new List<string> { "sourceRecord.[Active] = 1" };
+
+        if (!string.IsNullOrWhiteSpace(filterField) || filterValue is not null)
+        {
+            var effectiveFilterField = string.IsNullOrWhiteSpace(filterField)
+                ? metadata.ParentIdField
+                : filterField;
+            if (!string.Equals(
+                    effectiveFilterField,
+                    metadata.ParentIdField,
+                    StringComparison.OrdinalIgnoreCase)
+                || metadata.ParentIdField is null
+                || filterValue is null)
+            {
+                throw new ArgumentException(
+                    $"The requested filter is not supported for {lookupKey}.",
+                    nameof(filterField));
+            }
+
+            predicates.Add(
+                $"sourceRecord.[{metadata.ParentIdField}] = @ParentId");
+            parameters.Add("ParentId", filterValue);
+        }
+
+        if (metadata.Scope != LookupScope.Global)
+        {
+            await _tenantAuthorizationService.EnsureCanReadOperationalDataAsync();
+            var context = await _tenantAuthorizationService.GetAccessContextAsync();
+            AddScopeParameters(parameters, context);
+
+            if (metadata.Scope == LookupScope.DirectTenant)
+            {
+                predicates.Add(BuildDirectTenantPredicate(metadata));
+            }
+            else
+            {
+                var assessmentId = GetAssessmentId(filterValue);
+                parameters.Add("AssessmentId", assessmentId);
+                predicates.Add("sourceRecord.[AssessmentId] = @AssessmentId");
+                predicates.Add(BuildAssessmentPredicate());
+            }
+        }
+
+        var query = $"""
+            SELECT
+                sourceRecord.[{metadata.IdField}] AS Id,
+                sourceRecord.[{metadata.DisplayField}] AS Description
+            FROM [{metadata.Table}] sourceRecord
+            WHERE {string.Join(" AND ", predicates)}
+            ORDER BY sourceRecord.[{metadata.DisplayField}] ASC;
+            """;
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        return (await connection.QueryAsync<LookupItem>(query, parameters)).AsList();
+    }
+
+    private async Task<IEnumerable<LookupItem>> GetTenantUsersAsync()
+    {
+        await _tenantAuthorizationService.EnsureCanReadOperationalDataAsync();
+        var context = await _tenantAuthorizationService.GetAccessContextAsync();
+        const string query = """
+            SELECT
+                users.Id,
+                LTRIM(RTRIM(CONCAT(users.FirstName, ' ', users.LastName))) AS Description
+            FROM tblTenantMembership membership
+            INNER JOIN tblApplicationUsers users
+                ON users.Id = membership.UserId
+               AND users.IsActive = 1
+            WHERE membership.TenantId = @TenantId
+              AND membership.Active = 1
+              AND membership.MembershipStatus = 'Active'
+            ORDER BY users.FirstName, users.LastName;
+            """;
+
+        using var connection = _dbConnectionFactory.CreateConnection();
+        return (await connection.QueryAsync<LookupItem>(
+            query,
+            new { context.TenantId })).AsList();
+    }
+
+    private long GetAssessmentId(object? filterValue)
+    {
+        var assessmentId = filterValue switch
+        {
+            long value => value,
+            int value => value,
+            _ => _sessionService.AssessmentId ?? 0
+        };
+
+        if (assessmentId <= 0)
+        {
+            throw new InvalidOperationException(
+                "An active assessment is required for this lookup.");
+        }
+
+        return assessmentId;
+    }
+
+    private static string BuildDirectTenantPredicate(LookupMetadata metadata) => $"""
+        sourceRecord.TenantId = @TenantId
+        AND
+        (
+            @CanReadAll = 1
+            OR sourceRecord.CreatedBy = @UserId
+            OR EXISTS
+            (
+                SELECT 1
+                FROM tblTenantRecordGrant grantRecord
+                WHERE grantRecord.TenantId = @TenantId
+                  AND grantRecord.TenantMembershipId = @MembershipId
+                  AND grantRecord.EntityType = '{metadata.EntityType}'
+                  AND grantRecord.EntityId = sourceRecord.[{metadata.IdField}]
+                  AND grantRecord.Active = 1
+                  AND grantRecord.CanView = 1
+            )
+        )
+        """;
+
+    private static string BuildAssessmentPredicate() => """
+        EXISTS
+        (
+            SELECT 1
+            FROM tblAssessments assessment
+            WHERE assessment.AssessmentId = sourceRecord.AssessmentId
+              AND assessment.TenantId = @TenantId
+              AND
+              (
+                  @CanReadAll = 1
+                  OR assessment.CreatedBy = @UserId
+                  OR EXISTS
+                  (
+                      SELECT 1
+                      FROM tblTenantRecordGrant grantRecord
+                      WHERE grantRecord.TenantId = @TenantId
+                        AND grantRecord.TenantMembershipId = @MembershipId
+                        AND grantRecord.EntityType = 'Assessment'
+                        AND grantRecord.EntityId = assessment.AssessmentId
+                        AND grantRecord.Active = 1
+                        AND grantRecord.CanView = 1
+                  )
+              )
+        )
+        """;
+
+    private static void AddScopeParameters(
+        DynamicParameters parameters,
+        TenantAccessContext context)
+    {
+        parameters.Add("TenantId", context.TenantId);
+        parameters.Add("UserId", context.UserId);
+        parameters.Add("MembershipId", context.MembershipId);
+        parameters.Add("CanReadAll", context.CanReadAllOperationalRecords);
+    }
+
+    private static LookupMetadata Global(
+        string table,
+        string idField,
+        string displayField) =>
+        new(table, idField, displayField, null, LookupScope.Global, null);
+
+    private static LookupMetadata Tenant(
+        string table,
+        string idField,
+        string displayField,
+        string entityType) =>
+        new(table, idField, displayField, null, LookupScope.DirectTenant, entityType);
+
+    private static LookupMetadata AssessmentChild(
+        string table,
+        string idField,
+        string displayField) =>
+        new(
+            table,
+            idField,
+            displayField,
+            "AssessmentId",
+            LookupScope.AssessmentChild,
+            TenantRecordTypes.Assessment);
+
+    private sealed record LookupMetadata(
+        string Table,
+        string IdField,
+        string DisplayField,
+        string? ParentIdField,
+        LookupScope Scope,
+        string? EntityType);
+
+    private enum LookupScope
+    {
+        Global,
+        DirectTenant,
+        AssessmentChild
     }
 }

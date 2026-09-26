@@ -38,10 +38,28 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
 
                 if (alertType == "Announcement")
                 {
-                    // Handle announcement dismissal
                     var query = @"
-                        INSERT INTO UserAnnouncementDismissals (UserId, AnnouncementId, DismissalDate, DismissalExpiry)
-                        VALUES (@UserId, @AnnouncementId, GETUTCDATE(), DATEADD(DAY, 7, GETUTCDATE()))
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM UserAnnouncementDismissals
+                            WHERE UserId = @UserId
+                              AND AnnouncementId = @AnnouncementId
+                        )
+                        BEGIN
+                            UPDATE UserAnnouncementDismissals
+                            SET DismissalDate = GETUTCDATE(),
+                                DismissalExpiry = DATEADD(DAY, 7, GETUTCDATE())
+                            WHERE UserId = @UserId
+                              AND AnnouncementId = @AnnouncementId;
+                        END
+                        ELSE
+                        BEGIN
+                            INSERT INTO UserAnnouncementDismissals
+                                (UserId, AnnouncementId, DismissalDate, DismissalExpiry)
+                            VALUES
+                                (@UserId, @AnnouncementId, GETUTCDATE(), DATEADD(DAY, 7, GETUTCDATE()));
+                        END
                     ";
 
                     using var connection = _dbConnectionFactory.CreateConnection();
@@ -53,10 +71,30 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                 }
                 else
                 {
-                    // Handle assessment/alert dismissal
                     var query = @"
-                        INSERT INTO UserAlertDismissals (UserId, AlertId, AlertType, DismissalDate, DismissalExpiry)
-                        VALUES (@UserId, @AlertId, @AlertType, GETUTCDATE(), DATEADD(DAY, 7, GETUTCDATE()))
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM UserAlertDismissals
+                            WHERE UserId = @UserId
+                              AND AlertId = @AlertId
+                              AND AlertType = @AlertType
+                        )
+                        BEGIN
+                            UPDATE UserAlertDismissals
+                            SET DismissalDate = GETUTCDATE(),
+                                DismissalExpiry = DATEADD(DAY, 7, GETUTCDATE())
+                            WHERE UserId = @UserId
+                              AND AlertId = @AlertId
+                              AND AlertType = @AlertType;
+                        END
+                        ELSE
+                        BEGIN
+                            INSERT INTO UserAlertDismissals
+                                (UserId, AlertId, AlertType, DismissalDate, DismissalExpiry)
+                            VALUES
+                                (@UserId, @AlertId, @AlertType, GETUTCDATE(), DATEADD(DAY, 7, GETUTCDATE()));
+                        END
                     ";
 
                     using var connection = _dbConnectionFactory.CreateConnection();
