@@ -1,0 +1,11 @@
+ViabilityIQ.Shared\SharedModels\SaveResult.cs
+ViabilityIQ.Web\Services\ZabOffCanvasService.cs
+ViabilityIQ.Web\Services\OffCanvasStateService.cs
+ViabilityIQ.Web\Components\Layout\MainLayout.razor.cs
+ViabilityIQ.Web\Components\Layout\MainLayout_Assessment.razor
+ViabilityIQ.Web\Components\Pages\PageFormComponents\AssessmentsFormComponent.razor.cs
+ViabilityIQ.Web\Components\Pages_Assessments\AssetFormComponents\AssessmentAssetFormComponent.razor.cs
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\IncomeSalesFormComponent.razor.cs
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentStockFormComponent.razor.cs
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentExpensesFormComponent.razor.cs
+ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\AssessmentLoanFormComponent.razor.cs
