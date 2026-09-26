@@ -96,6 +96,9 @@
             {
                 Success = true,
                 RefreshGrid = true,
+                RefreshSummary = true,
+                RefreshKPIs = true,
+                RefreshDashboard = true,
                 ClosePanel = true,
                 Message = message
             };
@@ -119,6 +122,9 @@
                 CreateSave = true,
                 ClearForm = true,
                 RefreshGrid = true,
+                RefreshSummary = true,
+                RefreshKPIs = true,
+                RefreshDashboard = true,
                 ClosePanel = false,
                 Message = message
             };

@@ -10,6 +10,7 @@ namespace ViabilityIQ.Web.Services
         //---------------------------------------------------------
         public event Func<CanvasRequest, Task>? OnShow;
         public event Func<Task>? OnClose;
+        public event Func<SaveResult, Task>? OnSave;
 
         //---------------------------------------------------------
         // Current Request
@@ -46,11 +47,21 @@ namespace ViabilityIQ.Web.Services
                 await _currentResultCallback.Invoke(result);
             }
 
+            await NotifySaveAsync(result);
+
             // Should the OffCanvas close?
             if (result.ClosePanel)
             {
                 _currentResultCallback = null;
                 await CloseAsync();
+            }
+        }
+
+        public async Task NotifySaveAsync(SaveResult result)
+        {
+            if (result.Success && OnSave != null)
+            {
+                await OnSave.Invoke(result);
             }
         }
 

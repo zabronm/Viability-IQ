@@ -130,6 +130,8 @@ namespace ViabilityIQ.Web.Components.Pages
                 _Toast!.ShowSuccess("Business record has been deleted from system.", sessionService!.AppTitle);
                 if (businessTable is not null)
                     await businessTable.RefreshAsync();
+                await OffcanvasService!.NotifySaveAsync(
+                    SaveResult.SavedAndClose("Business deleted successfully."));
             }
         }
 
@@ -139,10 +141,10 @@ namespace ViabilityIQ.Web.Components.Pages
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
-                if (businessTable is not null)
+                if (_result.RefreshGrid && businessTable is not null)
                     await businessTable.RefreshAsync();
             }
-            else
+            else if (!_result.Cancelled)
             {
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }

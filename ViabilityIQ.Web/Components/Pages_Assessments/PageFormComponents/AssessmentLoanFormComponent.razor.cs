@@ -123,7 +123,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         }
                     }
 
-                    executionFeedbackPackage = SaveResult.SavedAndNew("Loan/repayment archived successfully.");     //NEW LOAN, NEW REPAYMENTS                    
+                    executionFeedbackPackage = isNewLoan
+                        ? SaveResult.SavedAndNew(Model, "Loan and repayment schedule saved successfully.")
+                        : SaveResult.SavedAndClose(Model, "Loan and repayment schedule updated successfully.");
                 }
                 else
                 {
@@ -142,6 +144,18 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             finally
             {
                 await zabOffCanvasService!.PublishResultAsync(executionFeedbackPackage);
+                if (executionFeedbackPackage.ClearForm)
+                {
+                    Model = new AssessmentLoan
+                    {
+                        AssessmentLoanId = 0,
+                        AssessmentId = AssessmentId,
+                        Active = true,
+                        Remarks = string.Empty,
+                        CreatedDate = DateTime.UtcNow,
+                        ModifiedDate = DateTime.UtcNow
+                    };
+                }
                 IsSubmitting = false;
             }
         }

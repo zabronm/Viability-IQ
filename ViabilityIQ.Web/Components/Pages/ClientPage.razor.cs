@@ -136,6 +136,8 @@ namespace ViabilityIQ.Web.Components.Pages
                 _Toast!.ShowSuccess("Record discarded successfully.", sessionService!.AppTitle);
                 if (clientTable is not null)
                     await clientTable.RefreshAsync();
+                await OffcanvasService!.NotifySaveAsync(
+                    SaveResult.SavedAndClose("Client deleted successfully."));
             }
         }
 
@@ -145,10 +147,10 @@ namespace ViabilityIQ.Web.Components.Pages
             if (_result.Success)
             {
                 _Toast!.ShowSuccess(_result.Message, sessionService!.AppTitle);
-                if (clientTable is not null)
+                if (_result.RefreshGrid && clientTable is not null)
                     await clientTable.RefreshAsync();
             }
-            else
+            else if (!_result.Cancelled)
             {
                 _Toast!.ShowError(_result.Message, sessionService!.AppTitle);
             }

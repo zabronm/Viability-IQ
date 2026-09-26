@@ -29,11 +29,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         {
             if (BusinessId == 0)
             {
-                businessModel = new()
-                {
-                    Active = true
-                };
-                isRowActive = true;
+                ResetForm();
             }
             else
             {
@@ -61,23 +57,27 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
             try
             {
+                var isNewRecord = businessModel.BusinessId == 0;
                 businessModel.Active = isRowActive;
 
                 bool executionOutcome = await businessRepository!.SaveAsync(businessModel);
                 if (executionOutcome)
                 {
-                    var saveResult = new SaveResult()
-                    {
-                        Success = true,
-                        RefreshGrid = true,
-                        ClosePanel = true,  // ✅ Always close on success
-                        Message = BusinessId == 0
-                            ? $"{businessModel.BusinessName} added successfully"
-                            : $"{businessModel.BusinessName} updated successfully"
-                    };
+                    var businessName = businessModel.BusinessName;
+                    var saveResult = isNewRecord
+                        ? SaveResult.SavedAndNew(
+                            businessModel,
+                            $"{businessName} added successfully")
+                        : SaveResult.SavedAndClose(
+                            businessModel,
+                            $"{businessName} updated successfully");
 
-                    // ✅ Use service to publish result
                     await OffcanvasService!.PublishResultAsync(saveResult);
+
+                    if (saveResult.ClearForm)
+                    {
+                        ResetForm();
+                    }
                 }
                 else
                 {
@@ -106,6 +106,15 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 isProcessingData = false;
                 StateHasChanged();
             }
+        }
+
+        private void ResetForm()
+        {
+            businessModel = new Business
+            {
+                Active = true
+            };
+            isRowActive = true;
         }
 
         private Task CancelAsync() => OffcanvasService!.CloseAsync();

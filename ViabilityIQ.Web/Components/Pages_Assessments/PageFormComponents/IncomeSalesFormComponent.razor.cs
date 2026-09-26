@@ -100,6 +100,7 @@ public partial class IncomeSalesFormComponent : ComponentBase
         IsSubmitting = true;
         try
         {
+            var isNewRecord = FormModel.AssessmentSalesId == 0;
             FormModel.AssessmentId = AssessmentId;
             FormModel.MonthlyValues = MonthlyValues;
             FormModel.TotalNoVAT = BaseTotalSum;
@@ -119,9 +120,19 @@ public partial class IncomeSalesFormComponent : ComponentBase
                 FormModel.AssessmentSalesId,
                 AssessmentId);
 
-            await ZabCanvasService.PublishResultAsync(SaveResult.SavedAndClose(
-                FormModel,
-                $"Monthly sales details for {FormModel.Description} committed successfully."));
+            var savedDescription = FormModel.Description;
+            var result = isNewRecord
+                ? SaveResult.SavedAndNew(FormModel,
+                    $"Monthly sales details for {savedDescription} committed successfully.")
+                : SaveResult.SavedAndClose(FormModel,
+                    $"Monthly sales details for {savedDescription} committed successfully.");
+
+            await ZabCanvasService.PublishResultAsync(result);
+
+            if (result.ClearForm)
+            {
+                ResetForm();
+            }
         }
         catch (Exception exception)
         {
@@ -140,6 +151,18 @@ public partial class IncomeSalesFormComponent : ComponentBase
 
     private async Task CancelFormAsync() =>
         await ZabCanvasService.HideAsync(SaveResult.Cancel());
+
+    private void ResetForm()
+    {
+        FormModel = new AssessmentSales
+        {
+            AssessmentId = AssessmentId,
+            IncomeTypeId = 1,
+            Active = true
+        };
+        MonthlyValues = new decimal[12];
+        BulkAnnualValueTarget = 0m;
+    }
 
     private static decimal VatFactor(decimal includeVat, decimal rate) =>
         includeVat > 0m ? 1m + Math.Max(rate, 0m) / 100m : 1m;

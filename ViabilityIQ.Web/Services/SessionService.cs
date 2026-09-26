@@ -34,6 +34,13 @@ namespace ViabilityIQ.Web.Services
         private long _companyId;
         private long _branchId;
         private long _provinceId;
+        private long _tenantId;
+        private string _tenantName = string.Empty;
+        private string _tenantType = string.Empty;
+        private string _subscriptionPlanCode = string.Empty;
+        private string _subscriptionStatus = string.Empty;
+        private long _tenantMembershipId;
+        private bool _isTenantOwner;
 
         public long UserId => _userId;
         public string UserName => _userName;
@@ -43,6 +50,13 @@ namespace ViabilityIQ.Web.Services
         public long CompanyId => _companyId;
         public long BranchId => _branchId;
         public long ProvinceId => _provinceId;
+        public long TenantId => _tenantId;
+        public string TenantName => _tenantName;
+        public string TenantType => _tenantType;
+        public string SubscriptionPlanCode => _subscriptionPlanCode;
+        public string SubscriptionStatus => _subscriptionStatus;
+        public long TenantMembershipId => _tenantMembershipId;
+        public bool IsTenantOwner => _isTenantOwner;
 
         // ====================================================
         // ASSESSMENT CONTEXT
@@ -141,6 +155,25 @@ namespace ViabilityIQ.Web.Services
 
             _isAuthenticated = true;
 
+            NotifyStateChanged();
+        }
+
+        public void SetActiveTenant(
+            long tenantId,
+            string tenantName,
+            string tenantType,
+            string subscriptionPlanCode,
+            string subscriptionStatus,
+            long tenantMembershipId,
+            bool isTenantOwner)
+        {
+            _tenantId = tenantId;
+            _tenantName = tenantName ?? string.Empty;
+            _tenantType = tenantType ?? string.Empty;
+            _subscriptionPlanCode = subscriptionPlanCode ?? string.Empty;
+            _subscriptionStatus = subscriptionStatus ?? string.Empty;
+            _tenantMembershipId = tenantMembershipId;
+            _isTenantOwner = isTenantOwner;
             NotifyStateChanged();
         }
 
@@ -266,6 +299,13 @@ namespace ViabilityIQ.Web.Services
             _companyId = 0;
             _branchId = 0;
             _provinceId = 0;
+            _tenantId = 0;
+            _tenantName = string.Empty;
+            _tenantType = string.Empty;
+            _subscriptionPlanCode = string.Empty;
+            _subscriptionStatus = string.Empty;
+            _tenantMembershipId = 0;
+            _isTenantOwner = false;
 
             _isAuthenticated = false;
 

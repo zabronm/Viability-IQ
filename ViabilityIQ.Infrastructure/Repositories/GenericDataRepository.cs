@@ -107,6 +107,17 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
             var entityId = entity is IEntity existingIdentity ? existingIdentity.Id : 0;
             bool saved;
 
+            if (isCreate && entity is ITenantEntity tenantEntity)
+            {
+                if (_sessionService.TenantId <= 0)
+                {
+                    throw new InvalidOperationException(
+                        $"An active tenant is required to create {typeof(T).Name} records.");
+                }
+
+                tenantEntity.TenantId = _sessionService.TenantId;
+            }
+
             if (entity is IAuditableEntity auditable)
             {
                 if (isCreate)

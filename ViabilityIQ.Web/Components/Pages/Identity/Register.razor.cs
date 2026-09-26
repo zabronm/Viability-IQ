@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
+using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Extensions;
 
@@ -14,6 +16,7 @@ public partial class Register : ComponentBase
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     [Inject] public CustomAuthenticationStateProvider AuthStateProvider { get; set; } = default!;
     [Inject] public ILogger<Register> Logger { get; set; } = default!;
+    [Inject] public IGenericDataRepository<Province> ProvinceRepository { get; set; } = default!;
 
     public RegisterRequest RegisterRequest { get; set; } = new();
     public string ErrorMessage { get; set; } = string.Empty;
@@ -24,8 +27,8 @@ public partial class Register : ComponentBase
     public bool IsSubmitting { get; set; }
     public bool IsEditProfileMode { get; set; }
     public List<ProvinceLookupDto> Provinces { get; set; } = new();
-    public List<BranchLookupDto> Branches { get; set; } = new();
-    public List<BranchLookupDto> FilteredBranches { get; set; } = new();
+    public bool IsOpenPlan =>
+        RegisterRequest.PlanCode == SubscriptionPlanCodes.Open;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,43 +51,32 @@ public partial class Register : ComponentBase
         }
     }
 
-    private Task LoadLookupsAsync()
+    private async Task LoadLookupsAsync()
     {
-        // Replace these temporary values with database lookup services.
-        Provinces = new List<ProvinceLookupDto>
-        {
-            new() { Id = 1, Name = "Gauteng" },
-            new() { Id = 2, Name = "Western Cape" },
-            new() { Id = 3, Name = "KwaZulu-Natal" },
-            new() { Id = 4, Name = "Gauteng" },
-            new() { Id = 5, Name = "Western Cape" },
-            new() { Id = 6, Name = "KwaZulu-Natal" }
-        };
-
-        Branches = new List<BranchLookupDto>
-        {
-            new() { Id = 101, ProvinceId = 1, Name = "Johannesburg Central" },
-            new() { Id = 102, ProvinceId = 1, Name = "Pretoria Branch" },
-            new() { Id = 103, ProvinceId = 2, Name = "Cape Town Waterfront" },
-            new() { Id = 104, ProvinceId = 3, Name = "Kuruman/Kimberly" },
-            new() { Id = 105, ProvinceId = 4, Name = "Brits/Ga-Rankuwa" },
-            new() { Id = 106, ProvinceId = 4, Name = "Mthata/Queberha" },
-            new() { Id = 107, ProvinceId = 5, Name = "Welkom" },
-            new() { Id = 108, ProvinceId = 6, Name = "Mtubatuba-KZN" }
-        };
-
-        return Task.CompletedTask;
+        var provinces = await ProvinceRepository.GetAllAsync();
+        Provinces = provinces
+            .Where(province => province.Active)
+            .OrderBy(province => province.ProvinceName)
+            .Select(province => new ProvinceLookupDto
+            {
+                Id = province.ProvinceId,
+                Name = province.ProvinceName ?? string.Empty
+            })
+            .ToList();
     }
 
-    private void OnProvinceChanged()
+    private void SelectPlan(string planCode)
     {
-        FilteredBranches = Branches
-            .Where(branch => branch.ProvinceId == RegisterRequest.ProvinceId)
-            .ToList();
-
-        if (!FilteredBranches.Any(branch => branch.Id == RegisterRequest.BranchId))
+        RegisterRequest.PlanCode = planCode;
+        if (planCode == SubscriptionPlanCodes.Standard)
         {
             RegisterRequest.BranchId = 0;
+            RegisterRequest.OrganisationName = string.Empty;
+            RegisterRequest.RequestedSeats = 1;
+        }
+        else
+        {
+            RegisterRequest.RequestedSeats = Math.Max(2, RegisterRequest.RequestedSeats);
         }
     }
 
@@ -141,7 +133,10 @@ public partial class Register : ComponentBase
                     Metadata = new
                     {
                         RegisterRequest.ProvinceId,
-                        RegisterRequest.BranchId
+                        RegisterRequest.PlanCode,
+                        RegisterRequest.OrganisationName,
+                        RegisterRequest.RequestedSeats,
+                        result.TenantId
                     }
                 });
             }
@@ -173,8 +168,14 @@ public partial class Register : ComponentBase
         if (string.IsNullOrWhiteSpace(RegisterRequest.FirstName)
             || string.IsNullOrWhiteSpace(RegisterRequest.LastName)
             || string.IsNullOrWhiteSpace(RegisterRequest.Email)
-            || RegisterRequest.ProvinceId <= 0
-            || RegisterRequest.BranchId <= 0)
+            || RegisterRequest.ProvinceId <= 0)
+        {
+            return false;
+        }
+
+        if (IsOpenPlan
+            && (string.IsNullOrWhiteSpace(RegisterRequest.OrganisationName)
+                || RegisterRequest.RequestedSeats < 2))
         {
             return false;
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Services;
 
@@ -18,6 +19,7 @@ namespace ViabilityIQ.Web.Components.Layout
         [Inject] private IGenericDataRepository<Business> BusinessRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<Client> ClientRepository { get; set; } = default!;
         [Inject] private INotificationItemRepository NotificationRepository { get; set; } = default!;
+        [Inject] private ITenantService TenantService { get; set; } = default!;
         [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
 
         private bool isSidebarCollapsed = false;
@@ -39,6 +41,7 @@ namespace ViabilityIQ.Web.Components.Layout
         {
             OffCanvasService.OnShow += HandleCanvasShowAsync;
             OffCanvasService.OnClose += HandleCanvasCloseAsync;
+            OffCanvasService.OnSave += HandleCanvasSaveAsync;
             SessionService.OnSessionChanged += HandleSessionChanged;
         }
 
@@ -75,6 +78,17 @@ namespace ViabilityIQ.Web.Components.Layout
             await Task.Delay(300);
             dynamicComponentType = null;
             dynamicParameters.Clear();
+            await LoadNavigationCountsAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+
+        private async Task HandleCanvasSaveAsync(SaveResult result)
+        {
+            if (!result.RefreshDashboard && !result.RefreshKPIs && !result.RefreshSummary)
+            {
+                return;
+            }
+
             await LoadNavigationCountsAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -149,6 +163,25 @@ namespace ViabilityIQ.Web.Components.Layout
                     0,
                     applicationUser.BranchId ?? 0,
                     applicationUser.ProvinceId ?? 0);
+
+                var tenant = await TenantService.GetDefaultTenantAsync(applicationUser.Id);
+                if (tenant is not null)
+                {
+                    SessionService.SetActiveTenant(
+                        tenant.TenantId,
+                        tenant.TenantName,
+                        tenant.TenantType,
+                        tenant.PlanCode,
+                        tenant.SubscriptionStatus,
+                        tenant.MembershipId,
+                        tenant.IsOwner);
+                }
+                else
+                {
+                    Logger.LogWarning(
+                        "Authenticated user {UserId} has no active tenant membership.",
+                        applicationUser.Id);
+                }
             }
             catch (Exception exception)
             {
@@ -180,6 +213,7 @@ namespace ViabilityIQ.Web.Components.Layout
         {
             OffCanvasService.OnShow -= HandleCanvasShowAsync;
             OffCanvasService.OnClose -= HandleCanvasCloseAsync;
+            OffCanvasService.OnSave -= HandleCanvasSaveAsync;
             SessionService.OnSessionChanged -= HandleSessionChanged;
         }
     }
