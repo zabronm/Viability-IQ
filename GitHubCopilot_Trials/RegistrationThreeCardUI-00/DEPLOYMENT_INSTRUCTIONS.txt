@@ -1,0 +1,50 @@
+REGISTRATION THREE-CARD UI
+==========================
+
+Purpose
+-------
+Redesigns the plan-enabled Register page into a responsive three-card layout:
+
+1. Choose Plan
+   - Standard
+   - Open Plan
+2. Subscriber Details
+   - Personal details
+   - Open Plan organisation name and seat count
+3. Contact & Security
+   - Contact, location, username, and password fields
+
+The submit action is presented in a shared footer below the three cards. Profile-edit
+mode automatically uses two columns because plan selection is not shown.
+
+Prerequisite
+------------
+Deploy the SaaSTenancyFoundation_2026-09-25 package first. This package contains only
+the Register UI file and expects the plan-enabled registration model and code-behind
+from that tenancy package.
+
+Deployment
+----------
+1. Back up the target application.
+2. Extract this package.
+3. Copy the contents of the Files directory to the application root while preserving
+   the directory structure.
+4. Replace:
+   ViabilityIQ.Web\Components\Pages\Identity\Register.razor
+   ViabilityIQ.Web\Components\Layout\MainLayout_Blank.razor
+5. Rebuild and publish the application using the normal deployment process.
+6. Verify registration at desktop, tablet, and mobile widths, including vertical and
+   horizontal scrolling when the viewport is smaller than the form.
+
+Validation
+----------
+The staged file was overlaid onto the cumulative tenancy validation solution and:
+
+  dotnet build .\ViabilityIQ.sln --no-restore --nologo --verbosity quiet
+
+completed successfully with 0 errors. Existing dependency/version warnings remain
+unchanged.
+
+Rollback
+--------
+Restore the backed-up Register.razor file and republish the application.

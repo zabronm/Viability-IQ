@@ -1,0 +1,60 @@
+@using ViabilityIQ.Shared.FinancialModels
+
+@if (!_isDismissed)
+{
+    <section class="projection-alert-panel" aria-label="@Heading">
+        <header>
+            <div>
+                <span>PORTFOLIO ATTENTION</span>
+                <h2>@Heading</h2>
+            </div>
+            <button type="button"
+                    title="Dismiss alerts"
+                    aria-label="Dismiss alerts"
+                    @onclick="Dismiss">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <div class="projection-alert-list">
+            @foreach (var alert in Alerts)
+            {
+                <article class="@GetAlertClass(alert.Severity)">
+                    <span class="projection-alert-icon">
+                        <i class="bi @GetAlertIcon(alert.Severity)"></i>
+                    </span>
+                    <div>
+                        <strong>@alert.Title</strong>
+                        <p>@alert.Message</p>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AccountsProjectionAlert> Alerts { get; set; } = [];
+
+    [Parameter]
+    public string Heading { get; set; } = "Debtors, creditors and cashflow alerts";
+
+    private bool _isDismissed;
+
+    private void Dismiss() => _isDismissed = true;
+
+    private static string GetAlertClass(AccountsAlertSeverity severity) => severity switch
+    {
+        AccountsAlertSeverity.Critical => "critical",
+        AccountsAlertSeverity.Warning => "warning",
+        _ => "information"
+    };
+
+    private static string GetAlertIcon(AccountsAlertSeverity severity) => severity switch
+    {
+        AccountsAlertSeverity.Critical => "bi-exclamation-octagon-fill",
+        AccountsAlertSeverity.Warning => "bi-hourglass-split",
+        _ => "bi-info-circle-fill"
+    };
+}

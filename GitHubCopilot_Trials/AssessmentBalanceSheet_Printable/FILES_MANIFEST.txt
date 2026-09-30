@@ -1,0 +1,4 @@
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentBalanceSheetPage.razor
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentBalanceSheetPage.razor.cs
+Files/ViabilityIQ.Web/Components/Pages_Assessments/AssessmentBalanceSheetPage.razor.css
+Files/ViabilityIQ.Web/Components/Pages_Assessments/ProjectionComponents/AssessmentBalanceSheetComponent.razor.css

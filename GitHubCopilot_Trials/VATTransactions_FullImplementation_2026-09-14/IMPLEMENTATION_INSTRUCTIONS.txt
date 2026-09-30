@@ -1,0 +1,136 @@
+VAT TRANSACTIONS - FULL IMPLEMENTATION
+======================================
+
+Purpose
+-------
+This package fixes:
+
+    Invalid object name 'tblAssessmentVATTransactions'
+
+It also completes the VAT feature so cashflow receives live VAT values and the
+VAT adjustment form performs real, transactional database writes.
+
+No production files were changed by this handoff package. The implementation
+files are under the Files directory with their production paths mirrored.
+
+
+Prerequisite
+------------
+Apply the CashflowIntegration_00 package first. This package updates that
+cashflow implementation to use the new VAT projection service.
+
+
+Installation order
+------------------
+1. Back up the application database and source tree.
+
+2. Run this SQL script against the same SQL Server database used by
+   ViabilityIQ.Web:
+
+   Files\ViabilityIQ.Modules\Database_Sql\AssessmentVATTransactions.sql
+
+   The script is idempotent. It creates:
+   - dbo.tblAssessmentVATTransactions
+   - validation constraints
+   - the assessment foreign key when dbo.tblAssessments exists
+   - lookup and active-source indexes
+   - dbo.vwAssessmentVATProjection
+
+3. Copy the files beneath Files into the matching solution directories.
+
+4. For these two service-registration files, merge the new registrations into
+   your current files if your local copies contain newer registrations:
+
+   ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+   ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+
+   Required application registrations:
+
+   services.AddScoped<IAssessmentVatProjectionService,
+       AssessmentVatProjectionService>();
+   services.AddScoped<ICashflowProjectionService,
+       CashflowProjectionService>();
+
+   Required infrastructure registration:
+
+   services.AddScoped<IVatAdjustmentRepository,
+       VatAdjustmentRepository>();
+
+5. Rebuild the complete solution:
+
+   dotnet build ViabilityIQ.sln
+
+6. Restart ViabilityIQ.Web so the new registrations are loaded.
+
+
+How VAT is calculated
+---------------------
+Source VAT is calculated live. Generated sales, stock, and expense VAT is not
+stored in tblAssessmentVATTransactions, preventing duplicate or stale rows.
+
+Monthly output VAT:
+  VAT-enabled AssessmentSales monthly net amount multiplied by its annual
+  gross-to-net VAT ratio. VATRate is used when that ratio is unavailable.
+
+Monthly input VAT:
+  VAT-enabled AssessmentStock and VAT-bearing AssessmentExpenses monthly net
+  values multiplied by their annual gross-to-net VAT ratios.
+
+Monthly VAT payable:
+  Output VAT + adjustment output VAT
+  - stock input VAT - expense input VAT - adjustment input VAT
+
+Cashflow uses:
+  VAT payment = max(VAT payable, 0)
+  VAT refund  = max(-VAT payable, 0)
+
+
+Manual VAT adjustments
+----------------------
+VatAdjustmentComponent now:
+- loads active Adjustment and Manual rows for the assessment;
+- displays M1 through M12;
+- requires an audit justification;
+- commits all 12 periods atomically;
+- preserves replaced rows as inactive audit history;
+- inserts only non-zero current adjustments;
+- stores VATPayable as OutputVAT - InputVAT;
+- invalidates the VAT projection only after a successful commit;
+- never reports success after a failed or partial write.
+
+
+Database verification
+---------------------
+Run:
+
+SELECT OBJECT_ID(N'dbo.tblAssessmentVATTransactions', N'U') AS TableObjectId;
+
+SELECT
+    AssessmentId,
+    Period,
+    AdjustmentOutputVAT,
+    AdjustmentInputVAT,
+    AdjustmentVATPayable
+FROM dbo.vwAssessmentVATProjection
+WHERE AssessmentId = 1
+ORDER BY Period;
+
+TableObjectId must not be NULL. The second query returns rows only when manual
+adjustments exist; source VAT remains live and is calculated by the application.
+
+
+Functional verification for AssessmentId 1
+------------------------------------------
+1. Open the VAT adjustment component for assessment 1.
+2. Enter an output or input adjustment in one month and provide justification.
+3. Save and reopen the form; the value must reload.
+4. Open cashflow and confirm that the selected month's VAT payment/refund and
+   closing bank value changed.
+5. Change the adjustment back to zero and save. Reopen the form and confirm
+   that the month is zero and the prior database row is inactive.
+
+
+Important
+---------
+Deploy the SQL script before starting the updated application. Deploying only
+the C# files will continue to produce the missing-object SQL error.

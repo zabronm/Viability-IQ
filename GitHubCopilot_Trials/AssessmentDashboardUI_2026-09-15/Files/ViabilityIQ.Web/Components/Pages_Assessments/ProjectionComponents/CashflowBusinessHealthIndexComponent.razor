@@ -1,0 +1,87 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+
+<section class="dashboard-chart-card" aria-labelledby="business-health-title">
+    <header class="chart-header">
+        <div>
+            <i class="bi bi-activity"></i>
+            <strong id="business-health-title">Business Health Index</strong>
+        </div>
+        <span>Live viability radar</span>
+    </header>
+
+    <div class="health-chart">
+        <svg viewBox="0 0 420 300" role="img" aria-labelledby="health-radar-description">
+            <title id="health-radar-description">
+                Radar chart of interest cover, margin of safety and asset efficiency
+            </title>
+
+            <polygon points="210,35 361.6,245 58.4,245" class="radar-grid radar-grid-outer" />
+            <polygon points="210,87.5 323.7,245 96.3,245" class="radar-grid" />
+            <polygon points="210,140 285.8,245 134.2,245" class="radar-grid" />
+            <line x1="210" y1="245" x2="210" y2="35" class="radar-axis" />
+            <line x1="210" y1="245" x2="361.6" y2="245" class="radar-axis" />
+            <line x1="210" y1="245" x2="58.4" y2="245" class="radar-axis" />
+
+            <polygon points="@RadarPoints" class="radar-value" />
+            <circle cx="210" cy="@InterestY" r="5" class="radar-point radar-point-interest" />
+            <circle cx="@MarginX" cy="245" r="5" class="radar-point radar-point-margin" />
+            <circle cx="@EfficiencyX" cy="245" r="5" class="radar-point radar-point-efficiency" />
+
+            <text x="210" y="18" text-anchor="middle" class="radar-label">Interest Cover</text>
+            <text x="210" y="31" text-anchor="middle" class="radar-value-label">@InterestCoverDisplay</text>
+            <text x="375" y="268" text-anchor="end" class="radar-label">Margin of Safety</text>
+            <text x="375" y="283" text-anchor="end" class="radar-value-label">@MarginOfSafetyDisplay</text>
+            <text x="45" y="268" class="radar-label">Asset Efficiency</text>
+            <text x="45" y="283" class="radar-value-label">@AssetEfficiencyDisplay</text>
+        </svg>
+
+        <div class="health-score-panel">
+            <span>Overall health score</span>
+            <strong>@Projection.Viability.HealthScore.ToString("F0")<small>/100</small></strong>
+            <div class="health-score-track">
+                <span style="@($"width: {Clamp(Projection.Viability.HealthScore):F0}%")"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public CashflowProjectionResult Projection { get; set; } = default!;
+
+    private decimal InterestScore =>
+        Projection.Viability.InterestCover is null
+            ? (Projection.Summary.InterestExpense == 0m && Projection.Summary.EBIT > 0m ? 100m : 0m)
+            : Clamp(Projection.Viability.InterestCover.Value / 4m * 100m);
+
+    private decimal MarginScore =>
+        Clamp(Projection.Viability.MarginOfSafety.GetValueOrDefault() / 0.5m * 100m);
+
+    private decimal EfficiencyScore =>
+        Clamp(Projection.Viability.AssetTurnover.GetValueOrDefault() / 2m * 100m);
+
+    private decimal InterestY => 245m - (210m * InterestScore / 100m);
+    private decimal MarginX => 210m + (151.6m * MarginScore / 100m);
+    private decimal EfficiencyX => 210m - (151.6m * EfficiencyScore / 100m);
+
+    private string RadarPoints =>
+        FormattableString.Invariant($"210,{InterestY:F1} {MarginX:F1},245 {EfficiencyX:F1},245");
+
+    private string InterestCoverDisplay =>
+        Projection.Viability.InterestCover.HasValue
+            ? $"{Projection.Viability.InterestCover.Value:F1}x"
+            : Projection.Summary.InterestExpense == 0m ? "No interest burden" : "N/A";
+
+    private string MarginOfSafetyDisplay =>
+        Projection.Viability.MarginOfSafety.HasValue
+            ? $"{Projection.Viability.MarginOfSafety.Value * 100m:F1}%"
+            : "N/A";
+
+    private string AssetEfficiencyDisplay =>
+        Projection.Viability.AssetTurnover.HasValue
+            ? $"{Projection.Viability.AssetTurnover.Value:F2}x"
+            : "N/A";
+
+    private static decimal Clamp(decimal value) => Math.Clamp(value, 0m, 100m);
+}

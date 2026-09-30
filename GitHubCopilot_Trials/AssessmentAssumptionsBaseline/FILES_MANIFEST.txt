@@ -1,0 +1,58 @@
+ASSESSMENT ASSUMPTIONS & BASELINE - FILE MANIFEST
+=================================================
+
+Documentation and collection artifacts
+--------------------------------------
+IMPLEMENTATION_INSTRUCTIONS.txt
+  Deployment, verification and rollback steps.
+
+ASSUMPTIONS_DATA_COLLECTION_TEMPLATE.csv
+  Editable fieldwork template for collecting opening facts and assumptions.
+
+READINESS_RULES.txt
+  Definition, corrective action and status logic for each readiness check.
+
+Production-path files beneath Files
+-----------------------------------
+ViabilityIQ.Shared\DataModels\AssessmentProjectionAssumptions.cs
+  Persisted lightweight assumptions entity.
+
+ViabilityIQ.Modules\Database_Sql\AssessmentProjectionAssumptions.sql
+  Idempotent table creation, validation constraints and assessment backfill.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSettingsPage.razor
+  Four-tab replacement markup for Assessment Assumptions & Baseline.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssessmentSettingsPage.razor.css
+  Component-scoped page and tab styling.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\LightweightProjectionAssumptionsComponent.razor
+  Sales, expense, VAT-frequency and cash-reserve assumption forms.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\LightweightProjectionAssumptionsComponent.razor.cs
+  Assumption loading, validation, save and confirmation behavior.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\LightweightProjectionAssumptionsComponent.razor.css
+  Component-specific assumptions editor styling.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\AssessmentProjectionReadinessComponent.razor
+  Readiness score, status, checklist and print control.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\AssessmentProjectionReadinessComponent.razor.cs
+  Ten-rule readiness evaluation across the complete assessment baseline.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\AssessmentProjectionReadinessComponent.razor.css
+  Readiness panel, status and print styling.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\AssumptionsGuidanceComponent.razor
+  Opening-document checklist and authoritative Assets-module guidance.
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssumptionComponents\AssumptionsGuidanceComponent.razor.css
+  Component-specific guidance-card styling.
+
+Excluded by design
+------------------
+- No projection calculator or projection service file.
+- No dependency-injection registration change.
+- No replacement AssessmentSettingsPage.razor.cs.
+- No production files outside this package were overwritten.

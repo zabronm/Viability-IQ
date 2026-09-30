@@ -1,0 +1,29 @@
+ASSESSMENT KPI CARDS HEADER
+===========================
+
+Adds an AssetSummaryKpiCardsComponent-style header above the existing
+AssessmentKpiCardsComponent card grid.
+
+Defaults
+--------
+Title: Assessment Performance Metrics
+Subtitle: Quick assessment KPI metrics
+Icon: bi-speedometer2
+
+The new HeaderTitle, HeaderSubtitle, and HeaderIcon parameters are optional, so all
+existing Sales, Expenses, Stock, and Loan page usages remain compatible and receive
+the default header automatically.
+
+Deployment
+----------
+1. Stop the application.
+2. Copy Files into the production solution root, preserving folders.
+3. Rebuild/publish and restart the application.
+
+No database changes are required.
+
+Validation
+----------
+dotnet build .\ViabilityIQ.sln --no-restore --nologo --verbosity quiet
+
+Result: 0 errors. Existing solution warnings remain.

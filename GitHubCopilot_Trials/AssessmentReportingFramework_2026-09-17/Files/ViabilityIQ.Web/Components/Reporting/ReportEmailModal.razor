@@ -1,0 +1,89 @@
+@namespace ViabilityIQ.Web.Components.Reporting
+@using System.ComponentModel.DataAnnotations
+
+@if (Visible)
+{
+    <div class="rem-backdrop" role="presentation">
+        <div class="rem-dialog" role="dialog" aria-modal="true" aria-labelledby="report-email-title">
+            <header>
+                <div>
+                    <span>Email output</span>
+                    <h2 id="report-email-title">@ReportName</h2>
+                </div>
+                <button type="button" aria-label="Close" @onclick="Cancel">×</button>
+            </header>
+            <EditForm Model="Model" OnValidSubmit="SubmitAsync">
+                <DataAnnotationsValidator />
+                <div class="rem-body">
+                    <label>Recipient</label>
+                    <InputText class="form-control form-control-sm" @bind-Value="Model.Recipient" />
+                    <ValidationMessage For="() => Model.Recipient" />
+                    <label>Subject</label>
+                    <InputText class="form-control form-control-sm" @bind-Value="Model.Subject" />
+                    <ValidationMessage For="() => Model.Subject" />
+                    <label>Message</label>
+                    <InputTextArea class="form-control form-control-sm" rows="5" @bind-Value="Model.Message" />
+                    <ValidationMessage For="() => Model.Message" />
+                    <div class="rem-attachment">
+                        <i class="bi bi-file-earmark-excel"></i>
+                        Formatted HTML message with genuine Excel workbook attached
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(StatusMessage))
+                    {
+                        <div class="alert @(Succeeded ? "alert-success" : "alert-danger") py-2 mb-0">
+                            @StatusMessage
+                        </div>
+                    }
+                </div>
+                <footer>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="Cancel"
+                            disabled="@Sending">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary" disabled="@Sending">
+                        @if (Sending) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        Confirm and send
+                    </button>
+                </footer>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public string ReportName { get; set; } = "Report";
+    [Parameter] public string DefaultRecipient { get; set; } = string.Empty;
+    [Parameter] public bool Sending { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool Succeeded { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<EmailReportSubmitRequest> OnSubmit { get; set; }
+
+    private EmailForm Model { get; set; } = new();
+    private bool _wasVisible;
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && !_wasVisible)
+            Model = new()
+            {
+                Recipient = DefaultRecipient,
+                Subject = $"{ReportName} - ViabilityIQ",
+                Message = "Please find the requested assessment report attached."
+            };
+        _wasVisible = Visible;
+    }
+
+    private Task Cancel() => OnClose.InvokeAsync();
+    private Task SubmitAsync() => OnSubmit.InvokeAsync(
+        new(Model.Recipient.Trim(), Model.Subject.Trim(), Model.Message.Trim()));
+
+    private sealed class EmailForm
+    {
+        [Required, EmailAddress, StringLength(254)]
+        public string Recipient { get; set; } = string.Empty;
+        [Required, StringLength(200)]
+        public string Subject { get; set; } = string.Empty;
+        [Required, StringLength(4000)]
+        public string Message { get; set; } = string.Empty;
+    }
+}

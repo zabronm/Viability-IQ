@@ -1,0 +1,92 @@
+SAAS TENANCY FOUNDATION
+=======================
+
+Purpose
+-------
+This package establishes the tenant and subscription foundation before broad
+record authorization is introduced.
+
+Plans
+-----
+Standard
+- Personal tenant.
+- One included seat.
+- Intended for individual subscribers.
+- Can later upgrade to Open Plan without moving tenant data.
+
+Open Plan
+- Organisation tenant.
+- Two-seat minimum with configurable additional seats.
+- Supports future branches, invitations, tenant roles, and shared access.
+
+Both plans are provisioned as Active until billing integration is implemented.
+The schema already includes provider, trial, billing-period, cancellation, and
+subscription-status fields for the later billing phase.
+
+Implemented
+-----------
+- Tenant, membership, tenant-role, membership-role, plan, entitlement,
+  subscription, and invitation schema.
+- Standard and Open Plan seed records.
+- Protected tenant roles:
+  Tenant Owner, Tenant Administrator, Branch Manager, Viewer, Billing Manager.
+- Assessor and Reviewer are intentionally not present; Branch Manager covers
+  those responsibilities.
+- Registration workspace selection and Open Plan organisation/seat fields.
+- Identity user and tenant provisioning as one application workflow, with
+  compensating user deletion if tenant provisioning fails.
+- Active Province data replaces the registration page's hard-coded values and
+  is loaded through DDLookupService rather than Dapper.Contrib GetAll.
+- New users receive an owner membership and Tenant Owner role.
+- Existing Identity users receive a Standard personal tenant during script
+  deployment.
+- Active tenant details are loaded into SessionService after authentication.
+- TenantId is introduced on Client, Business, Assessment, Company, and Branch.
+- GenericDataRepository stamps TenantId from the server-side active session
+  when creating those tenant-owned records.
+
+Not yet included
+----------------
+- Broad read/update/delete authorization.
+- DDLookupService tenant and permission filtering.
+- Invitation acceptance and member administration UI.
+- Permission matrices and record sharing.
+- Billing-provider integration and payment enforcement.
+
+These belong to the next broad-authorization and subscription phases. TenantId
+columns remain nullable during migration so unresolved legacy data is not
+silently assigned to the wrong subscriber.
+
+Deployment order
+----------------
+1. Back up the application database and source.
+2. Run:
+
+   DatabaseScripts\2026-09-25_SaaSTenancyFoundation.sql
+
+   The script is idempotent. If an earlier copy stopped with SQL Server error
+   207 for TenantId, the transaction was rolled back by XACT_ABORT; deploy this
+   corrected script and run it again from the beginning.
+
+3. Copy the complete contents of Files to the solution root, preserving paths.
+4. Build:
+
+   dotnet build .\ViabilityIQ.sln --no-restore --nologo --verbosity quiet
+
+5. Verify:
+   - Standard registration creates a Personal tenant with one seat.
+   - Open Plan requires an organisation name and at least two seats.
+   - Login establishes the user's active tenant.
+   - Existing users receive a personal Standard tenant after migration.
+
+Package note
+------------
+The shared SaveResult, OffCanvasStateService, and MainLayout files are
+cumulative with the immediately preceding save-workflow packages, so deploying
+this package does not remove their immediate badge-refresh behavior.
+
+Validation
+----------
+The cumulative package was overlaid onto the synchronized validation solution.
+The complete solution built successfully with 0 errors. Existing unrelated
+warnings remain.

@@ -1,0 +1,39 @@
+SHARED DATA-ENTRY FORM THEME - ALL PAGE FORMS
+Generated: 2026-09-18
+
+PURPOSE
+Extends the reusable Business form design system across every editable form in
+ViabilityIQ.Web\Components\Pages\PageFormComponents.
+
+CHANGES
+- Uses one shared stylesheet for consistent typography, controls, lookups, validation,
+  cards, switches, loading overlays and actions.
+- Preserves each form's existing fields, bindings, validation and submission behavior.
+- Fully restructures every included form with semantic shared sections, responsive grids,
+  fields, validation, status controls, loading states and action footers.
+- Uses BusinessFormComponent as the design reference across all included forms.
+- Applies responsive spacing and the green gradient submit treatment consistently.
+- Corrects the Expense Type copy/paste terminology and removes duplicate Company
+  Customer Code controls.
+
+FILES
+Copy all files under Files to their matching application paths.
+
+MANUAL APP.RAZOR MERGE
+In ViabilityIQ.Web\Components\App.razor, add this after the existing application CSS links:
+
+  <link rel="stylesheet" href="/css/data-entry-forms.css" />
+
+Load it after app.css/viability-iq.css and add it exactly once. App.razor is intentionally
+not included because the source copy contains unrelated merge markers.
+
+SCOPE
+AssetTypeFormComponent.razor is empty and was not included.
+NotificationItemDetailsComponent.razor is a read-only detail panel, not a data-entry form,
+and was not included.
+
+DATABASE / CONFIGURATION
+No database, DI, appsettings, JavaScript or package-reference change is required.
+
+VALIDATION
+The integrated .NET solution built successfully with 0 errors.

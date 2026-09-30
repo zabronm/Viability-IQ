@@ -1,0 +1,131 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+
+<section class="absheet-card" aria-labelledby="absheet-title">
+    <header class="absheet-header">
+        <div>
+            <span>Projected financial position</span>
+            <h2 id="absheet-title">Assessment Balance Sheet</h2>
+        </div>
+        <div class="absheet-header-meta">
+            <span>12-month outlook</span>
+            <strong>M1–M12</strong>
+        </div>
+    </header>
+
+    <div class="table-responsive absheet-frame">
+        <table class="table table-sm mb-0 absheet-table">
+            <thead>
+                <tr>
+                    <th scope="col">Balance sheet item</th>
+                    @foreach (var month in Months)
+                    {
+                        <th scope="col">@month.MonthLabel</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var line in StatementLines)
+                {
+                    if (line.IsHeading)
+                    {
+                        <tr class="@line.CssClass">
+                            <th colspan="13">@line.Label</th>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr class="@line.CssClass">
+                            <th scope="row">@line.Label</th>
+                            @foreach (var value in line.Values)
+                            {
+                                <td>@Amount(value)</td>
+                            }
+                        </tr>
+                    }
+                }
+
+                <tr class="absheet-check-row">
+                    <th>Balance check</th>
+                    @foreach (var month in Months)
+                    {
+                        var difference = month.TotalAssets - (TotalLiabilities(month) + ProjectedEquity(month));
+                        <td class="@(Math.Abs(difference) < 0.01m ? "absheet-balanced" : "absheet-unbalanced")">
+                            @Amount(difference)
+                        </td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="absheet-note">
+        <i class="bi bi-info-circle"></i>
+        <span>
+            Projected net assets/equity is the balancing amount after recognised projected assets and liabilities.
+            It is not a substitute for a separately maintained share-capital or drawings ledger.
+        </span>
+    </footer>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public CashflowProjectionResult Projection { get; set; } = default!;
+
+    private IReadOnlyList<CashflowProjectionMonth> Months =>
+        Projection.Months.OrderBy(month => month.MonthNumber).ToArray();
+
+    private static decimal CurrentLiabilitiesExcludingLoans(CashflowProjectionMonth month) =>
+        Math.Max(-month.ClosingBank, 0m) + month.ClosingCreditors;
+
+    private static decimal TotalLiabilities(CashflowProjectionMonth month) =>
+        CurrentLiabilitiesExcludingLoans(month) + month.ClosingLoanBalance;
+
+    private static decimal ProjectedEquity(CashflowProjectionMonth month) =>
+        month.TotalAssets - TotalLiabilities(month);
+
+    private IReadOnlyList<BalanceSheetLine> StatementLines =>
+    [
+        BalanceSheetLine.Heading("ASSETS", "absheet-section"),
+        BalanceSheetLine.Heading("Current assets", "absheet-subsection"),
+        Line("Cash at bank", month => Math.Max(month.ClosingBank, 0m)),
+        Line("Trade debtors", month => month.ClosingDebtors),
+        Line("Inventory / stock", month => month.ClosingStock),
+        Line("Total current assets", month => month.CurrentAssets, "absheet-total-row"),
+        BalanceSheetLine.Heading("Non-current assets", "absheet-subsection"),
+        Line("Property, plant & equipment (net)", month => month.ClosingFixedAssets),
+        Line("Total non-current assets", month => month.ClosingFixedAssets, "absheet-total-row"),
+        Line("TOTAL ASSETS", month => month.TotalAssets, "absheet-grand-total"),
+        BalanceSheetLine.Heading("LIABILITIES", "absheet-section"),
+        BalanceSheetLine.Heading("Current liabilities", "absheet-subsection"),
+        Line("Bank overdraft", month => Math.Max(-month.ClosingBank, 0m)),
+        Line("Trade creditors", month => month.ClosingCreditors),
+        Line("Total current liabilities", CurrentLiabilitiesExcludingLoans, "absheet-total-row"),
+        BalanceSheetLine.Heading("Non-current liabilities", "absheet-subsection"),
+        Line("Loans and borrowings", month => month.ClosingLoanBalance),
+        Line("Total non-current liabilities", month => month.ClosingLoanBalance, "absheet-total-row"),
+        Line("TOTAL LIABILITIES", TotalLiabilities, "absheet-grand-total"),
+        BalanceSheetLine.Heading("PROJECTED NET ASSETS / EQUITY", "absheet-section"),
+        Line("Projected net assets / equity", ProjectedEquity, "absheet-equity-row"),
+        Line("TOTAL LIABILITIES & EQUITY", month => TotalLiabilities(month) + ProjectedEquity(month), "absheet-grand-total")
+    ];
+
+    private BalanceSheetLine Line(
+        string label,
+        Func<CashflowProjectionMonth, decimal> valueSelector,
+        string cssClass = "") =>
+        new(label, cssClass, Months.Select(valueSelector).ToArray(), false);
+
+    private static string Amount(decimal value) =>
+        value < 0m ? $"({Math.Abs(value):N0})" : value.ToString("N0");
+
+    private sealed record BalanceSheetLine(
+        string Label,
+        string CssClass,
+        IReadOnlyList<decimal> Values,
+        bool IsHeading)
+    {
+        public static BalanceSheetLine Heading(string label, string cssClass) =>
+            new(label, cssClass, [], true);
+    }
+}

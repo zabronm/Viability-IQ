@@ -1,0 +1,39 @@
+VIABILITYIQ APPLICATION REPORTS SQL SYNTAX HOTFIX
+Package date: 2026-09-26
+
+ERROR CORRECTED
+---------------
+Operational assessment report failed for tenant 1 and user 1.
+Incorrect syntax near 'WHEREassessment'.
+Incorrect syntax near ')'.
+
+ROOT CAUSE
+----------
+The assessment-report SQL was assembled from a C# raw string and dynamic predicates.
+The raw string did not retain a trailing line break, so the first predicate was joined
+directly to the WHERE keyword:
+
+  WHEREassessment.TenantId = @TenantId
+
+CORRECTION
+----------
+OperationalReportsService now appends an explicit line ending, then WHERE, then the
+authorisation and report-filter predicates. The resulting SQL is:
+
+  WHERE
+  assessment.TenantId = @TenantId
+  AND (...)
+
+DEPLOYMENT
+----------
+1. Stop the application.
+2. Back up:
+   ViabilityIQ.Infrastructure\Repositories\OperationalReportsService.cs
+3. Copy the file under Files into the solution root, preserving its relative path.
+4. Rebuild and restart the application.
+5. Open /settings/reports and run Assessment Register.
+6. Verify the other three report views and filtered searches.
+
+No database changes are required for this hotfix.
+No Groq, Gemini, configuration, or service-registration files are included.
+

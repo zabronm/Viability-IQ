@@ -1,0 +1,42 @@
+﻿@page "/settings/assessments"
+
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Web.Components.Pages.PageFormComponents
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+
+<div class="p-0 position-relative">
+    <PageHeading _pageTitle="Assessments" CurrentPage="PageType.Assessments" _pageHeading="My Assessments" />
+
+    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:6px;">
+        <div class="app-workspace-shell">
+
+            <ZabDataTableAdvanced TItem="AssessmentDto"
+                                  @ref="assessmentTable"
+                                  ServerData="LoadAssessmentPageAsync"
+                                  DefaultSortField="@nameof(AssessmentDto.CaseNumber)"
+                                  ItemName="Assessment"
+                                  Columns="@tableColumns"
+                                  IsLoading="@loadingStateActive"
+                                  ShowAdd="true"
+                                  ShowDelete="false"
+                                  SecondaryActionIcon="true"
+                                  OnDelete="DeleteSelectedAssessment"
+                                  GetRowId="@(x => x.AssessmentId)"
+                                  OnAddRecordId="HandleFormExecution"
+                                  OnEditRecordId="HandleFormExecution"
+                                  OnLoadError="HandleTableLoadError"
+                                  OnPrintList="ExecutePrintFormatProcess"
+                                  OnExportExcelList="ExecuteExcelExportProcess"
+                                  OnEmailList="ExecuteEmailDistributionProcess" />
+
+        </div>
+    </main>
+
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

@@ -1,0 +1,68 @@
+﻿@using ViabilityIQ.Web.Components.CommonComponents
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
+
+<EditForm Model="FormModel" OnValidSubmit="ExecuteSaveWorkflowAsync">
+    <DataAnnotationsValidator />
+    <div class="p-2">
+
+        <!-- Sales Category Lookup -->
+        <div class="mb-3 mt-1">
+            <label class="form-label fw-bold text-xs text-secondary uppercase pb-1">Sales Category</label>
+            <DDLookupComponent SourceKey="DDLookupEnums.AssessmentSalesCategories"
+                               @bind-Value="FormModel.AssessmentSalesCategoryId"
+                               Placeholder="Select Sales Category" />
+        </div>
+
+        <!-- Include VAT Switch -->
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="vatSwitch" @bind="FormModel.blIncludeVAT">
+            <label class="form-check-label text-xs fw-bold text-secondary ps-2 pt-2" for="vatSwitch">Include VAT</label>
+        </div>
+
+        <!-- Quick Distribution Engine -->
+        <div class="card bg-light border-0 mb-3 p-1.5 rounded pb-0">
+            <label class="form-label fw-bold text-xs pt-1">Quick Even Distribution</label>
+            <div class="input-group input-group-sm pt-0">
+                <input type="number" class="form-control" @bind="BulkTargetValue" />
+                <button class="btn btn-outline-success" type="button" @onclick="DistributeStockValuesEvenly">Apply</button>
+            </div>
+        </div>
+
+        <!-- 12-Month Horizon -->
+        <div style="max-height: 280px; overflow-y: auto;">
+            @for (int i = 0; i < 12; i++)
+            {
+                int idx = i;
+                <div class="row mb-1 align-items-center">
+                    <div class="col-4"><span class="text-xs fw-semibold text-muted">M@(idx + 1)</span></div>
+                    <div class="col-8">
+                        <input type="number" class="form-control form-control-sm text-end font-monospace text-xs"
+                               @bind="MonthlyValues[idx]"
+                               @bind:event="oninput" />
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Total allocation row -->
+        <div class="d-flex align-items-center gap-2 mt-3 p-2 rounded text-xs fw-bold mb-3" style="background-color: #e0f2fe; color: #1e3a8a;">
+            <span>TOTAL STOCK VALUE</span>
+            <span class="ms-auto">@MonthlyValues.Sum().ToString("N2")</span>
+        </div>
+
+        <div class="d-flex gap-2 border-top pt-2">
+            <button type="submit" class="btn btn-primary btn-sm w-100 py-1.5 text-xs fw-bold" disabled="@IsSubmitting">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Saving stock changes...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-circle"></i>
+                    <span>&nbsp; Save Stock Changes</span>
+                }
+            </button>
+        </div>
+    </div>
+</EditForm>

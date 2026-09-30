@@ -1,0 +1,71 @@
+@page "/assessment/assets/{RouteAssessmentId:long}"
+@page "/assessment/assets"
+@layout MainLayout_Assessment
+@namespace ViabilityIQ.Web.Components.Pages_Assessments
+
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="assets-page container-fluid p-0 position-relative dashboard-workspace">
+    <PageHeading_Assessment _pageTitle="Assets"
+                            PageTitle="Asset Management &amp; Projections"
+                            CurrentPage="PageType.Assets" />
+
+    <section class="assets-tabs-shell">
+        <div class="assets-tabs" role="tablist" aria-label="Asset views">
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AssetPageTab.Summary)"
+                    class="assets-tab @(ActiveTab == AssetPageTab.Summary ? "active" : null)"
+                    @onclick="() => SelectTab(AssetPageTab.Summary)">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Assets Summary</span>
+            </button>
+
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AssetPageTab.Details)"
+                    class="assets-tab @(ActiveTab == AssetPageTab.Details ? "active" : null)"
+                    @onclick="() => SelectTab(AssetPageTab.Details)">
+                <i class="bi bi-calendar3-range-fill"></i>
+                <span>Assets Detail</span>
+            </button>
+
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(ActiveTab == AssetPageTab.BalanceSheet)"
+                    class="assets-tab @(ActiveTab == AssetPageTab.BalanceSheet ? "active" : null)"
+                    @onclick="() => SelectTab(AssetPageTab.BalanceSheet)">
+                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                <span>Balance Sheet</span>
+            </button>
+        </div>
+
+        <div class="assets-tab-content" role="tabpanel">
+            @if (AssessmentId <= 0)
+            {
+                <div class="assets-context-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>No active assessment is available.</strong>
+                        <span>Open an assessment before viewing its assets.</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @switch (ActiveTab)
+                {
+                    case AssetPageTab.Summary:
+                        <AssessmentAssetSummaryPage AssessmentId="@AssessmentId" />
+                        break;
+                    case AssetPageTab.Details:
+                        <AssessmentAssetDetailsPage AssessmentId="@AssessmentId" />
+                        break;
+                    case AssetPageTab.BalanceSheet:
+                        <AssessmentBalanceSheetPage AssessmentId="@AssessmentId" />
+                        break;
+                }
+            }
+        </div>
+    </section>
+</div>

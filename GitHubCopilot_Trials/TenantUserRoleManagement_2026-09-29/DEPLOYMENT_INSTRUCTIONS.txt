@@ -1,0 +1,165 @@
+VIABILITYIQ TENANT USER AND ROLE MANAGEMENT
+Package date: 2026-09-29
+
+PURPOSE
+-------
+This package completes the two Security Settings destinations already linked from:
+
+  /settings/settings
+
+Routes implemented:
+
+  /settings/users
+  /settings/roles
+
+WORKFLOW
+--------
+Tenant Owner and Tenant Administrator can:
+- Create a ViabilityIQ account directly.
+- Select a branch.
+- Allocate one or more tenant roles.
+- Add an existing ViabilityIQ account to the active tenant.
+- Suspend, reactivate or remove a tenant membership.
+- Re-add a previously removed member.
+- See active users compared with the subscribed seat quantity.
+
+For a new account:
+1. A cryptographically generated temporary password is created.
+2. The account receives the global Identity role User when that role exists.
+3. An active tenant membership and the selected tenant roles are created.
+4. The temporary password is sent using the existing EmailSettings SMTP configuration.
+5. The user is redirected to Change Password after first sign-in.
+6. All other application routes remain blocked until the password is changed.
+
+If welcome-email delivery fails, the new account and tenant membership are rolled back.
+The temporary password is never logged or shown in the UI.
+
+SUPPORTED TENANT ROLES
+----------------------
+- Tenant Owner
+  Protected. Created and assigned during tenant provisioning and cannot be reassigned
+  through these pages.
+- Tenant Administrator
+- Branch Manager
+- Viewer
+- Billing Manager
+
+Multiple roles can be assigned to one tenant member.
+
+AUTHORIZATION
+-------------
+- Only Tenant Owner and Tenant Administrator can load or modify tenant users and roles.
+- Role and user links are hidden from other tenant members on /settings/settings.
+- Every service operation independently validates the active tenant role.
+- All membership, role and branch reads/writes include the active TenantId.
+- Tenant Owner membership and role are immutable in these pages.
+- Administrators cannot suspend or remove their own active membership.
+- Subscription SeatQuantity is enforced for new and reactivated active members.
+- Standard Plan tenants normally have one seat and therefore cannot add another active
+  member unless the subscription seat quantity is increased.
+
+DATABASE
+--------
+Run this idempotent script before deploying the application files:
+
+  Files\DatabaseScripts\2026-09-29_TenantUserRoleManagement.sql
+
+It adds:
+- dbo.tblApplicationUsers.MustChangePassword
+- IX_tblTenantMembership_TenantStatus
+
+The tenancy foundation tables must already exist.
+
+APPLICATION FILES
+-----------------
+Copy or merge the files under Files into the solution root while preserving paths.
+
+New files:
+- ViabilityIQ.Database\Dtos\TenantUserManagementDtos.cs
+- ViabilityIQ.Database\Interfaces\ITenantUserManagementService.cs
+- ViabilityIQ.Web\Services\TenantUserManagementService.cs
+- ViabilityIQ.Web\Components\Shared\ForcedPasswordRouteView.razor
+- ViabilityIQ.Web\Components\Pages\TenantUsersPage.razor
+- ViabilityIQ.Web\Components\Pages\TenantUsersPage.razor.css
+- ViabilityIQ.Web\Components\Pages\TenantRolesPage.razor
+- ViabilityIQ.Web\Components\Pages\TenantRolesPage.razor.css
+- ViabilityIQ.Web\Components\Pages\Settings.TenantSecurity.cs
+
+Existing files to merge/replace:
+- ViabilityIQ.Shared\DataModels\SecurityDataModels\ApplicationUser.cs
+- ViabilityIQ.Web\Extensions\ApplicationExtensions.cs
+- ViabilityIQ.Web\Controllers\AuthController.cs
+- ViabilityIQ.Web\Components\Routes.razor
+- ViabilityIQ.Web\Components\Pages\Settings.razor
+- ViabilityIQ.Web\Components\Pages\Identity\ChangePassword.razor.cs
+- ViabilityIQ.Infrastructure\Repositories\OperationalReportsService.cs
+
+SERVICE REGISTRATION
+--------------------
+ApplicationExtensions.cs adds:
+
+  services.AddScoped<ITenantUserManagementService, TenantUserManagementService>();
+
+Do not replace:
+
+  ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+
+That separate application-layer file contains the Gemini and Groq registrations.
+
+EMAIL CONFIGURATION
+-------------------
+The feature reuses the existing settings:
+
+  EmailSettings:SmtpServer
+  EmailSettings:Port
+  EmailSettings:EnableSsl
+  EmailSettings:SenderAddress
+  EmailSettings:SenderPassword
+
+The user is not created when SMTP delivery fails. Verify these settings before testing.
+
+REPORTING INTEGRATION
+---------------------
+OperationalReportsService now resolves an advisor's branch from:
+
+  tblTenantMembership.DefaultBranchId
+
+instead of the global tblApplicationUsers.BranchId. This keeps branch reporting correct
+when an existing account belongs to more than one tenant.
+
+BUILD
+-----
+From the solution root:
+
+  dotnet restore .\ViabilityIQ.sln
+  dotnet build .\ViabilityIQ.sln --no-restore
+
+VALIDATION CHECKLIST
+--------------------
+1. Sign in as Tenant Owner.
+2. Open Settings > Users.
+3. Confirm the current owner and subscribed-seat count.
+4. Create a user with a controlled email address, branch and multiple roles.
+5. Confirm the email contains the generated temporary password.
+6. Sign in as the new user and confirm redirection to Change Password.
+7. Confirm /home cannot be used until the password is changed.
+8. Change the password and confirm /home opens.
+9. Open Settings > User Groups / Roles as Tenant Owner.
+10. Change the member's roles and confirm the updated pills on both pages.
+11. Suspend the user and confirm tenant application access is denied.
+12. Reactivate the user.
+13. Remove and re-add the user using the same email.
+14. Add an existing ViabilityIQ account and confirm its existing password remains valid.
+15. Sign in as Branch Manager, Viewer and Billing Manager and confirm the two Security
+    Settings links are hidden and direct service access is denied.
+16. Confirm users cannot be added beyond SeatQuantity.
+17. Run Reports with a branch filter and confirm membership branch allocation is used.
+
+VALIDATION PERFORMED
+--------------------
+- Package overlaid on the corrected synchronized source.
+- dotnet restore completed successfully.
+- dotnet build completed successfully with 0 errors.
+- No new warnings originate from the tenant user/role files.
+- No unresolved Git conflict markers or embedded credentials were found.
+

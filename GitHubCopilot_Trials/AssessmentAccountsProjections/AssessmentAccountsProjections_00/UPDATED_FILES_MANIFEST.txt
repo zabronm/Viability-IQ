@@ -1,0 +1,99 @@
+LATEST DEBTORS / CREDITORS PACKAGE - 12 SEPTEMBER 2026
+======================================================
+
+Use files only from this directory:
+
+    GitHubCopilot_Trials\AssessmentAccountsProjections_Updated_2026-09-12
+
+Do not use the earlier AssessmentAccountsProjections directory when applying
+this revision.
+
+
+FILES CHANGED BY THE LATEST REQUEST
+-----------------------------------
+Replace these files even if you copied an earlier version:
+
+1. Files\ViabilityIQ.Database\FinancialCalculations\
+   AccountsProjectionService.cs
+
+   Changes:
+   - Uses Debtors_30, Debtors_60, Debtors_90, Debtors_120 and
+     Debtors_120Plus.
+   - Uses Creditors_30, Creditors_60, Creditors_90, Creditors_120 and
+     Creditors_120Plus.
+   - Uses 0-30, 31-60, 61-90, 91-120 and 120+ profile labels.
+
+2. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_Page.razor
+
+   Changes:
+   - Uses PageHeading_Assessment.
+   - Places all three tabs immediately below the page heading.
+   - Uses the same tab structure as AssessmentAssetsPage.
+
+3. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_Page.razor.css
+
+   Changes:
+   - Uses the same tab-shell, active-tab, hover, responsive and print styling
+     as AssessmentAssetsPage.
+
+4. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_Page.razor.cs
+
+   Changes:
+   - Removes the obsolete parent-page alert formatting helpers.
+
+5. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AccountsProjectionAlerts.razor
+
+6. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AccountsProjectionAlerts.razor.css
+
+   These are NEW files. Copy both. They provide the reusable dismissible alert
+   panel displayed independently on every tab.
+
+7. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_DebtorsPage.razor
+
+8. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_DebtorsPage.razor.cs
+
+9. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_CreditorsPage.razor
+
+10. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+    AssessmentAccs_CreditorsPage.razor.cs
+
+11. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+    AssessmentAccs_ConsolidatedPage.razor
+
+12. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+    AssessmentAccs_ConsolidatedPage.razor.cs
+
+    Changes across these six files:
+    - Adds AccountsProjectionAlerts to every tab.
+    - Uses M1 through M12 in table rows, chart labels and chart tooltips.
+
+
+UNCHANGED BUT REQUIRED SUPPORTING FILES
+---------------------------------------
+The new folder also includes the complete supporting implementation:
+
+- AccountsProjectionModels.cs
+- IAccountsProjectionService.cs
+- The three page-specific .razor.css files
+- MainLayout_Assessment route patch and instructions
+- Full implementation instructions
+
+
+COPY RULE
+---------
+The folder below Files mirrors the destination project structure. Copy its
+contents into the repository root and allow these listed module files to replace
+the earlier versions:
+
+    Files\
+
+Do not copy the outer AssessmentAccountsProjections_Updated_2026-09-12 folder
+into ViabilityIQ.Web.

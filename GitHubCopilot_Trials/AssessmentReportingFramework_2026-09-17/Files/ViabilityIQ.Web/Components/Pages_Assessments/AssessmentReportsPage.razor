@@ -1,0 +1,88 @@
+@page "/assessment/reports/{AssessmentId:long}"
+@layout MainLayout_Assessment
+@using ViabilityIQ.Shared.Reporting
+@using ViabilityIQ.Web.Components.Reporting
+
+<div class="arp-workspace container-fluid p-0">
+    <PageHeading_Assessment _pageTitle="Reports" PageTitle="Assessment Reports" CurrentPage="PageType.Reports" />
+
+    <section class="arp-hero">
+        <div>
+            <span>Assessment reporting workspace</span>
+            <h1>Decision-ready reports from the live projection</h1>
+            <p>Select a fixed report definition, confirm its projection period, then print, export or email it.</p>
+        </div>
+        <div class="arp-context"><span>Assessment</span><strong>@AssessmentId</strong></div>
+    </section>
+
+    <div class="arp-layout">
+        <aside class="arp-catalogue" aria-label="Report catalogue">
+            <header><span>Catalogue</span><strong>@ReportCatalogue.AssessmentReports.Count reports</strong></header>
+            @foreach (var report in ReportCatalogue.AssessmentReports)
+            {
+                <button type="button" class="arp-report-card @(SelectedType == report.Type ? "active" : null)"
+                        @onclick="() => SelectReportAsync(report.Type)">
+                    <i class="@IconFor(report.Type)"></i>
+                    <span><strong>@report.Name</strong><small>@report.Description</small></span>
+                </button>
+            }
+        </aside>
+
+        <main class="arp-main">
+            <section class="arp-parameters">
+                <div>
+                    <span>Projection period</span>
+                    <strong>M@StartMonth – M@EndMonth</strong>
+                </div>
+                <label>From
+                    <select class="form-select form-select-sm" @bind="StartMonth">
+                        @for (var month = 1; month <= 12; month++) { <option value="@month">M@month</option> }
+                    </select>
+                </label>
+                <label>To
+                    <select class="form-select form-select-sm" @bind="EndMonth">
+                        @for (var month = 1; month <= 12; month++) { <option value="@month">M@month</option> }
+                    </select>
+                </label>
+                <button class="btn btn-sm btn-primary" @onclick="GenerateAsync" disabled="@IsLoading">
+                    <i class="bi bi-arrow-repeat me-1"></i> Generate
+                </button>
+            </section>
+
+            @if (!string.IsNullOrWhiteSpace(AuditWarning))
+            {
+                <div class="arp-audit-warning"><i class="bi bi-exclamation-circle"></i> @AuditWarning</div>
+            }
+            @if (IsLoading)
+            {
+                <div class="arp-state"><span class="spinner-border spinner-border-sm"></span> Building report from live projection…</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="arp-state arp-error"><i class="bi bi-exclamation-octagon"></i> @ErrorMessage</div>
+            }
+            else if (Document is null)
+            {
+                <div class="arp-state">Select a report to begin.</div>
+            }
+            else
+            {
+                <section class="arp-container">
+                    <header class="arp-toolbar report-screen-only">
+                        <div><span>Report preview</span><strong>@Document.Definition.Name</strong></div>
+                        <ReportOutputMenu InstanceKey="@($"{AssessmentId}-{Document.Definition.Code}")"
+                            PdfLoading="IsPdfBusy" ExcelLoading="IsExcelBusy" EmailLoading="IsEmailBusy"
+                            OnPdf="ExportPdfAsync" OnExcel="ExportExcelAsync" OnEmail="OpenEmail" />
+                    </header>
+                    <div id="@ReportElementId"><AssessmentReportRenderer Document="Document" /></div>
+                </section>
+            }
+        </main>
+    </div>
+</div>
+
+<ReportEmailModal Visible="ShowEmail" ReportName="@(Document?.Definition.Name ?? "Report")"
+    DefaultRecipient="@Session.UserEmail" Sending="IsEmailBusy" StatusMessage="EmailStatus"
+    Succeeded="EmailSucceeded" OnClose="CloseEmail" OnSubmit="SendEmailAsync" />
+<BFooter />
+

@@ -1,0 +1,290 @@
+﻿@typeparam TItem
+
+<section class="zdt-shell" aria-busy="@EffectiveLoading.ToString().ToLowerInvariant()">
+    @if (EffectiveLoading)
+    {
+        <div class="zdt-loading-overlay" role="status">
+            <div class="zdt-loading-card">
+                <span class="zdt-spinner" aria-hidden="true"></span>
+                <span>Loading @ItemName.ToLowerInvariant() data…</span>
+            </div>
+        </div>
+    }
+
+    <header class="zdt-toolbar">
+        <div class="zdt-toolbar-primary">
+            @if (ShowAdd)
+            {
+                <button class="zdt-add-button" type="button" @onclick="OnAddClick">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    <span>Add @ItemName</span>
+                </button>
+            }
+            <div class="zdt-record-context">
+                <strong>@ItemName register</strong>
+                <span>@TotalItemCount.ToString("N0") record@(TotalItemCount == 1 ? string.Empty : "s")</span>
+            </div>
+        </div>
+
+        <div class="zdt-toolbar-actions">
+            @if (Columns.Any(column => column.Filterable))
+            {
+                <button class="zdt-icon-button @(ShowFilters ? "active" : null)" type="button"
+                        @onclick="ToggleFilters" title="Show or hide column filters"
+                        aria-pressed="@ShowFilters">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                </button>
+            }
+
+            @if (IsServerMode)
+            {
+                <button class="zdt-icon-button" type="button" @onclick="RefreshAsync"
+                        disabled="@EffectiveLoading" title="Refresh server data">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                </button>
+            }
+
+            <div class="dropdown">
+                <button class="zdt-icon-button dropdown-toggle" type="button" id="@_utilityMenuId"
+                        data-bs-toggle="dropdown" aria-expanded="false" title="Export and output">
+                    <i class="bi bi-box-arrow-up" aria-hidden="true"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end zdt-output-menu shadow-sm"
+                    aria-labelledby="@_utilityMenuId">
+                    <li>
+                        <button class="dropdown-item" type="button" @onclick="HandlePrintTriggerAsync"
+                                disabled="@(!CanPrint)">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger"></i>Export to PDF
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item" type="button" @onclick="HandleExcelExportTriggerAsync"
+                                disabled="@(!CanExportExcel)">
+                            <i class="bi bi-file-earmark-excel-fill text-success"></i>Export to MS Excel
+                        </button>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button class="dropdown-item" type="button" @onclick="HandleEmailTriggerAsync"
+                                disabled="@(!CanEmail)">
+                            <i class="bi bi-envelope-fill text-primary"></i>Send on Email
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="zdt-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input value="@_searchText" @oninput="HandleSearchInputAsync"
+                       placeholder="@SearchPlaceholder" aria-label="Search @ItemName records" />
+                @if (!string.IsNullOrWhiteSpace(_searchText))
+                {
+                    <button type="button" @onclick="ClearSearchAsync" title="Clear search">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="zdt-error" role="alert">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <span>@_errorMessage</span>
+            @if (IsServerMode)
+            {
+                <button type="button" @onclick="RefreshAsync">Retry</button>
+            }
+        </div>
+    }
+
+    <div class="zdt-table-frame">
+        <table class="zdt-table">
+            <thead>
+                <tr>
+                    @foreach (var column in Columns)
+                    {
+                        <th class="@column.HeaderCssClass" aria-sort="@GetAriaSort(column)">
+                            @if (CanSort(column))
+                            {
+                                <button class="zdt-sort-button" type="button"
+                                        @onclick="() => SortAsync(column)">
+                                    <span>@column.Title</span>
+                                    <i class="@GetSortIcon(column)" aria-hidden="true"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="zdt-static-header">@column.Title</span>
+                            }
+                        </th>
+                    }
+                    @if (ShowActions)
+                    {
+                        <th class="zdt-actions-header">Actions</th>
+                    }
+                </tr>
+                @if (ShowFilters)
+                {
+                    <tr class="zdt-filter-row">
+                        @foreach (var column in Columns)
+                        {
+                            <th>
+                                @if (column.Filterable && (!IsServerMode || !string.IsNullOrWhiteSpace(column.ServerField)))
+                                {
+                                    <div class="zdt-column-filter">
+                                        <i class="bi bi-filter" aria-hidden="true"></i>
+                                        <input value="@GetFilterValue(column)"
+                                               @oninput="eventArgs => HandleFilterInputAsync(column, eventArgs)"
+                                               placeholder="@(column.FilterPlaceholder ?? $"Filter {column.Title}")"
+                                               aria-label="Filter @column.Title" />
+                                    </div>
+                                }
+                            </th>
+                        }
+                        @if (ShowActions)
+                        {
+                            <th>
+                                @if (HasActiveFilters)
+                                {
+                                    <button class="zdt-clear-filters" type="button" @onclick="ClearFiltersAsync">
+                                        Clear
+                                    </button>
+                                }
+                            </th>
+                        }
+                    </tr>
+                }
+            </thead>
+            <tbody>
+                @if (VisibleItems.Count == 0 && !EffectiveLoading)
+                {
+                    <tr>
+                        <td colspan="@ColumnSpan" class="zdt-empty-state">
+                            <span class="zdt-empty-icon"><i class="bi bi-inbox" aria-hidden="true"></i></span>
+                            <strong>No matching records</strong>
+                            <span>Adjust the search or filters and try again.</span>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var row in VisibleItems)
+                    {
+                        <tr class="zdt-data-row @(IsRowClickable ? "clickable" : null) @ResolveRowCssClass(row)"
+                            @onclick="() => HandleRowClick(row)">
+                            @foreach (var column in Columns)
+                            {
+                                <td class="@ResolveCssClass(column, row)"
+                                    @onclick:stopPropagation="column.IsClickable || column.IsLink || column.CellTemplate is not null">
+                                    @if (column.CellTemplate is not null)
+                                    {
+                                        @column.CellTemplate(row)
+                                    }
+                                    else if (column.IsLink || column.IsClickable)
+                                    {
+                                        <button type="button" class="zdt-cell-link"
+                                                @onclick="() => HandleLinkClick(column, row)">
+                                            @if (!string.IsNullOrWhiteSpace(column.IconCss))
+                                            {
+                                                <i class="@column.IconCss" aria-hidden="true"></i>
+                                            }
+                                            @if (!column.IconOnly)
+                                            {
+                                                @FormatCellValue(column, row)
+                                            }
+                                        </button>
+                                    }
+                                    else if (column.UseBadge)
+                                    {
+                                        <span class="zdt-status-badge @(column.BadgeClass?.Invoke(row))">
+                                            @if (!string.IsNullOrWhiteSpace(column.IconCss))
+                                            {
+                                                <i class="@column.IconCss" aria-hidden="true"></i>
+                                            }
+                                            @if (!column.IconOnly)
+                                            {
+                                                @FormatCellValue(column, row)
+                                            }
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @if (!string.IsNullOrWhiteSpace(column.IconCss))
+                                        {
+                                            <i class="@column.IconCss zdt-cell-icon" aria-hidden="true"></i>
+                                        }
+                                        @if (!column.IconOnly)
+                                        {
+                                            @FormatCellValue(column, row)
+                                        }
+                                    }
+                                </td>
+                            }
+
+                            @if (ShowActions)
+                            {
+                                <td class="zdt-row-actions" @onclick:stopPropagation="true">
+                                    @if (ShowSecondaryAction && GetRowId is not null)
+                                    {
+                                        <button class="zdt-row-button secondary" type="button"
+                                                @onclick="() => OnSecondaryActionClick(GetRowId(row))"
+                                                title="@SecondaryActionTitle">
+                                            <i class="@SecondaryActionIcon" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                    @if (GetRowId is not null)
+                                    {
+                                        <button class="zdt-row-button edit" type="button"
+                                                @onclick="() => OnEditClick(GetRowId(row))"
+                                                title="Edit @ItemName">
+                                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                    @if (ShowDelete)
+                                    {
+                                        <button class="zdt-row-button delete" type="button"
+                                                @onclick="() => ConfirmDelete(row)"
+                                                title="Delete @ItemName">
+                                            <i class="bi bi-trash3" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="zdt-footer">
+        <div class="zdt-page-size">
+            <label for="@_pageSizeId">Rows per page</label>
+            <select id="@_pageSizeId" value="@_pageSize" @onchange="ChangePageSizeAsync">
+                @foreach (var size in PageSizeOptions.Where(size => size > 0).Distinct().Order())
+                {
+                    <option value="@size">@size</option>
+                }
+            </select>
+        </div>
+
+        <div class="zdt-page-summary">
+            Showing <strong>@($"{StartRecordIndex:N0}–{EndRecordIndex:N0}")</strong>
+            of <strong>@TotalItemCount.ToString("N0")</strong>
+        </div>
+
+        <nav class="zdt-pagination" aria-label="@ItemName pagination">
+            <button type="button" @onclick="FirstPageAsync" disabled="@(_currentPage <= 1 || EffectiveLoading)"
+                    title="First page"><i class="bi bi-chevron-bar-left" aria-hidden="true"></i></button>
+            <button type="button" @onclick="PreviousPageAsync" disabled="@(_currentPage <= 1 || EffectiveLoading)"
+                    title="Previous page"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+            <span>Page <strong>@_currentPage</strong> of <strong>@TotalPages</strong></span>
+            <button type="button" @onclick="NextPageAsync" disabled="@(_currentPage >= TotalPages || EffectiveLoading)"
+                    title="Next page"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+            <button type="button" @onclick="LastPageAsync" disabled="@(_currentPage >= TotalPages || EffectiveLoading)"
+                    title="Last page"><i class="bi bi-chevron-bar-right" aria-hidden="true"></i></button>
+        </nav>
+    </footer>
+</section>

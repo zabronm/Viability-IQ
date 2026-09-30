@@ -1,0 +1,23 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+<div class="card border-0 shadow-sm h-100">
+    <div class="card-header bg-dark text-white">
+        <strong>12-Month Cash Summary</strong>
+    </div>
+    <table class="table mb-0">
+        <tbody>
+            <tr><td>Total cash inflows</td><td class="text-end">@Projection.Summary.TotalInflows.ToString("N0")</td></tr>
+            <tr><td>Total cash outflows</td><td class="text-end">(@Projection.Summary.TotalOutflows.ToString("N0"))</td></tr>
+            <tr><td>Net cashflow</td><td class="text-end fw-bold">@Projection.Summary.NetCashflow.ToString("N0")</td></tr>
+            <tr><td>Opening bank</td><td class="text-end">@Projection.Summary.OpeningBank.ToString("N0")</td></tr>
+            <tr><td>Closing bank</td><td class="text-end fw-bold">@Projection.Summary.ClosingBank.ToString("N0")</td></tr>
+            <tr>
+                <td>Closing debtors / creditors</td>
+                <td class="text-end">
+                    @Projection.Summary.ClosingDebtors.ToString("N0") /
+                    @Projection.Summary.ClosingCreditors.ToString("N0")
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

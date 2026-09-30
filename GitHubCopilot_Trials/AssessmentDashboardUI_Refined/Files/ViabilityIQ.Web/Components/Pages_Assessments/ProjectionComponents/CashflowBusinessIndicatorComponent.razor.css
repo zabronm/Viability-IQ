@@ -1,0 +1,129 @@
+.business-indicators {
+    overflow: hidden;
+    border: 1px solid #d7e0e8;
+    border-radius: 0.7rem;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
+}
+
+.indicator-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.9rem;
+    background: linear-gradient(135deg, #34495e, #50687a);
+    color: #fff;
+}
+
+.indicator-header div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.indicator-header span {
+    color: #d7e4ea;
+    font-size: 0.62rem;
+}
+
+.indicator-body {
+    padding: 1rem;
+}
+
+.indicator-statuses {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.indicator-statuses > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid #e6edf2;
+    color: #475569;
+    font-size: 0.74rem;
+}
+
+.status-good { color: #15803d; }
+.status-warning { color: #b45309; }
+.status-risk { color: #dc2626; }
+.status-neutral { color: #64748b; }
+
+.indicator-highlights {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0.9rem 0;
+}
+
+.indicator-highlights > div {
+    padding: 0.85rem;
+    border: 1px solid #dce5eb;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+}
+
+.indicator-highlights span,
+.indicator-highlights small {
+    display: block;
+    color: #64748b;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+.indicator-highlights strong {
+    display: block;
+    margin: 0.2rem 0;
+    color: #0f4c5c;
+    font-size: 1.2rem;
+}
+
+.indicator-highlights strong small {
+    display: inline;
+}
+
+.indicator-table {
+    border: 1px solid #d9e4e8;
+    font-size: 0.72rem;
+}
+
+.indicator-table th,
+.indicator-table td {
+    padding: 0.5rem 0.65rem;
+    border-color: #d9e4e8;
+}
+
+.indicator-component-state {
+    display: flex;
+    min-height: 18rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.indicator-component-error {
+    color: #b91c1c;
+}
+
+.indicator-table th {
+    width: 62%;
+    background: #ecfdf5;
+    color: #315b52;
+}
+
+.indicator-table td {
+    background: #f8fffd;
+    color: #132238;
+    font-weight: 800;
+    text-align: right;
+}
+
+@media (max-width: 480px) {
+    .indicator-highlights {
+        grid-template-columns: 1fr;
+    }
+}

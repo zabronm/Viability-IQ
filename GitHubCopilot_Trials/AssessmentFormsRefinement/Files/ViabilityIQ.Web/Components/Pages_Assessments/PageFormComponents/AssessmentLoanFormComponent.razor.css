@@ -1,0 +1,33 @@
+.viq-method-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    padding: .7rem .75rem;
+    border: 1px solid #bcd9d0;
+    border-left: 3px solid #198754;
+    border-radius: .5rem;
+    background: #f1faf6;
+}
+
+.viq-method-note > span {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: .42rem;
+    background: #dff3e9;
+    color: #157347;
+}
+
+.viq-method-note strong {
+    color: #174d36;
+    font-size: .76rem;
+}
+
+.viq-method-note p {
+    margin: .12rem 0 0;
+    color: #527062;
+    font-size: .64rem;
+    line-height: 1.4;
+}

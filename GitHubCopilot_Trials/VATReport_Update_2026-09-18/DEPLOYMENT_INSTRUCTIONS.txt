@@ -1,0 +1,33 @@
+VAT REPORT - INCREMENTAL UPDATE ONLY
+Generated: 2026-09-18
+
+PURPOSE
+Adds VAT Report as the fifth report in the already-deployed Assessment Reports module.
+This package contains only the four production files required for that update.
+
+REPORT CONTENT
+- Total output VAT
+- Total input VAT
+- Net VAT payable or refundable
+- Projected VAT payments
+- Projected VAT refunds
+- Monthly VAT reconciliation for the selected project period
+- Planning-use disclaimer
+
+The report uses the authoritative central cashflow projection. It automatically uses the existing
+project-period mapping, report preview, PDF/print, Excel, email and activity-log functionality.
+
+DEPLOYMENT
+Review local changes, then replace the four files under Files at their matching application paths.
+No Razor renderer, CSS, logo, JavaScript, database, DI or configuration file is included.
+Your manually adjusted report header and logo files are therefore not replaced by this package.
+
+PREREQUISITE
+The Assessment Reporting Framework and the latest project-period adjustments must already be
+deployed.
+
+DATABASE / CONFIGURATION
+No migration, database table, DI registration, package reference or appsettings change is required.
+
+VALIDATION
+The integrated .NET 8 solution built successfully with 0 errors.

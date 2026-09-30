@@ -1,0 +1,21 @@
+.tenant-offcanvas-role-grid {
+    display: grid;
+    gap: .65rem;
+    margin-top: 1rem;
+}
+
+.tenant-offcanvas-role-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .8rem;
+    border: 1px solid #dce5ec;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.tenant-offcanvas-role-choice small {
+    display: block;
+    color: #607086;
+}
+

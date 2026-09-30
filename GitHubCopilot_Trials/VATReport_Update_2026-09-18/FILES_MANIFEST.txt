@@ -1,0 +1,17 @@
+VAT REPORT - UPDATE FILE MANIFEST
+Generated: 2026-09-18
+
+REPLACE
+ViabilityIQ.Shared\Reporting\ReportModels.cs
+ViabilityIQ.Shared\Reporting\ReportCatalogue.cs
+ViabilityIQ.Database\Reporting\AssessmentReportService.cs
+ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor.cs
+
+TOTAL PRODUCTION FILES: 4
+
+NOT INCLUDED
+- AssessmentReportRenderer.razor or its CSS
+- AssessmentReportsPage.razor
+- Logo/image files
+- Print JavaScript
+- Database or configuration files

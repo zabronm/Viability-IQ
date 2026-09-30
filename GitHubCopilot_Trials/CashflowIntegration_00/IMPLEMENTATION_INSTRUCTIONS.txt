@@ -1,0 +1,311 @@
+CASHFLOW INTEGRATION - CORRECTED LIVE CALCULATIONS
+=================================================
+
+Use only this package:
+
+    GitHubCopilot_Trials\CashflowIntegration_Fixed_2026-09-12
+
+The Files directory mirrors the destination repository structure. This package
+does not directly replace production files.
+
+
+WHAT THIS REFACTORS
+-------------------
+All cashflow components now receive one immutable CashflowProjectionResult from
+CashflowMainPagesComponent. The parent calculates once and refreshes the whole
+cashflow area whenever IProjectionStateManager publishes a change for the same
+assessment.
+
+The following components no longer calculate separate or hard-coded figures:
+
+- BusinessHealthAlertsComponent
+- CashflowKPICardsComponent
+- CashflowSummaryDashboardComponent
+- CashflowSummaryTableComponent
+- DetailedCashflowStatementComponent
+- FinancialViabilityKPIComponent
+
+CashflowMainPagesComponent owns loading, errors, refresh subscriptions and the
+shared result.
+
+
+STEP 1 - PREREQUISITE ACCOUNTS FIELDS
+-------------------------------------
+AssessmentSalesCategory must contain database-backed decimal properties:
+
+    public decimal OpeningDebtorsAmount { get; set; }
+    public decimal OpeningCreditorsAmount { get; set; }
+
+The package includes the latest corrected AccountsProjectionService. It:
+
+- loads DebtorsCreditorsProfile by AssessmentId without requiring Active=true;
+- calculates 0-30 debtor and creditor percentages as the remainder from 100%;
+- uses AssessmentSales for debtor invoices;
+- uses AssessmentStock for creditor purchases.
+
+
+STEP 2 - COPY FILES
+-------------------
+Copy the contents of:
+
+    Files\
+
+into the repository root, preserving the directory structure.
+
+This adds:
+
+- CashflowProjectionModels.cs
+- ICashflowProjectionService.cs
+- CashflowProjectionCalculator.cs
+- CashflowProjectionService.cs
+
+It replaces:
+
+- CashflowEngine.cs
+- all listed cashflow .razor and .razor.cs components
+
+It also includes the supplied component CSS files unchanged so the existing
+visual design remains available.
+
+
+STEP 3 - DEPENDENCY INJECTION
+-----------------------------
+Open:
+
+    ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+
+In AddFinancialCalculationServices, add these registrations immediately before
+the existing ICashflowEngine registration:
+
+    services.AddScoped<IAccountsProjectionService, AccountsProjectionService>();
+    services.AddScoped<ICashflowProjectionService, CashflowProjectionService>();
+
+Keep:
+
+    services.AddScoped<ICashflowEngine, CashflowEngine>();
+
+The new CashflowEngine is a compatibility adapter over the authoritative live
+projection. Existing consumers of ICashflowEngine therefore receive corrected
+values without reading stale persisted display rows.
+
+
+STEP 4 - INVALIDATE AFTER SETTINGS AND VAT SAVES
+------------------------------------------------
+Sales, Stock, Expenses, Loans and Assets already call:
+
+    IProjectionStateManager.InvalidateDataAsync(...)
+
+Add the same notification to the remaining save paths.
+
+A. AssessmentSettingsPage.razor.cs
+
+Inject:
+
+    [Inject]
+    private IProjectionStateManager ProjectionStateManager { get; set; } = default!;
+
+Inside RefreshComponentData, after confirming saveResult.Success and before
+showing success, add:
+
+    var dataType = refName switch
+    {
+        "VAT-UPDATE" => "VAT",
+        "DEBTORS-CREDITORS" => "debtors-creditors",
+        _ => "assessment"
+    };
+
+    await ProjectionStateManager.InvalidateDataAsync(
+        dataType,
+        ActiveAssessmentId,
+        ActiveAssessmentId);
+
+B. VatAdjustmentComponent.razor.cs
+
+Inject:
+
+    [Inject]
+    private IProjectionStateManager ProjectionStateManager { get; set; } = default!;
+
+After the database save succeeds and before ReturnSuccess, add:
+
+    await ProjectionStateManager.InvalidateDataAsync(
+        "VAT",
+        AssessmentId,
+        AssessmentId);
+
+C. AssessmentVATPage.razor.cs
+
+After a successful VAT adjustment or VAT save, add:
+
+    await projectionStateManager!.InvalidateDataAsync(
+        "VAT",
+        AssessmentId,
+        AssessmentId);
+
+Do not publish the event before the database transaction succeeds.
+
+
+AUTHORITATIVE FORMULAS
+----------------------
+Opening cash:
+
+    M1 Opening Bank = Assessment.OpeningBalance_Bank
+    M(n) Opening Bank = M(n-1) Closing Bank
+
+Profit and loss values are VAT-exclusive:
+
+    Revenue = active AssessmentSales monthly values
+
+    COGS by sales category =
+        Category Sales / (1 + MarkupPercentage / 100)
+
+If markup is zero or missing, that category's stock purchases are used as a
+visible fallback and a warning is raised.
+
+    Gross Profit = Revenue - COGS
+
+    Operating Expenses =
+        all active AssessmentExpenses net monthly values
+        + Assessment.MonthlyDirectorWagesAmountTotal
+
+    EBITDA = Gross Profit - Operating Expenses
+    EBIT = EBITDA - Depreciation
+    Profit Before Tax = EBIT - Loan Interest - Overdraft Interest
+
+Depreciation is never included in cash outflows.
+
+
+CASH RECEIPTS AND PAYMENTS
+--------------------------
+When Assessment.blDebtorsCreditors == 1:
+
+    Sales Receipts = profile-driven debtor collections
+    Supplier Payments = profile-driven creditor payments
+
+Otherwise:
+
+    Sales Receipts = immediate monthly sales cash, VAT-inclusive per sales row
+    Supplier Payments = immediate stock purchases, VAT-inclusive only when the
+                        stock row has blIncludeVAT
+
+Cash operating expenses include only AssessmentExpenses rows where
+blSendToCashBook is true, grossed using TotalWithVAT / TotalNoVAT, plus director
+wages.
+
+VAT:
+
+    VAT Payment = max(AssessmentVATTransactions.VATPayable, 0)
+    VAT Refund = max(-AssessmentVATTransactions.VATPayable, 0)
+
+VAT changes cash but is not a profit expense.
+
+Loans:
+
+    Loan Cash Payment =
+        MetricTypeId 1 Expected Repayment
+        + MetricTypeId 3 Extra Repayment
+
+MetricTypeId 1 already contains the contractual installment. MetricTypeId 2
+interest is not added to the installment again.
+
+    Principal Repaid =
+        max(Expected Repayment - Interest, 0) + Extra Repayment
+
+No loan inflow is inferred from LoanAmount because the model has no reliable
+indicator that a loan is newly disbursed during the projection.
+
+Overdraft interest:
+
+    Monthly Overdraft Interest =
+        abs(negative opening bank)
+        * Assessment.InterestOnOverDraft / 100 / 12
+
+Asset movements:
+
+    Addition = cash outflow
+    Disposal = cash inflow
+    Revaluation / Transfer = non-cash
+
+MovementValue on a Disposal is assumed to be cash proceeds. If it represents
+book value instead, add a separate disposal-proceeds field before relying on it.
+
+Total cash:
+
+    Total Inflows =
+        Sales Receipts + Asset Disposal Proceeds + VAT Refunds
+
+    Total Outflows =
+        Supplier Payments
+        + Cash Operating Expenses
+        + VAT Payments
+        + Loan Cash Payments
+        + Overdraft Interest
+        + Asset Purchases
+
+    Net Cashflow = Total Inflows - Total Outflows
+    Closing Bank = Opening Bank + Net Cashflow
+
+
+BALANCE AND VIABILITY FORMULAS
+------------------------------
+    Closing Stock =
+        max(0, Opening Stock + cumulative net stock purchases - cumulative COGS)
+
+    Closing Loan =
+        max(0, Opening Loan Balance - cumulative principal repaid)
+
+    Current Assets =
+        max(Closing Bank, 0) + Closing Debtors + Closing Stock
+
+    Current Liabilities =
+        Closing Creditors
+        + Closing Loan Balance
+        + max(-Closing Bank, 0)
+
+The complete loan balance is conservatively classified as current because the
+model has no current/non-current split.
+
+    Current Ratio = Current Assets / Current Liabilities
+    Contribution Margin Ratio = (Revenue - COGS) / Revenue
+    Break-even Sales = Operating Expenses / Contribution Margin Ratio
+    Margin of Safety = (Revenue - Break-even Sales) / Revenue
+    Interest Cover = EBIT / Interest
+    DSCR = EBITDA / Loan Cash Payments
+
+NPV discounts the 12 monthly net cashflows at 10% nominal annual divided by 12.
+Payback is displayed as unavailable because there is no authoritative initial
+investment cashflow in the current model.
+
+
+IMPORTANT MODEL LIMITATIONS
+---------------------------
+1. No cash-versus-credit field exists per AssessmentSales row. The assessment's
+   blDebtorsCreditors flag is therefore the authoritative whole-assessment rule.
+2. No fixed/variable expense classification exists. Break-even treats all
+   operating expenses as fixed, which is conservative and explicitly labelled.
+3. No current/non-current loan split exists.
+4. Asset disposal MovementValue is assumed to equal proceeds.
+5. No reliable new-loan disbursement flag exists.
+
+
+VALIDATION
+----------
+The complete solution was compiled in an isolated copy against origin/master,
+with the two confirmed AssessmentSalesCategory opening-balance fields supplied
+only to that validation copy.
+
+After copying locally:
+
+1. Build the full solution.
+2. Open assessment 1 and confirm M1 opening bank equals OpeningBalance_Bank.
+3. Change one monthly sale and confirm Revenue, COGS, profit and either immediate
+   receipts or debtor collections change.
+4. Change one stock purchase and confirm closing stock and supplier cash change.
+5. Change one cashbook expense and confirm operating profit and cash change.
+6. Change a non-cashbook expense and confirm profit changes but cash does not.
+7. Change a VAT transaction and confirm VAT payment/refund and closing bank.
+8. Change a loan schedule and confirm payment, interest, principal and closing
+   loan balance.
+9. Change an asset Addition/Disposal and confirm the corresponding cash movement.
+10. Confirm every next-month opening bank equals the previous closing bank.
+11. Confirm all month headings display M1 through M12.

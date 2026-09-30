@@ -1,0 +1,38 @@
+ASSESSMENT ASSET FORM - UNIFORM UI
+==================================
+
+This package updates the singular asset-registration component shown by the
+"Edit Asset" off-canvas:
+
+ViabilityIQ.Web\Components\Pages_Assessments\AssetFormComponents\
+AssessmentAssetFormComponent.razor
+
+It does not update AssessmentAssetsFormComponent, which is the separate monthly
+stock-values form.
+
+Changes
+-------
+- Uses the shared viq form shell and intro banner.
+- Separates ownership period, asset identity, opening valuation, and depreciation
+  into the same titled bordered sections used by AssessmentLoanFormComponent.
+- Replaces the old blue pill controls and blue Save Asset footer with the uniform
+  section controls and green sticky action footer.
+- Adds standard validation summary/messages and a submission busy overlay.
+- Preserves existing/acquired-period switching, acquisition-month behavior,
+  accumulated-depreciation rules, depreciation methods, calculations, validation,
+  movement-template creation, and projection invalidation.
+
+Deployment
+----------
+1. Stop the application.
+2. Copy Files into the production solution root, preserving folders.
+3. Ensure wwwroot\css\data-entry-forms.css is deployed.
+4. Rebuild/publish and restart the application.
+
+No database changes are required.
+
+Validation
+----------
+dotnet build .\ViabilityIQ.sln --no-restore --nologo --verbosity quiet
+
+Result: 0 errors. Existing solution warnings remain.

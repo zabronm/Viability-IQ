@@ -1,0 +1,40 @@
+ASSET TYPE UI AND PRODUCT CATEGORY OFF-CANVAS FIX
+Generated: 2026-09-23
+
+ASSET TYPE UI
+- Uses the authoritative viq-* design system from data-entry-forms.css.
+- Mirrors the current LoanTypeFormComponent shown in the unified forms package.
+- Adds the same intro banner, icon tiles, bordered section groups, two-column field
+  grids, explanatory helper text, toggle cards, busy overlay, and green action footer.
+- Uses viq-form-shell, viq-data-form, viq-form-section, viq-form-control,
+  viq-toggle-card, viq-switch, viq-form-actions, and viq-button classes.
+- Preserves the working Asset Type add/edit, Save, close, and grid-refresh flow.
+
+PRODUCT CATEGORY ERROR
+ProductCategoryPage mixed two incompatible off-canvas patterns. It opened a local
+ZabOffCanvas and passed OnSavedSuccess, but ProductCategoryFormComponent has no
+OnSavedSuccess parameter and publishes results through OffCanvasStateService.
+This caused the component-parameter runtime error when the form was opened.
+
+PRODUCT CATEGORY FIX
+- Removes the page-local ZabOffCanvas.
+- Opens ProductCategoryFormComponent through the global OffCanvasStateService.
+- Passes ProductCategoryId through CanvasRequest.
+- Routes SaveResult back to ProductCategoryPage.
+- Refreshes the grid after successful saves.
+- Suppresses error notifications for user cancellation.
+
+FILES
+Copy all files under Files to their matching application paths.
+
+PREREQUISITE
+This package supersedes AssetType_OffCanvasFix_2026-09-23 and contains its
+AssetTypeFormComponent code-behind correction.
+The shared data-entry-forms.css stylesheet from FormTheme_AllForms_2026-09-18
+must remain linked in App.razor.
+
+DATABASE / CONFIGURATION
+No database, migration, DI, JavaScript, or configuration change is required.
+
+VALIDATION
+The integrated .NET solution built successfully with 0 errors.

@@ -1,0 +1,345 @@
+@page "/settings/users"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Shared.DataModels.SecurityDataModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<PageTitle>Tenant Users</PageTitle>
+
+<div class="p-0">
+    <PageHeading _pageTitle="Security Settings" CurrentPage="PageType.Settings" _pageHeading="Tenant Users" />
+
+    <main class="tenant-security-page">
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="alert alert-success">@successMessage</div>
+        }
+
+        @if (isLoading)
+        {
+            <div class="tenant-security-loading">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+        else if (snapshot is not null)
+        {
+            <section class="tenant-security-summary">
+                <div>
+                    <span class="tenant-security-eyebrow">ACTIVE TENANT</span>
+                    <h2>@snapshot.TenantName</h2>
+                    <p>Manage tenant membership, branch allocation, access status and roles.</p>
+                </div>
+                <div class="tenant-seat-card">
+                    <span>Subscribed seats</span>
+                    <strong>@snapshot.ActiveMemberCount / @snapshot.SeatQuantity</strong>
+                </div>
+                <button class="btn btn-primary" @onclick="OpenCreate">
+                    <i class="bi bi-person-plus-fill me-2"></i>Add user
+                </button>
+            </section>
+
+            <section class="tenant-security-card">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Branch</th>
+                                <th>Roles</th>
+                                <th>Status</th>
+                                <th>Last sign-in</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var member in snapshot.Members)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@member.FullName</strong>
+                                        <div class="text-muted small">@member.Email</div>
+                                        @if (member.MustChangePassword)
+                                        {
+                                            <span class="badge text-bg-warning mt-1">Password change required</span>
+                                        }
+                                    </td>
+                                    <td>@member.BranchName</td>
+                                    <td>
+                                        @foreach (var role in member.RoleNames)
+                                        {
+                                            <span class="tenant-role-pill">@role</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge @(member.MembershipStatus == "Active" ? "text-bg-success" : "text-bg-secondary")">
+                                            @member.MembershipStatus
+                                        </span>
+                                    </td>
+                                    <td>@(member.LastLoginAt?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "Never")</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                disabled="@member.IsOwner"
+                                                title="@(member.IsOwner ? "The Tenant Owner cannot be changed here." : "Edit membership")"
+                                                @onclick="() => OpenEdit(member)">
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+    </main>
+</div>
+
+@if (showEditor && snapshot is not null)
+{
+    <div class="tenant-modal-backdrop" @onclick="CloseEditor"></div>
+    <div class="tenant-modal" role="dialog" aria-modal="true">
+        <div class="tenant-modal-header">
+            <div>
+                <span class="tenant-security-eyebrow">SECURITY SETTINGS</span>
+                <h3>@(isCreating ? "Add tenant user" : "Edit tenant membership")</h3>
+            </div>
+            <button class="btn-close" @onclick="CloseEditor" aria-label="Close"></button>
+        </div>
+
+        @if (isCreating)
+        {
+            <EditForm Model="@createRequest" OnValidSubmit="SaveCreateAsync" FormName="CreateTenantUser">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First name</label>
+                        <InputText class="form-control" @bind-Value="createRequest.FirstName" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last name</label>
+                        <InputText class="form-control" @bind-Value="createRequest.LastName" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Email address</label>
+                        <InputText class="form-control" type="email" @bind-Value="createRequest.Email" />
+                        <div class="form-text">A generated temporary password is emailed to a new account.</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Branch</label>
+                        <select class="form-select"
+                                value="@(createRequest.BranchId?.ToString() ?? string.Empty)"
+                                @onchange="eventArgs => createRequest.BranchId = ParseBranch(eventArgs.Value?.ToString())">
+                            <option value="">Unassigned</option>
+                            @foreach (var branch in snapshot.Branches)
+                            {
+                                <option value="@branch.BranchId">@branch.BranchName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Tenant roles</label>
+                        <div class="tenant-role-grid">
+                            @foreach (var role in snapshot.Roles.Where(item => item.RoleCode != TenantRoleCodes.Owner))
+                            {
+                                <label class="tenant-role-choice">
+                                    <input type="checkbox"
+                                           checked="@createRequest.RoleCodes.Contains(role.RoleCode)"
+                                           @onchange="eventArgs => ToggleRole(createRequest.RoleCodes, role.RoleCode, (bool?)eventArgs.Value == true)" />
+                                    <span>
+                                        <strong>@role.RoleName</strong>
+                                        <small>@role.Description</small>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="tenant-modal-actions">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseEditor" disabled="@isSaving">Cancel</button>
+                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                        @(isSaving ? "Saving..." : "Save")
+                    </button>
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <EditForm Model="@updateRequest" OnValidSubmit="SaveUpdateAsync" FormName="UpdateTenantUser">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <strong>@editingMember?.FullName</strong>
+                    <div class="text-muted">@editingMember?.Email</div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Branch</label>
+                        <select class="form-select"
+                                value="@(updateRequest.BranchId?.ToString() ?? string.Empty)"
+                                @onchange="eventArgs => updateRequest.BranchId = ParseBranch(eventArgs.Value?.ToString())">
+                            <option value="">Unassigned</option>
+                            @foreach (var branch in snapshot.Branches)
+                            {
+                                <option value="@branch.BranchId">@branch.BranchName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Membership status</label>
+                        <InputSelect class="form-select" @bind-Value="updateRequest.MembershipStatus">
+                            <option value="Active">Active</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Removed">Removed</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Tenant roles</label>
+                        <div class="tenant-role-grid">
+                            @foreach (var role in snapshot.Roles.Where(item => item.RoleCode != TenantRoleCodes.Owner))
+                            {
+                                <label class="tenant-role-choice">
+                                    <input type="checkbox"
+                                           checked="@updateRequest.RoleCodes.Contains(role.RoleCode)"
+                                           @onchange="eventArgs => ToggleRole(updateRequest.RoleCodes, role.RoleCode, (bool?)eventArgs.Value == true)" />
+                                    <span>
+                                        <strong>@role.RoleName</strong>
+                                        <small>@role.Description</small>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="tenant-modal-actions">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseEditor" disabled="@isSaving">Cancel</button>
+                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                        @(isSaving ? "Saving..." : "Save")
+                    </button>
+                </div>
+            </EditForm>
+        }
+    </div>
+}
+
+@code {
+    [Inject] private ViabilityIQ.Application.Interfaces.ITenantUserManagementService UserManagementService { get; set; } = default!;
+
+    private TenantUserManagementSnapshot? snapshot;
+    private CreateTenantUserRequest createRequest = new();
+    private UpdateTenantMemberRequest updateRequest = new();
+    private TenantMemberRow? editingMember;
+    private bool isLoading = true;
+    private bool isSaving;
+    private bool showEditor;
+    private bool isCreating;
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            snapshot = await UserManagementService.GetSnapshotAsync();
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            errorMessage = exception.Message;
+        }
+        catch (Exception exception)
+        {
+            errorMessage = $"Tenant users could not be loaded: {exception.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OpenCreate()
+    {
+        createRequest = new CreateTenantUserRequest
+        {
+            RoleCodes = [TenantRoleCodes.Viewer]
+        };
+        isCreating = true;
+        showEditor = true;
+    }
+
+    private void OpenEdit(TenantMemberRow member)
+    {
+        editingMember = member;
+        updateRequest = new UpdateTenantMemberRequest
+        {
+            MembershipId = member.MembershipId,
+            BranchId = member.BranchId,
+            MembershipStatus = member.MembershipStatus,
+            RoleCodes = member.RoleCodes.ToHashSet(StringComparer.OrdinalIgnoreCase)
+        };
+        isCreating = false;
+        showEditor = true;
+    }
+
+    private void CloseEditor()
+    {
+        if (!isSaving)
+            showEditor = false;
+    }
+
+    private async Task SaveCreateAsync()
+    {
+        await SaveAsync(() => UserManagementService.CreateMemberAsync(createRequest));
+    }
+
+    private async Task SaveUpdateAsync()
+    {
+        await SaveAsync(() => UserManagementService.UpdateMemberAsync(updateRequest));
+    }
+
+    private async Task SaveAsync(Func<Task<TenantUserOperationResult>> operation)
+    {
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+        try
+        {
+            var result = await operation();
+            if (!result.Succeeded)
+            {
+                errorMessage = result.Message;
+                return;
+            }
+
+            successMessage = result.Message;
+            showEditor = false;
+            await LoadAsync();
+            successMessage = result.Message;
+        }
+        catch (Exception exception)
+        {
+            errorMessage = $"The tenant membership could not be saved: {exception.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private static long? ParseBranch(string? value) =>
+        long.TryParse(value, out var branchId) && branchId > 0 ? branchId : null;
+
+    private static void ToggleRole(HashSet<string> roles, string roleCode, bool selected)
+    {
+        if (selected)
+            roles.Add(roleCode);
+        else
+            roles.Remove(roleCode);
+    }
+}

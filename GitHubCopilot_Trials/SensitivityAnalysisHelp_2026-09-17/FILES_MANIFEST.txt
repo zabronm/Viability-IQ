@@ -1,0 +1,15 @@
+SENSITIVITY ANALYSIS HELP — FILES MANIFEST
+Generated: 2026-09-17
+
+EDITABLE SOURCE
+AssessmentAssumptionsHelp.html
+
+DEPLOYMENT FILE
+Files\ViabilityIQ.Web\wwwroot\documents\AssessmentAssumptionsHelp.pdf
+
+PACKAGE DOCUMENTATION
+DEPLOYMENT_INSTRUCTIONS.txt
+FILES_MANIFEST.txt
+
+The PDF replaces the existing help document while retaining the complete
+Assumptions and Baseline guidance and adding Chapter 8: Using Sensitivity Analysis.

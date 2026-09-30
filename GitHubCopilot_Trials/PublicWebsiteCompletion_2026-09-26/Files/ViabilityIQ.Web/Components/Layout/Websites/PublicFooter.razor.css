@@ -1,0 +1,37 @@
+.viq-site-footer { color: #bcccdc; background: #102a43; }
+.viq-footer-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.35fr;
+    gap: 45px;
+    width: min(1180px, calc(100% - 40px));
+    margin-inline: auto;
+    padding: 58px 0 44px;
+}
+.viq-brand { display: inline-flex; text-decoration: none; }
+.viq-brand img { display: block; width: auto; height: 50px; object-fit: contain; }
+.viq-footer-brand p { max-width: 400px; margin: 18px 0 0; color: #9fb3c8; font-size: .8rem; line-height: 1.75; }
+.viq-footer-column { display: flex; flex-direction: column; gap: 9px; }
+.viq-footer-column h4 { margin: 0 0 8px; color: #fff; font-size: .82rem; }
+.viq-footer-column a { color: #9fb3c8; font-size: .76rem; text-decoration: none; }
+.viq-footer-column a:hover { color: #68d6bc; }
+.viq-footer-column address { margin: 0; color: #9fb3c8; font-size: .76rem; font-style: normal; line-height: 1.7; }
+.viq-footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    width: min(1180px, calc(100% - 40px));
+    margin-inline: auto;
+    padding: 18px 0 23px;
+    border-top: 1px solid rgba(255,255,255,.09);
+    color: #829ab1;
+    font-size: .7rem;
+}
+
+@media (max-width: 800px) {
+    .viq-footer-container { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 520px) {
+    .viq-footer-container { grid-template-columns: 1fr; width: calc(100% - 28px); gap: 28px; }
+    .viq-footer-bottom { align-items: flex-start; flex-direction: column; width: calc(100% - 28px); }
+}

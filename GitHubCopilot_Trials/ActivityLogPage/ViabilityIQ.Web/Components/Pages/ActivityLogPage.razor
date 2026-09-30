@@ -1,0 +1,257 @@
+@page "/activity-log"
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="p-0 position-relative">
+    <PageHeading _pageTitle="Activity Log"
+                 CurrentPage="PageType.ActivityLog"
+                 _pageHeading="My Activity Log" />
+
+    <main class="activity-page mt-2 mb-4">
+        <header class="activity-page-header">
+            <div>
+                <span class="activity-eyebrow">Audit history</span>
+                <h2>Activity Log</h2>
+                <p>A read-only record of actions performed in your workspace.</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn btn-sm btn-outline-success" @onclick="PrintPageAsync">
+                    <i class="bi bi-printer me-1"></i>Print
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-success"
+                        disabled="@(Result.Items.Count == 0)"
+                        @onclick="ExportCurrentPageAsync">
+                    <i class="bi bi-filetype-csv me-1"></i>Export current page
+                </button>
+            </div>
+        </header>
+
+        <section class="activity-metrics" aria-label="Activity summary">
+            <article>
+                <i class="bi bi-list-check"></i>
+                <div><strong>@Result.TotalCount</strong><span>Total activities</span></div>
+            </article>
+            <article>
+                <i class="bi bi-calendar-day"></i>
+                <div><strong>@Result.TodayCount</strong><span>Today</span></div>
+            </article>
+            <article>
+                <i class="bi bi-calendar-week"></i>
+                <div><strong>@Result.LastSevenDaysCount</strong><span>Last 7 days</span></div>
+            </article>
+            <article>
+                <i class="bi bi-person-check"></i>
+                <div><strong>@Result.ActorCount</strong><span>Actors</span></div>
+            </article>
+        </section>
+
+        <section class="activity-filter-panel" aria-label="Activity filters">
+            <div class="filter-field search-field">
+                <label for="activity-search">Search</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input id="activity-search"
+                           class="form-control"
+                           placeholder="Actor, record, assessment, module or remarks"
+                           @bind="SearchText"
+                           @onkeydown="HandleSearchKeyDownAsync" />
+                </div>
+            </div>
+            <div class="filter-field">
+                <label for="activity-action">Action</label>
+                <select id="activity-action" class="form-select form-select-sm" @bind="SelectedAction">
+                    <option value="">All actions</option>
+                    @foreach (var action in ActionOptions)
+                    {
+                        <option value="@action">@action</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-field">
+                <label for="activity-entity">Entity</label>
+                <select id="activity-entity" class="form-select form-select-sm" @bind="SelectedEntityType">
+                    <option value="">All entities</option>
+                    @foreach (var entityType in EntityTypeOptions)
+                    {
+                        <option value="@entityType">@FormatEnumText(entityType)</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-field">
+                <label for="activity-from">From</label>
+                <input id="activity-from" type="date" class="form-control form-control-sm" @bind="FromDate" />
+            </div>
+            <div class="filter-field">
+                <label for="activity-to">To</label>
+                <input id="activity-to" type="date" class="form-control form-control-sm" @bind="ToDate" />
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="btn btn-sm btn-success" @onclick="ApplyFiltersAsync">
+                    <i class="bi bi-funnel me-1"></i>Apply
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ResetFiltersAsync">
+                    Reset
+                </button>
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="alert alert-danger activity-error" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>@ErrorMessage</span>
+                <button type="button" class="btn btn-sm btn-outline-danger ms-auto" @onclick="LoadActivitiesAsync">
+                    Retry
+                </button>
+            </div>
+        }
+
+        <section class="activity-table-card" aria-busy="@IsLoading">
+            @if (IsLoading)
+            {
+                <div class="activity-loading" role="status">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    Loading activity history...
+                </div>
+            }
+            else if (Result.Items.Count == 0 && string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="activity-empty">
+                    <i class="bi bi-journal-x"></i>
+                    <strong>No matching activities</strong>
+                    <span>Change the filters or return later after workspace actions are recorded.</span>
+                </div>
+            }
+            else if (Result.Items.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="activity-table">
+                        <thead>
+                            <tr>
+                                <th class="expand-column"><span class="visually-hidden">Details</span></th>
+                                <th>Date and time</th>
+                                <th>Actor</th>
+                                <th>Action</th>
+                                <th>Affected record</th>
+                                <th>Assessment</th>
+                                <th>Module / Page</th>
+                                <th><span class="visually-hidden">Open</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var activity in Result.Items)
+                            {
+                                <tr class="activity-row @(ExpandedActivityId == activity.Id ? "expanded" : null)">
+                                    <td class="expand-column">
+                                        <button type="button"
+                                                class="detail-toggle"
+                                                title="Show activity details"
+                                                aria-expanded="@(ExpandedActivityId == activity.Id)"
+                                                @onclick="() => ToggleDetails(activity.Id)">
+                                            <i class="bi @(ExpandedActivityId == activity.Id ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                                        </button>
+                                    </td>
+                                    <td class="date-cell">
+                                        <span>@activity.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</span>
+                                        <small>@activity.CreatedDate.ToLocalTime().ToString("HH:mm:ss")</small>
+                                    </td>
+                                    <td>@DisplayText(activity.ActorName, "System")</td>
+                                    <td>
+                                        <span class="action-badge @GetActionClass(activity.ActivityAction)">
+                                            @FormatAction(activity.ActivityAction)
+                                        </span>
+                                    </td>
+                                    <td class="entity-cell">
+                                        <span>@DisplayText(activity.EntityName, "Unnamed record")</span>
+                                        <small>@FormatEnumText(activity.EntityType) @FormatEntityId(activity.EntityId)</small>
+                                    </td>
+                                    <td>@DisplayText(activity.AssessmentName, "—")</td>
+                                    <td class="module-cell">
+                                        <span>@DisplayText(activity.Module, "—")</span>
+                                        <small>@DisplayText(activity.Page, string.Empty)</small>
+                                    </td>
+                                    <td class="open-column">
+                                        @if (!string.IsNullOrWhiteSpace(activity.NavigationUrl))
+                                        {
+                                            <button type="button"
+                                                    class="open-related-button"
+                                                    title="Open related assessment"
+                                                    @onclick="() => OpenRelatedActivity(activity.NavigationUrl)">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                                @if (ExpandedActivityId == activity.Id)
+                                {
+                                    <tr class="activity-detail-row">
+                                        <td colspan="8">
+                                            <div class="activity-detail-grid">
+                                                <div class="detail-remarks">
+                                                    <span class="detail-label">Description</span>
+                                                    <p>@DisplayText(activity.Remarks, "No description was recorded.")</p>
+                                                </div>
+                                                <div>
+                                                    <span class="detail-label">IP address</span>
+                                                    <span>@DisplayText(activity.IpAddress, "Not recorded")</span>
+                                                </div>
+                                                <div>
+                                                    <span class="detail-label">Correlation ID</span>
+                                                    <span class="technical-value">@DisplayText(activity.CorrelationId, "Not recorded")</span>
+                                                </div>
+                                                <div>
+                                                    <span class="detail-label">User agent</span>
+                                                    <span>@DisplayText(activity.UserAgent, "Not recorded")</span>
+                                                </div>
+                                                @if (!string.IsNullOrWhiteSpace(activity.MetadataJson))
+                                                {
+                                                    <div class="detail-metadata">
+                                                        <span class="detail-label">Metadata</span>
+                                                        <pre>@activity.MetadataJson</pre>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <footer class="activity-pagination">
+                <span>Showing @FirstVisibleRecord–@LastVisibleRecord of @Result.FilteredCount records</span>
+                <div class="page-controls">
+                    <label for="activity-page-size">Rows</label>
+                    <select id="activity-page-size"
+                            class="form-select form-select-sm"
+                            value="@PageSize"
+                            @onchange="ChangePageSizeAsync">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            disabled="@(PageNumber <= 1 || IsLoading)"
+                            @onclick="PreviousPageAsync">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </button>
+                    <span>Page @PageNumber of @TotalPages</span>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            disabled="@(PageNumber >= TotalPages || IsLoading)"
+                            @onclick="NextPageAsync">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </footer>
+        </section>
+    </main>
+
+    <footer class="py-4 bg-light mt-auto">
+        <BFooter />
+    </footer>
+</div>

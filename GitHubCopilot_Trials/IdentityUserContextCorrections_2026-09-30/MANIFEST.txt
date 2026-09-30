@@ -1,0 +1,88 @@
+﻿VIABILITYIQ IDENTITY USER CONTEXT CORRECTIONS - MANIFEST
+Package date: 2026-09-30
+
+SUMMARY
+-------
+- Corrects previous-login and last-logout timestamp tracking.
+- Resolves the Home branch from the active tenant membership.
+- Loads and persists all editable My Profile fields.
+- Displays ranked active-tenant roles in the profile dropdown.
+- Adds an idempotent timestamp database migration.
+
+VALIDATION
+----------
+- Cumulative isolated solution build succeeded.
+- Build errors: 0.
+- Tenant branch source scan: passed.
+- Timestamp tracking scan: passed.
+- Profile load/save scan: passed.
+- Tenant role ranking scan: passed.
+- Git conflict-marker scan: passed.
+- Credential-pattern scan: passed.
+
+FILES
+-----
+Path
+  Size (bytes)
+  SHA-256
+
+DEPLOYMENT_INSTRUCTIONS.txt
+  4 285
+  58BA6502FA569E38CC8171BD619E0B6CC00DA5DABD78690135C78D6562A69649
+
+Files\DatabaseScripts\2026-09-30_IdentitySessionTimestamps.sql
+  403
+  57CE4C1360C0223F147C258AE38781CF3A8F969807BA7CA232F7F2D1221309DF
+
+Files\ViabilityIQ.Database\Interfaces\IdentityInterfaces\IAuthenticationService.cs
+  1 259
+  414998E7C52421276939279A161E8395C4280215E08CE4FB248A79CAD3F4F98A
+
+Files\ViabilityIQ.Database\ServicesMisc\AuthenticationService.cs
+  29 311
+  44FAABE3D07BABB32CDB23379CD8C965AD9CF5BE847B8915A89FE6A342DC4CC8
+
+Files\ViabilityIQ.Infrastructure\Repositories\TenantAuthorizationService.cs
+  8 962
+  242AF3398813D23CE11326107F2AD5BB488A733DADEC0A9451450C55F18C66C6
+
+Files\ViabilityIQ.Infrastructure\Repositories\UserRepository.cs
+  5 545
+  D48EC0F7B469F3D89263E693128BFBCC45D52C25A6A471D0BFB74FBABC154D5B
+
+Files\ViabilityIQ.Shared\DataModels\SecurityDataModels\ApplicationUser.cs
+  1 319
+  B644727FE2BD06DD77CD3653916572E686684A5AEB2434BAC9C6690150F68275
+
+Files\ViabilityIQ.Shared\DataModels\SecurityDataModels\TenantAuthorizationModels.cs
+  1 095
+  B60D3A17B0E2AE00992846BD51D1FD3984CF061E86809ABCF009776A731F443D
+
+Files\ViabilityIQ.Web\Components\Pages\HomePage.razor
+  3 635
+  0E5E09BD19DF09A91FD7761EE60C247CD9EF3B4DE3ECAD4D17965C3704E84715
+
+Files\ViabilityIQ.Web\Components\Pages\HomePage.razor.cs
+  18 101
+  03F53E328B08012E2C8877F50ACB7D6ED15287BBB0D8A2687033B2506A4BCD6E
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\ProfileDropdownComponent.razor
+  15 014
+  8247454256F28C986E74EEB7C195EDE47447C17B3E48946A781D898C29DE046A
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\ProfileDropdownComponent.razor.css
+  4 082
+  0FED8ED8A890CED6CB1D61BC6BCC8F898889DF0954079032827C5970B88935FD
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\Register.razor
+  27 616
+  B37F662EE01F07F05849C8B3C60E5A8323E4A6DB013996CE8819A8751401E6A5
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\Register.razor.cs
+  8 795
+  5514E5BBA240869EE589A77CBD7188A18744A208FEE24E8FDB0ECEC98391EC67
+
+Files\ViabilityIQ.Web\Controllers\AuthController.cs
+  11 063
+  7A70856882EC23A7BE60D1A0E80D0AE82C3F971761BA71F6E7B44D68BC2091C2
+

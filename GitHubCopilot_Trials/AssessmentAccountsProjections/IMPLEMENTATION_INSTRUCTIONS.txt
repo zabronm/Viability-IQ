@@ -1,0 +1,354 @@
+ASSESSMENT DEBTORS / CREDITORS PROJECTION WORKSPACE
+==================================================
+
+PURPOSE
+-------
+This package adds a live-data, three-tab working-capital page:
+
+1. Debtors
+2. Creditors
+3. Consolidated Outlook, followed by CashflowMainPagesComponent
+
+No production file has been replaced. All implementation files are under:
+
+    GitHubCopilot_Trials\AssessmentAccountsProjections\Files\
+
+
+DATA BASIS CONFIRMED FOR THIS IMPLEMENTATION
+--------------------------------------------
+Opening debtors:
+    Sum of AssessmentSalesCategory.OpeningDebtorsAmount for active categories.
+
+Opening creditors:
+    Sum of AssessmentSalesCategory.OpeningCreditorsAmount for active categories.
+
+New debtors:
+    Active AssessmentSales monthly values.
+
+New creditors:
+    Active AssessmentStock monthly values.
+
+Collection/payment timing:
+    Active DebtorsCreditorsProfile percentage fields:
+
+    Debtors:
+        Debtors_30
+        Debtors_60
+        Debtors_90
+        Debtors_120
+        Debtors_120Plus
+
+    Creditors:
+        Creditors_30
+        Creditors_60
+        Creditors_90
+        Creditors_120
+        Creditors_120Plus
+
+    Debtors_30 and Creditors_30 are not trusted as the source of the first
+    percentage. The settings component displays 0-30 as an automatically
+    calculated remainder. The projection service mirrors it:
+
+        Debtors 0-30 =
+            100 - Debtors_60 - Debtors_90 - Debtors_120 - Debtors_120Plus
+
+        Creditors 0-30 =
+            100 - Creditors_60 - Creditors_90 - Creditors_120
+            - Creditors_120Plus
+
+    The DebtorsValue_* and CreditorsValue_* fields are not substituted for the
+    requested percentage profiles.
+
+Profile lookup:
+    The settings component loads tblAssessmentDebtorsCreditorsProfile using
+    AssessmentId only. The projection service now follows that rule and does not
+    require Active=true. If duplicate rows exist, it prefers Active=true and
+    then the most recently modified/created row.
+
+VAT:
+    When DebtorsCreditorsProfile.IncludeVAT is true, each sales or stock row's
+    monthly values are multiplied by TotalWithVAT / TotalNoVAT. This preserves
+    each row's actual annual VAT ratio instead of hard-coding a tax rate.
+
+
+STEP 1 - VERIFY THE TWO CATEGORY PROPERTIES
+-------------------------------------------
+Your local AssessmentSalesCategory must contain these exact decimal properties:
+
+    public decimal OpeningDebtorsAmount { get; set; }
+    public decimal OpeningCreditorsAmount { get; set; }
+
+The remote repository version inspected by Copilot did not yet contain them.
+You confirmed that these are the correct property names in your current local
+development version.
+
+If the fields are not already present in both the C# model and the SQL table,
+stop and add a proper database migration before copying the projection service.
+Do not add C# properties without matching database columns.
+
+
+STEP 2 - COPY THE FILES
+-----------------------
+Copy each package file to the same relative production path.
+
+FROM:
+    Files\ViabilityIQ.Shared\FinancialModels\AccountsProjectionModels.cs
+TO:
+    ViabilityIQ.Shared\FinancialModels\AccountsProjectionModels.cs
+
+FROM:
+    Files\ViabilityIQ.Database\Interfaces\IAccountsProjectionService.cs
+TO:
+    ViabilityIQ.Database\Interfaces\IAccountsProjectionService.cs
+
+FROM:
+    Files\ViabilityIQ.Database\FinancialCalculations\AccountsProjectionService.cs
+TO:
+    ViabilityIQ.Database\FinancialCalculations\AccountsProjectionService.cs
+
+Copy all files from:
+    Files\ViabilityIQ.Web\Components\Pages_Assessments\
+to:
+    ViabilityIQ.Web\Components\Pages_Assessments\
+
+The web files are:
+
+    AssessmentAccs_Page.razor
+    AssessmentAccs_Page.razor.cs
+    AssessmentAccs_Page.razor.css
+
+    AssessmentAccs_DebtorsPage.razor
+    AssessmentAccs_DebtorsPage.razor.cs
+    AssessmentAccs_DebtorsPage.razor.css
+
+    AssessmentAccs_CreditorsPage.razor
+    AssessmentAccs_CreditorsPage.razor.cs
+    AssessmentAccs_CreditorsPage.razor.css
+
+    AssessmentAccs_ConsolidatedPage.razor
+    AssessmentAccs_ConsolidatedPage.razor.cs
+    AssessmentAccs_ConsolidatedPage.razor.css
+
+    AccountsProjectionAlerts.razor
+    AccountsProjectionAlerts.razor.css
+
+
+STEP 3 - REGISTER THE CALCULATION SERVICE
+-----------------------------------------
+In ViabilityIQ.Web\Program.cs, add this registration next to the other scoped
+financial engines/services:
+
+    builder.Services.AddScoped<
+        ViabilityIQ.Application.Interfaces.IAccountsProjectionService,
+        ViabilityIQ.Application.FinancialCalculations.AccountsProjectionService>();
+
+The fully qualified names avoid requiring additional using statements.
+
+
+STEP 4 - UPDATE NAVIGATION
+--------------------------
+The page requires the assessment ID in the URL so refreshes and new browser
+circuits do not depend on in-memory session state.
+
+Primary route:
+
+    /assessment/accounts/{AssessmentId}
+
+Compatibility route:
+
+    /assessment/debtors-creditors/{AssessmentId}
+
+Change the relevant menu or assessment action to construct one of these URLs.
+Example:
+
+    NavigationManager.NavigateTo($"/assessment/accounts/{assessmentId}");
+
+Do not navigate to the old parameterless route:
+
+    /assessment/debtors-creditors/
+
+The existing unfinished AssessmentDebtorsCreditorsPage can remain temporarily,
+but remove its old navigation link after the new page has been accepted.
+
+For MainLayout_Assessment specifically, apply:
+
+    MainLayout_Assessment_ROUTE_CHANGE.patch
+
+Detailed manual instructions are also available in:
+
+    MAIN_LAYOUT_INSTRUCTIONS.txt
+
+
+CALCULATION RULES
+-----------------
+Profile timing:
+
+    0-30 days       delay 0 months
+    31-60 days      delay 1 month
+    61-90 days      delay 2 months
+    91-120 days     delay 3 months
+    120+ days       delay 4 months
+
+Example:
+If Month 1 sales are 100,000 and the debtor profile is 50% / 30% / 20%:
+
+    Month 1 collections from those sales = 50,000
+    Month 2 collections from those sales = 30,000
+    Month 3 collections from those sales = 20,000
+
+If your accounting policy treats "30 days" as collection in the following
+month, change the delays in AccountsProjectionService.CreateBuckets from:
+
+    0, 1, 2, 3, 4
+
+to:
+
+    1, 2, 3, 4, 5
+
+Debtor formula per month:
+
+    Closing debtors =
+        Opening debtors
+        + credit sales
+        - collections
+        - projected bad debt
+
+Creditor formula per month:
+
+    Closing creditors =
+        Opening creditors
+        + AssessmentStock purchases
+        - supplier payments
+
+Consolidated cash movement:
+
+    Debtor collections - supplier payments
+
+Amounts scheduled after Month 12 are not lost. They remain in the Month 12
+closing debtor or creditor balance.
+
+Bad debt:
+The configured BadDebtPercentage applies to new projected sales. It does not
+write off the brought-forward opening debtor balance. If opening debtors require
+a separate impairment, add a dedicated opening-balance impairment input rather
+than silently applying the new-sales assumption.
+
+Invalid profile totals:
+The saved percentages should total 100% independently for debtors and creditors.
+If a non-zero total differs from 100%, the UI raises a warning and the service
+normalizes those percentages to 100% for calculation. A zero total produces no
+schedule and raises a critical alert.
+
+
+ALERT RULES INCLUDED
+--------------------
+- No active debtor/creditor profile
+- No active sales categories
+- No monthly sales
+- No monthly AssessmentStock purchases
+- Debtor percentages do not total 100%
+- Creditor percentages do not total 100%
+- Bad debt at or above 5%
+- Bad debt at or above 10%
+- Closing creditors exceed closing debtors in at least 6 months
+- Healthy/information state when no warning applies
+
+
+IMPORTANT CASHFLOW INTERVENTION
+-------------------------------
+The Consolidated Outlook displays CashflowMainPagesComponent at the bottom as
+requested.
+
+However, the existing CashflowEngine currently uses monthly sales as immediate
+SalesRevenue and does not consume debtor collections or creditor payments. This
+means the existing cashflow component is visually consolidated on the new page,
+but its internal cash receipts/payment calculations remain independent.
+
+For accounting correctness, do not simply add collections on top of existing
+SalesRevenue, because that would double count sales cash.
+
+The correct later refactor is:
+
+1. Inject IAccountsProjectionService into CashflowEngine.
+2. Call CalculateAsync(assessmentId) once.
+3. Use monthly DebtorCollections as operating cash receipts instead of treating
+   all monthly credit sales as cash.
+4. Use monthly CreditorPayments as stock-purchase cash outflows.
+5. Ensure AssessmentStock purchases are not also included elsewhere in cash
+   outflows.
+6. Reconcile the new cashflow closing balance to the Consolidated Outlook.
+
+This has deliberately not been forced into the package because cash/credit sales
+classification is not currently present on AssessmentSales. Until that business
+rule is defined, replacing all SalesRevenue with collections could incorrectly
+defer cash sales.
+
+
+UI CONTENT
+----------
+Parent page:
+- Uses PageHeading_Assessment.
+- Places Debtors, Creditors and Consolidated Outlook tabs immediately below the
+  page heading.
+- Uses the same tab markup, border, active underline, hover behavior, spacing,
+  responsive behavior and print behavior as AssessmentAssetsPage.
+
+All three tabs:
+- Render their own AccountsProjectionAlerts instance immediately inside the tab.
+- Use explicit Razor interpolation for M1, M2, M3 ... M12 in tables, chart axes
+  and chart tooltips:
+
+      @($"M{month.MonthNumber}")
+
+  Do not write M@month.MonthNumber because Razor renders that text literally in
+  this markup context.
+
+Debtors tab:
+- Opening debtors, annual sales, collections, closing debtors and DSO KPIs
+- Profile percentages and assumptions
+- Collections versus closing-debtors chart
+- 12-month movement matrix
+- Sales-category distribution table
+
+Creditors tab:
+- Opening creditors, stock purchases, payments, closing creditors and payment
+  coverage KPIs
+- Profile percentages
+- Payments versus closing-creditors chart
+- 12-month movement matrix
+- Purchase-category distribution table
+
+Consolidated Outlook:
+- Receipts, supplier payments, net cash movement, closing debtors and net
+  working capital KPIs
+- Receipts-versus-payments chart
+- Monthly consolidated table
+- Existing CashflowMainPagesComponent at the bottom
+
+The charts use CSS only. No JavaScript file or Chart.js lifecycle management is
+required.
+
+
+ACCEPTANCE CHECKS
+-----------------
+1. Compile the full solution.
+2. Open an assessment with known opening debtor/creditor balances.
+3. Confirm both profile percentage totals equal 100%.
+4. Confirm Month 1 opening balances equal the sum of active sales-category
+   opening balances.
+5. Confirm annual sales equal the active AssessmentSales monthly values.
+6. Confirm annual purchases equal the active AssessmentStock monthly values.
+7. Manually trace one sales value through its debtor timing buckets.
+8. Manually trace one stock value through its creditor timing buckets.
+9. Confirm Month N closing equals Month N+1 opening.
+10. Confirm delayed Month 12 amounts remain in closing balances.
+11. Confirm VAT-inclusive mode matches the source rows' annual VAT totals.
+12. Refresh the browser and confirm the assessment ID remains in the URL.
+
+
+FILES THAT SHOULD NOT BE COPIED FROM OLDER PROTOTYPES
+-----------------------------------------------------
+Do not use the hard-coded rows, Sept-99 timeline, sample invoices, eval-based
+chart detection, or locally mutated profile values from the unfinished
+AssessmentDebtorsCreditorsPage. This implementation obtains all displayed
+financial values from repositories through IAccountsProjectionService.

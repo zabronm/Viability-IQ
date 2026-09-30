@@ -1,0 +1,281 @@
+MASTERDATASERVICE ACTIVITY-RECORDING CHANGES
+============================================
+
+MasterDataService is a 550-line mixed read/write service. Apply the focused
+changes below to the existing file rather than replacing unrelated query code.
+
+
+1. ADD THESE USING DIRECTIVES
+-----------------------------
+
+using ViabilityIQ.Shared.SharedModels;
+
+The file already imports ViabilityIQ.Application.Interfaces.
+
+
+2. ADD THE WRITER FIELD
+-----------------------
+
+Immediately after:
+
+    private readonly ISessionService _sessionService;
+
+add:
+
+    private readonly IActivityLogWriter _activityLogWriter;
+
+
+3. REPLACE THE CONSTRUCTOR
+--------------------------
+
+public MasterDataService(
+    IDbConnectionFactory connectionFactory,
+    ISessionService sessionService,
+    IActivityLogWriter activityLogWriter)
+{
+    _dbConnectionFactory = connectionFactory;
+    _sessionService = sessionService;
+    _activityLogWriter = activityLogWriter;
+}
+
+
+4. REPLACE SaveBankAsync
+------------------------
+
+public async Task<bool> SaveBankAsync(Bank bank)
+{
+    ArgumentNullException.ThrowIfNull(bank);
+
+    using var connection = _dbConnectionFactory.CreateConnection();
+    connection.Open();
+    using var transaction = connection.BeginTransaction();
+
+    try
+    {
+        var isCreate = bank.BankId == 0;
+        long entityId;
+        bool saved;
+
+        if (isCreate)
+        {
+            bank.CreatedDate = DateTime.UtcNow;
+            bank.CreatedBy = _sessionService.UserId;
+            bank.Active = true;
+            entityId = await connection.InsertAsync(bank, transaction);
+            saved = entityId > 0;
+        }
+        else
+        {
+            bank.ModifiedDate = DateTime.UtcNow;
+            bank.ModifiedBy = _sessionService.UserId;
+            entityId = bank.BankId;
+            saved = await connection.UpdateAsync(bank, transaction);
+        }
+
+        if (!saved)
+        {
+            transaction.Rollback();
+            return false;
+        }
+
+        await _activityLogWriter.RecordAsync(
+            new ActivityLogWriteRequest
+            {
+                Action = isCreate ? ActivityAction.Create : ActivityAction.Update,
+                EntityType = nameof(Bank),
+                EntityId = entityId,
+                EntityName = bank.BankName,
+                Module = "Master Data",
+                Page = _sessionService.CurrentPage,
+                Remarks = $"{(isCreate ? "Created" : "Updated")} bank record."
+            },
+            connection,
+            transaction);
+
+        transaction.Commit();
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+
+
+5. REPLACE DeleteBankAsync
+--------------------------
+
+public async Task<bool> DeleteBankAsync(Bank bank)
+{
+    ArgumentNullException.ThrowIfNull(bank);
+
+    using var connection = _dbConnectionFactory.CreateConnection();
+    connection.Open();
+    using var transaction = connection.BeginTransaction();
+
+    try
+    {
+        var deleted = await connection.DeleteAsync(bank, transaction);
+        if (!deleted)
+        {
+            transaction.Rollback();
+            return false;
+        }
+
+        await _activityLogWriter.RecordAsync(
+            new ActivityLogWriteRequest
+            {
+                Action = ActivityAction.Delete,
+                EntityType = nameof(Bank),
+                EntityId = bank.BankId,
+                EntityName = bank.BankName,
+                Module = "Master Data",
+                Page = _sessionService.CurrentPage,
+                Remarks = "Deleted bank record."
+            },
+            connection,
+            transaction);
+
+        transaction.Commit();
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+
+
+6. REPLACE SaveLoanTypeAsync
+----------------------------
+
+public async Task<bool> SaveLoanTypeAsync(LoanType loanType)
+{
+    ArgumentNullException.ThrowIfNull(loanType);
+
+    using var connection = _dbConnectionFactory.CreateConnection();
+    connection.Open();
+    using var transaction = connection.BeginTransaction();
+
+    try
+    {
+        var isCreate = loanType.LoanTypeId == 0;
+        long entityId;
+        bool saved;
+
+        if (isCreate)
+        {
+            loanType.CreatedDate = DateTime.UtcNow;
+            loanType.CreatedBy = _sessionService.UserId;
+            loanType.Active = true;
+            entityId = await connection.InsertAsync(loanType, transaction);
+            saved = entityId > 0;
+        }
+        else
+        {
+            loanType.ModifiedDate = DateTime.UtcNow;
+            loanType.ModifiedBy = _sessionService.UserId;
+            entityId = loanType.LoanTypeId;
+            saved = await connection.UpdateAsync(loanType, transaction);
+        }
+
+        if (!saved)
+        {
+            transaction.Rollback();
+            return false;
+        }
+
+        await _activityLogWriter.RecordAsync(
+            new ActivityLogWriteRequest
+            {
+                Action = isCreate ? ActivityAction.Create : ActivityAction.Update,
+                EntityType = nameof(LoanType),
+                EntityId = entityId,
+                EntityName = loanType.LoanTypeName,
+                Module = "Master Data",
+                Page = _sessionService.CurrentPage,
+                Remarks = $"{(isCreate ? "Created" : "Updated")} loan type record."
+            },
+            connection,
+            transaction);
+
+        transaction.Commit();
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+
+
+7. REPLACE DeleteLoanTypeAsync
+------------------------------
+
+public async Task<bool> DeleteLoanTypeAsync(LoanType loanType)
+{
+    ArgumentNullException.ThrowIfNull(loanType);
+
+    using var connection = _dbConnectionFactory.CreateConnection();
+    connection.Open();
+    using var transaction = connection.BeginTransaction();
+
+    try
+    {
+        var deleted = await connection.DeleteAsync(loanType, transaction);
+        if (!deleted)
+        {
+            transaction.Rollback();
+            return false;
+        }
+
+        await _activityLogWriter.RecordAsync(
+            new ActivityLogWriteRequest
+            {
+                Action = ActivityAction.Delete,
+                EntityType = nameof(LoanType),
+                EntityId = loanType.LoanTypeId,
+                EntityName = loanType.LoanTypeName,
+                Module = "Master Data",
+                Page = _sessionService.CurrentPage,
+                Remarks = "Deleted loan type record."
+            },
+            connection,
+            transaction);
+
+        transaction.Commit();
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+
+
+8. DO NOT AUTO-LOG GENERIC SQL METHODS
+--------------------------------------
+
+Do not add automatic logging to ExecuteAsync, ExecuteCommandAsync or
+UpdateFieldAsync. Raw SQL does not reliably describe:
+
+- the logical entity;
+- its identifier or display name;
+- whether one command changed multiple records;
+- whether the command contains sensitive values.
+
+Where those methods perform an important business action, either migrate that
+operation to IGenericDataRepository<T>, or add a purpose-specific service method
+that supplies an ActivityLogWriteRequest and records it in the same transaction.
+
+
+9. AVOID DUPLICATE EVENTS
+-------------------------
+
+Do not call both MasterDataService.SaveBankAsync and
+IGenericDataRepository<Bank>.SaveAsync for one user operation. Each path records
+its own event, so using both would create two activity rows.

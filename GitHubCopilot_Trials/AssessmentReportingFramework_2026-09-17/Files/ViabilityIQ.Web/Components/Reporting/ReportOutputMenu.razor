@@ -1,0 +1,45 @@
+@namespace ViabilityIQ.Web.Components.Reporting
+
+<div class="dropdown report-output-menu">
+    <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+            id="@MenuId" data-bs-toggle="dropdown" aria-expanded="false"
+            disabled="@(PdfLoading || ExcelLoading || EmailLoading)">
+        <i class="bi bi-box-arrow-up-right me-1"></i> Output
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="@MenuId">
+        <li>
+            <button class="dropdown-item" disabled="@(!PdfEnabled || PdfLoading)" @onclick="OnPdf">
+                <i class="bi bi-file-earmark-pdf me-2"></i>
+                @(PdfLoading ? "Opening preview…" : "Export to PDF")
+            </button>
+        </li>
+        <li>
+            <button class="dropdown-item" disabled="@(!ExcelEnabled || ExcelLoading)" @onclick="OnExcel">
+                <i class="bi bi-file-earmark-excel me-2"></i>
+                @(ExcelLoading ? "Building workbook…" : "Export Excel (.xlsx)")
+            </button>
+        </li>
+        <li><hr class="dropdown-divider" /></li>
+        <li>
+            <button class="dropdown-item" disabled="@(!EmailEnabled || EmailLoading)" @onclick="OnEmail">
+                <i class="bi bi-envelope me-2"></i>
+                @(EmailLoading ? "Sending…" : "Email report")
+            </button>
+        </li>
+    </ul>
+</div>
+
+@code {
+    [Parameter] public string InstanceKey { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public bool PdfEnabled { get; set; } = true;
+    [Parameter] public bool ExcelEnabled { get; set; } = true;
+    [Parameter] public bool EmailEnabled { get; set; } = true;
+    [Parameter] public bool PdfLoading { get; set; }
+    [Parameter] public bool ExcelLoading { get; set; }
+    [Parameter] public bool EmailLoading { get; set; }
+    [Parameter] public EventCallback OnPdf { get; set; }
+    [Parameter] public EventCallback OnExcel { get; set; }
+    [Parameter] public EventCallback OnEmail { get; set; }
+    private string MenuId => $"report-output-{InstanceKey}";
+}
+

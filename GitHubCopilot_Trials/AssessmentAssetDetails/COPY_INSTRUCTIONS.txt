@@ -1,0 +1,117 @@
+ASSESSMENT ASSET DETAILS - MANUAL COPY GUIDE
+============================================
+
+These files are a trial handoff. Nothing in the live application was modified.
+
+1. Replace the existing routed assets page files in:
+
+   ViabilityIQ.Web\Components\Pages_Assessments\
+
+   - AssessmentAssetsPage.razor
+   - AssessmentAssetsPage.razor.cs
+   - AssessmentAssetsPage.razor.css
+
+   These files now provide only assessment-context initialization, the page
+   heading, and the Summary/Detail tab host.
+
+2. Copy both child component sets to the same directory:
+
+   ViabilityIQ.Web\Components\Pages_Assessments\
+
+   - AssessmentAssetSummaryPage.razor
+   - AssessmentAssetSummaryPage.razor.cs
+   - AssessmentAssetSummaryPage.razor.css
+   - AssessmentAssetDetailsPage.razor
+   - AssessmentAssetDetailsPage.razor.cs
+   - AssessmentAssetDetailsPage.razor.css
+
+   AssessmentAssetSummaryPage contains the original AssessmentAssetsPage
+   interface and behavior. AssessmentAssetDetailsPage is now a non-routed child
+   component. Both receive AssessmentId from AssessmentAssetsPage.
+
+3. Copy the read-only off-canvas component files to:
+
+   ViabilityIQ.Web\Components\Pages_Assessments\AssetFormComponents\
+
+   - AssessmentAssetDetailComponent.razor
+   - AssessmentAssetDetailComponent.razor.cs
+   - AssessmentAssetDetailComponent.razor.css
+
+4. Copy the chart module to:
+
+   ViabilityIQ.Web\wwwroot\scripts\
+
+   - assessmentAssetDetailsCharts.js
+
+5. Load the chart module after Chart.js in Components\App.razor:
+
+   <script src="scripts/assessmentAssetDetailsCharts.js"></script>
+
+6. Apply the navigation change documented in:
+
+   MainLayout_Assessment_CONTEXT_CHANGE.txt
+
+   The link must include the current AssessmentId. SessionService is in-memory
+   scoped state and cannot restore the ID after a refresh or a new Blazor circuit.
+
+7. Update the existing Assets navigation link:
+
+   @if (SessionService.AssessmentId is long assessmentId && assessmentId > 0)
+   {
+       <NavLink href="@($"assessment/assets/{assessmentId}")">
+           Assets
+       </NavLink>
+   }
+
+8. The dashboard expects these existing registrations and artifacts:
+
+   - IAssetRepository / AssetRepository
+   - MasterDataService
+   - ISessionService
+   - ZabOffCanvasService
+   - ToastService
+   - IProjectionStateManager
+   - AssetSummaryKpiCardsComponent
+   - AssetMovementFormComponent
+   - ZabConfirmDialogComponent
+   - vw_assessment_asset_list
+   - tblAssessmentAssets
+   - tblAssessmentAssetMovement
+
+9. AssessmentId is resolved by AssessmentAssetsPage in this order:
+
+   - Route: /assessment/assets/{AssessmentId}
+   - CurrentAssessmentId cascading value from MainLayout_Assessment
+   - ISessionService.AssessmentId
+
+   The parent then passes that value directly to AssessmentAssetSummaryPage and
+   AssessmentAssetDetailsPage. Neither child reads its assessment context from
+   the route.
+
+10. Deactivation is a soft delete. After confirmation it sets Active = 0 on
+   both tblAssessmentAssets and tblAssessmentAssetMovement.
+
+11. Suggested validation after copying:
+
+   dotnet build .\ViabilityIQ.Web\ViabilityIQ.Web.csproj
+
+   Then open:
+
+   /assessment/assets/{AssessmentId}
+
+   Example:
+
+   /assessment/assets/125
+
+12. Printing:
+
+    - Assets Summary includes a Print Full Page action.
+    - Summary printing temporarily expands all Cashflow Projections accordions,
+      prints their complete contents, and restores their prior open/closed state.
+    - Summary temporarily collapses every asset before opening browser print.
+    - Detailed temporarily expands every filtered asset before printing.
+    - The prior expand/collapse state is restored after the print dialog closes.
+    - The browser print dialog can print to paper or save the page as PDF.
+    - Print CSS removes the layout's fixed viewport height and scrolling overflow,
+      allowing the full table and charts to paginate instead of printing only the
+      first visible screen.

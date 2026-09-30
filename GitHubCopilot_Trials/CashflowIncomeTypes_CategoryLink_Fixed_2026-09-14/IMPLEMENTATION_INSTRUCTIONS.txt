@@ -1,0 +1,85 @@
+CASHFLOW INCOME TYPE - CATEGORY LINK FIX
+========================================
+
+Problem fixed
+-------------
+Sales for Clothing were shown as zero because the first implementation checked
+AssessmentSales.IncomeTypeId before the linked sales category.
+
+The authoritative relationship is now:
+
+    AssessmentSales.ProductCategoryId
+      -> AssessmentSalesCategory.AssessmentSalesCategoryId
+      -> AssessmentSalesCategory.IncomeTypeId
+      -> tblIncomeType.IncomeTypeId
+
+Therefore, Clothing with IncomeTypeId = 1 and tblIncomeType value "Sales"
+is classified as Sales regardless of a stale or different IncomeTypeId copied
+onto the AssessmentSales row.
+
+
+Installation
+------------
+Apply CashflowIncomeTypes_2026-09-14 first, then copy the two files under Files
+into their matching production paths:
+
+1. ViabilityIQ.Shared\FinancialModels\IncomeSourceClassification.cs
+2. ViabilityIQ.Database\FinancialCalculations\CashflowProjectionService.cs
+
+Rebuild and restart the application:
+
+    dotnet build ViabilityIQ.sln
+
+
+Lookup behaviour
+----------------
+1. Sales-category IncomeTypeId is authoritative.
+2. AssessmentSales.IncomeTypeId is used only if no category/lookup can resolve.
+3. All tblIncomeType rows are loaded, including inactive historical values, so
+   existing assessment categories continue to classify correctly.
+4. Names, not assumed numeric IDs, determine the semantic type. This prevents
+   a future lookup reseed from silently changing financial meaning.
+
+
+Should IncomeType be an enum?
+-----------------------------
+Keep tblIncomeType plus AssessmentSalesCategory.IncomeTypeId as the database
+source of truth. Do not replace that relationship with an enum.
+
+An enum is only safe if IDs such as 1=Sales and 2=Sundry Income are guaranteed
+immutable seed values across every database. A code enum may be added later as
+a convenience, but it should not replace the foreign-key lookup.
+
+
+Verification
+------------
+For the Clothing category, run:
+
+SELECT
+    c.AssessmentSalesCategoryId,
+    c.AssessmentSalesCategoryName,
+    c.IncomeTypeId,
+    i.IncomeTypeName,
+    SUM(
+        s.Month_1 + s.Month_2 + s.Month_3 + s.Month_4 +
+        s.Month_5 + s.Month_6 + s.Month_7 + s.Month_8 +
+        s.Month_9 + s.Month_10 + s.Month_11 + s.Month_12
+    ) AS AnnualAmount
+FROM dbo.tblAssessmentSalesCategory c
+JOIN dbo.tblIncomeType i
+  ON i.IncomeTypeId = c.IncomeTypeId
+LEFT JOIN dbo.tblAssessmentSales s
+  ON s.ProductCategoryId = c.AssessmentSalesCategoryId
+ AND s.Active = 1
+WHERE c.AssessmentSalesCategoryName = N'Clothing'
+GROUP BY
+    c.AssessmentSalesCategoryId,
+    c.AssessmentSalesCategoryName,
+    c.IncomeTypeId,
+    i.IncomeTypeName;
+
+Expected:
+- IncomeTypeName is Sales (or Saless if that is the saved spelling).
+- AnnualAmount is 4,240,200.
+- The Profit Summary Sales line reflects that amount, VAT-adjusted only when
+  the underlying sales rows are VAT-enabled.

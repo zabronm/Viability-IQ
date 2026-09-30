@@ -1,0 +1,69 @@
+﻿@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Services
+@using ViabilityIQ.Application.Interfaces
+@inject ZabOffCanvasService zabCanvasService
+
+
+<div class="p-3">
+    @if (AvailableExpenses == null)
+    {
+        <div class="text-center p-3">Loading items...</div>
+    }
+    else if (!AvailableExpenses.Any())
+    {
+        <div class="alert alert-info">All available expense items have been added to this assessment.</div>
+    }
+    else
+    {
+        <!-- Header with Totals Feedback -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-navy-brand uppercase mb-0">Select Expenses to Import</h6>
+            <span class="badge bg-primary text-white">Total selected: @SelectedCount</span>
+        </div>
+
+        <div class="table-responsive border rounded" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light text-xxs sticky-top">
+                    <tr>
+                        <th class="ps-2">Import</th>
+                        <th>Expense Item</th>
+                        <th class="text-center">Cashbook</th>
+                        <th class="text-center">% Sales</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs">
+                    @foreach (var item in AvailableExpenses)
+                    {
+                        <tr>
+                            <td class="ps-2"><input type="checkbox" @bind="item.IsSelected" @bind:event="onchange" /></td>
+                            <td class="text-muted fw-semibold">@item.ExpenseItemName</td>
+                            <td class="text-center"><input type="checkbox" @bind="item.PostToCashbook" /></td>
+                            <td class="text-center"><input type="checkbox" @bind="item.UsePercentageOfSales" /></td>
+                            <td style="width: 190px;">
+                                <DDLookupComponent SourceKey="DDLookupEnums.ExpenseTypes" @bind-Value="item.ExpenseTypeId" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3">
+            <button class="btn btn-primary w-100 fw-bold" @onclick="ImportSelected" disabled="@isSubmitting">
+                @if (isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span> Importing @SelectedCount Items ...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-circle"></i>
+                    <span> &nbsp;Import @SelectedCount Items</span>
+                }
+            </button>
+
+
+        </div>
+    }
+</div>

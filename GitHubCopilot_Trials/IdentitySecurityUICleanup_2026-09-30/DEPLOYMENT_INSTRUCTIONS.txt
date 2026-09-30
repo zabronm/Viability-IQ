@@ -1,0 +1,124 @@
+VIABILITYIQ IDENTITY AND SECURITY UI CLEANUP
+Package date: 2026-09-30
+
+PURPOSE
+-------
+This package repairs the Identity account-settings, change-password, registration,
+and password-recovery user experience.
+
+CHANGES
+-------
+1. Account Settings
+   - Restores consistent sizing, spacing, focus states, and icon padding for Blazor
+     InputSelect and InputDate controls.
+   - Replaces each custom/native duplicate checkbox pair with one accessible Bootstrap
+     checkbox.
+   - Adds explicit labels and responsive small-screen layout.
+   - Removes inline success/error alerts and routes feedback through ToastService.
+   - Accurately reports that the current settings component updates session state only;
+     it does not claim that preferences were persisted.
+
+2. Change Password
+   - Restores full-width password controls and correct left/right icon spacing.
+   - Adds accessible labels, autocomplete hints, and labelled password-visibility
+     buttons.
+   - Removes inline success/error alerts and routes all feedback through ToastService.
+   - Preserves the TenantUserRoleManagement temporary-password workflow:
+       * MustChangePassword is cleared only after a successful password change.
+       * A failed restriction update is logged and shown as an error Toast.
+       * Successful changes continue to /home.
+
+3. Registration
+   - Includes the corrected registration view in which anonymous users see only the
+     Sign In link.
+   - Back to Dashboard is rendered only when IsEditProfileMode confirms that the user
+     opened the form while authenticated.
+
+4. Forgot Password
+   - Adds /identity/forgot-password as the canonical route.
+   - Retains /forgot-password as a compatibility alias.
+   - Corrects the Login page's account-recovery footer link so anonymous users are not
+     sent to the authenticated Change Password page.
+
+5. Identity layouts
+   - Adds ToastComponent to MainLayout_Identity and MainLayout_Blank so ToastService
+     messages are visible on all affected Identity pages.
+
+PREREQUISITES
+-------------
+Deploy these packages first, in this order:
+
+  1. ApplicationReports_RuntimeCorrections_2026-09-26
+  2. TenantUserRoleManagement_2026-09-29
+  3. TenantUserRoleManagement_UIRefinement_2026-09-29
+
+The TenantUserRoleManagement package supplies ApplicationUser.MustChangePassword and
+the mandatory first-login password-change workflow preserved by this package.
+
+FILES
+-----
+Copy or merge every file under Files into the solution root while preserving paths.
+
+Replace these existing files:
+
+  ViabilityIQ.Web\Components\Layout\MainLayout_Blank.razor
+  ViabilityIQ.Web\Components\Layout\MainLayout_Identity.razor
+  ViabilityIQ.Web\Components\Pages\Identity\ChangePassword.razor
+  ViabilityIQ.Web\Components\Pages\Identity\ChangePassword.razor.cs
+  ViabilityIQ.Web\Components\Pages\Identity\ChangePassword.razor.css
+  ViabilityIQ.Web\Components\Pages\Identity\ForgotPassword.razor
+  ViabilityIQ.Web\Components\Pages\Identity\Login.razor
+  ViabilityIQ.Web\Components\Pages\Identity\Register.razor
+  ViabilityIQ.Web\Components\Pages\Identity\UserSettings.razor
+  ViabilityIQ.Web\Components\Pages\Identity\UserSettings.razor.cs
+  ViabilityIQ.Web\Components\Pages\Identity\UserSettings.razor.css
+
+DATABASE AND CONFIGURATION
+--------------------------
+No database script is required.
+No service-registration or application-configuration change is required.
+No credentials or secrets are included.
+
+BUILD
+-----
+From the solution root:
+
+  dotnet restore .\ViabilityIQ.sln
+  dotnet build .\ViabilityIQ.sln --no-restore
+
+VALIDATION CHECKLIST
+--------------------
+1. Open /identity/account-settings while authenticated.
+2. Confirm all selects and date inputs are full width, aligned, and retain icon spacing.
+3. Confirm Email, SMS, and Phone Call each display exactly one checkbox.
+4. Save settings and confirm feedback appears through the global Toast component, with
+   no inline Bootstrap alert.
+5. Open /identity/change-password and confirm all three controls are full width and
+   the lock and eye icons do not overlap entered text.
+6. Trigger invalid and valid password-change results and confirm all feedback uses
+   Toasts.
+7. For a temporary-password account, confirm successful change clears the restriction
+   and redirects to /home.
+8. Open /identity/register anonymously and confirm there is no Dashboard link.
+9. Open the registration/profile form while authenticated and confirm Back to Dashboard
+   is displayed.
+10. From Login, select Forgot Password and confirm /identity/forgot-password opens.
+11. Confirm /forgot-password also opens for compatibility.
+
+VALIDATION PERFORMED
+--------------------
+- Built in cumulative deployment order:
+    ApplicationReports_RuntimeCorrections_2026-09-26
+    TenantUserRoleManagement_2026-09-29
+    TenantUserRoleManagement_UIRefinement_2026-09-29
+    IdentitySecurityUICleanup_2026-09-30
+- dotnet restore succeeded.
+- dotnet build succeeded with 0 errors.
+- Existing solution warnings remain; no package-specific compiler errors were reported.
+- Static checks confirmed:
+    * no inline alert state in Account Settings or Change Password;
+    * one checkbox control per Account Settings notification option;
+    * Toast hosts exist in both affected Identity layouts;
+    * registration Dashboard navigation is authenticated/profile-mode only;
+    * /identity/forgot-password and the compatibility alias are declared;
+    * no unresolved conflict markers or embedded credentials are included.

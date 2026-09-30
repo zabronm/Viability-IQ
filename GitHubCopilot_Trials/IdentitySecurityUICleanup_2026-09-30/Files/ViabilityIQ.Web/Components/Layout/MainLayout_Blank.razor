@@ -1,0 +1,46 @@
+﻿@inherits LayoutComponentBase
+
+<ToastComponent />
+
+<div class="layout-container">
+    <div class="layout-content">
+        @Body
+    </div>
+</div>
+
+<style>
+    .layout-container {
+        position: relative; /* needed for the overlay */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100dvh;
+        width: 100%;
+        overflow: hidden;
+        /* ============== background image settings ============= */
+        background-image: url('images/neumorphic.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+        /* Dark overlay on top of the background image */
+        .layout-container::before {
+            content: "";
+            position: absolute;
+            inset: 0; /* covers entire container */
+            background: linear-gradient( rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) );
+            z-index: 0; /* sits above bg, below content */
+            pointer-events: none; /* lets clicks pass through */
+        }
+
+    /* Make sure content sits above the overlay */
+    .layout-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: left;
+    }
+</style>

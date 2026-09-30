@@ -1,0 +1,12 @@
+CASHFLOW INCOME TYPE CATEGORY LINK FIX
+=====================================
+
+Files\ViabilityIQ.Shared\FinancialModels\IncomeSourceClassification.cs
+  Makes AssessmentSalesCategory.IncomeTypeId authoritative and retains the
+  sales-row IncomeTypeId only as a fallback.
+
+Files\ViabilityIQ.Database\FinancialCalculations\CashflowProjectionService.cs
+  Loads all tblIncomeType lookup rows so historical category links resolve.
+
+IMPLEMENTATION_INSTRUCTIONS.txt
+FILES_MANIFEST.txt

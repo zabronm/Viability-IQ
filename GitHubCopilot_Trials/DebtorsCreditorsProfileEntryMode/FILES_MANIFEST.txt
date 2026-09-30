@@ -1,0 +1,21 @@
+DEBTORS/CREDITORS PROFILE ENTRY MODE - FILE MANIFEST
+===================================================
+
+IMPLEMENTATION_INSTRUCTIONS.txt
+  Deployment, verification, behavior and rollback notes.
+
+Files\ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\DebtorsCreditorsComponent.razor
+  Refined themed UI with percentage and actual-value entry modes.
+
+Files\ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\DebtorsCreditorsComponent.razor.cs
+  Bidirectional amount/percentage conversion, normalization, validation and persistence.
+
+Files\ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\SettingsPageComponents\DebtorsCreditorsComponent.razor.css
+  Component-specific responsive styling consistent with the application theme.
+
+Excluded by design
+------------------
+- No database migration.
+- No data-model change.
+- No projection-engine change.
+- No production file was overwritten directly.

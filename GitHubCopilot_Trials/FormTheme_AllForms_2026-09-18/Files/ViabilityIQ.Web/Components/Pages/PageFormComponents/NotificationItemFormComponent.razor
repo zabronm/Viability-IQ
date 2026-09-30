@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+
+<div class="viq-form-shell">
+    @if (isProcessing)
+    {
+        <div class="viq-form-busy" role="status" aria-live="polite">
+            <div class="viq-form-busy-card">
+                <span class="viq-form-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong>Sending communication</strong>
+                    <span>Please wait while the message is delivered.</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="@newItem" OnValidSubmit="HandleSubmitAsync"
+              class="viq-data-form" aria-label="Communication details">
+        <DataAnnotationsValidator />
+
+        <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-send" aria-hidden="true"></i></span>
+            <div>
+                <h2>New communication</h2>
+                <p>Send a message or assign a task to a recipient.</p>
+            </div>
+        </div>
+
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-person-check" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Recipient and context</h3>
+                    <p>Choose the recipient and optionally associate an assessment case.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="recipientId">Recipient ID</label>
+                    <InputNumber id="recipientId" class="viq-form-control"
+                                 @bind-Value="newItem.RecipientId" />
+                    <ValidationMessage For="@(() => newItem.RecipientId)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="assessmentNumber">Assessment case number <small>(optional)</small></label>
+                    <InputText id="assessmentNumber" class="viq-form-control"
+                               @bind-Value="newItem.AssessmentNumber"
+                               placeholder="e.g. CAS-2026-001" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-chat-left-text" aria-hidden="true"></i></span>
+                <div>
+                    <h3>Message</h3>
+                    <p>Provide a clear subject and the communication details.</p>
+                </div>
+            </header>
+
+            <div class="viq-form-grid">
+                <div class="viq-form-field">
+                    <label for="notificationTitle">Title / subject</label>
+                    <InputText id="notificationTitle" class="viq-form-control"
+                               @bind-Value="newItem.Title"
+                               placeholder="Brief subject header" />
+                    <ValidationMessage For="@(() => newItem.Title)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field">
+                    <label for="notificationMessage">Message details</label>
+                    <InputTextArea id="notificationMessage" class="viq-form-control viq-form-textarea" rows="5"
+                                   @bind-Value="newItem.Message"
+                                   placeholder="Type your message or task description here..." />
+                    <ValidationMessage For="@(() => newItem.Message)" class="viq-form-validation" />
+                </div>
+            </div>
+
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isTaskCheck">
+                <span>
+                    <strong>Assigned task</strong>
+                    <small>Mark this communication as requiring completion.</small>
+                </span>
+                <InputCheckbox id="isTaskCheck" class="viq-switch" @bind-Value="newItem.IsTask" />
+            </label>
+
+            @if (newItem.IsTask)
+            {
+                <div class="viq-form-field">
+                    <label for="taskDueDate">Task due date</label>
+                    <input type="date" id="taskDueDate" class="viq-form-control"
+                           @bind="newItem.DueDate" />
+                </div>
+            }
+        </section>
+
+        <footer class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Sending...</span>
+                }
+                else
+                {
+                    <i class="bi bi-send" aria-hidden="true"></i>
+                    <span>Send / Assign</span>
+                }
+            </button>
+        </footer>
+    </EditForm>
+</div>

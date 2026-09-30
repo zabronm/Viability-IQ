@@ -1,0 +1,140 @@
+CASHFLOW INCOME TYPE CLASSIFICATION
+===================================
+
+Purpose
+-------
+This package updates cashflow calculations to distinguish income using the
+active records in dbo.tblIncomeType.
+
+Supported classifications:
+
+- Sales
+- Asset Disposal
+- Grants / Donations
+- Sundry Income
+- Other Income
+
+No production files were changed by this package.
+
+
+Prerequisites
+-------------
+Apply these packages first:
+
+1. CashflowIntegration_00
+2. VATTransactions_FullImplementation_2026-09-14
+3. CashflowVisuals_2026-09-14
+
+This package replaces selected files from those packages with the latest
+income-aware versions.
+
+
+Installation
+------------
+Copy all files below Files into the matching production paths and rebuild:
+
+    dotnet build ViabilityIQ.sln
+
+No new table or migration is required. The existing tblIncomeType model and
+table are used.
+
+
+Classification rules
+--------------------
+Classification is resolved from the active tblIncomeType row referenced by
+AssessmentSales.IncomeTypeId. If that value has no active lookup, the linked
+AssessmentSalesCategory.IncomeTypeId is used as a fallback.
+
+Names are normalized by removing spaces and punctuation and using lowercase.
+This permits names such as:
+
+- Sales / Saless / Sales Category
+- Asset Disposal / Sale of Assets
+- Grants / Donations
+- Sundry Income
+
+Any unmatched or missing active lookup is included under Other Income and
+creates an "Unclassified income" projection warning. No income is silently
+dropped.
+
+
+Engine behaviour
+----------------
+Sales:
+- drives Sales/Revenue;
+- is the only income source used for COGS and gross profit;
+- is the only current-period income sent through debtor collection profiles;
+- drives break-even, margin-of-safety, debtor-risk, and sales-based ratios.
+
+Sundry Income:
+- appears separately in profit and cashflow;
+- is received in its entered month.
+
+Grants / Donations:
+- appears separately in detailed cashflow;
+- is included in Other Income in the requested profit summary;
+- is received in its entered month.
+
+Asset Disposal:
+- appears separately in detailed cashflow;
+- is included in Other Income in the requested profit summary;
+- is received in its entered month.
+
+Asset movement disposals:
+- continue reducing the asset position;
+- are used as disposal proceeds only when no classified Asset Disposal income
+  rows exist, preserving compatibility without double-counting;
+- cause a warning when this fallback is used.
+
+Other / unknown income:
+- appears separately in detailed cashflow;
+- is included in Other Income in the profit summary;
+- is received in its entered month.
+
+
+VAT treatment
+-------------
+The authoritative accounting projection remains VAT exclusive.
+
+The Profit Summary requested by the supplied image has a dedicated
+VAT-inclusive presentation:
+
+Sales
+(less) Cost of Goods (COGs)
+GROSS PROFIT
+(add) Sundry Income
+(add) Other Income
+GROSS INCOME
+(less) Operating Expenses
+(less) Net VAT Payable / (add Refund)
+EBITDA
+(less) Depreciation
+(less) Interest
+NET PROFIT BEFORE TAX
+
+Other Income on that component equals:
+
+    Grants / Donations
+  + Asset Disposal
+  + Other / unclassified income
+
+VAT-inclusive values use each row's saved TotalNoVAT and TotalWithVAT ratio.
+No hard-coded VAT rate is introduced.
+
+
+Verification
+------------
+For one assessment, add one active income row for each tblIncomeType and put a
+different amount in M1.
+
+Verify:
+
+1. Only Sales appears in the Sales line and sales graph.
+2. Only Sales contributes to COGS and debtor balances.
+3. Sundry appears on its own profit-summary line.
+4. Grants, Asset Disposal, and Other appear in the Other Income total.
+5. Detailed cashflow shows separate receipt rows for all sources.
+6. Total inflows equal all classified receipts plus any VAT refund.
+7. A classified Asset Disposal value is not also added from asset movements.
+8. Changing any source record refreshes all cashflow visuals through the
+   existing projection invalidation flow.

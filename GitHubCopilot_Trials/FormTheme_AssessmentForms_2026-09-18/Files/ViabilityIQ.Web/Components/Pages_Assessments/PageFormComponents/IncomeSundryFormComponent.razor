@@ -1,0 +1,48 @@
+﻿
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
+
+<div class="p-3">
+    @if (FormModel != null)
+    {
+        <div class="alert alert-info py-1.5 rounded mb-2 text-xxs shadow-sm">
+            <i class="bi bi-info-circle me-1"></i> Update incidental operational cash flows or use split allocations.
+        </div>
+
+        <div class="mb-2 p-1 bg-light rounded text-dark fw-bold border text-xxs px-2 text-truncate">
+            Sundry Target: <span class="text-navy-brand">@FormModel.StreamName</span>
+        </div>
+
+        <div class="card bg-light border-0 mb-3 p-1.5 rounded">
+            <label class="form-label fw-bold text-xxs text-secondary uppercase mb-0.5">Quick Distribution Engine (Even Annual Split)</label>
+            <div class="input-group input-group-sm">
+                <input type="number" class="form-control font-monospace text-xs" placeholder="Enter target annual amount..." @bind="BulkAnnualValueTarget" min="0" />
+                <button class="btn btn-navy text-white text-xxs px-2 fw-bold" type="button" @onclick="DistributeAnnualValueEvenly">Apply Split</button>
+            </div>
+        </div>
+
+        <h6 class="text-xxs fw-bold text-secondary mb-1 uppercase">12-Month Incidental Stream Balance Configuration</h6>
+        <div class="pe-1 border p-1.5 rounded bg-light-subtle mb-3 sales-input-pane" style="max-height: 380px; overflow-y: auto;">
+            @for (int i = 0; i < 12; i++)
+            {
+                var index = i;
+                <div class="row align-items-center mb-1 g-2 mx-0 input-row-hover rounded py-0.5">
+                    <div class="col-4"><span class="text-xxs fw-semibold text-muted">Month @(index + 1)</span></div>
+                    <div class="col-8">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text py-0 px-1 font-monospace text-xxs bg-light">M@(index + 1)</span>
+                            <input type="number" class="form-control form-control-sm text-end font-monospace text-xs py-0.5 text-dark fw-bold"
+                                   @bind="FormModel.MonthlySundry[index]" @bind:event="oninput" min="0" />
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
+            <button type="button" class="btn btn-primary btn-sm flex-fill py-1.5 text-xs fw-bold shadow-sm" @onclick="ExecuteSaveWorkflowAsync">
+                <i class="bi bi-check-circle me-1"></i> Save Matrix Parameters
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm py-1.5 text-xs" @onclick="CancelFormAsync">Cancel</button>
+        </div>
+    }
+</div>

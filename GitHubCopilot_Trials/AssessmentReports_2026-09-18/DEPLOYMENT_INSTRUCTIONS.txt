@@ -1,0 +1,66 @@
+﻿ASSESSMENT REPORTING FRAMEWORK (ACTIVITY LOG) - DEPLOYMENT
+Generated: 2026-09-18
+
+SUPERSEDES
+This one complete package supersedes AssessmentReportingFramework_2026-09-17. Deploy this
+package instead of the earlier reporting package. For a fresh reporting deployment, DO NOT
+run the earlier package's report-activity SQL. This package does not create, use, or require a
+separate reporting activity table or repository.
+
+PURPOSE
+Replaces the mock AssessmentReportsPage with four live reports: Assessment Summary, Profit &
+Loss, Cashflow and Balance Sheet. It includes the code-based ReportCatalogue (with ReportScope
+ready for future system/admin reports), reusable ReportOutputMenu, browser print/PDF, genuine
+Open XML .xlsx output, email modal and hardened SMTP delivery. View, Print, Export and Share
+activities are written through the system IActivityLogWriter activity catalogue.
+
+REPORT PRESENTATION
+Project periods are mapped from Assessment.AssessmentStartDate. For example, a start date of
+15 September 2026 produces M-1 = Sept/26 through M-12 = Aug/27. The selected report range,
+financial-table headings and summary findings use the same shared ProjectPeriodMapper.
+Report previews and browser PDF output use the existing marble palette and the existing
+ViabilityIQ.Web\wwwroot\viabilityIQ_icon.png logo. The Assessment Summary body uses Arial with
+larger narrative and heading type, and print spacing keeps labels visually separated from values.
+
+PREREQUISITE
+The existing ActivityLog package/schema must already be deployed, including tblActivityLog,
+IActivityLogWriter, ActivityLogWriter, ActivityEntityType.Report, and ActivityAction values
+View, Print, Export and Share. Verify the existing application DI registration resolves
+IActivityLogWriter to ActivityLogWriter. Do not add a duplicate registration.
+
+DATABASE
+No database migration is required by this reporting package when the prerequisite tblActivityLog
+schema is deployed. Do not execute SQL during package deployment.
+
+FILES
+Copy NEW and REPLACE files from Files to their matching production-relative paths according to
+FILES_MANIFEST.txt. Review local modifications before replacing critical files. Apply MERGE
+instructions in MANUAL_EXISTING_FILE_MERGE.txt rather than blindly replacing DI, App.razor or
+configuration files.
+
+Verify ViabilityIQ.Web\wwwroot\viabilityIQ_icon.png exists. It is an existing application asset
+and is therefore referenced, not duplicated, by this package.
+
+ACTIVITY DATA
+Each operation records Report entity/type, assessment/report identity, route, safe remarks and
+structured operational metadata. Email addresses are server-validated then masked; no full
+recipient, report financial contents, email body, SMTP setting or credential enters Metadata.
+If activity logging alone fails, the report operation retains its true result, a warning is logged,
+and the UI states: “The report operation completed, but activity logging was unavailable.”
+
+EMAIL CONFIGURATION
+Supply EmailSettings__SmtpServer, EmailSettings__Port, EmailSettings__SenderAddress,
+EmailSettings__SenderPassword and EmailSettings__EnableSsl through deployment environment or
+user secrets. Never commit a password. No email is sent by automated validation.
+
+VALIDATION
+  dotnet build .\ViabilityIQ.sln --no-restore --nologo
+Then manually verify all four reports, month ranges, print preview, .xlsx opening in Excel or
+LibreOffice, and non-production SMTP delivery. Confirm tblActivityLog records View for generation,
+Print for PDF/print, Export for Excel, and Share for email success/failure. Confirm recipient
+metadata is masked and failures contain only a safe error category.
+
+KNOWN LIMITATIONS
+- PDF uses the browser print/save-PDF dialog; no PDF bytes are attached to email.
+- Email attaches Excel and includes a formatted HTML summary.
+- Business-profile output remains limited to verified current fields.

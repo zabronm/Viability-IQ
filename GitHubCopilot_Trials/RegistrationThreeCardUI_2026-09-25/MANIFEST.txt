@@ -1,0 +1,35 @@
+REGISTRATION THREE-CARD UI - FILE MANIFEST
+==========================================
+
+Package documentation
+---------------------
+DEPLOYMENT_INSTRUCTIONS.txt
+MANIFEST.txt
+
+Application files
+-----------------
+Files\ViabilityIQ.Web\Components\Pages\Identity\Register.razor
+Files\ViabilityIQ.Web\Components\Layout\MainLayout_Blank.razor
+
+Change summary
+--------------
+- Places Standard and Open Plan choices in the first card.
+- Places subscriber and conditional organisation fields in the second card.
+- Places contact and security fields in the third card.
+- Uses three equal-width columns on wide displays.
+- Adapts to two plan choices plus stacked detail cards on tablet widths.
+- Uses one column and a full-width submit button on mobile widths.
+- Uses two equal columns when the page is opened in profile-edit mode.
+- Preserves the existing registration events, validation, model bindings, and plan
+  selection behavior.
+- Removes the registration logo/header and compacts panel, field, footer, and card
+  spacing so the form fits typical desktop screens.
+- Keeps the MainLayout_Blank background fixed while its content surface scrolls.
+- Restores automatic horizontal and vertical scrollbars when content exceeds the
+  available viewport.
+- Centers MainLayout_Blank content when it fits within the available viewport.
+
+Production source status
+------------------------
+The package was assembled under GitHubCopilot_Trials. The production
+ViabilityIQ.Web\Components\Pages\Identity\Register.razor file was not modified.

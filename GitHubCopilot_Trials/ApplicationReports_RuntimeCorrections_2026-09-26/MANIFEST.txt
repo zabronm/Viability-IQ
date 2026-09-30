@@ -1,0 +1,110 @@
+VIABILITYIQ APPLICATION REPORTS AND RUNTIME CORRECTIONS - MANIFEST
+Package date: 2026-09-26
+
+SUMMARY
+-------
+- Rebases the application Reports implementation against the synchronized source.
+- Resolves the App.razor merge conflict without discarding either feature set.
+- Fixes tenant-session initialization ordering before tenant-aware content renders.
+- Corrects stale dashboard assessment and Identity-column SQL.
+- Corrects dynamic report SQL line separation before the WHERE predicates.
+- Adds the missing announcement and alert-dismissal database objects.
+- Preserves the application-layer Gemini and Groq service-registration file.
+- Prevents concurrent render-time UserManager queries against the circuit IdentityDbContext.
+
+VALIDATION
+----------
+- The complete package was overlaid onto an isolated copy of the synchronized repository.
+- dotnet restore completed successfully.
+- dotnet build completed successfully with 0 errors.
+- Package files contain no unresolved Git conflict markers.
+
+FILE SIZE AND SHA-256
+--------------------
+DEPLOYMENT_INSTRUCTIONS.txt
+9848 bytes
+8E142682097EB1659F36A2B84DF7E990F8AE790B6ABECE936D52D54F6E1BD2DD
+
+Files\DatabaseScripts\2026-09-26_DashboardAnnouncements.sql
+2642 bytes
+CA9AD179FEE95D6A84938F4F53AD68B98B1ADA35222D76B538D7FEB89450A1D6
+
+Files\ViabilityIQ.Database\Interfaces\IOperationalReportsService.cs
+459 bytes
+F3B300F652B3F1E2B105A29A8888DA315BDBD714140B395529DE2FED139209DE
+
+Files\ViabilityIQ.Database\Interfaces\ITenantAuthorizationService.cs
+646 bytes
+E1550CECB43BCEC078EA174B38FFF7F1681C72AF8AF815372A18051E1CFF928C
+
+Files\ViabilityIQ.Database\ServicesMisc\AuthenticationService.cs
+26853 bytes
+FAA3189A38E7C398F0683BF464FC686BE445FB8832421F03372E53F34C5A2C41
+
+Files\ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+3475 bytes
+A51C5A1A08A4745C7010AD1CA1D353594CC8EAAF4CAB722B9BD5D2297DE81AEA
+
+Files\ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AlertDismissalService.cs
+7286 bytes
+989FAB6DC2E9753A6278F31D9E58C4F43567E82B1DB168C3DED82D0C11A517C4
+
+Files\ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AlertRepository.cs
+6847 bytes
+B35655E39980E77AE538434ECCDD3BC3536DA07E37C804F856E4E91D38AF0788
+
+Files\ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AnnouncementRepository.cs
+5648 bytes
+3267C53CB96F24A03E3B75283D7A057C790511673A8C3112E08CC36F45EF8617
+
+Files\ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AssessmentRepository.cs
+8611 bytes
+85D4513E4739FF5A6FB9B19CE34E2487378140BB09393C4440D00999A3286E23
+
+Files\ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\InsightsRepository.cs
+12145 bytes
+B62EC6CE7BF526ABDD2B7AD69D2BF03B4ED1B4C212D38C8717F61E69181EED83
+
+Files\ViabilityIQ.Infrastructure\Repositories\OperationalReportsService.cs
+12917 bytes
+EF65E039BE9E9B7BEEF521BC502BFF834F3C4FEC6B9129622B261CB259F27C83
+
+Files\ViabilityIQ.Infrastructure\Repositories\TenantAuthorizationService.cs
+8410 bytes
+3165F32F932F5A8B5CC7D8F862BB151BF4DABE2F228A2D706C89921BEA544E0E
+
+Files\ViabilityIQ.Shared\DataModels\SecurityDataModels\TenantAuthorizationModels.cs
+992 bytes
+97484EDD4EED8B70FD7B8AC6A429B4077F4BB600D479840A4412F36F10D599B9
+
+Files\ViabilityIQ.Shared\Reporting\OperationalReportsModels.cs
+5848 bytes
+4A6B5CF69B5B47FE501284ADC5A23F21CA79DE9CDD5A1A78B333702E67E43312
+
+Files\ViabilityIQ.Web\Components\App.razor
+3292 bytes
+02175EC8CAC2C7306A601A76DA691843A5D8D2A391C2581189347E9DBE2C6186
+
+Files\ViabilityIQ.Web\Components\Layout\MainLayout.razor
+6673 bytes
+6D9330C7CB33B5CA926383ED64318DB3404B132A1FD6B7E613E7C9166761D847
+
+Files\ViabilityIQ.Web\Components\Layout\MainLayout.razor.cs
+11329 bytes
+768E12F8072DFB77D04499207A44FD007C3652A5C3F20CEDC3FF16B0696E9DBB
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\ProfileDropdownComponent.razor
+12680 bytes
+E1BFF54F405B72D1472128C128A923F418793E158BC8CB5A5569A9614E2D1D0C
+
+Files\ViabilityIQ.Web\Components\Pages\SystemReports.razor
+16204 bytes
+B57ED7D4D0FF6501392D1AB7C864B76B44EE9CE54BA9BA5178B5F61AA015F87D
+
+Files\ViabilityIQ.Web\Components\Pages\SystemReports.razor.cs
+17289 bytes
+71D0A53A43166AE2219D42F32FF8D5E0D575BE93D731DAE8683825E6311593C6
+
+Files\ViabilityIQ.Web\Components\Pages\SystemReports.razor.css
+8082 bytes
+00F06BC90FFE42CB709F35F46B23771584BB1B099B208AD6F3DA98FD3A198F85

@@ -1,0 +1,53 @@
+VALIDATION RESULTS - 2026-09-18
+
+Integrated baseline:
+C:\Users\v15\.copilot\session-state\5cacad73-c0f8-4769-be92-5306c5d8ba70\files\accounts-projection-build\ViabilityIQ.sln
+
+Command:
+dotnet build .\ViabilityIQ.sln --no-restore --nologo --verbosity quiet
+
+Result:
+Build succeeded.
+0 errors.
+125 existing/integrated-solution warnings in the final invocation.
+No build warning identified a reporting framework source file.
+No dependency manifest changed and no restore was required.
+
+Project-period verification:
+- AssessmentStartDate 15/09/2026 and range M-1 through M-12 produced
+  "Sept/26 – Aug/27".
+- Table labels produced "M-1 Sept/26", "M-2 Oct/26" and "M-12 Aug/27".
+- A missing AssessmentStartDate safely falls back to "M-1 – M-12".
+- The period mapper was exercised through a disposable .NET 8 validation harness.
+
+Presentation verification:
+- All report types render the existing /viabilityIQ_icon.png asset instead of a text brand.
+- The report cover uses the application's #728FCE marble palette.
+- Assessment Summary narrative and body headings use Arial at 110% of their prior size.
+- Print rules retain label/value spacing, and reportOutput.js passed `node --check`.
+- Print waits for the logo image before opening the browser print/PDF dialog.
+
+Activity-log verification:
+- AssessmentReportsPage injects IActivityLogWriter.
+- Generation success/failure uses ActivityAction.View.
+- PDF success/failure uses ActivityAction.Print.
+- Excel success/failure uses ActivityAction.Export.
+- Email success/failure and validation failures use ActivityAction.Share.
+- Every activity uses ActivityEntityType.Report and assessment/report context.
+- Email recipients are masked before entering metadata.
+- Activity failure preserves the primary operation outcome and surfaces AuditWarning.
+- No source file references tblReportActivity, IReportActivityRepository,
+  ReportActivityRepository or a report-specific migration.
+
+Workbook verification:
+The inherited OpenXmlReportWorkbookWriter validation generated a genuine .xlsx
+archive containing the required package, workbook, style and worksheet parts.
+No workbook implementation changed during the activity-log refactor.
+
+Email:
+No email was sent. Compile-time integration and safe configuration paths were
+validated only.
+
+Database:
+No database migration is included or required by this package. The existing
+ActivityLog schema and dbo.tblActivityLog are prerequisites and were not modified.

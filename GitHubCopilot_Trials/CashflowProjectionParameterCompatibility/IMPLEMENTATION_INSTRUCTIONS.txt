@@ -1,0 +1,31 @@
+CASHFLOW PROJECTION PARAMETER COMPATIBILITY FIX
+===============================================
+
+Runtime error fixed
+-------------------
+Object of type 'CashflowKPICardsComponent' has a property matching the name
+'Projection', but it does not have [Parameter].
+
+Cause
+-----
+Older pages pass an already-calculated projection:
+
+  <CashflowKPICardsComponent Projection="@Projection" />
+
+The independently loading dashboard revision expected:
+
+  <CashflowKPICardsComponent AssessmentId="@AssessmentId" />
+
+Fix
+---
+IndependentCashflowProjectionComponent now supports both contracts:
+
+1. Projection supplied by a parent component.
+2. AssessmentId supplied for independent calculation and refresh.
+
+The fix applies to all dashboard components inheriting this base class.
+
+Deployment
+----------
+Copy the file beneath Files into the matching production path and rebuild the
+solution. No Razor page changes are required.

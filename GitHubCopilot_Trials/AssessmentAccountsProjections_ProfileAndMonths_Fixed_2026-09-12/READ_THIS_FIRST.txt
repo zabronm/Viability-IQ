@@ -1,0 +1,74 @@
+CORRECTED PROFILE AND MONTH LABEL PACKAGE
+=========================================
+
+Use only this directory for the latest correction:
+
+    AssessmentAccountsProjections_ProfileAndMonths_Fixed_2026-09-12
+
+
+ROOT CAUSE 1 - ZERO PROFILES
+----------------------------
+DebtorsCreditorsComponent loads the profile from:
+
+    tblAssessmentDebtorsCreditorsProfile
+
+using:
+
+    new { AssessmentId }
+
+It does not require Active=true.
+
+It also does not use the stored Debtors_30 and Creditors_30 values for display.
+It calculates the 0-30 values as the remainder from 100%.
+
+AccountsProjectionService.cs has therefore been corrected to:
+
+1. Query profiles by AssessmentId without an Active filter.
+2. Prefer an active/newer row only when duplicate rows exist.
+3. Calculate the first buckets exactly like DebtorsCreditorsComponent:
+
+    Debtors 0-30 =
+        100 - Debtors_60 - Debtors_90 - Debtors_120 - Debtors_120Plus
+
+    Creditors 0-30 =
+        100 - Creditors_60 - Creditors_90 - Creditors_120
+        - Creditors_120Plus
+
+For the values in the supplied screenshot, this produces:
+
+    Debtors:   55%, 40%, 5%, 0%, 0%
+    Creditors: 80%, 10%, 10%, 0%, 0%
+
+
+ROOT CAUSE 2 - LITERAL M@month.MonthNumber
+------------------------------------------
+Razor does not evaluate the mixed text/expression syntax used previously in
+this markup context.
+
+All affected labels now use:
+
+    @($"M{month.MonthNumber}")
+
+This renders:
+
+    M1, M2, M3 ... M12
+
+
+FILES THAT MUST BE REPLACED
+---------------------------
+Copy these corrected files from this package:
+
+1. Files\ViabilityIQ.Database\FinancialCalculations\
+   AccountsProjectionService.cs
+
+2. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_DebtorsPage.razor
+
+3. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_CreditorsPage.razor
+
+4. Files\ViabilityIQ.Web\Components\Pages_Assessments\
+   AssessmentAccs_ConsolidatedPage.razor
+
+The directory also contains the complete latest module so it can be used as a
+full clean handoff.

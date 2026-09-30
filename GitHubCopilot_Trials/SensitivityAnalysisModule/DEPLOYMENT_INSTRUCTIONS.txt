@@ -1,0 +1,55 @@
+SENSITIVITY ANALYSIS MODULE — DEPLOYMENT INSTRUCTIONS
+Generated: 2026-09-17
+
+Purpose
+-------
+Adds a deterministic, non-AI Sensitivity Analysis page at:
+  /assessment/sensitivity/{assessmentId}
+
+The package is based on the integrated AuthoritativeOpeningBalances and
+AssessmentAssumptionsUIRefined baseline. Files\ mirrors production-relative paths.
+
+Deployment
+----------
+1. Back up the target repository and database.
+2. Copy the CONTENTS of Files\ over the repository root, preserving paths.
+3. Existing files that are intentionally replaced:
+   - ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+   - ViabilityIQ.Web\Components\Layout\MainLayout_Assessment.razor
+4. All other package files are new.
+5. Restore/build:
+   dotnet restore ViabilityIQ.sln
+   dotnet build ViabilityIQ.sln --no-restore
+6. Run the application and open an active assessment.
+7. Select "Sensitivity Analysis" immediately below "Assessment Reports".
+
+Important behaviour
+-------------------
+- The authoritative baseline is immutable.
+- Scenarios are session-memory UI state only and are explicitly shown as unsaved.
+- Every calculation starts from a fresh ICashflowProjectionService baseline result.
+- The service applies deterministic, non-persisting overlays to projection results.
+- Existing projected VAT schedules remain unchanged under overlays and this is
+  disclosed in the UI calculation notes.
+- Collection/payment timing shifts move existing receipts/payments; values shifted
+  beyond M12 are outside the analysis horizon.
+- No AI analysis, external model, heavy JavaScript chart package, or schema change
+  is included.
+
+Manual checks
+-------------
+1. Confirm navigation order: Assessment Reports, Sensitivity Analysis,
+   Assumptions/Baseline.
+2. Confirm the route resolves the route assessment ID and session fallback.
+3. Confirm all four tabs render and match the Assets tab shell/active behaviour.
+4. Run each preset and verify the baseline values never change.
+5. Run a one-variable range, verify baseline row, status flags and chart.
+6. Select up to three comparison scenarios and export CSV.
+7. Set a minimum cash reserve and recalculate Risk & Break-even.
+8. Use Print / Save PDF and test narrow/mobile layout.
+9. Confirm incomplete sales/expense sessions show the draft-baseline warning.
+
+Rollback
+--------
+Delete the six new source/UI files listed in FILES_MANIFEST.txt, restore the two
+replaced files from backup, then rebuild. No database rollback is required.

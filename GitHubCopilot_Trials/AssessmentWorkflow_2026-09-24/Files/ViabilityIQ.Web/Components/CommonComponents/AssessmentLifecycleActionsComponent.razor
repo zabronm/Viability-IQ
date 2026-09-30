@@ -1,0 +1,64 @@
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="ala-cell">
+    <div class="ala-readiness">
+        <div class="ala-readiness-copy">
+            <span>Projection readiness</span>
+            <strong>@Assessment.ProgressPercentage%</strong>
+        </div>
+        <div class="ala-progress" role="progressbar" aria-valuenow="@Assessment.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
+            <span class="@GetReadinessClass()" style="@($"width:{Math.Clamp(Assessment.ProgressPercentage, 0, 100)}%")"></span>
+        </div>
+    </div>
+
+    <div class="ala-actions">
+        <button type="button" class="ala-button ala-button-secondary" @onclick="ViewReadiness">
+            <i class="bi bi-clipboard2-check"></i> View Readiness
+        </button>
+        @if (Assessment.StatusId == AssessmentLifecycleStatus.Completed)
+        {
+            <button type="button" class="ala-button ala-button-reopen" @onclick="Reopen">
+                <i class="bi bi-arrow-counterclockwise"></i> Re-open
+            </button>
+        }
+        else if (Assessment.StatusId == AssessmentLifecycleStatus.ReadyForReview)
+        {
+            <button type="button" class="ala-button ala-button-complete" @onclick="Complete">
+                <i class="bi bi-check-circle"></i> Mark Complete
+            </button>
+        }
+        else if (Assessment.ProgressPercentage >= 100)
+        {
+            <button type="button" class="ala-button ala-button-complete" @onclick="SubmitForReview">
+                <i class="bi bi-send-check"></i> Ready for Review
+            </button>
+        }
+        else
+        {
+            <button type="button" class="ala-button ala-button-complete" disabled>
+                <i class="bi bi-lock"></i> Complete
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public AssessmentDto Assessment { get; set; } = default!;
+    [Parameter] public EventCallback<AssessmentDto> OnViewReadiness { get; set; }
+    [Parameter] public EventCallback<AssessmentDto> OnComplete { get; set; }
+    [Parameter] public EventCallback<AssessmentDto> OnReopen { get; set; }
+    [Parameter] public EventCallback<AssessmentDto> OnSubmitForReview { get; set; }
+
+    private Task ViewReadiness() => OnViewReadiness.InvokeAsync(Assessment);
+    private Task Complete() => OnComplete.InvokeAsync(Assessment);
+    private Task Reopen() => OnReopen.InvokeAsync(Assessment);
+    private Task SubmitForReview() => OnSubmitForReview.InvokeAsync(Assessment);
+
+    private string GetReadinessClass() => Assessment.ProgressPercentage switch
+    {
+        >= 100 => "ala-progress-ready",
+        >= 70 => "ala-progress-warning",
+        _ => "ala-progress-incomplete"
+    };
+}

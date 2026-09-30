@@ -1,0 +1,3 @@
+namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents;
+
+public partial class CashflowSummaryDashboardComponent : IndependentCashflowProjectionComponent;

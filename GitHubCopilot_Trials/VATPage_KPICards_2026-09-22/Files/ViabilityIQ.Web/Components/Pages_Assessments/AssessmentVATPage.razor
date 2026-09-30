@@ -1,0 +1,235 @@
+﻿@page "/assessment/vat/{AssessmentId:long}"
+
+@layout MainLayout_Assessment
+
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Layout
+@using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+
+<div class="p-0 position-relative dashboard-workspace container-fluid">
+    <PageHeading_Assessment _pageTitle="VAT" PageTitle="Value Added Tax(VAT)" CurrentPage="PageType.VAT" />
+
+    <div class="row bg-white g-3 mt-1 mb-2" style="border-radius: 6px;">    
+        <div class="w-100">
+            <!-- place VAT components here-->
+            <div class="vat-page-container">
+                <div class="vat-header">
+                    <div class="vat-title-section">
+                        <h2 class="vat-page-title">VAT Projections & Schedule</h2>
+                        <p class="vat-page-subtitle">Assessment ID: #ASSESS-2026-9042 | 12-Month Tax Modeling</p>
+                    </div>
+                    <div class="vat-actions">
+                        <button class="btn-vat-secondary" @onclick="ExportReport">
+                            <i class="bi bi-download"></i> Export Report
+                        </button>
+                        <button class="btn-vat-primary" @onclick="SaveChanges">
+                            <i class="bi bi-check2-all"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+
+                @if (IsLoading)
+                {
+                    <div class="vat-table-card p-4 text-center" role="status" aria-live="polite">
+                        <span class="spinner-border spinner-border-sm text-primary me-2" aria-hidden="true"></span>
+                        <span class="text-muted">Loading VAT projections...</span>
+                    </div>
+                }
+                else
+                {
+                    <section class="vat-kpi-grid" aria-label="VAT performance indicators">
+                        <article class="vat-kpi-card vat-kpi-output">
+                            <div class="vat-kpi-heading">
+                                <span>Output VAT</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-receipt-cutoff"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalOutputVat.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">VAT charged on taxable sales</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-input">
+                            <div class="vat-kpi-heading">
+                                <span>Input VAT</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-box-arrow-in-down"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalInputVat.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Recoverable VAT on purchases</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-sales">
+                            <div class="vat-kpi-heading">
+                                <span>VATable Sales</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalVatAbleSales.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Annual taxable revenue</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-net">
+                            <div class="vat-kpi-heading">
+                                <span>Net VAT Payable</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-calculator"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalNetVatPayable.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Output VAT less input VAT</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-purchases">
+                            <div class="vat-kpi-heading">
+                                <span>VATable Purchases</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-cart-check"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">R @TotalVatAblePurchases.ToString("N0")</strong>
+                            <span class="vat-kpi-caption">Annual taxable purchases</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+
+                        <article class="vat-kpi-card vat-kpi-recovery">
+                            <div class="vat-kpi-heading">
+                                <span>VAT Recovery Rate</span>
+                                <span class="vat-kpi-icon"><i class="bi bi-percent"></i></span>
+                            </div>
+                            <strong class="vat-kpi-value">@VatRecoveryRate.ToString("N1")%</strong>
+                            <span class="vat-kpi-caption">Input VAT as % of output VAT</span>
+                            <span class="vat-kpi-decoration"></span>
+                        </article>
+                    </section>
+
+                    <div class="vat-table-card">
+                        <div class="table-responsive">
+                        <table class="table vat-schedule-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-line-item">Line Item</th>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <th class="text-end">M@i</th>
+                                    }
+                                    <th class="text-end">Total</th>
+                                    <th class="text-center col-action">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Base Engine Projections -->
+                                <tr>
+                                    <td class="fw-semibold text-dark">Gross Sales (Revenue)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-muted">@GetMonthlyValue(Sales, i).ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@GetTotal(Sales).ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-dark">Taxable Purchases</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-muted">@GetMonthlyValue(Purchases, i).ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@GetTotal(Purchases).ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-dark">Operating Expenses</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-muted">@GetMonthlyValue(Expenses, i).ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@GetTotal(Expenses).ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+
+                                <tr class="table-divider-row"><td colspan="15"></td></tr>
+
+                                <!-- Calculated VAT -->
+                                <tr>
+                                    <td class="text-secondary">Output VAT (Calculated)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-secondary">@CalcOutput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end text-secondary">@CalcOutput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Input VAT (Calculated)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end text-secondary">@CalcInput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end text-secondary">@CalcInput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-secondary">Net VAT Payable (Calc)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-bold text-secondary">@CalcNet[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-secondary">@CalcNet.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+
+                                <tr class="table-section-header">
+                                    <td colspan="15">ADJUSTED VAT SCHEDULE (FOR PAYMENT & CASHFLOW)</td>
+                                </tr>
+
+                                <!-- Adjusted VAT Rows -->
+                                <tr>
+                                    <td class="fw-semibold text-marble">Adjusted Output VAT</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-semibold text-dark">@AdjOutput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@AdjOutput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold text-marble">Adjusted Input VAT</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-semibold text-dark">@AdjInput[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-dark">@AdjInput.Sum().ToString("N0")</td>
+                                    <td></td>
+                                </tr>
+                                <tr class="table-highlight-row">
+                                    <td class="fw-bold text-marble">Net Payable (Adjusted)</td>
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        <td class="text-end fw-bold text-marble">@AdjNet[i].ToString("N0")</td>
+                                    }
+                                    <td class="text-end fw-bold text-marble">@AdjNet.Sum().ToString("N0")</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-marble" @onclick="OpenAdjustmentOffCanvas">
+                                            <i class="bi bi-sliders"></i> Adjust VAT
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+        @* <div class="col-xl-2 col-lg-3 col-12 documentation-sidebar">
+
+            <RightSummary01 />
+
+        </div> *@
+    </div>
+
+    <CashflowMainPagesComponent AssessmentId="@AssessmentId" />    
+
+</div>
+
+    <footer class="py-2 bg-light mt-3">
+        <BFooter />
+    </footer>

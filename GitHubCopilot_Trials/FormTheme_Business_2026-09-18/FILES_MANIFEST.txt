@@ -1,0 +1,15 @@
+SHARED FORM THEME - BUSINESS FORM FILE MANIFEST
+Generated: 2026-09-18
+
+NEW
+ViabilityIQ.Web\wwwroot\css\data-entry-forms.css
+
+REPLACE
+ViabilityIQ.Web\Components\Pages\PageFormComponents\BusinessFormComponent.razor
+ViabilityIQ.Web\Components\Pages\PageFormComponents\BusinessFormComponent.razor.cs
+
+MANUAL MERGE
+ViabilityIQ.Web\Components\App.razor
+Add: <link rel="stylesheet" href="/css/data-entry-forms.css" />
+
+TOTAL PRODUCTION FILES: 3

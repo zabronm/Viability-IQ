@@ -1,0 +1,16 @@
+ASSESSMENT REPORTS - ADJUSTMENTS-ONLY FILE MANIFEST
+Generated: 2026-09-18
+
+NEW
+ViabilityIQ.Shared\Reporting\ProjectPeriodMapper.cs
+
+REPLACE
+ViabilityIQ.Shared\Reporting\ReportModels.cs
+ViabilityIQ.Database\Reporting\AssessmentReportService.cs
+ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor
+ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor.cs
+ViabilityIQ.Web\Components\Reporting\AssessmentReportRenderer.razor
+ViabilityIQ.Web\Components\Reporting\AssessmentReportRenderer.razor.css
+ViabilityIQ.Web\wwwroot\scripts\reportOutput.js
+
+TOTAL PRODUCTION FILES: 8

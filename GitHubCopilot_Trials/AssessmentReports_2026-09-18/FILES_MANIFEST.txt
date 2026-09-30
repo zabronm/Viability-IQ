@@ -1,0 +1,68 @@
+ASSESSMENT REPORTING FRAMEWORK (ACTIVITY LOG) - FILES MANIFEST
+Generated: 2026-09-18
+
+Legend: NEW = copy; REPLACE = review local changes before replacing;
+MERGE = apply the documented snippet only.
+
+NEW      ViabilityIQ.Database\Interfaces\IAssessmentReportService.cs
+         Size: 414 | SHA256: F8EAE5C03136702FF94AE9123A5F9899744746AD3A012C740F1F8D3FD8A53B94
+REPLACE  ViabilityIQ.Database\Interfaces\IEmailReportingService.cs
+         Size: 354 | SHA256: 85F98259B46CDD47AB7D0A4568B2127A1B7136E5C17147E43995D813F47B51CC
+NEW      ViabilityIQ.Database\Reporting\AssessmentReportService.cs
+         Size: 25667 | SHA256: 2A4B0C9860AD74019F066633B53C25795AF52B663664CC251B45FF3EEB566073
+NEW      ViabilityIQ.Database\Reporting\OpenXmlReportWorkbookWriter.cs
+         Size: 11631 | SHA256: 6CEBC7AA8111232DBA5ABE010B553325BE7D0C041CD4E80D64EE66F3AC50A3F8
+REPLACE  ViabilityIQ.Infrastructure\Reporting\EmailReportingService.cs
+         Size: 4564 | SHA256: 89843E6A65B12A8FC38489665A9A491FEEB40377A38435D2749F9BC7903077DD
+NEW      ViabilityIQ.Shared\Reporting\ReportCatalogue.cs
+         Size: 1695 | SHA256: 916BC6B50E473C2D6B56678FE525DA7A5BDA9A8BF6F7C0DC01E7412FF81513A4
+NEW      ViabilityIQ.Shared\Reporting\ProjectPeriodMapper.cs
+         Size: 2017 | SHA256: B9D846A8EAA9D0A4A7D955A752D0CC55D0927A85EB36810FBB83F926A1F8F77C
+NEW      ViabilityIQ.Shared\Reporting\ReportModels.cs
+         Size: 2337 | SHA256: 687E1B4E200EE3CC18388610D6DBFE705002F5EE7BE96762A70C9DE4D35CBFC9
+REPLACE  ViabilityIQ.Shared\SharedModels\EmailReportRequest.cs
+         Size: 735 | SHA256: 97AA86CEB1381C22583E47DBD607693B89A84E724A0AC6798A82731B57B80480
+REPLACE  ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor
+         Size: 4299 | SHA256: 9C46F6B59C395742A7B7FE31CEB5518B745483932930EBFE1FCDE1AE1699AB01
+REPLACE  ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor.cs
+         Size: 13426 | SHA256: 9F6C2E6A614A06437DD27B4D8632575F56A1C082F797068317015029AEC69F01
+NEW      ViabilityIQ.Web\Components\Pages_Assessments\AssessmentReportsPage.razor.css
+         Size: 3358 | SHA256: C35A01A8F518B552275106BE6B007D4217D9A6C1E445803B4F062FA448DD7B29
+NEW      ViabilityIQ.Web\Components\Reporting\AssessmentReportRenderer.razor
+         Size: 4882 | SHA256: 68E4A0EDF305728523D47788B74874E621F9481F393860817365F85A9A7BCD26
+NEW      ViabilityIQ.Web\Components\Reporting\AssessmentReportRenderer.razor.css
+         Size: 4227 | SHA256: E6203E34B539A4F931318129375350B0B8DA7C0D8F2D89F0614961B6AB6CA62F
+NEW      ViabilityIQ.Web\Components\Reporting\EmailReportSubmitRequest.cs
+         Size: 149 | SHA256: 0C40BE283101A11C7AA38A0DD228710CC14084B4409087CBAC7AAC2ECA6E2363
+NEW      ViabilityIQ.Web\Components\Reporting\ReportEmailModal.razor
+         Size: 4017 | SHA256: FB7A28B0E53E6CD1D38B2C43D081665EDEC717551ECA196898FD85DE9E9D561E
+NEW      ViabilityIQ.Web\Components\Reporting\ReportEmailModal.razor.css
+         Size: 1245 | SHA256: 4B8137A534434E90EA4BEEDF3BC7AAA915B95D851767808A71B51FE9C62C27F0
+NEW      ViabilityIQ.Web\Components\Reporting\ReportOutputMenu.razor
+         Size: 2109 | SHA256: 59B0E353348B44105EA1991022792294BB4A3249EC2155F67925B448E80DBA2F
+NEW      ViabilityIQ.Web\Components\Reporting\ReportOutputMenu.razor.css
+         Size: 310 | SHA256: CC5E786DE7A7A6DEA0B66B38A7BF5912A06F52B0ECFB9FAE7C4B50F2DE96B5C5
+NEW      ViabilityIQ.Web\wwwroot\scripts\reportOutput.js
+         Size: 2903 | SHA256: D08A1340560324A9AB163358E1C91A2598321E5192C87280D2155AE09EA5CB9D
+
+MERGE    ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+MERGE    ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+MERGE    ViabilityIQ.Web\Components\App.razor
+MERGE    appsettings/environment email configuration
+
+PREREQUISITE
+The previously deployed ActivityLog implementation and dbo.tblActivityLog.
+
+NOT INCLUDED OR REQUIRED
+- No report-specific database migration
+- No tblReportActivity
+- No IReportActivityRepository
+- No ReportActivityRepository
+- No project or NuGet dependency change
+- Existing ViabilityIQ.Web\wwwroot\viabilityIQ_icon.png is reused and not duplicated
+
+Package documents:
+DEPLOYMENT_INSTRUCTIONS.txt
+MANUAL_EXISTING_FILE_MERGE.txt
+VALIDATION_RESULTS.txt
+FILES_MANIFEST.txt

@@ -1,0 +1,38 @@
+CASHFLOW INCOME TYPE CLASSIFICATION PACKAGE
+===========================================
+
+Shared financial models
+-----------------------
+Files\ViabilityIQ.Shared\FinancialModels\IncomeSourceClassification.cs
+  Maps active tblIncomeType names to stable cashflow income classifications.
+
+Files\ViabilityIQ.Shared\FinancialModels\CashflowProjectionModels.cs
+  Adds monthly and annual fields for each income source plus VAT-inclusive
+  profit-summary values.
+
+Cashflow engine
+---------------
+Files\ViabilityIQ.Database\FinancialCalculations\CashflowProjectionService.cs
+  Loads active tblIncomeType rows and passes them to the calculator.
+
+Files\ViabilityIQ.Database\FinancialCalculations\CashflowProjectionCalculator.cs
+  Separates Sales, Asset Disposal, Grants/Donations, Sundry and Other income;
+  corrects debtor, COGS, profit, cash inflow, ratio, and disposal behaviour.
+
+Files\ViabilityIQ.Database\FinancialCalculations\CashflowEngine.cs
+  Corrects compatibility DTO/entity totals to include all additional income.
+
+Cashflow UI
+-----------
+Files\ViabilityIQ.Web\Components\Pages_Assessments\ProjectionComponents\CashflowSummaryDashboardComponent.razor
+Files\ViabilityIQ.Web\Components\Pages_Assessments\ProjectionComponents\CashflowSummaryDashboardComponent.razor.css
+  Implements the requested VAT-inclusive profit summary.
+
+Files\ViabilityIQ.Web\Components\Pages_Assessments\ProjectionComponents\DetailedCashflowStatementComponent.razor
+  Displays each classified income source separately in monthly cash inflows and
+  VAT-exclusive profit lines.
+
+Documentation
+-------------
+IMPLEMENTATION_INSTRUCTIONS.txt
+FILES_MANIFEST.txt

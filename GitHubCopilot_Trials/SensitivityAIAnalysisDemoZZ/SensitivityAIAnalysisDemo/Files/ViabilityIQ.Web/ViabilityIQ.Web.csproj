@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ViabilityIQ-SensitivityAI-Demo</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Components\CommonComponents\NewFolder\**" />
+    <Compile Remove="Components\Pages\NewFolder\**" />
+    <Content Remove="Components\CommonComponents\NewFolder\**" />
+    <Content Remove="Components\Pages\NewFolder\**" />
+    <EmbeddedResource Remove="Components\CommonComponents\NewFolder\**" />
+    <EmbeddedResource Remove="Components\Pages\NewFolder\**" />
+    <None Remove="Components\CommonComponents\NewFolder\**" />
+    <None Remove="Components\Pages\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Components\Pages\ReportsPage.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\AssetFormComponents\AssetMovementsListComponent.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\CommonComponents\CashFlowSummaryDetailComponent.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\CommonComponents\ConsolidatedRevenueAnalysisComponent.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor.cs" />
+    <Compile Remove="Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor.cs" />
+    <Compile Remove="Extensions\AuthenticationServiceExtension.cs" />
+    <Compile Remove="Extensions\DatabaseServiceExtension.cs" />
+    <Compile Remove="Extensions\IdentityCoreExtension.cs" />
+    <Compile Remove="Extensions\IdentityServiceExtension.cs" />
+    <Compile Remove="Extensions\ServiceIdentityCollectionExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Components\CommonComponents\BFooter.razor" />
+    <Content Remove="Components\Pages\AppInitializer.razor" />
+    <Content Remove="Components\Pages_Assessments\AssetFormComponents\AssetMovementsListComponent.razor" />
+    <Content Remove="Components\Pages_Assessments\CommonComponents\CashFlowSummaryDetailComponent.razor" />
+    <Content Remove="Components\Pages_Assessments\CommonComponents\ConsolidatedRevenueAnalysisComponent.razor" />
+    <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor" />
+    <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor" />
+    <Content Remove="wwwroot\css\AssessmentSettings.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Components\Pages\AppInitializer.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\Pages\ReportsPage.razor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\AssessmentSettings.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazor.Bootstrap" Version="3.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.29" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.29" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.29">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ViabilityIQ.Database\ViabilityIQ.Application.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Infrastructure\ViabilityIQ.Infrastructure.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Modules\ViabilityIQ.Modules.csproj" />
+    <ProjectReference Include="..\ViabilityIQ.Shared\ViabilityIQ.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

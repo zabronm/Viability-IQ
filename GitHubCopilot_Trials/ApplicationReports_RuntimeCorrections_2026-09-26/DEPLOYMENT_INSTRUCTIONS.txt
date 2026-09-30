@@ -1,0 +1,225 @@
+VIABILITYIQ APPLICATION REPORTS AND RUNTIME CORRECTIONS
+Package date: 2026-09-26
+Route: /settings/reports
+
+PURPOSE
+-------
+This consolidated package is rebased against the synchronized source supplied after
+ErrorsAterReports.txt. It completes the application-level Reports page and corrects
+the independent runtime faults shown in that trace.
+
+CONFIRMED SOURCE/DEPLOYMENT MISMATCH
+------------------------------------
+The synchronized source did not contain the operational Reports files or the complete
+Identity concurrency correction from the earlier package. It also contained unresolved
+Git merge markers in ViabilityIQ.Web\Components\App.razor. Those markers are a build
+error and confirm that at least one incorrectly merged file was copied.
+
+CORRECTIONS INCLUDED
+--------------------
+- Removes all merge markers from App.razor while preserving the data-entry and website
+  stylesheets plus the asset-detail chart script from both sides of the merge.
+- Uses Dapper/claims instead of circuit-scoped UserManager reads during rendering.
+- Initializes a missing active tenant even when another component has already populated
+  the authenticated user session.
+- Holds tenant-aware page content behind a tenant-session readiness gate.
+- Corrects dashboard assessment queries to use CaseNumber, CreatedBy, StatusId,
+  AssessmentFinishDate and the actual assessment dashboard route.
+- Corrects top-performer joins from tblApplicationUsers.Id to UserId.
+- Prevents the operational report WHERE keyword and first predicate from being
+  concatenated as invalid SQL (`WHEREassessment`).
+- Adds the missing announcement and alert-dismissal tables.
+- Includes the complete application-level Reports page and its tenant authorization
+  dependencies.
+
+REPORTS INCLUDED
+----------------
+1. Assessment Register
+   Detailed authorised assessment records with case, business, client, branch,
+   advisor, status, readiness, start date and age.
+
+2. Workflow & Readiness
+   Operational monitoring of workflow status, readiness, last activity and cases
+   that have remained open.
+
+3. Advisor Performance
+   Management summary by assessment creator, including workload, lifecycle counts,
+   average readiness and completion rate.
+
+4. Branch Performance
+   Management summary by the branch assigned to each assessment creator.
+
+FILTERS
+-------
+- Search by case number, business, client, branch or advisor.
+- Branch.
+- Assessment status.
+- Advisor / Created By.
+- Assessment start date from and to.
+- Active assessments only.
+
+OUTPUT
+------
+The existing ReportOutputMenu and ReportEmailModal components are reused.
+Every report can:
+- Export a generated PDF.
+- Export an Excel workbook.
+- Send the Excel workbook by email.
+
+Email uses the existing EmailSettings configuration and IEmailReportingService.
+
+AUTHORIZATION
+-------------
+- The page requires an authenticated user.
+- Every query requires an active tenant membership and active subscription.
+- Tenant Owner and Tenant Administrator can report across the active tenant.
+- Branch Manager and Viewer see only assessments created by them or explicitly
+  granted to their membership, matching Broad Tenant Authorization rules.
+- Billing Manager alone does not receive operational reporting access.
+- All SQL enforces TenantId and record-scope predicates before applying filters.
+- The MainLayout Reports link is hidden when the active membership has no
+  operational read permission.
+- Exports and email contain only the already-authorised filtered result set.
+
+PREREQUISITES
+-------------
+The SaaSTenancyFoundation_2026-09-25 database migration must already be deployed.
+This package includes the authorization service/model files needed by Reports, but it
+does not repeat every repository replacement in BroadTenantAuthorization_2026-09-26.
+
+The existing generic PDF, Excel, email and report-output JavaScript services must
+remain deployed.
+
+DATABASE
+--------
+Run this idempotent script before starting the updated application:
+
+  DatabaseScripts\2026-09-26_DashboardAnnouncements.sql
+
+It creates:
+- dbo.SystemAnnouncements
+- dbo.UserAnnouncementDismissals
+- dbo.UserAlertDismissals
+
+APPLICATION FILES
+-----------------
+Back up all target files before deployment. Copy or merge files from Files into
+the solution root while preserving their relative paths.
+
+New files:
+- DatabaseScripts\2026-09-26_DashboardAnnouncements.sql
+- ViabilityIQ.Shared\DataModels\SecurityDataModels\TenantAuthorizationModels.cs
+- ViabilityIQ.Shared\Reporting\OperationalReportsModels.cs
+- ViabilityIQ.Database\Interfaces\ITenantAuthorizationService.cs
+- ViabilityIQ.Database\Interfaces\IOperationalReportsService.cs
+- ViabilityIQ.Infrastructure\Repositories\TenantAuthorizationService.cs
+- ViabilityIQ.Infrastructure\Repositories\OperationalReportsService.cs
+- ViabilityIQ.Web\Components\Pages\SystemReports.razor.css
+
+Existing files to merge/replace:
+- ViabilityIQ.Web\Components\App.razor
+- ViabilityIQ.Database\ServicesMisc\AuthenticationService.cs
+- ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AssessmentRepository.cs
+- ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AlertRepository.cs
+- ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\InsightsRepository.cs
+- ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AnnouncementRepository.cs
+- ViabilityIQ.Infrastructure\Repositories\HomePageRepositories\AlertDismissalService.cs
+- ViabilityIQ.Web\Components\Pages\SystemReports.razor
+- ViabilityIQ.Web\Components\Pages\SystemReports.razor.cs
+- ViabilityIQ.Web\Components\Pages\Identity\ProfileDropdownComponent.razor
+- ViabilityIQ.Web\Components\Layout\MainLayout.razor
+- ViabilityIQ.Web\Components\Layout\MainLayout.razor.cs
+- ViabilityIQ.Infrastructure\Extensions\ServiceCollectionExtensions.cs
+
+IMPORTANT SERVICE-REGISTRATION NOTE
+-----------------------------------
+This package does not include or replace:
+
+  ViabilityIQ.Database\ExtensionServices\ServiceCollectionExtensions.cs
+
+That is the application-layer file containing Gemini and Groq registrations.
+Leave its Groq section unchanged.
+
+These infrastructure registrations are required. If merging manually, add them inside
+AddInfrastructureServices(), before return services:
+
+  services.AddScoped<IOperationalReportsService, OperationalReportsService>();
+  services.AddScoped<ITenantAuthorizationService, TenantAuthorizationService>();
+
+The required namespaces are already present in the packaged infrastructure file:
+
+  using ViabilityIQ.Application.Interfaces;
+  using ViabilityIQ.Infrastructure.Repositories;
+
+MAINLAYOUT MERGE
+----------------
+The existing Reports NavLink already targets /settings/reports. The package wraps
+that NavLink in:
+
+  @if (CanViewOperationalReports)
+  {
+      ...existing Reports NavLink...
+  }
+
+MainLayout.razor.cs adds:
+- ITenantAuthorizationService injection.
+- CanViewOperationalReports state.
+- RefreshReportAccessAsync().
+- Calls after session initialization and active-session changes.
+
+Preserve any later navigation or badge changes when merging.
+
+IDENTITY DBCONTEXT CONCURRENCY CORRECTION
+-----------------------------------------
+Blazor components share scoped services for the lifetime of a circuit. The old
+MainLayout and profile dropdown could start concurrent UserManager queries against
+the same scoped IdentityDbContext during initial rendering, producing:
+
+  A second operation was started on this context instance before a previous
+  operation completed.
+
+The included correction:
+- Uses IUserRepository's independent Dapper connection for render-time current-user
+  profile reads in AuthenticationService.
+- Removes render-time UserManager queries from ProfileDropdownComponent.
+- Reads the displayed Identity role from the authenticated principal's role claim.
+- Preserves UserManager for sequential Identity write operations such as login,
+  registration, password and account management.
+- Preserves tenancy initialization in MainLayout before resolving report access.
+
+BUILD
+-----
+From the solution root:
+
+  dotnet restore .\ViabilityIQ.sln
+  dotnet build .\ViabilityIQ.sln --no-restore
+
+If the build reports RZ9980 errors in App.razor, the corrected App.razor was not copied
+or unresolved conflict-marker lines remain.
+
+VALIDATION
+----------
+1. Sign in as Tenant Owner or Tenant Administrator.
+2. Confirm Reports appears in MainLayout and opens /settings/reports.
+3. Confirm tenant-wide branch and advisor choices appear.
+4. Verify search, status, branch, advisor and start-date filters.
+5. Confirm the four report views reconcile to the same filtered assessment set.
+6. Export each report to PDF and Excel.
+7. Configure EmailSettings and send each report to a controlled test recipient.
+8. Sign in as Branch Manager and Viewer.
+9. Confirm only self-created or explicitly granted assessments appear.
+10. Confirm branch/advisor filter lists do not disclose unauthorised records.
+11. Sign in with only Billing Manager access.
+12. Confirm the Reports navigation link is hidden and direct access is denied.
+13. Switch active tenants and confirm the report data and filter choices change.
+14. Open Home and confirm recent assessments, urgent/upcoming alerts and top performers
+    load without invalid-column errors.
+15. Dismiss and restore an assessment alert, then dismiss an announcement.
+
+VALIDATION PERFORMED
+--------------------
+- Cumulative solution build completed with 0 errors.
+- Dependency resolution completed successfully.
+- /settings/reports resolves as a single protected endpoint.
+- Unauthenticated access redirects to login with ReturnUrl preserved.
+- No Groq or Gemini service-registration file is included in this package.

@@ -1,0 +1,64 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.AssumptionComponents
+
+<section class="apr-card" aria-labelledby="apr-title">
+    <header>
+        <div>
+            <span>Projection readiness</span>
+            <h2 id="apr-title">Baseline completeness review</h2>
+        </div>
+        <div class="apr-actions">
+            @if (!IsLoading)
+            {
+                <span class="apr-status apr-status-@StatusClass">@ReadinessStatus</span>
+                <strong>@ReadinessScore%</strong>
+            }
+            <button type="button" class="apr-print" disabled="@IsLoading" @onclick="PrintAsync" title="Print readiness report">
+                <i class="bi bi-printer"></i>
+            </button>
+        </div>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="apr-state"><span class="spinner-border spinner-border-sm"></span> Checking baseline inputs...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="apr-state apr-error"><i class="bi bi-exclamation-triangle"></i> @ErrorMessage</div>
+    }
+    else
+    {
+        <div class="apr-progress" role="progressbar" aria-valuenow="@ReadinessScore" aria-valuemin="0" aria-valuemax="100">
+            <span class="apr-progress-@StatusClass" style="@($"width:{ReadinessScore}%")"></span>
+        </div>
+
+        <div class="apr-summary">
+            <span><i class="bi bi-check-circle-fill"></i>@Checks.Count(check => check.Passed) complete</span>
+            <span><i class="bi bi-exclamation-triangle-fill"></i>@Checks.Count(check => !check.Passed) needing attention</span>
+            <button type="button" @onclick="ToggleDetails">
+                @(ShowDetails ? "Hide checklist" : "View checklist")
+                <i class="bi @(ShowDetails ? "bi-chevron-up" : "bi-chevron-down")"></i>
+            </button>
+        </div>
+
+        @if (ShowDetails)
+        {
+            <div class="apr-check-grid">
+                @foreach (var check in Checks)
+                {
+                    <article class="apr-check @(check.Passed ? "apr-check-pass" : check.Required ? "apr-check-required" : "apr-check-warning")">
+                        <i class="bi @(check.Passed ? "bi-check-circle-fill" : check.Required ? "bi-x-circle-fill" : "bi-exclamation-circle-fill")"></i>
+                        <div>
+                            <strong>@check.Title</strong>
+                            <p>@check.Message</p>
+                            @if (!check.Passed)
+                            {
+                                <small>@check.Action</small>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    }
+</section>

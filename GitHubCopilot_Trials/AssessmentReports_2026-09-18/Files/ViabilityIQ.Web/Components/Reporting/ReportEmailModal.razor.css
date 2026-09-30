@@ -1,0 +1,12 @@
+.rem-backdrop { position: fixed; inset: 0; z-index: 1080; display: grid; place-items: center; padding: 1rem; background: rgba(9,29,46,.62); }
+.rem-dialog { width: min(36rem,100%); overflow: hidden; border-radius: .75rem; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.28); }
+.rem-dialog header { display:flex; justify-content:space-between; align-items:center; padding:.85rem 1rem; background:#12324a; color:#fff; }
+.rem-dialog header span { color:#8bd7d2; font-size:.58rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.rem-dialog h2 { margin:.1rem 0 0; font-size:.95rem; }
+.rem-dialog header button { border:0; background:transparent; color:#fff; font-size:1.5rem; }
+.rem-body { display:grid; gap:.35rem; padding:1rem; }
+.rem-body label { margin-top:.25rem; color:#324d62; font-size:.66rem; font-weight:800; text-transform:uppercase; }
+.rem-body .validation-message { color:#b42318; font-size:.65rem; }
+.rem-attachment { margin-top:.5rem; padding:.55rem; border:1px solid #cde6df; border-radius:.4rem; background:#f1faf7; color:#246455; font-size:.68rem; }
+.rem-dialog footer { display:flex; justify-content:flex-end; gap:.5rem; padding:.75rem 1rem; border-top:1px solid #e5edf2; background:#f8fafc; }
+

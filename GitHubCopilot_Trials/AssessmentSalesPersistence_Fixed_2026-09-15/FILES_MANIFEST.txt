@@ -1,0 +1,13 @@
+ASSESSMENT SALES PERSISTENCE FIX
+================================
+
+Files\ViabilityIQ.Web\Components\Pages_Assessments\PageFormComponents\IncomeSalesFormComponent.razor.cs
+  Loads the complete existing entity before editing and preserves category,
+  active, audit, and VAT fields.
+
+Files\ViabilityIQ.Modules\Database_Sql\RepairAssessmentSalesCategoryLinks.sql
+  Repairs already-corrupted category links, active flags, income types, and
+  annual totals for a selected assessment.
+
+IMPLEMENTATION_INSTRUCTIONS.txt
+FILES_MANIFEST.txt
