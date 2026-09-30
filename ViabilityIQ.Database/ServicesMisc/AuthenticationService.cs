@@ -197,6 +197,62 @@ namespace ViabilityIQ.Application.ServicesMisc
 
         #endregion
 
+        public async Task<AuthResult> UpdateProfileAsync(
+            ClaimsPrincipal principal,
+            RegisterRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(principal);
+            ArgumentNullException.ThrowIfNull(request);
+
+            var result = new AuthResult();
+            try
+            {
+                var userIdValue = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!long.TryParse(userIdValue, out var userId) || userId <= 0)
+                {
+                    result.Messages.Add("Your authenticated user profile could not be resolved.");
+                    return result;
+                }
+
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user is null || !user.IsActive)
+                {
+                    result.Messages.Add("Your active user profile could not be found.");
+                    return result;
+                }
+
+                user.FirstName = request.FirstName.Trim();
+                user.LastName = request.LastName.Trim();
+                user.PhoneNumber = request.PhoneNumber?.Trim();
+                user.Department = request.Department?.Trim() ?? string.Empty;
+                user.JobTitle = request.JobTitle?.Trim() ?? string.Empty;
+                user.Address = request.Address?.Trim();
+                user.City = request.City?.Trim();
+                user.Country = request.Country?.Trim();
+                user.ProvinceId = request.ProvinceId;
+
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    result.Messages.AddRange(updateResult.Errors.Select(error => error.Description));
+                    return result;
+                }
+
+                result.Success = true;
+                result.UserId = user.Id;
+                result.Email = user.Email ?? string.Empty;
+                result.FirstName = user.FirstName;
+                result.Messages.Add("Profile updated successfully.");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Profile update failed for the authenticated user");
+                result.Messages.Add("An unexpected error occurred while updating your profile.");
+                return result;
+            }
+        }
+
         #region Login
 
        

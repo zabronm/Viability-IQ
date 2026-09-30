@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Application.ServicesMisc;
 using ViabilityIQ.Infrastructure.Data;
@@ -116,6 +117,7 @@ namespace ViabilityIQ.Web.Extensions
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITenantUserManagementService, TenantUserManagementService>();
 
             services.AddHttpContextAccessor();
 

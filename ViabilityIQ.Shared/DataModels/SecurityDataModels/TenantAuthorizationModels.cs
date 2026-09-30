@@ -21,6 +21,8 @@ public sealed class TenantAccessContext
     public long TenantId { get; init; }
     public long UserId { get; init; }
     public long MembershipId { get; init; }
+    public long? BranchId { get; init; }
+    public string BranchName { get; init; } = "Unassigned";
     public IReadOnlySet<string> RoleCodes { get; init; } = new HashSet<string>();
     public bool CanReadAllOperationalRecords { get; init; }
     public bool CanWriteAllOperationalRecords { get; init; }

@@ -6,6 +6,7 @@ using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Extensions;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.Identity;
 
@@ -17,6 +18,7 @@ public partial class Register : ComponentBase
     [Inject] public CustomAuthenticationStateProvider AuthStateProvider { get; set; } = default!;
     [Inject] public ILogger<Register> Logger { get; set; } = default!;
     [Inject] public IGenericDataRepository<Province> ProvinceRepository { get; set; } = default!;
+    [Inject] public ToastService ToastService { get; set; } = default!;
 
     public RegisterRequest RegisterRequest { get; set; } = new();
     public string ErrorMessage { get; set; } = string.Empty;
@@ -82,9 +84,22 @@ public partial class Register : ComponentBase
 
     private async Task LoadUserProfileDataAsync(System.Security.Claims.ClaimsPrincipal user)
     {
-        RegisterRequest.Email =
-            user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
-        await Task.CompletedTask;
+        var applicationUser = await AuthService.GetCurrentUserAsync(user);
+        if (applicationUser is null)
+            throw new InvalidOperationException("The authenticated user profile could not be resolved.");
+
+        RegisterRequest.FirstName = applicationUser.FirstName;
+        RegisterRequest.LastName = applicationUser.LastName;
+        RegisterRequest.Email = applicationUser.Email ?? string.Empty;
+        RegisterRequest.PhoneNumber = applicationUser.PhoneNumber ?? string.Empty;
+        RegisterRequest.Department = applicationUser.Department;
+        RegisterRequest.JobTitle = applicationUser.JobTitle;
+        RegisterRequest.DateOfBirth =
+            applicationUser.DateOfBirth == default ? null : applicationUser.DateOfBirth;
+        RegisterRequest.Address = applicationUser.Address;
+        RegisterRequest.City = applicationUser.City;
+        RegisterRequest.Country = applicationUser.Country;
+        RegisterRequest.ProvinceId = applicationUser.ProvinceId ?? 0;
     }
 
     public async Task HandleFormSubmit()
@@ -102,9 +117,21 @@ public partial class Register : ComponentBase
         {
             if (IsEditProfileMode)
             {
-                // Profile persistence is not implemented in the supplied component.
-                // Do not write a success-shaped activity until a real update succeeds.
-                ErrorMessage = "Profile editing has not yet been connected to a persistence service.";
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var updateResult = await AuthService.UpdateProfileAsync(
+                    authState.User,
+                    RegisterRequest);
+                if (!updateResult.Success)
+                {
+                    ToastService.ShowError(
+                        updateResult.Messages.Any()
+                            ? string.Join(" ", updateResult.Messages)
+                            : "Your profile could not be updated.",
+                        "Profile Update Failed");
+                    return;
+                }
+
+                ToastService.ShowSuccess("Your profile was updated successfully.", "Profile Updated");
                 return;
             }
 

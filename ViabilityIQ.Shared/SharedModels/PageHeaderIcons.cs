@@ -34,7 +34,9 @@
         LoanTypes,
         IncomeTypes,
         ExpenseTypes,
+        Budgets,
         Home,
+        Sensitivity,
     }
 
     public static class PageHeaderIcons
@@ -77,6 +79,8 @@
             PageType.ClientTypes => "bi bi-people-fill",
             PageType.IncomeTypes => "bi bi-diagram-3-fill",
             PageType.ExpenseTypes => "bi bi-palette2",   
+            PageType.Budgets => "bi bi-calculator",
+            PageType.Sensitivity => "bi bi-binoculars-fill",
 
             _ => "bi bi-circle"
         };

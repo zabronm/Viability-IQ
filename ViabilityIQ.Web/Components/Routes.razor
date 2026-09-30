@@ -8,18 +8,11 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using ViabilityIQ.Web.Components.Layout
+@using ViabilityIQ.Web.Components.Shared
 
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-            <NotAuthorized>
-                <div class="alert alert-warning m-4">
-                    <h4>Access Denied</h4>
-                    <p>You must be logged in to access this page.</p>
-                    <a href="/login" class="btn btn-primary">Go to Login</a>
-                </div>
-            </NotAuthorized>
-        </AuthorizeRouteView>
+        <ForcedPasswordRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>

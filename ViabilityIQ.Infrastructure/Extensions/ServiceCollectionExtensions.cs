@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
 
         //=========== 
         services.AddScoped<IAssessmentReadinessService, AssessmentReadinessService>();
+        services.AddScoped<IAssessmentBudgetService, AssessmentBudgetService>();
 
         return services;
     }

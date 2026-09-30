@@ -157,23 +157,26 @@
                                 </div>
                             </a>
 
-                            @* ===============/settings/users ====================== *@
-                            <a href="settings/users" class="settings-icon-card row-layout">
-                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-person-badge-fill"></i></div>
-                                <div class="settings-card-body">
-                                    <span class="settings-card-label">Users</span>
-                                    <p class="settings-card-narration">System operator access accounts.</p>
-                                </div>
-                            </a>
+                            @if (CanManageTenantSecurity)
+                            {
+                                @* ===============/settings/users ====================== *@
+                                <a href="/settings/users" class="settings-icon-card row-layout">
+                                    <div class="settings-icon-avatar alt-avatar"><i class="bi bi-person-badge-fill"></i></div>
+                                    <div class="settings-card-body">
+                                        <span class="settings-card-label">Users</span>
+                                        <p class="settings-card-narration">Tenant accounts, branches, access status and subscribed seats.</p>
+                                    </div>
+                                </a>
 
-                            @* ===============/settings/roles ====================== *@
-                            <a href="settings/roles" class="settings-icon-card row-layout">
-                                <div class="settings-icon-avatar alt-avatar"><i class="bi bi-key-fill"></i></div>
-                                <div class="settings-card-body">
-                                    <span class="settings-card-label">User Groups / Roles</span>
-                                    <p class="settings-card-narration">Permission sets and access profiles.</p>
-                                </div>
-                            </a>
+                                @* ===============/settings/roles ====================== *@
+                                <a href="/settings/roles" class="settings-icon-card row-layout">
+                                    <div class="settings-icon-avatar alt-avatar"><i class="bi bi-key-fill"></i></div>
+                                    <div class="settings-card-body">
+                                        <span class="settings-card-label">User Groups / Roles</span>
+                                        <p class="settings-card-narration">Protected tenant roles and member access profiles.</p>
+                                    </div>
+                                </a>
+                            }
 
                             @* ===============/settings/provinces ====================== *@
                             <a href="settings/provinces" class="settings-icon-card row-layout">

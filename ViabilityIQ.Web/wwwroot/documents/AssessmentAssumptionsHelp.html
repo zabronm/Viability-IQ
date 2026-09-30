@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Assessment Assumptions, Baseline &amp; Sensitivity Analysis Help</title>
+<title>Viability.IQ Assessment, Budgeting &amp; Tenant Administration User Guide</title>
 <style>
 @page{size:A4;margin:16mm}
 body{font-family:Arial,sans-serif;color:#243b4a;font-size:10pt;line-height:1.45}
@@ -27,10 +27,10 @@ footer{margin-top:20px;color:#718294;font-size:8pt}
 </style>
 </head>
 <body>
-<h1>Assessment Assumptions, Baseline &amp; Sensitivity Analysis</h1>
-<p class="lead">Practical guidance for preparing and testing a credible 12-month SME projection.</p>
-<p>This guide explains how to prepare the assessment baseline and use Sensitivity Analysis to test how changes in key assumptions could affect profitability, liquidity and viability. It supports government-programme assessment and management discussion; it is not a substitute for audited accounts, professional tax advice or a guarantee of future performance.</p>
-<div class="note"><strong>Recommended sequence:</strong> capture verified opening facts, enter reasonable baseline assumptions, review readiness, confirm the baseline, and then use Sensitivity Analysis to test uncertainty without changing the approved assessment records.</div>
+<h1>Viability.IQ Assessment, Budgeting &amp; Tenant Administration</h1>
+<p class="lead">Practical guidance for registration, tenant administration and preparing a credible 12-month SME projection and budget.</p>
+<p>This guide explains registration and subscription workspaces, tenant user administration, assessment baseline preparation, Sensitivity Analysis and assessment-linked budgeting. It supports government-programme assessment and management discussion; it is not a substitute for audited accounts, professional tax advice or a guarantee of future performance.</p>
+<div class="note"><strong>Recommended sequence:</strong> capture verified opening facts, enter reasonable baseline assumptions, review readiness, confirm the baseline, test uncertainty with Sensitivity Analysis, and then create the assessment budget for management approval and monitoring.</div>
 
 <h2>1. Opening Position</h2>
 <table><tr><th>Setting</th><th>How it supports projections</th></tr>
@@ -220,6 +220,245 @@ footer{margin-top:20px;color:#718294;font-size:8pt}
 <li>Export or print the final analysis for the assessment record.</li>
 </ol>
 
+<div class="page"></div>
+<h2>9. Using the Assessment Budget</h2>
+<p>The Budgeting module converts the current assessment projection into a controlled 12-month management budget. Every budget belongs to one assessment and uses the same Month 1–12 period and assessment start date.</p>
+<div class="note"><strong>Important distinction:</strong> the assessment projection is the source and comparison baseline. The budget is a separate planning record. Editing the budget does not change Sales, expenses, stock, assets, loans, VAT, cash-flow calculations or any other assessment source record.</div>
+
+<h3>9.1 Before creating a budget</h3>
+<ol>
+<li>Open the correct assessment and verify the case number displayed in the assessment layout.</li>
+<li>Complete the material Sales, stock, expense, asset, loan, VAT and working-capital information.</li>
+<li>Review Projection Readiness and resolve material missing data.</li>
+<li>Generate the assessment reports and confirm that projected profit and cash flow are reasonable.</li>
+<li>Use Sensitivity Analysis where appropriate to understand the main risks before committing to targets.</li>
+</ol>
+<p>A budget may still be created from incomplete assessment information, but the imported amounts will reflect those omissions. Correct the assessment first whenever the missing information is material.</p>
+
+<h3>9.2 Opening the module</h3>
+<ol>
+<li>Open the required assessment.</li>
+<li>Select the shortcuts menu in <strong>MainLayout_Assessment</strong>.</li>
+<li>Select <strong>Budgets — Assessment Budget &amp; Variance</strong>.</li>
+<li>The application opens the budget belonging to that assessment. A budget from another assessment cannot be displayed through this route.</li>
+</ol>
+
+<h3>9.3 Creating the first budget</h3>
+<p>Each assessment supports one active budget. If no budget exists, enter a meaningful budget name, add optional planning notes, and select <strong>Create from assessment projection</strong>.</p>
+<p>ViabilityIQ copies the assessment's current 12-month projection into two sets of values:</p>
+<table><tr><th>Value</th><th>Purpose</th></tr>
+<tr><td>Projection</td><td>A dated snapshot of the assessment result used as the comparison baseline.</td></tr>
+<tr><td>Budget</td><td>The management target. It initially equals the projection and can then be edited independently.</td></tr></table>
+<p>The snapshot includes revenue, other income, cost of goods sold, operating expenses, depreciation, interest, receipts, supplier payments, VAT payments, loan payments, asset purchases and calculated profit and cash-flow totals.</p>
+
+<h3>9.4 Editing the monthly planning matrix</h3>
+<p>Editable rows contain white monthly input fields. Enter the planned amount for each Month 1–12. Amounts are displayed to two decimal places.</p>
+<table><tr><th>Section</th><th>Typical editable lines</th><th>Calculated lines</th></tr>
+<tr><td>Profit &amp; Loss</td><td>Revenue, other income, cost of goods sold, operating expenses, depreciation and interest expense.</td><td>Gross profit, EBITDA, EBIT and profit before tax.</td></tr>
+<tr><td>Cash Flow</td><td>Sales receipts, other receipts, supplier payments, cash operating expenses, VAT payments, loan payments and asset purchases.</td><td>Total inflows, total outflows, net cash movement and closing cash balance.</td></tr></table>
+<p>Calculated rows cannot be entered manually. They update automatically when an editable amount changes and are recalculated again by the server when the draft is saved.</p>
+<div class="warning"><strong>Profit and cash are different:</strong> changing budgeted revenue does not automatically change Sales receipts. Likewise, depreciation affects profit but is not a cash payment. Review both sections and keep related assumptions consistent.</div>
+
+<h3>9.5 Reading the three display modes</h3>
+<table><tr><th>Mode</th><th>Meaning</th><th>Recommended use</th></tr>
+<tr><td>Budget</td><td>Shows the current management targets. Editable lines can be changed while the budget is Draft.</td><td>Prepare and revise the budget.</td></tr>
+<tr><td>Projection</td><td>Shows the most recently imported assessment projection snapshot.</td><td>Confirm the financial model on which the budget was based.</td></tr>
+<tr><td>Variance</td><td>Shows Budget minus Projection for each month and total.</td><td>Identify deliberate departures from the assessment result and document the reason.</td></tr></table>
+<p>A positive variance means the budget amount is higher than the projection; a negative variance means it is lower. Whether that is favourable depends on the line. Higher revenue may be favourable, while higher costs or payments may be unfavourable.</p>
+
+<h3>9.6 KPI cards and alerts</h3>
+<table><tr><th>Indicator</th><th>Interpretation</th></tr>
+<tr><td>Budget revenue</td><td>Total budgeted true revenue for Months 1–12 and its difference from projection.</td></tr>
+<tr><td>Profit before tax</td><td>Budgeted profit after operating costs, depreciation and interest, before tax.</td></tr>
+<tr><td>Net cash movement</td><td>Total budgeted cash inflows less cash outflows over the 12 months.</td></tr>
+<tr><td>Closing cash</td><td>Month 12 cash position after applying monthly net cash movements to the assessment opening bank balance.</td></tr></table>
+<p>Budget alerts highlight a closing funding shortfall, loss-making months and a material deterioration in profit relative to the assessment projection. Alerts are management prompts; they do not prevent saving or submitting the budget.</p>
+
+<h3>9.7 Saving and refreshing the projection</h3>
+<p>Select <strong>Save draft</strong> after changing budget values, the name or planning notes. The page marks unsaved changes and will not submit them until they are saved.</p>
+<p>Select <strong>Refresh projection</strong> when assessment source records have changed and the comparison baseline must be updated. Refreshing:</p>
+<ul>
+<li>recalculates the live assessment projection;</li>
+<li>updates the Projection and Variance views;</li>
+<li>updates the projection-import date; and</li>
+<li><strong>does not overwrite any Budget values</strong>.</li>
+</ul>
+<div class="warning"><strong>Review before refresh:</strong> refresh is available only while the budget is Draft. Record why the source projection changed and review all resulting variances after refreshing.</div>
+
+<h3>9.8 Budget workflow</h3>
+<table><tr><th>Status</th><th>What it means</th><th>Available action</th></tr>
+<tr><td>Draft</td><td>The budget can be edited and its projection comparison can be refreshed.</td><td>Save and Submit.</td></tr>
+<tr><td>Submitted</td><td>The preparer has completed the draft. Values are read-only while approval is pending.</td><td>A Tenant Owner or Tenant Administrator may Approve.</td></tr>
+<tr><td>Approved</td><td>The agreed budget is locked as the assessment's approved management plan.</td><td>A Tenant Owner or Tenant Administrator may Reopen it as Draft when a controlled revision is required.</td></tr></table>
+<p>Every status change is recorded in budget status history with the user and date. Concurrent changes are protected: if another user changes the budget after it was opened, reload the page before saving again.</p>
+
+<h3>9.9 Permissions</h3>
+<table><tr><th>Tenant role</th><th>Budget access</th></tr>
+<tr><td>Tenant Owner / Tenant Administrator</td><td>Create, edit and submit authorized assessment budgets; approve and reopen submitted or approved budgets.</td></tr>
+<tr><td>Branch Manager</td><td>Create, edit and submit budgets only for assessments within the manager's authorized scope.</td></tr>
+<tr><td>Viewer</td><td>Read budgets for authorized assessments but cannot create, edit, submit, approve or reopen them.</td></tr></table>
+<p>Access is checked by the service for every operation. Hiding a button in the page is not the only security control.</p>
+
+<h3>9.10 Recommended budget review</h3>
+<ol>
+<li>Confirm the budget name, assessment case and Month 1 start date.</li>
+<li>Compare Budget with Projection and explain material variances.</li>
+<li>Review gross profit, EBITDA and profit before tax by month.</li>
+<li>Check that cash receipts and payments are consistent with the profit assumptions.</li>
+<li>Review the lowest monthly cash position, not only Month 12 closing cash.</li>
+<li>Resolve or document funding shortfalls and loss-making months.</li>
+<li>Save the draft, perform a final Projection and Variance review, and then submit.</li>
+<li>Approve only after assumptions, evidence, risks and management actions have been reviewed.</li>
+</ol>
+
+<h3>9.11 Important limitations</h3>
+<div class="danger">
+<ul>
+<li>The first release supports one active 12-month budget per assessment.</li>
+<li>The budget is a planning record, not an accounting ledger or replacement for actual management accounts.</li>
+<li>Budget versus actual reporting is not populated automatically in this release.</li>
+<li>Editing revenue does not automatically rebuild receipts, VAT, stock purchases or working-capital timing inside the budget.</li>
+<li>Refreshing the projection preserves budget values by design; users must review the resulting variances.</li>
+<li>Approving a budget does not change or approve the underlying assessment.</li>
+<li>Displayed amounts use two decimal places while the database retains four-decimal calculation precision.</li>
+</ul>
+</div>
+
+<div class="page"></div>
+<h2>10. Registration, Plans &amp; Tenant User Management</h2>
+<p>Viability.IQ is tenant-based. A tenant is the private Personal or Organisation workspace that owns its clients, businesses, assessments, branches, budgets and user memberships. Application users sign in with one identity account, while their tenant membership determines which workspace records and functions they may use.</p>
+<div class="note"><strong>Identity versus tenant access:</strong> an account proves who the user is. A tenant membership, role, branch and record grants determine what that user may access inside the active tenant. An existing Viability.IQ account can be attached to another tenant without creating a second password.</div>
+
+<h3>10.1 Registering a new subscriber</h3>
+<ol>
+<li>Open <strong>Register</strong> from the sign-in area. The registration route is <strong>/identity/register</strong>.</li>
+<li>Select the required workspace plan: <strong>Standard</strong> for an individual or <strong>Open Plan</strong> for an organisation.</li>
+<li>Enter the subscriber's first name, last name, department, job title and province.</li>
+<li>Enter the email address and contact details.</li>
+<li>Create and confirm a secure password and accept the applicable terms.</li>
+<li>For Open Plan, enter the organisation name and initial number of seats.</li>
+<li>Submit the registration and sign in after confirmation.</li>
+</ol>
+<p>Successful registration creates the Identity account, provisions the tenant and subscription, creates the subscriber's active tenant membership, and assigns the protected <strong>Tenant Owner</strong> role. If tenant provisioning fails, registration is rolled back rather than leaving an account without its workspace.</p>
+<div class="warning"><strong>Use a unique, controlled email address:</strong> the registration email becomes the user's sign-in identity. Verify spelling before submission. Do not share one account among several staff members; create a membership for each person so activity and permissions remain attributable.</div>
+
+<h3>10.2 Choosing a plan</h3>
+<table><tr><th>Plan</th><th>Workspace</th><th>Seats</th><th>Best suited to</th></tr>
+<tr><td>Standard (Individual)</td><td>Personal tenant</td><td>One included seat</td><td>A sole assessor or individual subscriber who does not need additional active users.</td></tr>
+<tr><td>Open Plan</td><td>Organisation tenant</td><td>At least two seats, with a configurable higher quantity</td><td>Teams, branches and organisations that need shared access and tenant roles.</td></tr></table>
+<p>The Standard plan is sometimes referred to as the <strong>Individual Plan</strong>. In the current registration page its displayed name is <strong>Standard</strong> and its stored plan code is <strong>STANDARD</strong>. Open Plan uses the code <strong>OPEN</strong>.</p>
+<p>A Standard tenant can be upgraded to Open Plan without moving its tenant data. The subscribed seat quantity must be increased as part of that commercial or administrative process before additional active members can be added.</p>
+<div class="warning"><strong>Current billing status:</strong> registrations currently provision the selected subscription as Active. Payment-provider checkout, signed payment webhooks and automatic payment enforcement are not yet part of this release. Confirm the commercial subscription outside the application until billing integration is deployed.</div>
+
+<h3>10.3 Understanding seats</h3>
+<p>A seat represents one <strong>active tenant membership</strong>, not one role. A member may hold several roles and still use only one seat.</p>
+<ul>
+<li>The Tenant Owner consumes a seat.</li>
+<li>Adding a new active member consumes one available seat.</li>
+<li>Attaching an existing Viability.IQ account as an active member also consumes one seat.</li>
+<li>Reactivating a suspended or removed member requires an available seat.</li>
+<li>Suspended or removed memberships do not count as active seats.</li>
+<li>The Users page shows active members compared with the subscribed seat quantity.</li>
+</ul>
+<p>If no seat is available, the application refuses the new or reactivated active membership. Increase the subscription seat quantity or suspend/remove an unused membership before trying again.</p>
+
+<h3>10.4 Tenant roles and their purpose</h3>
+<table><tr><th>Role</th><th>Purpose and default operational access</th></tr>
+<tr><td>Tenant Owner</td><td>Full tenant administration and operational access. Assigned automatically during provisioning. The allocation is protected and cannot be moved, suspended or removed through the user-management pages.</td></tr>
+<tr><td>Tenant Administrator</td><td>Full operational administration and permission to manage tenant users and role allocations.</td></tr>
+<tr><td>Branch Manager</td><td>Creates operational records and works with records created by that user or explicitly granted to the membership. Suitable for assessors and reviewers operating within an assigned scope.</td></tr>
+<tr><td>Viewer</td><td>Read-only access to records created by the user or explicitly granted for viewing. Cannot create, update or delete operational records.</td></tr>
+<tr><td>Billing Manager</td><td>Reserved for subscription and billing responsibilities. The role alone does not grant operational-record access.</td></tr></table>
+<p>A member may have multiple roles. The application applies the union of those permissions. For example, Billing Manager plus Viewer receives Viewer operational read access in addition to billing responsibility.</p>
+
+<h3>10.5 Opening user and role management</h3>
+<p>Only Tenant Owner and Tenant Administrator can see or use the Security Settings links.</p>
+<ol>
+<li>Sign in and open <strong>Settings</strong>.</li>
+<li>Under Security Settings, select <strong>Users</strong> to open <strong>/settings/users</strong>.</li>
+<li>Select <strong>User Groups / Roles</strong> to open <strong>/settings/roles</strong>.</li>
+<li>Use the Settings-rooted breadcrumb to move between the administration pages.</li>
+</ol>
+<p>User and role forms open in the right-side OffCanvas panel. Save, validation and error outcomes are displayed using application Toast messages.</p>
+
+<h3>10.6 Adding a new user</h3>
+<ol>
+<li>Open <strong>Settings &gt; Users</strong> and review the active-seat counter.</li>
+<li>Select <strong>Add user</strong>.</li>
+<li>Enter the first name, last name and email address.</li>
+<li>Select the tenant branch that should be used for branch-oriented access and reporting.</li>
+<li>Select one or more tenant roles. Viewer is the initial role selection and may be changed as required.</li>
+<li>Save the form.</li>
+</ol>
+<p>For a genuinely new Viability.IQ account, the system generates a cryptographically random temporary password, creates the tenant membership and selected roles, and emails the password using the configured SMTP service. The password is never displayed in the page or written to application logs.</p>
+<p>If welcome-email delivery fails, creation is rolled back so the tenant is not left with an inaccessible user. Correct the SMTP configuration or recipient address before retrying.</p>
+
+<h3>10.7 First sign-in with a temporary password</h3>
+<ol>
+<li>The new user signs in with the emailed address and temporary password.</li>
+<li>Viability.IQ redirects the user to <strong>Change Password</strong>.</li>
+<li>Other application routes remain blocked until the temporary password has been replaced.</li>
+<li>After a successful password change, the user can open the tenant functions allowed by the assigned roles and record scope.</li>
+</ol>
+<div class="danger"><strong>Temporary-password handling:</strong> send the password only through the configured email workflow. An administrator should never copy it into notes, support tickets or shared chat. If the email is suspected to be compromised, reset the account before use.</div>
+
+<h3>10.8 Adding an existing Viability.IQ account</h3>
+<p>If the email already belongs to a Viability.IQ Identity account, the service attaches that account to the active tenant rather than rejecting it or creating a duplicate identity. The existing password remains valid; no new temporary password is generated.</p>
+<p>The tenant administrator must still select the tenant-specific branch and roles. These allocations apply only to the active tenant and do not change the user's membership in another tenant.</p>
+
+<h3>10.9 Editing membership, branch and roles</h3>
+<p>From <strong>Settings &gt; Users</strong>, select the edit action for a member to update branch, roles and membership status. From <strong>User Groups / Roles</strong>, select <strong>Assign roles</strong> when only the role allocation needs to change.</p>
+<ul>
+<li>Assign the minimum roles necessary for the person's responsibilities.</li>
+<li>Review multiple-role combinations because permissions accumulate.</li>
+<li>Use the tenant membership branch rather than the user's global profile branch for operational reporting.</li>
+<li>The Tenant Owner role is protected and cannot be assigned to another member through these pages.</li>
+<li>An administrator cannot suspend or remove their own active membership.</li>
+</ul>
+
+<h3>10.10 Suspending, reactivating, removing and re-adding</h3>
+<table><tr><th>Action</th><th>Effect</th><th>When to use it</th></tr>
+<tr><td>Suspend</td><td>Stops tenant application access without deleting the membership history and releases the active seat.</td><td>Temporary leave, investigation or short-term access withdrawal.</td></tr>
+<tr><td>Reactivate</td><td>Restores the membership when a seat is available.</td><td>The same user returns and should keep the tenant relationship.</td></tr>
+<tr><td>Remove</td><td>Marks the membership as removed and releases the active seat. Historical identity and tenant records are retained.</td><td>The user has permanently left the tenant.</td></tr>
+<tr><td>Re-add</td><td>Restores a previously removed membership for the same email, subject to seat availability.</td><td>A former member returns to the organisation.</td></tr></table>
+<p>Do not delete business or assessment records merely because a member leaves. Record ownership, activity history and explicit record grants remain part of the tenant audit trail.</p>
+
+<h3>10.11 Record scope and explicit grants</h3>
+<p>Tenant isolation prevents users from reading or changing records in another tenant. Within the active tenant:</p>
+<ul>
+<li>Tenant Owner and Tenant Administrator can work across tenant operational records.</li>
+<li>Branch Manager and Viewer normally see records created by that user plus records explicitly granted to the membership.</li>
+<li>Explicit grants may independently allow View, Edit or Delete for an Assessment, Business, Client, Company or Branch.</li>
+<li>An Assessment grant also governs its child financial records.</li>
+<li>Billing Manager alone receives no operational-record access.</li>
+</ul>
+<p>Membership, tenant and subscription must all be active. Active and Trial subscription statuses are accepted by the authorization service.</p>
+
+<h3>10.12 Recommended administration procedure</h3>
+<ol>
+<li>Confirm that the selected plan and seat quantity match the organisation's approved subscription.</li>
+<li>Maintain at least one accessible Tenant Owner account and protect its credentials.</li>
+<li>Allocate named accounts; never share user credentials.</li>
+<li>Assign the member's branch before allocating operational responsibilities.</li>
+<li>Use least privilege and review combinations of multiple roles.</li>
+<li>Verify temporary-password delivery and completion of the first password change.</li>
+<li>Suspend access promptly when temporary access should stop; remove departed users.</li>
+<li>Review active members against paid seats regularly.</li>
+<li>Review explicit record grants when responsibilities or branches change.</li>
+<li>Test access using representative non-administrator accounts after material role changes.</li>
+</ol>
+
+<h3>10.13 Troubleshooting</h3>
+<table><tr><th>Symptom</th><th>Likely cause and response</th></tr>
+<tr><td>User cannot be added or reactivated</td><td>No subscribed seat is available. Review the active-seat counter and subscription quantity.</td></tr>
+<tr><td>New account is rolled back</td><td>Welcome-email delivery failed. Verify SMTP settings and the recipient address, then retry.</td></tr>
+<tr><td>User is repeatedly sent to Change Password</td><td>The temporary password requirement has not been cleared by a successful password change.</td></tr>
+<tr><td>Security Settings links are missing</td><td>The active membership is not Tenant Owner or Tenant Administrator.</td></tr>
+<tr><td>User can sign in but cannot access tenant data</td><td>Check membership status, subscription status, roles, branch and explicit grants.</td></tr>
+<tr><td>Existing account is found instead of a new account being created</td><td>This is expected. Viability.IQ attaches the existing identity to the tenant and retains its password.</td></tr>
+<tr><td>Billing Manager cannot open assessments</td><td>Billing Manager does not grant operational access; assign an appropriate additional role if justified.</td></tr></table>
+
 <h2>Recommended overall review sequence</h2>
 <ol>
 <li>Verify the opening date and balances.</li>
@@ -229,7 +468,9 @@ footer{margin-top:20px;color:#718294;font-size:8pt}
 <li>Reconcile loans and assets to supporting statements.</li>
 <li>Review warnings, document sources and confirm the baseline.</li>
 <li>Run sensitivity scenarios and record the principal risks and mitigations.</li>
+<li>Create the assessment budget, document material variances and review cash requirements.</li>
+<li>Submit and approve the budget through the authorized workflow.</li>
 </ol>
-<footer>Viability.IQ — Assessment Assumptions, Baseline &amp; Sensitivity Analysis Help — September 2026</footer>
+<footer>Viability.IQ — Assessment, Budgeting &amp; Tenant Administration User Guide — September 2026</footer>
 </body>
 </html>

@@ -21,8 +21,11 @@ namespace ViabilityIQ.Shared.DataModels.SecurityDataModels
         public string? City { get; set; }
         public string? Country { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? PreviousLoginAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public DateTime? LastLogoutAt { get; set; }
         public bool IsActive { get; set; } = true;
+        public bool MustChangePassword { get; set; }
 
         // Navigation properties
         //public ICollection<ApplicationRole> Roles { get; set; } = new List<ApplicationRole>();

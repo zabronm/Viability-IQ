@@ -50,11 +50,14 @@ namespace ViabilityIQ.Infrastructure.Repositories
                         Address,
                         City,
                         Country,
+                        ProvinceId,
                         BranchId,
                         IsActive,
                         CreatedAt,
                         UpdatedAt,
-                        LastLoginAt
+                        PreviousLoginAt,
+                        LastLoginAt,
+                        LastLogoutAt
                     FROM tblApplicationUsers
                     WHERE Email = @Email";
 
@@ -113,11 +116,14 @@ namespace ViabilityIQ.Infrastructure.Repositories
                         Address,
                         City,
                         Country,
+                        ProvinceId,
                         BranchId,
                         IsActive,
                         CreatedAt,
                         UpdatedAt,
-                        LastLoginAt
+                        PreviousLoginAt,
+                        LastLoginAt,
+                        LastLogoutAt
                     FROM tblApplicationUsers
                     WHERE UserId = @UserId";
 

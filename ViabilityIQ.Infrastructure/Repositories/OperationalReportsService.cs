@@ -64,7 +64,12 @@ public sealed class OperationalReportsService : IOperationalReportsService
                 branch.BranchName AS Name
             FROM AuthorisedAssessments authorised
             INNER JOIN tblApplicationUsers advisor ON advisor.UserId = authorised.CreatedBy
-            INNER JOIN tblBranch branch ON branch.BranchId = advisor.BranchId
+            INNER JOIN tblTenantMembership advisorMembership
+                ON advisorMembership.TenantId = @TenantId
+               AND advisorMembership.UserId = advisor.UserId
+               AND advisorMembership.Active = 1
+               AND advisorMembership.MembershipStatus = 'Active'
+            INNER JOIN tblBranch branch ON branch.BranchId = advisorMembership.DefaultBranchId
             WHERE branch.Active = 1
             ORDER BY branch.BranchName;
 
@@ -167,7 +172,7 @@ public sealed class OperationalReportsService : IOperationalReportsService
             predicates.Add("assessment.Active = 1");
         if (filter.BranchId is > 0)
         {
-            predicates.Add("advisor.BranchId = @BranchId");
+            predicates.Add("advisorMembership.DefaultBranchId = @BranchId");
             parameters.Add("BranchId", filter.BranchId);
         }
         if (filter.StatusId is > 0)
@@ -216,7 +221,7 @@ public sealed class OperationalReportsService : IOperationalReportsService
                 COALESCE(assessment.CaseNumber, CONCAT('Assessment-', assessment.AssessmentId)) AS CaseNumber,
                 COALESCE(business.BusinessName, 'Unassigned') AS BusinessName,
                 COALESCE(client.FullName, 'Unassigned') AS ClientName,
-                advisor.BranchId,
+                advisorMembership.DefaultBranchId AS BranchId,
                 COALESCE(branch.BranchName, 'Unassigned') AS BranchName,
                 assessment.CreatedBy AS AdvisorId,
                 COALESCE(
@@ -250,7 +255,12 @@ public sealed class OperationalReportsService : IOperationalReportsService
             LEFT JOIN tblBusiness business ON business.BusinessId = assessment.BusinessId
             LEFT JOIN tblClient client ON client.ClientId = business.ClientId
             LEFT JOIN tblApplicationUsers advisor ON advisor.UserId = assessment.CreatedBy
-            LEFT JOIN tblBranch branch ON branch.BranchId = advisor.BranchId
+            LEFT JOIN tblTenantMembership advisorMembership
+                ON advisorMembership.TenantId = @TenantId
+               AND advisorMembership.UserId = advisor.UserId
+               AND advisorMembership.Active = 1
+               AND advisorMembership.MembershipStatus = 'Active'
+            LEFT JOIN tblBranch branch ON branch.BranchId = advisorMembership.DefaultBranchId
             """);
         sql.AppendLine();
         sql.AppendLine("WHERE");
