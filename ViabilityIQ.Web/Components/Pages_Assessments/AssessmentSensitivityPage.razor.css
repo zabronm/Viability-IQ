@@ -182,6 +182,10 @@
 .kpi-card span { color: #627d98; font-size: .68rem; text-transform: uppercase; letter-spacing: .03em; }
 .kpi-card strong { margin: .15rem 0; color: var(--sensitivity-navy); font-size: 1.05rem; }
 .kpi-card small, .variance { display: block; color: #627d98; font-size: .65rem; }
+.kpi-card.kpi-critical strong { color: #c62828; }
+.kpi-card.kpi-average strong { color: #b26a00; }
+.kpi-card.kpi-good strong { color: #111827; }
+.kpi-card.kpi-very-good strong { color: #15803d; }
 .explanation-panel { margin-top: .7rem; }
 .explanation-panel ul { margin-bottom: .4rem; padding-left: 1.2rem; font-size: .75rem; }
 .explanation-panel summary { color: #486581; cursor: pointer; font-size: .72rem; font-weight: 650; }
@@ -293,6 +297,19 @@
 .ai-severity.medium { color: #7c4a03; background: #fff0c9; }
 .ai-severity.low { color: #136a4b; background: #dff7eb; }
 .ai-disclaimer { margin: .7rem 0 0; border-color: #9dc2ea; color: #174f83; background: #edf6ff; }
+.groq-report .kpi-grid { margin-bottom: .75rem; }
+.groq-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+.groq-chart-grid .mini-chart { margin-bottom: .75rem; }
+.groq-chart-grid h3 {
+    margin: 0 0 .35rem;
+    color: var(--sensitivity-navy);
+    font-size: .78rem;
+}
+.groq-metrics-table { min-width: 620px; margin-bottom: .75rem; }
 
 @keyframes sensitivity-arrival {
     from { opacity: 0; transform: translateY(5px); }
@@ -307,6 +324,7 @@
     .comparison-picker { grid-template-columns: 1fr; }
     .ai-provider-state { align-items: flex-start; flex-direction: column; }
     .ai-buttons { align-items: stretch; flex-direction: column; }
+    .groq-chart-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -315,11 +333,45 @@
 }
 
 @media print {
+    .sensitivity-page,
+    .sensitivity-page * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .sensitivity-page {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
     .sensitivity-actions, .sensitivity-tabs, .btn, .preset-grid, .sweep-controls, .comparison-picker, .reserve-control, .ai-controls-panel, .ai-configuration-panel { display: none !important; }
-    .sensitivity-tabs-shell { overflow: visible; border: 0; box-shadow: none; }
-    .sensitivity-tab-content { min-height: 0; padding: 0; }
+    .sensitivity-tabs-shell, .sensitivity-tab-content, .groq-report, .table-responsive, .ai-table-wrap {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    .sensitivity-tabs-shell { border: 0; box-shadow: none; }
+    .sensitivity-tab-content { padding: 0; }
     .sensitivity-table { white-space: normal; font-size: 8pt; }
-    .sensitivity-panel, .explanation-panel, .threshold-card { break-inside: avoid; }
+    .section-heading, .kpi-card, .mini-chart, .sensitivity-panel, .explanation-panel, .threshold-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
     .ai-table { min-width: 0; font-size: 7pt; }
-    .ai-table tr, .ai-summary, .ai-disclaimer { break-inside: avoid; }
+    .ai-table tr, .groq-metrics-table tr, .ai-summary, .ai-disclaimer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    .groq-chart-grid { display: grid !important; grid-template-columns: 1fr 1fr; break-inside: auto; }
+    .groq-metrics-table { min-width: 0; break-inside: auto; }
+    .ai-table thead, .groq-metrics-table thead { display: table-header-group; }
 }

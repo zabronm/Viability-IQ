@@ -73,10 +73,13 @@
                     </span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item bd-bottom" href="/settings/reports">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
-                    <span class="strong">Reports</span>
-                </NavLink>
+                @if (CanViewOperationalReports)
+                {
+                    <NavLink class="fa-nav-item bd-bottom" href="/settings/reports">
+                        <div class="nav-icon-avatar-round"><i class="bi bi-clipboard2-data"></i></div>
+                        <span class="strong">Reports</span>
+                    </NavLink>
+                }
 
                 <NavLink class="fa-nav-item bd-bottom " href="/settings/settings">
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
@@ -105,7 +108,24 @@
 
         <main class="fa-main-content-surface @(isSidebarCollapsed ? "expanded" : "")">
             <div class="content-body-padding">
-                @Body
+                @if (isSessionReady)
+                {
+                    @Body
+                }
+                else if (!string.IsNullOrWhiteSpace(sessionInitializationError))
+                {
+                    <div class="alert alert-warning" role="alert">
+                        @sessionInitializationError
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center py-5" aria-label="Loading tenant session">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
             </div>
         </main>
     </div>

@@ -155,7 +155,7 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                             (SELECT COUNT(*) FROM tblAssessments a
                             INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
                             WHERE b.BranchId = @BranchId 
-                            AND a.Status NOT IN ('InProgress', 'Completed', 'Pending')), 0
+                            AND a.StatusId NOT IN (2, 3, 4)), 0
                         ) AS OtherCount,
                         0 AS OtherPercentage
                 ";
@@ -190,17 +190,17 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                     DECLARE @CurrentYear INT = YEAR(GETUTCDATE());
 
                     SELECT TOP (@Count)
-                        u.Id AS UserId,
+                        u.UserId,
                         CONCAT(u.FirstName, ' ', u.LastName) AS Name,
                         COUNT(a.AssessmentId) AS CompletedCount,
                         ROW_NUMBER() OVER (ORDER BY COUNT(a.AssessmentId) DESC) AS Rank,
                         0 AS Score
                     FROM tblApplicationUsers u
-                    INNER JOIN tblAssessments a ON u.Id = a.CreatedBy
+                    INNER JOIN tblAssessments a ON u.UserId = a.CreatedBy
                     WHERE a.StatusId = 4
                     AND MONTH(a.CompletedDate) = @CurrentMonth
                     AND YEAR(a.CompletedDate) = @CurrentYear
-                    GROUP BY u.Id, u.FirstName, u.LastName
+                    GROUP BY u.UserId, u.FirstName, u.LastName
                     ORDER BY COUNT(a.AssessmentId) DESC
                 ";
 

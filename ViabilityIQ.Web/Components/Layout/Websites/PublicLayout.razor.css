@@ -1,0 +1,10 @@
+.viq-public-site {
+    min-height: 100vh;
+    overflow-x: clip;
+    color: #334e68;
+    background: #fff;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.viq-public-main { width: 100%; }
+

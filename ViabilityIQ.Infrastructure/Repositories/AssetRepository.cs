@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
 namespace ViabilityIQ.Infrastructure.Repositories
 {
@@ -16,17 +17,22 @@ namespace ViabilityIQ.Infrastructure.Repositories
     {
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly ILogger<AssetRepository> _logger;
+        private readonly ITenantAuthorizationService _tenantAuthorizationService;
 
         public AssetRepository(
             IDbConnectionFactory dbConnectionFactory,
-            ILogger<AssetRepository> logger)
+            ILogger<AssetRepository> logger,
+            ITenantAuthorizationService tenantAuthorizationService)
         {
             _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _tenantAuthorizationService = tenantAuthorizationService;
         }
 
         public async Task<List<AssessmentAsset>> GetAssessmentAssetsAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -52,6 +58,20 @@ namespace ViabilityIQ.Infrastructure.Repositories
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
+                var assessmentId = await connection.QuerySingleOrDefaultAsync<long?>(
+                    """
+                    SELECT AssessmentId
+                    FROM tblAssessmentAssets
+                    WHERE AssessmentAssetId = @AssessmentAssetId;
+                    """,
+                    new { AssessmentAssetId = assessmentAssetId });
+                if (!assessmentId.HasValue)
+                {
+                    throw new KeyNotFoundException("The selected asset does not exist.");
+                }
+
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    assessmentId.Value, TenantRecordAccess.Read);
                 const string query = @"
                     SELECT TOP 1 * FROM tblAssessmentAssetMovement
                     WHERE AssessmentAssetId = @AssessmentAssetId
@@ -71,6 +91,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<List<AssessmentAssetMovement>> GetAllAssetMovementsAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -91,6 +113,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task SaveAssetDepreciationSummaryAsync(long assessmentId, Dictionary<int, decimal> monthlyDepreciation)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Write);
             // This would store aggregated depreciation for reporting/analysis
             _logger.LogDebug("Saved asset depreciation summary for assessment {AssessmentId}", assessmentId);
             await Task.CompletedTask;
@@ -98,6 +122,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<Dictionary<int, decimal>> GetAssetDepreciationSummaryAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             var summary = new Dictionary<int, decimal>();
             for (int i = 1; i <= 12; i++)
                 summary[i] = 0;

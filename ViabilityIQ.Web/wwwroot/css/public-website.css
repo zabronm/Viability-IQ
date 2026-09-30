@@ -95,6 +95,12 @@
     flex-shrink: 0;
 }
 
+.viq-brand img {
+    display: block;
+    width: auto;
+    height: 46px;
+    object-fit: contain;
+}
 
 .viq-brand-mark {
     width: 40px;
@@ -200,7 +206,7 @@
 
 
     .viq-login-link:hover {
-        color: var(--viq-white);
+            color: var(--viability-green);
     }
 
 
@@ -263,6 +269,14 @@
     background: white;
 }
 
+.viq-mobile-menu > a:not(.viq-primary-button) {
+    display: block;
+    padding: 10px 0;
+    color: var(--viq-text);
+    font-size: 14px;
+    font-weight: 650;
+    text-decoration: none;
+}
 
 .viq-mobile-nav-link {
     display: block;
@@ -325,6 +339,19 @@
     font-weight: 700;
 }
 
+.viq-footer-brand .viq-brand img {
+    height: 50px;
+    filter: drop-shadow(0 5px 12px rgba(0,0,0,.18));
+}
+
+.viq-footer-brand > p,
+.viq-footer-column address {
+    margin: 14px 0 0;
+    color: #94a3b8;
+    font-size: 13px;
+    font-style: normal;
+    line-height: 1.7;
+}
 
     .viq-footer-logo .viq-brand-mark {
         width: 36px;

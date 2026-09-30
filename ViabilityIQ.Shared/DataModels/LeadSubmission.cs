@@ -1,13 +1,8 @@
 ﻿using Dapper.Contrib.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ViabilityIQ.Shared.DataModels
 {
-    [Table("tblLeadSubmissions")]
+    [Table("LeadSubmissions")]
     public class LeadSubmission
     {
         [Key] public long LeadSubmissionId { get; set; }
@@ -19,5 +14,10 @@ namespace ViabilityIQ.Shared.DataModels
         public string? Country { get; set; }        
         public string? City { get; set; }
         public string AssetVolumeScale { get; set; } = string.Empty;
+        public string Subject { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Status { get; set; } = "New";
+        public DateTime SubmittedAtUtc { get; set; }
+        public DateTime? EmailSentAtUtc { get; set; }
     }
 }

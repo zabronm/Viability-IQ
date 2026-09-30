@@ -1,0 +1,83 @@
+VIABILITYIQ TENANT OWNER BRANCH ASSIGNMENT
+Package date: 2026-09-30
+
+PURPOSE
+-------
+This focused package allows the authenticated Tenant Owner to change their own
+tenant-specific branch from Settings > Users without weakening Owner protection.
+
+CHANGES
+-------
+1. The Owner's Edit button is enabled only when the listed Owner is the authenticated
+   user.
+2. The Owner off-canvas form displays the Branch selector only.
+3. Owner role and membership-status controls remain hidden and protected.
+4. The service permits an Owner update only when:
+   - the target membership belongs to the authenticated user;
+   - the target is the active Tenant Owner membership;
+   - the requested branch is active and belongs to the current tenant; and
+   - the membership remains Active.
+5. The update changes only tblTenantMembership.DefaultBranchId. It does not modify the
+   global tblApplicationUsers.BranchId, roles, status, or ownership.
+6. Tenant Administrators still cannot edit the Tenant Owner.
+
+PREREQUISITES
+-------------
+Deploy these packages first, in this order:
+
+  1. ApplicationReports_RuntimeCorrections_2026-09-26
+  2. TenantUserRoleManagement_2026-09-29
+  3. TenantUserRoleManagement_UIRefinement_2026-09-29
+  4. IdentitySecurityUICleanup_2026-09-30
+
+FILES
+-----
+Copy or merge every file under Files into the solution root while preserving paths.
+
+Replace these existing files:
+
+  ViabilityIQ.Database\Dtos\TenantUserManagementDtos.cs
+  ViabilityIQ.Web\Services\TenantUserManagementService.cs
+  ViabilityIQ.Web\Components\Pages\TenantUsersPage.razor
+  ViabilityIQ.Web\Components\Pages\PageFormComponents\TenantUserFormComponent.razor
+
+DATABASE AND CONFIGURATION
+--------------------------
+No database script is required.
+No service-registration or configuration change is required.
+No credentials or secrets are included.
+
+BUILD
+-----
+From the solution root:
+
+  dotnet restore .\ViabilityIQ.sln
+  dotnet build .\ViabilityIQ.sln --no-restore
+
+USE
+---
+1. Sign in as the Tenant Owner.
+2. Open Settings > Security Settings > Users.
+3. Find your Owner row and select Edit.
+4. Choose an active tenant branch.
+5. Select Update branch.
+6. Confirm the success Toast and refreshed Branch column.
+
+VALIDATION CHECKLIST
+--------------------
+1. Confirm the authenticated Owner's Edit button is enabled.
+2. Confirm an Administrator sees the Owner's Edit button disabled.
+3. Open the Owner editor and confirm only Branch is editable.
+4. Confirm role and membership-status controls are absent.
+5. Update the branch and confirm tblTenantMembership.DefaultBranchId changes.
+6. Confirm the Owner role, Active status, and IsOwner flag remain unchanged.
+7. Confirm a branch belonging to another tenant or an inactive branch is rejected.
+8. Confirm ordinary member editing remains unchanged.
+
+VALIDATION PERFORMED
+--------------------
+- Built cumulatively after all prerequisite packages.
+- dotnet restore succeeded.
+- dotnet build succeeded with 0 errors.
+- Static checks confirmed the authenticated-Owner guard, tenant-scoped branch
+  validation, branch-only SQL update, locked Owner controls, and no conflict markers.

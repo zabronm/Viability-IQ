@@ -20,6 +20,7 @@ namespace ViabilityIQ.Web.Components.Layout
         [Inject] private IGenericDataRepository<Client> ClientRepository { get; set; } = default!;
         [Inject] private INotificationItemRepository NotificationRepository { get; set; } = default!;
         [Inject] private ITenantService TenantService { get; set; } = default!;
+        [Inject] private ITenantAuthorizationService TenantAuthorizationService { get; set; } = default!;
         [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
 
         private bool isSidebarCollapsed = false;
@@ -35,7 +36,10 @@ namespace ViabilityIQ.Web.Components.Layout
         private int BusinessCount { get; set; }
         private int ClientCount { get; set; }
         private int UnreadNotificationCount { get; set; }
+        private bool CanViewOperationalReports { get; set; }
         private bool isEstablishingUserSession;
+        private bool isSessionReady;
+        private string? sessionInitializationError;
 
         protected override void OnInitialized()
         {
@@ -48,7 +52,17 @@ namespace ViabilityIQ.Web.Components.Layout
         protected override async Task OnInitializedAsync()
         {
             await EnsureAuthenticatedSessionAsync();
-            await LoadNavigationCountsAsync();
+            if (HasActiveTenant)
+            {
+                await RefreshReportAccessAsync();
+                await LoadNavigationCountsAsync();
+                isSessionReady = true;
+            }
+            else
+            {
+                sessionInitializationError =
+                    "Your account does not have an active tenant membership and subscription. Contact your administrator.";
+            }
         }
 
         private async Task HandleCanvasShowAsync(CanvasRequest request)
@@ -96,7 +110,9 @@ namespace ViabilityIQ.Web.Components.Layout
         private async Task LoadNavigationCountsAsync()
         {
             var userId = SessionService.UserId;
-            if (!SessionService.IsAuthenticated || userId <= 0)
+            if (!SessionService.IsAuthenticated
+                || userId <= 0
+                || !HasActiveTenant)
             {
                 AssessmentCount = 0;
                 BusinessCount = 0;
@@ -127,13 +143,20 @@ namespace ViabilityIQ.Web.Components.Layout
 
         private async Task EnsureAuthenticatedSessionAsync()
         {
-            if (SessionService.IsAuthenticated && SessionService.UserId > 0)
+            if (HasActiveTenant)
             {
                 return;
             }
 
+            isEstablishingUserSession = true;
             try
             {
+                if (SessionService.IsAuthenticated && SessionService.UserId > 0)
+                {
+                    await SetDefaultTenantAsync(SessionService.UserId);
+                    return;
+                }
+
                 var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
                 if (authenticationState.User.Identity?.IsAuthenticated != true)
                 {
@@ -153,7 +176,6 @@ namespace ViabilityIQ.Web.Components.Layout
                     new[] { applicationUser.FirstName, applicationUser.LastName }
                         .Where(value => !string.IsNullOrWhiteSpace(value)));
 
-                isEstablishingUserSession = true;
                 SessionService.EstablishUserSession(
                     applicationUser.Id,
                     string.IsNullOrWhiteSpace(displayName)
@@ -164,24 +186,7 @@ namespace ViabilityIQ.Web.Components.Layout
                     applicationUser.BranchId ?? 0,
                     applicationUser.ProvinceId ?? 0);
 
-                var tenant = await TenantService.GetDefaultTenantAsync(applicationUser.Id);
-                if (tenant is not null)
-                {
-                    SessionService.SetActiveTenant(
-                        tenant.TenantId,
-                        tenant.TenantName,
-                        tenant.TenantType,
-                        tenant.PlanCode,
-                        tenant.SubscriptionStatus,
-                        tenant.MembershipId,
-                        tenant.IsOwner);
-                }
-                else
-                {
-                    Logger.LogWarning(
-                        "Authenticated user {UserId} has no active tenant membership.",
-                        applicationUser.Id);
-                }
+                await SetDefaultTenantAsync(applicationUser.Id);
             }
             catch (Exception exception)
             {
@@ -193,6 +198,27 @@ namespace ViabilityIQ.Web.Components.Layout
             }
         }
 
+        private async Task SetDefaultTenantAsync(long userId)
+        {
+            var tenant = await TenantService.GetDefaultTenantAsync(userId);
+            if (tenant is null)
+            {
+                Logger.LogWarning(
+                    "Authenticated user {UserId} has no active tenant membership.",
+                    userId);
+                return;
+            }
+
+            SessionService.SetActiveTenant(
+                tenant.TenantId,
+                tenant.TenantName,
+                tenant.TenantType,
+                tenant.PlanCode,
+                tenant.SubscriptionStatus,
+                tenant.MembershipId,
+                tenant.IsOwner);
+        }
+
         private void HandleSessionChanged()
         {
             if (isEstablishingUserSession)
@@ -202,12 +228,46 @@ namespace ViabilityIQ.Web.Components.Layout
 
             _ = InvokeAsync(async () =>
             {
-                await LoadNavigationCountsAsync();
+                await EnsureAuthenticatedSessionAsync();
+                isSessionReady = HasActiveTenant;
+                sessionInitializationError = isSessionReady
+                    ? null
+                    : "Your account does not have an active tenant membership and subscription. Contact your administrator.";
+                if (isSessionReady)
+                {
+                    await LoadNavigationCountsAsync();
+                    await RefreshReportAccessAsync();
+                }
                 StateHasChanged();
             });
         }
 
+        private async Task RefreshReportAccessAsync()
+        {
+            try
+            {
+                var context = await TenantAuthorizationService.GetAccessContextAsync();
+                CanViewOperationalReports =
+                    context.CanReadAllOperationalRecords
+                    || context.CanReadScopedOperationalRecords;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                CanViewOperationalReports = false;
+            }
+            catch (Exception exception)
+            {
+                CanViewOperationalReports = false;
+                Logger.LogError(exception, "Unable to resolve operational reports navigation access.");
+            }
+        }
+
         private static string FormatCount(int count) => count > 99 ? "99+" : count.ToString();
+        private bool HasActiveTenant =>
+            SessionService.IsAuthenticated
+            && SessionService.UserId > 0
+            && SessionService.TenantId > 0
+            && SessionService.TenantMembershipId > 0;
 
         public void Dispose()
         {

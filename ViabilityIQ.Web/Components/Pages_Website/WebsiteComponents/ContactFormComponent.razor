@@ -1,99 +1,156 @@
-﻿@using System.ComponentModel.DataAnnotations
 @using ViabilityIQ.Application.Interfaces
 @using ViabilityIQ.Shared.DataModels
-@using ViabilityIQ.Web.Models
-@using ViabilityIQ.Web.Services
-e
+@inject IContactService ContactService
+@inject ILogger<ContactFormComponent> Logger
 
-<div class="contact-form">
+<div class="contact-form-card">
     @if (_submitted)
     {
-        <div class="form-alert success">
-            <strong>Thanks, @_model.Name!</strong><br />
-            We've received your request and will get back to you within one business day.
+        <div class="contact-success" role="status">
+            <i class="bi bi-check-circle-fill"></i>
+            <div>
+                <h3>Message received</h3>
+                <p>@_resultMessage</p>
+                <small>Reference: @_reference</small>
+                <button type="button" class="contact-reset" @onclick="ResetForm">Send another message</button>
+            </div>
         </div>
     }
     else
     {
-        <EditForm Model="_model" OnValidSubmit="HandleValidSubmit">
+        <div class="contact-form-heading">
+            <span>Send us a message</span>
+            <h3>How can we help?</h3>
+        </div>
+
+        <EditForm Model="_model" OnValidSubmit="HandleValidSubmitAsync">
             <DataAnnotationsValidator />
 
-            @if (!string.IsNullOrEmpty(_errorMessage))
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
             {
-                <div class="form-alert error">@_errorMessage</div>
+                <div class="contact-error" role="alert">@_errorMessage</div>
             }
 
-            <div>
-                <label for="name">Full name</label>
-                <InputText id="name" @bind-Value="_model.Name" placeholder="Jane Smith" />
-                <ValidationMessage For="() => _model.Name" class="field-error" />
+            <div class="contact-form-grid">
+                <div class="form-field">
+                    <label for="contact-name">Full name <em>*</em></label>
+                    <InputText id="contact-name" @bind-Value="_model.Name" autocomplete="name" />
+                    <ValidationMessage For="() => _model.Name" />
+                </div>
+                <div class="form-field">
+                    <label for="contact-email">Email <em>*</em></label>
+                    <InputText id="contact-email" type="email" @bind-Value="_model.Email" autocomplete="email" />
+                    <ValidationMessage For="() => _model.Email" />
+                </div>
+                <div class="form-field">
+                    <label for="contact-phone">Phone number</label>
+                    <InputText id="contact-phone" type="tel" @bind-Value="_model.PhoneNumber" autocomplete="tel" />
+                    <ValidationMessage For="() => _model.PhoneNumber" />
+                </div>
+                <div class="form-field">
+                    <label for="contact-company">Company</label>
+                    <InputText id="contact-company" @bind-Value="_model.Company" autocomplete="organization" />
+                    <ValidationMessage For="() => _model.Company" />
+                </div>
+                <div class="form-field full">
+                    <label for="contact-subject">Subject <em>*</em></label>
+                    <InputSelect id="contact-subject" @bind-Value="_model.Subject">
+                        <option value="">Select a subject</option>
+                        <option value="Demo Request">Demo Request</option>
+                        <option value="Sales Enquiry">Sales Enquiry</option>
+                        <option value="Support">Support</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="Partnership">Partnership</option>
+                        <option value="Other">Other</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => _model.Subject" />
+                </div>
+                <div class="form-field full">
+                    <label for="contact-message">Message <em>*</em></label>
+                    <InputTextArea id="contact-message" @bind-Value="_model.Message" rows="5"
+                                   placeholder="Tell us what you would like to discuss." />
+                    <ValidationMessage For="() => _model.Message" />
+                </div>
             </div>
 
-            <div>
-                <label for="email">Work email</label>
-                <InputText id="email" type="email" @bind-Value="_model.Email" placeholder="jane@company.com" />
-                <ValidationMessage For="() => _model.Email" class="field-error" />
+            <div class="form-honeypot" aria-hidden="true">
+                <label for="contact-website">Website</label>
+                <InputText id="contact-website" @bind-Value="_model.Website" tabindex="-1" autocomplete="off" />
             </div>
 
-            <div>
-                <label for="company">Company</label>
-                <InputText id="company" @bind-Value="_model.Company" placeholder="Acme Inc." />
-                <ValidationMessage For="() => _model.Company" class="field-error" />
-            </div>
+            <label class="consent-field">
+                <InputCheckbox @bind-Value="_model.Consent" />
+                <span>I agree that ViabilityIQ may use these details to respond to my enquiry. <em>*</em></span>
+            </label>
+            <ValidationMessage For="() => _model.Consent" />
 
-            <div>
-                <label for="interest">What are you interested in?</label>
-                <InputSelect id="interest" @bind-Value="_model.Interest">
-                    <option value="">Select an option…</option>
-                    <option value="demo">Book a demo</option>
-                    <option value="trial">Start a free trial</option>
-                    <option value="pricing">Pricing question</option>
-                    <option value="partnership">Partnership</option>
-                    <option value="other">Something else</option>
-                </InputSelect>
-                <ValidationMessage For="() => _model.Interest" class="field-error" />
-            </div>
-
-            <div>
-                <label for="message">Tell us about your project</label>
-                <InputTextArea id="message" @bind-Value="_model.Message"
-                               placeholder="Briefly describe what you're trying to validate…" />
-                <ValidationMessage For="() => _model.Message" class="field-error" />
-            </div>
-
-            <button type="submit" class="btn btn-primary" disabled="@_submitting">
-                @(_submitting ? "Sending…" : "Send message")
+            <button type="submit" class="contact-submit" disabled="@_submitting">
+                @if (_submitting)
+                {
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span>Sending...</span>
+                }
+                else
+                {
+                    <span>Send message</span>
+                    <i class="bi bi-send"></i>
+                }
             </button>
         </EditForm>
     }
 </div>
 
 @code {
-
-    [Inject] IContactService ContactService { get; set; } = default!;
-
     private ContactRequest _model = new();
     private bool _submitting;
     private bool _submitted;
     private string? _errorMessage;
+    private string _resultMessage = string.Empty;
+    private string _reference = string.Empty;
+    private DateTimeOffset? _lastSubmissionAt;
 
-    private async Task HandleValidSubmit()
+    private async Task HandleValidSubmitAsync()
     {
+        if (_lastSubmissionAt.HasValue
+            && DateTimeOffset.UtcNow - _lastSubmissionAt.Value < TimeSpan.FromSeconds(15))
+        {
+            _errorMessage = "Please wait a few seconds before submitting another message.";
+            return;
+        }
+
         _submitting = true;
         _errorMessage = null;
         try
         {
-            var ok = await ContactService.SubmitAsync(_model);
-            if (ok) _submitted = true;
-            else _errorMessage = "Something went wrong. Please try again.";
+            var result = await ContactService.SubmitAsync(_model);
+            if (!result.Accepted)
+            {
+                _errorMessage = result.UserMessage;
+                return;
+            }
+
+            _lastSubmissionAt = DateTimeOffset.UtcNow;
+            _resultMessage = result.UserMessage;
+            _reference = result.Reference;
+            _submitted = true;
         }
-        catch
+        catch (Exception exception)
         {
-            _errorMessage = "Something went wrong. Please try again.";
+            Logger.LogError(exception, "Website contact submission failed.");
+            _errorMessage = "We could not submit your message. Please try again or contact us on WhatsApp.";
         }
         finally
         {
             _submitting = false;
         }
+    }
+
+    private void ResetForm()
+    {
+        _model = new();
+        _submitted = false;
+        _resultMessage = string.Empty;
+        _reference = string.Empty;
+        _errorMessage = null;
     }
 }

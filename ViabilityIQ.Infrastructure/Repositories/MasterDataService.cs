@@ -13,6 +13,7 @@ using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 using ViabilityIQ.Shared.SharedModels;
 
 
@@ -24,6 +25,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly ISessionService _sessionService;
         private readonly IActivityLogWriter _activityLogWriter;
+        private readonly ITenantAuthorizationService _tenantAuthorizationService;
 
 
         //private readonly ILogger<MasterDataService> _logger;
@@ -38,11 +40,13 @@ namespace ViabilityIQ.Infrastructure.Repositories
         public MasterDataService(
                                IDbConnectionFactory connectionFactory,
                                ISessionService sessionService,
-                               IActivityLogWriter activityLogWriter)
+                               IActivityLogWriter activityLogWriter,
+                               ITenantAuthorizationService tenantAuthorizationService)
         {
             _dbConnectionFactory = connectionFactory;
             _sessionService = sessionService;
             _activityLogWriter = activityLogWriter;
+            _tenantAuthorizationService = tenantAuthorizationService;
         }
 
 
@@ -324,11 +328,30 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //================= ASSESSMENT LOANS CRUD OPERATIONS ==============================
 
         public async Task<AssessmentLoanDto?> GetAssessmentLoanByIdAsync(long assessmentLoanId)
-            => await _dbConnectionFactory.CreateConnection().GetAsync<AssessmentLoanDto>(assessmentLoanId);
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
+            var assessmentId = await connection.QuerySingleOrDefaultAsync<long?>(
+                """
+                SELECT AssessmentId
+                FROM vw_assessment_loans_list
+                WHERE AssessmentLoanId = @AssessmentLoanId;
+                """,
+                new { AssessmentLoanId = assessmentLoanId });
+            if (!assessmentId.HasValue)
+            {
+                return null;
+            }
+
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId.Value, TenantRecordAccess.Read);
+            return await connection.GetAsync<AssessmentLoanDto>(assessmentLoanId);
+        }
 
 
         public async Task<IEnumerable<AssessmentLoanDto>> GetAssessmentLoansByIdAsync(long assessmentId)
         {
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, TenantRecordAccess.Read);
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -374,11 +397,17 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
             if (string.IsNullOrWhiteSpace(sql))      // If no custom SQL is supplied, default to the ORM's direct primary key mapping method
             {
-                return await connection.GetAsync<T>(id);
+                var directResult = await connection.GetAsync<T>(id);
+                await AuthorizeReturnedEntityAsync(directResult, TenantRecordAccess.Read);
+                return directResult;
             }
 
             var parameters = new Dictionary<string, object> { { paramName, id } };  // Dynamic parameter mapping for explicit query structures
-            return await connection.QueryFirstOrDefaultAsync<T>(sql, parameters);
+            await AuthorizeAssessmentParametersAsync(
+                sql, parameters, TenantRecordAccess.Read);
+            var result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameters);
+            await AuthorizeReturnedEntityAsync(result, TenantRecordAccess.Read);
+            return result;
         }
 
         public async Task<IEnumerable<T>> GetListByIdAsync<T>(long id, string sql, string paramName = "Id") where T : class
@@ -387,8 +416,11 @@ namespace ViabilityIQ.Infrastructure.Repositories
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
                 var parameters = new Dictionary<string, object> { { paramName, id } };   // Dynamically assigns the tracking value to your specific query parameter name
-
-                return await connection.QueryAsync<T>(sql, parameters);
+                await AuthorizeAssessmentParametersAsync(
+                    sql, parameters, TenantRecordAccess.Read);
+                var results = (await connection.QueryAsync<T>(sql, parameters)).AsList();
+                await AuthorizeReturnedEntitiesAsync(results, TenantRecordAccess.Read);
+                return results;
             }
             catch (Exception)
             {
@@ -407,6 +439,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<T?> GetSingleAsync<T>(string tableName, object conditions)
         {
+            await AuthorizeAssessmentParametersAsync(
+                tableName, conditions, TenantRecordAccess.Read);
 
             ValidateSqlIdentifier(tableName);
 
@@ -445,6 +479,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
                                                           string? orderBy = null,
                                                           bool ascending = true)
         {
+            await AuthorizeAssessmentParametersAsync(
+                tableName, conditions, TenantRecordAccess.Read);
             ValidateSqlIdentifier(tableName);
             string whereClause = BuildWhereClause(conditions);
 
@@ -497,6 +533,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // Example usage: var count = await repo.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Farmers");
         public async Task<T> ExecuteScalarAsync<T>(string sql, object parameters = null)
         {
+            await AuthorizeAssessmentParametersAsync(
+                sql, parameters, TenantRecordAccess.Read);
             try
             {
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -513,6 +551,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // Example usage: await repo.ExecuteCommandAsync("UPDATE Farmers SET Name = @Name WHERE Id = @Id", new { Name = "John", Id = 1 });
         public async Task<int> ExecuteCommandAsync(string sql, object parameters = null)
         {
+            await AuthorizeAssessmentParametersAsync(
+                sql, parameters, TenantRecordAccess.Write);
             using var connection = _dbConnectionFactory.CreateConnection();
             if (connection.State != ConnectionState.Open) connection.Open();
 
@@ -538,6 +578,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //1. ===================  check if record exists ==================
         public async Task<bool> RecordExistsAsync(string tableName, string keyFieldName, object keyValue)
         {
+            await AuthorizeAssessmentKeyAsync(
+                tableName, keyFieldName, keyValue, TenantRecordAccess.Read);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(keyFieldName);
 
@@ -566,6 +608,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //decimal vatRate = await ViqCrudService.LookupAsync<decimal>( "tblAssessment", "VATRate", "AssessmentId", AssessmentId);
         public async Task<T?> LookAsync<T>(string tableName, string returnField, string keyField, object keyValue)
         {
+            await AuthorizeAssessmentKeyAsync(
+                tableName, keyField, keyValue, TenantRecordAccess.Read);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(returnField);
             ValidateSqlIdentifier(keyField);
@@ -585,6 +629,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //3. ===================== Count records meeting a key criteria ===================================== CountAsync
         public async Task<int> CountAsync(string tableName, string? keyField = null, object? keyValue = null)
         {
+            await AuthorizeAssessmentKeyAsync(
+                tableName, keyField, keyValue, TenantRecordAccess.Read);
             ValidateSqlIdentifier(tableName);
 
             string sql;
@@ -614,6 +660,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
                                             string? keyField = null,
                                             object? keyValue = null)
         {
+            await AuthorizeAssessmentKeyAsync(
+                tableName, keyField, keyValue, TenantRecordAccess.Read);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
@@ -641,6 +689,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //5. ===================== Min records meeting a key criteria ===================================== MinAsync
         public async Task<T?> MinAsync<T>(string tableName, string fieldName)
         {
+            await RejectUnscopedAssessmentQueryAsync(tableName);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
@@ -654,6 +703,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //6. ===================== Max records meeting a key criteria ===================================== MaxAsync
         public async Task<T?> MaxAsync<T>(string tableName, string fieldName)
         {
+            await RejectUnscopedAssessmentQueryAsync(tableName);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
@@ -667,6 +717,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //7. ===================== Average records meeting a key criteria ===================================== AverageAsync
         public async Task<decimal> AverageAsync(string tableName, string fieldName)
         {
+            await RejectUnscopedAssessmentQueryAsync(tableName);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(fieldName);
 
@@ -684,6 +735,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
                                                 string keyField,
                                                 object keyValue)
         {
+            await AuthorizeAssessmentKeyAsync(
+                tableName, keyField, keyValue, TenantRecordAccess.Write);
             ValidateSqlIdentifier(tableName);
             ValidateSqlIdentifier(updateField);
             ValidateSqlIdentifier(keyField);
@@ -704,9 +757,222 @@ namespace ViabilityIQ.Infrastructure.Repositories
         //8. ===================== Execute sql ===================================== UpdateFieldAsync
         public async Task<int> ExecuteAsync(string sql, object? parameters = null)
         {
+            await AuthorizeAssessmentParametersAsync(
+                sql, parameters, TenantRecordAccess.Write);
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.ExecuteAsync(sql, parameters);
         }
+
+        private async Task AuthorizeAssessmentKeyAsync(
+            string resource,
+            string? keyField,
+            object? keyValue,
+            TenantRecordAccess access)
+        {
+            if (!IsAssessmentResource(resource))
+            {
+                return;
+            }
+
+            if (string.Equals(keyField, "AssessmentId", StringComparison.OrdinalIgnoreCase)
+                && TryConvertToPositiveLong(keyValue, out var assessmentId))
+            {
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    assessmentId, access);
+                return;
+            }
+
+            var values = keyField is null
+                ? null
+                : new Dictionary<string, object> { [keyField] = keyValue! };
+            await AuthorizeAssessmentParametersAsync(resource, values, access);
+        }
+
+        private async Task AuthorizeAssessmentParametersAsync(
+            string resource,
+            object? parameters,
+            TenantRecordAccess access)
+        {
+            if (!IsAssessmentResource(resource))
+            {
+                return;
+            }
+
+            if (TryReadPositiveLong(parameters, "AssessmentId", out var assessmentId))
+            {
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    assessmentId, access);
+                return;
+            }
+
+            foreach (var mapping in AssessmentRecordKeys)
+            {
+                if (!TryReadPositiveLong(parameters, mapping.Key, out var recordId))
+                {
+                    continue;
+                }
+
+                using var connection = _dbConnectionFactory.CreateConnection();
+                var parentAssessmentId = await connection.QuerySingleOrDefaultAsync<long?>(
+                    $"""
+                    SELECT AssessmentId
+                    FROM [{mapping.Value.Table}]
+                    WHERE [{mapping.Value.Key}] = @RecordId;
+                    """,
+                    new { RecordId = recordId });
+                if (!parentAssessmentId.HasValue)
+                {
+                    throw new KeyNotFoundException(
+                        $"The selected {mapping.Key} record does not exist.");
+                }
+
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    parentAssessmentId.Value, access);
+                return;
+            }
+
+            throw new UnauthorizedAccessException(
+                "Assessment SQL requires an authorised AssessmentId or supported child-record identifier.");
+        }
+
+        private async Task AuthorizeReturnedEntityAsync<T>(
+            T? entity,
+            TenantRecordAccess access)
+            where T : class
+        {
+            if (entity is null
+                || !TryReadPositiveLong(entity, "AssessmentId", out var assessmentId))
+            {
+                return;
+            }
+
+            await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                assessmentId, access);
+        }
+
+        private async Task AuthorizeReturnedEntitiesAsync<T>(
+            IEnumerable<T> entities,
+            TenantRecordAccess access)
+            where T : class
+        {
+            foreach (var assessmentId in entities
+                .Select(entity => TryReadPositiveLong(entity, "AssessmentId", out var id) ? id : 0)
+                .Where(id => id > 0)
+                .Distinct())
+            {
+                await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
+                    assessmentId, access);
+            }
+        }
+
+        private Task RejectUnscopedAssessmentQueryAsync(string resource)
+        {
+            if (IsAssessmentResource(resource))
+            {
+                throw new UnauthorizedAccessException(
+                    "Unscoped aggregate queries are not permitted for assessment data.");
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private static bool IsAssessmentResource(string resource) =>
+            AssessmentResourceNames.Any(name =>
+                resource.Contains(name, StringComparison.OrdinalIgnoreCase));
+
+        private static bool TryReadPositiveLong(
+            object? source,
+            string propertyName,
+            out long value)
+        {
+            value = 0;
+            if (source is null)
+            {
+                return false;
+            }
+
+            object? rawValue = null;
+            if (source is IReadOnlyDictionary<string, object> readOnlyDictionary)
+            {
+                var item = readOnlyDictionary.FirstOrDefault(pair =>
+                    IsParameterName(pair.Key, propertyName));
+                rawValue = item.Value;
+            }
+            else if (source is IDictionary<string, object> dictionary)
+            {
+                var item = dictionary.FirstOrDefault(pair =>
+                    IsParameterName(pair.Key, propertyName));
+                rawValue = item.Value;
+            }
+            else
+            {
+                rawValue = source.GetType().GetProperties()
+                    .FirstOrDefault(property =>
+                        IsParameterName(property.Name, propertyName))
+                    ?.GetValue(source);
+            }
+
+            return TryConvertToPositiveLong(rawValue, out value);
+        }
+
+        private static bool TryConvertToPositiveLong(object? source, out long value)
+        {
+            try
+            {
+                value = source is null ? 0 : Convert.ToInt64(source);
+                return value > 0;
+            }
+            catch (Exception) when (source is not null)
+            {
+                value = 0;
+                return false;
+            }
+        }
+
+        private static bool IsParameterName(string candidate, string expected) =>
+            candidate.Equals(expected, StringComparison.OrdinalIgnoreCase)
+            || candidate.Equals($"par{expected}", StringComparison.OrdinalIgnoreCase);
+
+        private static readonly string[] AssessmentResourceNames =
+        [
+            "tblAssessments",
+            "tblAssessmentAssets",
+            "tblAssessmentAssetMovement",
+            "tblAssessmentExpenses",
+            "tblAssessmentSales",
+            "tblAssessmentStock",
+            "tblAssessmentCashBook",
+            "tblAssessmentLoan",
+            "tblAssessmentLoanRepayment",
+            "tblAssessmentProjectionAssumptions",
+            "tblAssessmentSalesCategory",
+            "tblAssessmentWorkingCapitalDetail",
+            "tblAssessmentIncomeStatement",
+            "tblAssessmentVATTransactions",
+            "tblAssessmentDebtorsCreditorsProfile",
+            "tblAssessmentReviews",
+            "vw_assessment",
+            "tblCashflowSummary",
+            "tblDebtorPaymentSchedule",
+            "tblDebtorsConfiguration"
+        ];
+
+        private static readonly IReadOnlyDictionary<string, (string Table, string Key)>
+            AssessmentRecordKeys =
+                new Dictionary<string, (string Table, string Key)>(
+                    StringComparer.OrdinalIgnoreCase)
+                {
+                    ["AssessmentAssetId"] =
+                        ("tblAssessmentAssets", "AssessmentAssetId"),
+                    ["AssessmentLoanId"] =
+                        ("tblAssessmentLoan", "AssessmentLoanId"),
+                    ["AssessmentStockId"] =
+                        ("tblAssessmentStock", "AssessmentStockId"),
+                    ["AssessmentExpensesId"] =
+                        ("tblAssessmentExpenses", "AssessmentExpensesId"),
+                    ["AssessmentSalesId"] =
+                        ("tblAssessmentSales", "AssessmentSalesId")
+                };
 
 
 

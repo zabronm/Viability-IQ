@@ -12,6 +12,7 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
 {
     [Inject] private ISensitivityAnalysisService SensitivityService { get; set; } = default!;
     [Inject] private ISensitivityAiAnalysisService SensitivityAiService { get; set; } = default!;
+    [Inject] private IGroqSensitivityAiAnalysisService GroqSensitivityAiService { get; set; } = default!;
     [Inject] private ISessionService? SessionService { get; set; }
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private ILogger<AssessmentSensitivityPage> Logger { get; set; } = default!;
@@ -33,6 +34,11 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
     private bool AiConsentGiven { get; set; }
     private bool IsGeneratingAiAnalysis { get; set; }
     private CancellationTokenSource? _aiCancellation;
+    private SensitivityAiConfiguration GroqAiConfiguration { get; set; } = default!;
+    private SensitivityAiAnalysisResult? GroqAiAnalysis { get; set; }
+    private bool GroqAiConsentGiven { get; set; }
+    private bool IsGeneratingGroqAiAnalysis { get; set; }
+    private CancellationTokenSource? _groqAiCancellation;
     private long _loadedAssessmentId;
 
     private SensitivityScenario WorkingScenario { get; set; } = NewCustomScenario();
@@ -60,6 +66,7 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
     protected override void OnInitialized()
     {
         AiConfiguration = SensitivityAiService.GetConfiguration();
+        GroqAiConfiguration = GroqSensitivityAiService.GetConfiguration();
         if (SessionService is not null)
             SessionService.OnSessionChanged += OnSessionChanged;
         ResolveAssessmentContext();
@@ -236,8 +243,51 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
     private void ResetAiState(bool resetConsent)
     {
         ClearAiAnalysis();
+        ClearGroqAiAnalysis();
         if (resetConsent)
+        {
             AiConsentGiven = false;
+            GroqAiConsentGiven = false;
+        }
+    }
+
+    private async Task GenerateGroqAiAnalysisAsync()
+    {
+        if (CurrentResult is null
+            || BaselineResult is null
+            || !GroqAiConsentGiven
+            || IsGeneratingGroqAiAnalysis)
+            return;
+
+        _groqAiCancellation?.Cancel();
+        _groqAiCancellation?.Dispose();
+        var cancellation = new CancellationTokenSource();
+        _groqAiCancellation = cancellation;
+        IsGeneratingGroqAiAnalysis = true;
+        GroqAiAnalysis = null;
+        try
+        {
+            var analysis = await GroqSensitivityAiService.AnalyseAsync(
+                BuildAiRequest(CurrentResult, BaselineResult),
+                GroqAiConsentGiven,
+                cancellation.Token);
+            if (ReferenceEquals(_groqAiCancellation, cancellation))
+                GroqAiAnalysis = analysis;
+        }
+        finally
+        {
+            if (ReferenceEquals(_groqAiCancellation, cancellation))
+                IsGeneratingGroqAiAnalysis = false;
+        }
+    }
+
+    private void ClearGroqAiAnalysis()
+    {
+        _groqAiCancellation?.Cancel();
+        _groqAiCancellation?.Dispose();
+        _groqAiCancellation = null;
+        GroqAiAnalysis = null;
+        IsGeneratingGroqAiAnalysis = false;
     }
 
     private static SensitivityAiAnalysisRequest BuildAiRequest(
@@ -327,7 +377,10 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
         await DownloadCsvAsync($"scenario-comparison-{AssessmentId}.csv", csv.ToString());
     }
 
-    private Task PrintAsync() => JS.InvokeVoidAsync("print").AsTask();
+    private Task PrintAsync() =>
+        JS.InvokeVoidAsync(
+            "viqAssessmentPagePrint.print",
+            "#sensitivity-print-report").AsTask();
 
     private async Task DownloadCsvAsync(string filename, string csv)
     {
@@ -343,6 +396,34 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
     private static decimal Variance(decimal scenario, decimal baseline) => scenario - baseline;
     private static decimal? VariancePercent(decimal scenario, decimal baseline) =>
         baseline == 0m ? null : (scenario - baseline) / Math.Abs(baseline) * 100m;
+
+    private static string KpiPerformanceClass(decimal value, decimal baseline)
+    {
+        if (value < 0m)
+            return "kpi-critical";
+        if (baseline <= 0m)
+            return value > 0m ? "kpi-very-good" : "kpi-average";
+
+        var performance = value / baseline;
+        if (performance >= 1.1m)
+            return "kpi-very-good";
+        if (performance >= 0.9m)
+            return "kpi-good";
+        return "kpi-average";
+    }
+
+    private static string GrossMarginKpiClass(decimal? grossMarginPercent) =>
+        grossMarginPercent switch
+        {
+            null => "kpi-good",
+            < 0m => "kpi-critical",
+            < 20m => "kpi-average",
+            < 30m => "kpi-good",
+            _ => "kpi-very-good"
+        };
+
+    private static string FundingShortfallKpiClass(decimal fundingShortfall) =>
+        fundingShortfall > 0m ? "kpi-critical" : "kpi-very-good";
 
     private static decimal ChartWidth(decimal value, IEnumerable<decimal> values)
     {
@@ -433,10 +514,13 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
         _aiCancellation?.Cancel();
         _aiCancellation?.Dispose();
         _aiCancellation = null;
+        _groqAiCancellation?.Cancel();
+        _groqAiCancellation?.Dispose();
+        _groqAiCancellation = null;
         if (SessionService is not null)
             SessionService.OnSessionChanged -= OnSessionChanged;
         GC.SuppressFinalize(this);
     }
 
-    private enum SensitivityTab { Builder, Results, Comparison, Risk, AiAnalysis }
+    private enum SensitivityTab { Builder, Results, Comparison, Risk, AiAnalysis, GroqAiAnalysis }
 }

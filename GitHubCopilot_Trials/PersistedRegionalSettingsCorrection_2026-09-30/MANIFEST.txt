@@ -1,0 +1,51 @@
+﻿VIABILITYIQ PERSISTED REGIONAL SETTINGS CORRECTION - MANIFEST
+Package date: 2026-09-30
+
+SUMMARY
+-------
+- Reloads the persisted ApplicationUser ProvinceId.
+- Replaces sample Account Settings regions with live tenant data.
+- Persists the active tenant membership DefaultBranchId.
+- Confirms real province/branch saves through ToastService.
+- Adds no database or configuration changes.
+
+VALIDATION
+----------
+- Cumulative isolated solution build succeeded.
+- Build errors: 0.
+- Province reload scan: passed.
+- Tenant branch persistence scan: passed.
+- Placeholder-data and simulated-save scan: passed.
+- Git conflict-marker scan: passed.
+- Credential-pattern scan: passed.
+
+FILES
+-----
+Path
+  Size (bytes)
+  SHA-256
+
+DEPLOYMENT_INSTRUCTIONS.txt
+  3 804
+  A4298A54235EB37AB3BDE838A86FA80EF4260AEB0D40E09195C7B8EA353708BE
+
+Files\ViabilityIQ.Database\Dtos\TenantUserManagementDtos.cs
+  2 638
+  BC1AA7D733623BC4C5CECD370FF69D32EE63617CB776D4536F986BDC19E6E164
+
+Files\ViabilityIQ.Infrastructure\Repositories\UserRepository.cs
+  5 619
+  619F8ECC7A1C8BED5D515639D0E2E612336A22E3EA89ABA0C84D8F262BC2638C
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\UserSettings.razor
+  9 224
+  49032497CCBEB48CBF458C52663B2A144C7A24FCD58437D61B4A2A34DABBA5C0
+
+Files\ViabilityIQ.Web\Components\Pages\Identity\UserSettings.razor.cs
+  8 701
+  1E8CA5977EFD078EB41B948EB3FBADA952F4D238B59575D7907762E90418FC80
+
+Files\ViabilityIQ.Web\Services\TenantUserManagementService.cs
+  29 427
+  66999601F76F60A920AAF3BCD528172FC2EB18B1B1910CA5DB5852E63A5AC767
+

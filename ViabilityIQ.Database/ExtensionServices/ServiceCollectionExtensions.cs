@@ -62,6 +62,8 @@ namespace ViabilityIQ.Application.ExtensionServices
             services.AddScoped<ICashflowProjectionService, CashflowProjectionService>();
 
             services.Configure<SensitivityAiOptions>(configuration.GetSection(SensitivityAiOptions.SectionName));
+            services.Configure<GroqSensitivityAiOptions>(
+                configuration.GetSection(GroqSensitivityAiOptions.SectionName));
 
 
             //============= AI SENSITIVITY ANALYSIS SERVICE =============
@@ -91,14 +93,28 @@ namespace ViabilityIQ.Application.ExtensionServices
                             //    timespan.TotalSeconds);
                         }));
 
+            services.AddHttpClient<IGroqSensitivityAiAnalysisService, GroqSensitivityAiAnalysisService>(
+                (serviceProvider, client) =>
+                {
+                    var options = serviceProvider
+                        .GetRequiredService<
+                            Microsoft.Extensions.Options.IOptions<GroqSensitivityAiOptions>>()
+                        .Value;
+
+                    client.Timeout = TimeSpan.FromSeconds(
+                        Math.Clamp(options.TimeoutSeconds, 5, 120));
+                })
+                .AddPolicyHandler(HttpPolicyExtensions
+                    .HandleTransientHttpError()
+                    .WaitAndRetryAsync(
+                        retryCount: 2,
+                        sleepDurationProvider: retryAttempt =>
+                            TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
 
             //=============== REPORTING SERVICES ===============
             services.AddScoped<IAssessmentReportService, AssessmentReportService>();
             services.AddSingleton<IReportWorkbookWriter, OpenXmlReportWorkbookWriter>();
-
-            //=============== CONTACT SERVICES FOR THE WEBSITE CONTACTS FORM ===============
-            services.AddScoped<IContactService, ContactService>();
-
 
 
             return services;

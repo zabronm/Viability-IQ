@@ -1,0 +1,105 @@
+VIABILITYIQ IDENTITY USER CONTEXT CORRECTIONS
+Package date: 2026-09-30
+
+PURPOSE
+-------
+This package corrects the authenticated user's session timestamps, tenant branch,
+profile data, and tenant-role display.
+
+CHANGES
+-------
+1. Home page session information
+   - Records PreviousLoginAt before LastLoginAt is updated during successful sign-in.
+   - Records LastLogoutAt after secure sign-out completes.
+   - Displays Previous sign-in and Last sign-out independently.
+   - Uses local time for older absolute timestamps.
+   - Removes the fabricated two-hour fallback used when no login existed.
+
+2. Correct tenant branch
+   - Loads the branch from the active tblTenantMembership.DefaultBranchId.
+   - Resolves and displays the branch name from the active tenant's tblBranch row.
+   - No longer displays the global tblApplicationUsers.BranchId or "Default Branch".
+
+3. My Profile
+   - Changes the profile link to /identity/profile.
+   - Loads first name, last name, email, telephone, department, job title, province,
+     address, city, country, and date of birth from the authenticated ApplicationUser.
+   - Saves editable profile fields through IAuthenticationService.
+   - Keeps email read-only and does not alter tenant membership branch or roles.
+   - Uses ToastService for profile-update success and failure feedback.
+
+4. Profile role display
+   - Loads roles from the active tenant membership rather than the global Identity
+     "User" role.
+   - Ranks Tenant Owner, Tenant Administrator, Branch Manager, Billing Manager, then
+     Viewer.
+   - Displays the highest-ranked role prominently and remaining tenant roles below it
+     in smaller text.
+   - Retains Identity-role fallback only if tenant context cannot be resolved.
+
+DATABASE
+--------
+Before deploying application files, run:
+
+  Files\DatabaseScripts\2026-09-30_IdentitySessionTimestamps.sql
+
+The script is idempotent and adds nullable columns to dbo.tblApplicationUsers:
+
+  PreviousLoginAt DATETIME2(7)
+  LastLogoutAt DATETIME2(7)
+
+Existing users will show "First sign-in" and "Not recorded" until new sign-in/sign-out
+events populate these fields.
+
+PREREQUISITES
+-------------
+Deploy these packages first, in this order:
+
+  1. ApplicationReports_RuntimeCorrections_2026-09-26
+  2. TenantUserRoleManagement_2026-09-29
+  3. TenantUserRoleManagement_UIRefinement_2026-09-29
+  4. IdentitySecurityUICleanup_2026-09-30
+  5. TenantOwnerBranchAssignment_2026-09-30
+
+APPLICATION FILES
+-----------------
+After running the database script, copy or merge every application file under Files
+into the solution root while preserving paths.
+
+No service-registration or configuration changes are required.
+No credentials or secrets are included.
+
+BUILD
+-----
+From the solution root:
+
+  dotnet restore .\ViabilityIQ.sln
+  dotnet build .\ViabilityIQ.sln --no-restore
+
+VALIDATION CHECKLIST
+--------------------
+1. Run the database script and deploy the application files.
+2. Sign in, open /home, and confirm the active tenant branch name is shown.
+3. Sign out and sign in again.
+4. Confirm /home shows the prior sign-in and latest successful sign-out independently.
+5. Change the Owner branch through Settings > Users, refresh /home, and confirm the
+   new tenant branch name appears.
+6. Open the profile dropdown and confirm Tenant Owner is the main role.
+7. If additional tenant roles exist, confirm they appear beneath it in smaller text.
+8. Select My Profile and confirm all stored profile fields are populated.
+9. Change profile fields, save, and confirm the success Toast.
+10. Reopen My Profile and confirm the saved values remain populated.
+11. Confirm email remains read-only and profile saving does not change branch or roles.
+
+VALIDATION PERFORMED
+--------------------
+- Built cumulatively after all prerequisite packages.
+- dotnet restore succeeded.
+- dotnet build succeeded with 0 errors.
+- Static checks confirmed:
+    * no Home page use of global ApplicationUser.BranchId;
+    * separate PreviousLoginAt and LastLogoutAt handling;
+    * tenant branch name and tenant-role resolution;
+    * complete profile load and persistent profile update;
+    * /identity/profile navigation;
+    * no unresolved conflict markers.

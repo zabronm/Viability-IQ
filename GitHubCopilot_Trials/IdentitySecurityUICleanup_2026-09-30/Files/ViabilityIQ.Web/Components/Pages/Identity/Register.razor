@@ -1,0 +1,791 @@
+﻿@page "/identity/register"
+@page "/identity/profile"
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Application.Interfaces.IdentityInterfaces
+
+@layout MainLayout_Identity
+
+<PageTitle>Viability.ID:Register Account</PageTitle>
+
+<div class="registration-page font-def">
+    <div class="auth-card">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                <strong>@(IsEditProfileMode ? "Update Failed" : "Registration Failed")</strong>
+                <p class="mb-0 mt-1">@ErrorMessage</p>
+                <button type="button" class="btn-close" @onclick="() => { ErrorMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>Success</strong>
+                <p class="mb-0 mt-1">@SuccessMessage</p>
+                <button type="button" class="btn-close" @onclick="() => { SuccessMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
+            </div>
+        }
+
+        <EditForm Model="@RegisterRequest" OnSubmit="HandleFormSubmit" FormName="UserAccountForm">
+            <DataAnnotationsValidator />
+
+            <div class="registration-card-grid @(IsEditProfileMode ? "profile-mode" : "")">
+                @if (!IsEditProfileMode)
+                {
+                    <section class="registration-panel plan-panel">
+                        <div class="panel-heading">
+                            <span class="panel-step">1</span>
+                            <div>
+                                <h2>Choose Plan</h2>
+                                <p>Select the workspace that suits you now.</p>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                class="plan-option @(RegisterRequest.PlanCode == "STANDARD" ? "selected" : "")"
+                                @onclick='() => SelectPlan("STANDARD")'
+                                disabled="@IsSubmitting">
+                            <span class="plan-icon"><i class="bi bi-person-fill"></i></span>
+                            <span class="plan-copy">
+                                <span class="plan-title-row"><strong>Standard</strong><span class="plan-seat">1 seat</span></span>
+                                <small>Personal workspace for an individual subscriber.</small>
+                                <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Private tenant</span>
+                                <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Upgrade at any time</span>
+                            </span>
+                            <span class="selection-mark"><i class="bi bi-check-lg"></i></span>
+                        </button>
+
+                        <button type="button"
+                                class="plan-option @(RegisterRequest.PlanCode == "OPEN" ? "selected" : "")"
+                                @onclick='() => SelectPlan("OPEN")'
+                                disabled="@IsSubmitting">
+                            <span class="plan-icon"><i class="bi bi-buildings-fill"></i></span>
+                            <span class="plan-copy">
+                                <span class="plan-title-row"><strong>Open Plan</strong><span class="plan-seat">2+ seats</span></span>
+                                <small>Organisation workspace for teams and branches.</small>
+                                <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Flexible users</span>
+                                <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Role-ready workspace</span>
+                            </span>
+                            <span class="selection-mark"><i class="bi bi-check-lg"></i></span>
+                        </button>
+
+                        <div class="plan-note">
+                            <i class="bi bi-info-circle-fill"></i>
+                            Standard can be upgraded to Open Plan without moving your data.
+                        </div>
+                    </section>
+                }
+
+                <section class="registration-panel">
+                    <div class="panel-heading">
+                        <span class="panel-step">@(IsEditProfileMode ? "1" : "2")</span>
+                        <div>
+                            <h2>Subscriber Details</h2>
+                            <p>Your identity and workspace information.</p>
+                        </div>
+                    </div>
+
+                    @if (!IsEditProfileMode && IsOpenPlan)
+                    {
+                        <div class="organisation-fields">
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Organisation Name</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-building icon-addon"></i>
+                                    <InputText @bind-Value="RegisterRequest.OrganisationName" class="form-control-custom" placeholder="Your organisation" disabled="@IsSubmitting" />
+                                </div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Initial Seats</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-people icon-addon"></i>
+                                    <InputNumber @bind-Value="RegisterRequest.RequestedSeats" class="form-control-custom" min="2" disabled="@IsSubmitting" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">First Name</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.FirstName" class="form-control-custom" placeholder="First name" disabled="@IsSubmitting" />
+                        </div>
+                        <ValidationMessage For="@(() => RegisterRequest.FirstName)" class="auth-error-msg" />
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Last Name</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.LastName" class="form-control-custom" placeholder="Last name" disabled="@IsSubmitting" />
+                        </div>
+                        <ValidationMessage For="@(() => RegisterRequest.LastName)" class="auth-error-msg" />
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Department</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-diagram-3 icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.Department" class="form-control-custom" placeholder="Department" disabled="@IsSubmitting" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Job Title</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-briefcase icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.JobTitle" class="form-control-custom" placeholder="Job title" disabled="@IsSubmitting" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Province</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-map icon-addon"></i>
+                            <InputSelect @bind-Value="RegisterRequest.ProvinceId" class="form-control-custom" disabled="@IsSubmitting">
+                                <option value="0">-- Select Province --</option>
+                                @foreach (var province in Provinces)
+                                {
+                                    <option value="@province.Id">@province.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <ValidationMessage For="@(() => RegisterRequest.ProvinceId)" class="auth-error-msg" />
+                    </div>
+                </section>
+
+                <section class="registration-panel">
+                    <div class="panel-heading">
+                        <span class="panel-step">@(IsEditProfileMode ? "2" : "3")</span>
+                        <div>
+                            <h2>Contact & Security</h2>
+                            <p>Contact details and secure account access.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Email Address</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-envelope icon-addon"></i>
+                            <InputText type="email" @bind-Value="RegisterRequest.Email" class="form-control-custom" placeholder="your@email.com" disabled="@(IsSubmitting || IsEditProfileMode)" />
+                        </div>
+                        <ValidationMessage For="@(() => RegisterRequest.Email)" class="auth-error-msg" />
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Phone Number</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-telephone icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.PhoneNumber" class="form-control-custom" placeholder="+27 00 000 0000" disabled="@IsSubmitting" />
+                        </div>
+                        <ValidationMessage For="@(() => RegisterRequest.PhoneNumber)" class="auth-error-msg" />
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Street Address</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-geo-alt icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.Address" class="form-control-custom" placeholder="Street address" disabled="@IsSubmitting" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">City / Town</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pin-map icon-addon"></i>
+                            <InputText @bind-Value="RegisterRequest.City" class="form-control-custom" placeholder="City or town" disabled="@IsSubmitting" />
+                        </div>
+                    </div>
+
+                    @if (!IsEditProfileMode)
+                    {
+                        <div class="form-group-custom">
+                            <label class="form-label-custom">Password</label>
+                            <div class="input-icon-wrapper">
+                                <i class="bi bi-lock icon-addon"></i>
+                                <InputText type="@(ShowPassword ? "text" : "password")" @bind-Value="RegisterRequest.Password" class="form-control-custom" placeholder="••••••••" disabled="@IsSubmitting" />
+                                <button type="button" class="password-toggle-btn" @onclick="TogglePasswordVisibility" tabindex="-1">
+                                    <i class="bi @(ShowPassword ? "bi-eye-slash-fill" : "bi-eye-fill")"></i>
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => RegisterRequest.Password)" class="auth-error-msg" />
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label class="form-label-custom">Confirm Password</label>
+                            <div class="input-icon-wrapper">
+                                <i class="bi bi-shield-check icon-addon"></i>
+                                <InputText type="@(ShowConfirmPassword ? "text" : "password")" @bind-Value="RegisterRequest.ConfirmPassword" class="form-control-custom" placeholder="••••••••" disabled="@IsSubmitting" />
+                                <button type="button" class="password-toggle-btn" @onclick="ToggleConfirmPasswordVisibility" tabindex="-1">
+                                    <i class="bi @(ShowConfirmPassword ? "bi-eye-slash-fill" : "bi-eye-fill")"></i>
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => RegisterRequest.ConfirmPassword)" class="auth-error-msg" />
+                        </div>
+                    }
+                </section>
+            </div>
+
+            <div class="registration-footer">
+                @if (!IsEditProfileMode)
+                {
+                    <label class="checkbox-container-custom">
+                        <InputCheckbox @bind-Value="AgreedToTerms" disabled="@IsSubmitting" />
+                        <span class="checkmark"></span>
+                        I agree to the Terms of Service
+                    </label>
+                }
+
+                <button type="submit" class="btn registration-submit" disabled="@(IsSubmitting || !IsFormValid())">
+                    @if (IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>@(IsEditProfileMode ? "Saving Changes..." : "Creating Workspace...")</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-arrow-right-circle-fill me-2"></i>
+                        <span>@(IsEditProfileMode ? "Save Changes" : "Create Account & Workspace")</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+
+        <div class="auth-card-footer">
+            @if (!IsEditProfileMode)
+            {
+                <div>
+                    Already have an account?
+                    <a href="/login" class="link-btn-inline font-weight-bold">Sign In Here</a>
+                </div>
+            }
+            else
+            {
+                <div>
+                    <a href="/home" class="link-btn-inline font-weight-bold"><i class="bi bi-arrow-left me-1"></i> Back to Dashboard</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<style>
+
+    .font-def {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .mt-1 {
+        margin-top: 0.25rem;
+    }
+
+    .me-1 {
+        margin-right: 0.25rem;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+
+    .registration-page {
+        width: 100%;
+        min-width: 0;
+        padding: 10px;
+        box-sizing: border-box;
+        
+    }
+
+    .auth-card {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 1280px;
+        border-radius: 16px;
+        border: 1px solid #d1dbe8;
+        box-shadow: 0 15px 35px rgba(0, 0, 102, 0.08);
+        padding: 16px 20px 12px;
+        box-sizing: border-box;
+    }
+
+    .registration-card-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .registration-card-grid.profile-mode {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .registration-panel {
+        min-width: 0;
+        padding: 14px;
+        border: 1px solid #dbe4ef;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    .plan-panel {
+        background: linear-gradient(160deg, #f7f8ff 0%, #ffffff 58%, #f1f9f7 100%);
+    }
+
+    .panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 40px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .panel-heading h2 {
+        margin: 0;
+        color: #172033;
+        font-size: 1rem;
+        font-weight: 750;
+    }
+
+    .panel-heading p {
+        margin: 2px 0 0;
+        color: #64748b;
+        font-size: 0.74rem;
+        line-height: 1.35;
+    }
+
+    .panel-step {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: #fff;
+        background: linear-gradient(135deg, #000099, #3030bf);
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    .plan-option {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: start;
+        gap: 10px;
+        width: 100%;
+        min-height: 112px;
+        margin-bottom: 9px;
+        padding: 11px;
+        text-align: left;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .plan-option:hover:not(:disabled) {
+        border-color: #8585cf;
+        transform: translateY(-1px);
+    }
+
+    .plan-option.selected {
+        border-color: #000099;
+        box-shadow: 0 0 0 3px rgba(0, 0, 153, 0.08);
+        background: #f5f7ff;
+    }
+
+    .plan-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        color: #000099;
+        background: #e7e9ff;
+        font-size: 1rem;
+    }
+
+    .plan-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
+
+    .plan-copy strong {
+        display: block;
+        color: #172033;
+        font-size: 0.9rem;
+    }
+
+    .plan-copy small {
+        display: block;
+        margin: 5px 0 8px;
+        color: #64748b;
+        font-size: 0.73rem;
+        font-weight: 400;
+        line-height: 1.4;
+    }
+
+    .plan-feature {
+        display: block;
+        margin-top: 3px;
+        color: #475569;
+        font-size: 0.7rem;
+    }
+
+    .plan-feature i {
+        margin-right: 4px;
+        color: #198754;
+    }
+
+    .plan-seat {
+        padding: 3px 7px;
+        border-radius: 999px;
+        color: #065f46;
+        background: #d1fae5;
+        font-size: 0.7rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .selection-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        color: transparent;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        font-size: 0.72rem;
+    }
+
+    .plan-option.selected .selection-mark {
+        color: #fff;
+        border-color: #198754;
+        background: #198754;
+    }
+
+    .plan-note {
+        display: flex;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        color: #475569;
+        background: #eef2ff;
+        font-size: 0.72rem;
+        line-height: 1.45;
+    }
+
+    .plan-note i {
+        color: #000099;
+    }
+
+    .organisation-fields {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 112px;
+        gap: 10px;
+        margin: -2px 0 9px;
+        padding: 9px;
+        border: 1px solid #b9e5d6;
+        border-radius: 9px;
+        background: #f0fdf8;
+    }
+
+    .organisation-fields .form-group-custom {
+        margin-bottom: 0;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: 1px solid;
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        padding: 10px 14px;
+    }
+
+    .alert-danger {
+        background-color: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+    }
+
+    .alert-success {
+        background-color: #d1fae5;
+        border-color: #6ee7b7;
+        color: #065f46;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+    .form-row-custom {
+        display: flex;
+        gap: 14px;
+    }
+
+    .form-group-custom {
+        margin-bottom: 9px;
+        position: relative;
+    }
+
+    .flex-fill {
+        flex: 1;
+        min-width: 0;
+    }
+
+   @*  .form-label-custom {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: normal;
+        color: #475569;
+        margin-bottom: 1px;
+        text-transform:inherit;
+        letter-spacing: 0.4px;
+    } *@
+
+    .input-icon-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .icon-addon {
+        position: absolute;
+        left: 12px;
+        color: #94a3b8;
+        font-size: 0.95rem;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* Compact 36px height for text inputs and dropdown selects */
+    .form-control-custom {
+        width: 100%;
+        height: 36px;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 0 12px 0 36px;
+        font-size: 0.875rem;
+        color: #1e293b;
+        box-sizing: border-box;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #000099;
+            box-shadow: 0 0 0 3px rgba(0, 0, 153, 0.08);
+        }
+
+        .form-control-custom:disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+    .password-toggle-btn {
+        position: absolute;
+        right: 4px;
+        height: 30px;
+        width: 30px;
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }
+
+    .auth-actions-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .link-btn-inline {
+        font-size: 0.825rem;
+        color: #000099;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+        .link-btn-inline:hover {
+            text-decoration: underline;
+        }
+
+    .checkbox-container-custom {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding-left: 24px;
+        cursor: pointer;
+        font-size: 0.825rem;
+        color: #475569;
+        user-select: none;
+    }
+
+        .checkbox-container-custom input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+    .checkmark {
+        position: absolute;
+        left: 0;
+        height: 16px;
+        width: 16px;
+        background-color: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .checkbox-container-custom input:checked ~ .checkmark {
+        background-color: #000099;
+        border-color: #000099;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 4px;
+        top: 1px;
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .checkbox-container-custom input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .registration-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 12px;
+        padding: 10px 14px;
+        border: 1px solid #dbe4ef;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .registration-submit {
+        min-width: 240px;
+        min-height: 40px;
+        padding: 8px 18px;
+        color: #fff;
+        border: 0;
+        border-radius: 7px;
+        background: linear-gradient(135deg, #198754, #0f7044);
+        box-shadow: 0 6px 14px rgba(25, 135, 84, 0.18);
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .registration-submit:hover:not(:disabled) {
+        color: #fff;
+        background: linear-gradient(135deg, #157347, #0b5d38);
+    }
+
+    .registration-submit:disabled {
+        color: #94a3b8;
+        background: #e2e8f0;
+        box-shadow: none;
+    }
+
+    .auth-card-footer {
+        margin-top: 10px;
+        padding-top: 9px;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: 0.825rem;
+        color: #64748b;
+    }
+
+    .auth-error-msg {
+        display: block;
+        font-size: 0.72rem;
+        color: #ef4444;
+        margin-top: 2px;
+    }
+
+    .font-weight-bold {
+        font-weight: 700;
+    }
+
+    @@media (max-width: 1050px) {
+        .registration-card-grid,
+        .registration-card-grid.profile-mode {
+            grid-template-columns: 1fr;
+        }
+
+        .plan-panel {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .plan-panel .panel-heading,
+        .plan-panel .plan-note {
+            grid-column: 1 / -1;
+        }
+
+        .plan-option {
+            margin-bottom: 0;
+        }
+    }
+
+    @@media (max-width: 680px) {
+        .auth-card {
+            padding: 14px 10px 10px;
+        }
+
+        .plan-panel {
+            display: block;
+        }
+
+        .plan-option {
+            margin-bottom: 12px;
+        }
+
+        .organisation-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .registration-footer {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .registration-submit {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+</style>

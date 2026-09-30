@@ -1,23 +1,295 @@
-﻿@page "/settings/reports"
+@page "/settings/reports"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using ViabilityIQ.Shared.Reporting
+@using ViabilityIQ.Web.Components.Reporting
+@inherits SystemReportsBase
 
-@using ViabilityIQ.Web.Components.CommonComponents
-@using ViabilityIQ.Shared.DataModels
-@using ViabilityIQ.Web.Components.Pages.PageFormComponents
-@inherits Microsoft.AspNetCore.Components.ComponentBase
+<div class="opr-page">
+    <PageHeading _pageTitle="Reports" CurrentPage="PageType.Reports" _pageHeading="Operational & Management Reports" />
 
-<div class="p-0 position-relative">
-    <PageHeading _pageTitle="System Reports" CurrentPage="PageType.Reports" _pageHeading="System Reports" />
-
-    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
-        <div class="app-workspace-shell">
-           
-
-
-
+    <section class="opr-hero">
+        <div>
+            <span class="opr-eyebrow">Authorised tenant reporting</span>
+            <h1>Operational insight across your assessment portfolio</h1>
+            <p>Search, analyse and distribute live assessment information within your permitted tenant scope.</p>
         </div>
-    </main>
+        <div class="opr-scope">
+            <i class="bi bi-shield-check"></i>
+            <div>
+                <span>Current data scope</span>
+                <strong>@AccessScopeLabel</strong>
+            </div>
+        </div>
+    </section>
 
-    <footer class="py-4 bg-light mt-auto">
-        <BFooter />
-    </footer>
+    @if (!string.IsNullOrWhiteSpace(AccessDeniedMessage))
+    {
+        <div class="opr-state opr-state--denied">
+            <i class="bi bi-shield-lock"></i>
+            <div>
+                <strong>Reports access is unavailable</strong>
+                <span>@AccessDeniedMessage</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <section class="opr-kpis" aria-label="Report summary">
+            <article>
+                <i class="bi bi-clipboard2-data"></i>
+                <span>Assessments</span>
+                <strong>@FilteredRows.Count</strong>
+            </article>
+            <article>
+                <i class="bi bi-check2-circle"></i>
+                <span>Completed</span>
+                <strong>@CompletedCount</strong>
+            </article>
+            <article>
+                <i class="bi bi-speedometer2"></i>
+                <span>Average readiness</span>
+                <strong>@AverageReadiness.ToString("0.0")%</strong>
+            </article>
+            <article>
+                <i class="bi bi-person-check"></i>
+                <span>Active advisors</span>
+                <strong>@ActiveAdvisorCount</strong>
+            </article>
+            <article class="@(StalledCount > 0 ? "opr-kpi-warning" : null)">
+                <i class="bi bi-hourglass-split"></i>
+                <span>Stalled 14+ days</span>
+                <strong>@StalledCount</strong>
+            </article>
+        </section>
+
+        <div class="opr-layout">
+            <aside class="opr-catalogue" aria-label="Report catalogue">
+                <header>
+                    <span>Report catalogue</span>
+                    <strong>4 reports</strong>
+                </header>
+                @foreach (var report in ReportDefinitions)
+                {
+                    <button type="button"
+                            class="opr-report-option @(SelectedReport == report.Type ? "active" : null)"
+                            @onclick="() => SelectReport(report.Type)">
+                        <i class="@report.Icon"></i>
+                        <span>
+                            <strong>@report.Name</strong>
+                            <small>@report.Description</small>
+                        </span>
+                    </button>
+                }
+            </aside>
+
+            <main class="opr-main">
+                <section class="opr-filters">
+                    <header>
+                        <div>
+                            <span>Report parameters</span>
+                            <strong>Assessment start date and ownership filters</strong>
+                        </div>
+                        <button class="btn btn-sm btn-link" type="button" @onclick="ResetFiltersAsync" disabled="@IsLoading">
+                            Reset
+                        </button>
+                    </header>
+                    <div class="opr-filter-grid">
+                        <label class="opr-filter-search">
+                            <span>Search</span>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input class="form-control" maxlength="100"
+                                       placeholder="Case, business, client or advisor"
+                                       @bind="Filter.SearchText" @bind:event="oninput" />
+                            </div>
+                        </label>
+                        <label>
+                            <span>Branch</span>
+                            <select class="form-select form-select-sm" @bind="Filter.BranchId">
+                                <option value="">All authorised branches</option>
+                                @foreach (var branch in FilterOptions.Branches)
+                                {
+                                    <option value="@branch.Id">@branch.Name</option>
+                                }
+                            </select>
+                        </label>
+                        <label>
+                            <span>Status</span>
+                            <select class="form-select form-select-sm" @bind="Filter.StatusId">
+                                <option value="">All statuses</option>
+                                @foreach (var status in StatusOptions)
+                                {
+                                    <option value="@status.Id">@status.Name</option>
+                                }
+                            </select>
+                        </label>
+                        <label>
+                            <span>Advisor (created by)</span>
+                            <select class="form-select form-select-sm" @bind="Filter.AdvisorId">
+                                <option value="">All authorised advisors</option>
+                                @foreach (var advisor in FilterOptions.Advisors)
+                                {
+                                    <option value="@advisor.Id">@advisor.Name</option>
+                                }
+                            </select>
+                        </label>
+                        <label>
+                            <span>Start date from</span>
+                            <input class="form-control form-control-sm" type="date"
+                                   @bind="Filter.StartDateFrom" @bind:format="yyyy-MM-dd" />
+                        </label>
+                        <label>
+                            <span>Start date to</span>
+                            <input class="form-control form-control-sm" type="date"
+                                   @bind="Filter.StartDateTo" @bind:format="yyyy-MM-dd" />
+                        </label>
+                        <label class="opr-active-filter">
+                            <input class="form-check-input" type="checkbox" @bind="Filter.ActiveOnly" />
+                            <span>Active assessments only</span>
+                        </label>
+                        <button class="btn btn-sm btn-primary opr-run" type="button"
+                                @onclick="LoadReportAsync" disabled="@IsLoading">
+                            @if (IsLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-arrow-repeat me-1"></i>
+                            }
+                            Run report
+                        </button>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(FilterError))
+                    {
+                        <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>@FilterError</div>
+                    }
+                </section>
+
+                <section class="opr-output">
+                    <header class="opr-output-toolbar">
+                        <div>
+                            <span>Current report</span>
+                            <strong>@SelectedDefinition.Name</strong>
+                            <small>@FilteredRows.Count authorised assessment records</small>
+                        </div>
+                        <ReportOutputMenu InstanceKey="@SelectedReport.ToString()"
+                                          PdfEnabled="@(FilteredRows.Count > 0)"
+                                          ExcelEnabled="@(FilteredRows.Count > 0)"
+                                          EmailEnabled="@(FilteredRows.Count > 0)"
+                                          PdfLoading="@IsPdfBusy"
+                                          ExcelLoading="@IsExcelBusy"
+                                          EmailLoading="@IsEmailBusy"
+                                          OnPdf="ExportPdfAsync"
+                                          OnExcel="ExportExcelAsync"
+                                          OnEmail="OpenEmail" />
+                    </header>
+
+                    @if (IsLoading)
+                    {
+                        <div class="opr-state">
+                            <span class="spinner-border spinner-border-sm"></span>
+                            Loading authorised report data…
+                        </div>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                    {
+                        <div class="opr-state opr-state--error">
+                            <i class="bi bi-exclamation-octagon"></i>
+                            @ErrorMessage
+                        </div>
+                    }
+                    else if (FilteredRows.Count == 0)
+                    {
+                        <div class="opr-state">
+                            <i class="bi bi-inbox"></i>
+                            No authorised assessments match the selected filters.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="opr-table-wrap">
+                            @if (SelectedReport == OperationalReportType.AssessmentRegister)
+                            {
+                                <table class="table table-sm opr-table">
+                                    <thead><tr><th>Case</th><th>Business / Client</th><th>Branch</th><th>Advisor</th><th>Status</th><th>Readiness</th><th>Start</th><th>Days</th></tr></thead>
+                                    <tbody>
+                                        @foreach (var row in FilteredRows)
+                                        {
+                                            <tr>
+                                                <td><a href="@($"/assessment/dashboards/{row.AssessmentId}")">@row.CaseNumber</a></td>
+                                                <td><strong>@row.BusinessName</strong><small>@row.ClientName</small></td>
+                                                <td>@row.BranchName</td>
+                                                <td>@row.AdvisorName</td>
+                                                <td><span class="opr-status @StatusClass(row.StatusId)">@row.StatusName</span></td>
+                                                <td>@row.ProgressPercentage%</td>
+                                                <td>@FormatDate(row.AssessmentStartDate)</td>
+                                                <td>@row.DaysOpen</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else if (SelectedReport == OperationalReportType.WorkflowReadiness)
+                            {
+                                <table class="table table-sm opr-table">
+                                    <thead><tr><th>Case</th><th>Business</th><th>Status</th><th>Readiness</th><th>Advisor</th><th>Branch</th><th>Last updated</th><th>Days open</th></tr></thead>
+                                    <tbody>
+                                        @foreach (var row in WorkflowRows)
+                                        {
+                                            <tr>
+                                                <td>@row.CaseNumber</td>
+                                                <td>@row.BusinessName</td>
+                                                <td><span class="opr-status @StatusClassByName(row.StatusName)">@row.StatusName</span></td>
+                                                <td><div class="opr-progress"><span style="@($"width:{Math.Clamp(row.ReadinessPercentage, 0, 100)}%")"></span></div><small>@row.ReadinessPercentage%</small></td>
+                                                <td>@row.AdvisorName</td>
+                                                <td>@row.BranchName</td>
+                                                <td>@row.LastUpdated.ToString("dd MMM yyyy")</td>
+                                                <td>@row.DaysOpen</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else if (SelectedReport == OperationalReportType.AdvisorPerformance)
+                            {
+                                <table class="table table-sm opr-table">
+                                    <thead><tr><th>Advisor</th><th>Branch</th><th>Total</th><th>Draft</th><th>In progress</th><th>Review</th><th>Completed</th><th>Avg readiness</th><th>Completion</th></tr></thead>
+                                    <tbody>
+                                        @foreach (var row in AdvisorRows)
+                                        {
+                                            <tr><td><strong>@row.AdvisorName</strong></td><td>@row.BranchName</td><td>@row.TotalAssessments</td><td>@row.DraftCount</td><td>@row.InProgressCount</td><td>@row.ReadyForReviewCount</td><td>@row.CompletedCount</td><td>@row.AverageReadiness.ToString("0.0")%</td><td>@row.CompletionRate.ToString("0.0")%</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <table class="table table-sm opr-table">
+                                    <thead><tr><th>Branch</th><th>Advisors</th><th>Total</th><th>Draft</th><th>In progress</th><th>Review</th><th>Completed</th><th>Avg readiness</th><th>Completion</th></tr></thead>
+                                    <tbody>
+                                        @foreach (var row in BranchRows)
+                                        {
+                                            <tr><td><strong>@row.BranchName</strong></td><td>@row.AdvisorCount</td><td>@row.TotalAssessments</td><td>@row.DraftCount</td><td>@row.InProgressCount</td><td>@row.ReadyForReviewCount</td><td>@row.CompletedCount</td><td>@row.AverageReadiness.ToString("0.0")%</td><td>@row.CompletionRate.ToString("0.0")%</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    }
+                </section>
+            </main>
+        </div>
+    }
 </div>
+
+<ReportEmailModal Visible="@ShowEmail"
+                  ReportName="@SelectedDefinition.Name"
+                  DefaultRecipient="@Session.UserEmail"
+                  Sending="@IsEmailBusy"
+                  StatusMessage="@EmailStatus"
+                  Succeeded="@EmailSucceeded"
+                  OnClose="CloseEmail"
+                  OnSubmit="SendEmailAsync" />
+
+<footer class="py-0 bg-light mt-3"><BFooter /></footer>

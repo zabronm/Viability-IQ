@@ -405,8 +405,17 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return null;
                 }
 
-                // ✅ IMPORTANT: Await the operation and don't start another until this completes
-                var appUser = await _userManager.FindByIdAsync(userIdString);
+                if (!long.TryParse(userIdString, out var userId) || userId <= 0)
+                {
+                    _logger.LogWarning(
+                        "GetCurrentUserAsync: Invalid NameIdentifier claim {UserId}",
+                        userIdString);
+                    return null;
+                }
+
+                // Blazor circuit-scoped UserManager instances share one DbContext.
+                // Use the per-call Dapper repository for render-time profile reads.
+                var appUser = await _userRepository.GetUserByIdAsync(userId);
 
                 if (appUser != null)
                 {
@@ -510,7 +519,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return null;
                 }
 
-                var user = await _userManager.FindByEmailAsync(email);
+                var user = await _userRepository.GetUserByEmailAsync(email);
                 _logger.LogDebug("GetUserByEmailAsync: Found user for email {Email} with UserId {UserId}", email, user?.Id);
                 return user;
             }
@@ -619,9 +628,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                     return null;
                 }
 
-                // ✅ Convert long to string for FindByIdAsync
-                string userIdString = userId.ToString();
-                var user = await _userManager.FindByIdAsync(userIdString);
+                var user = await _userRepository.GetUserByIdAsync(userId);
 
                 _logger.LogDebug("GetUserByIdAsync: Found user with ID {UserId}", userId);
                 return user;

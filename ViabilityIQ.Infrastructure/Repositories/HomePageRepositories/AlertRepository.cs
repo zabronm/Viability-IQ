@@ -71,19 +71,27 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                     SELECT
                         CONVERT(VARCHAR(50), a.AssessmentId) AS Id,
                         a.AssessmentId,
-                        a.AssessmentName,
+                        COALESCE(a.CaseNumber, CONCAT('Assessment-', a.AssessmentId)) AS AssessmentName,
                         a.BusinessId,
                         b.BusinessName,
-                        a.DueDate,
+                        a.AssessmentFinishDate AS DueDate,
                         CAST(ROUND(a.ProgressPercentage, 0) AS INT) AS ProgressPercentage,
-                        a.Status
+                        CASE a.StatusId
+                            WHEN 1 THEN 'Draft'
+                            WHEN 2 THEN 'In Progress'
+                            WHEN 3 THEN 'Ready for Review'
+                            WHEN 4 THEN 'Completed'
+                            WHEN 5 THEN 'Archived'
+                            ELSE 'Unknown'
+                        END AS Status
                     FROM tblAssessments a
                     INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                    WHERE (a.AssignedToUserId = @UserId OR a.CreatedByUserId = @UserId)
-                    AND a.Status != 'Completed'
-                    AND a.DueDate <= DATEADD(HOUR, 24, GETUTCDATE())
-                    AND a.DueDate > GETUTCDATE()
-                    ORDER BY a.DueDate ASC
+                    WHERE a.CreatedBy = @UserId
+                    AND a.Active = 1
+                    AND a.StatusId <> 4
+                    AND a.AssessmentFinishDate <= DATEADD(HOUR, 24, GETUTCDATE())
+                    AND a.AssessmentFinishDate > GETUTCDATE()
+                    ORDER BY a.AssessmentFinishDate ASC
                 ";
 
                 using var connection = _dbConnectionFactory.CreateConnection();
@@ -116,19 +124,27 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
                     SELECT
                         CONVERT(VARCHAR(50), a.AssessmentId) AS Id,
                         a.AssessmentId,
-                        a.AssessmentName,
+                        COALESCE(a.CaseNumber, CONCAT('Assessment-', a.AssessmentId)) AS AssessmentName,
                         a.BusinessId,
                         b.BusinessName,
-                        a.DueDate,
+                        a.AssessmentFinishDate AS DueDate,
                         CAST(ROUND(a.ProgressPercentage, 0) AS INT) AS ProgressPercentage,
-                        a.Status
+                        CASE a.StatusId
+                            WHEN 1 THEN 'Draft'
+                            WHEN 2 THEN 'In Progress'
+                            WHEN 3 THEN 'Ready for Review'
+                            WHEN 4 THEN 'Completed'
+                            WHEN 5 THEN 'Archived'
+                            ELSE 'Unknown'
+                        END AS Status
                     FROM tblAssessments a
                     INNER JOIN tblBusiness b ON a.BusinessId = b.BusinessId
-                    WHERE (a.AssignedToUserId = @UserId OR a.CreatedByUserId = @UserId)
-                    AND a.Status != 'Completed'
-                    AND a.DueDate > DATEADD(HOUR, 24, GETUTCDATE())
-                    AND a.DueDate <= DATEADD(DAY, 7, GETUTCDATE())
-                    ORDER BY a.DueDate ASC
+                    WHERE a.CreatedBy = @UserId
+                    AND a.Active = 1
+                    AND a.StatusId <> 4
+                    AND a.AssessmentFinishDate > DATEADD(HOUR, 24, GETUTCDATE())
+                    AND a.AssessmentFinishDate <= DATEADD(DAY, 7, GETUTCDATE())
+                    ORDER BY a.AssessmentFinishDate ASC
                 ";
 
                 using var connection = _dbConnectionFactory.CreateConnection();

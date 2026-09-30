@@ -1,0 +1,46 @@
+﻿VIABILITYIQ TENANT OWNER BRANCH ASSIGNMENT - MANIFEST
+Package date: 2026-09-30
+
+SUMMARY
+-------
+- Enables Edit for the authenticated Tenant Owner.
+- Restricts the Owner editor to the tenant-specific Branch field.
+- Preserves Owner role, ownership, membership status, and account protections.
+- Allows only the authenticated Owner to update their own DefaultBranchId.
+- Adds no database or configuration changes.
+
+VALIDATION
+----------
+- Cumulative isolated solution build succeeded.
+- Build errors: 0.
+- Owner authorization and branch-only update scan: passed.
+- Protected Owner controls scan: passed.
+- Git conflict-marker scan: passed.
+- Credential-pattern scan: passed.
+
+FILES
+-----
+Path
+  Size (bytes)
+  SHA-256
+
+DEPLOYMENT_INSTRUCTIONS.txt
+  3 187
+  0191116F7F44FEC1896372547919857B758FB666E520DD9B9408A5194993E77A
+
+Files\ViabilityIQ.Database\Dtos\TenantUserManagementDtos.cs
+  2 595
+  08479721269854C5A4BA731732ABF41091CF5ED034ED506F2CDF3CC5284C4D20
+
+Files\ViabilityIQ.Web\Components\Pages\PageFormComponents\TenantUserFormComponent.razor
+  13 522
+  CD4A151F1BD9A04971C43D75B06BD8CBE529D31D400917ED4B6E903FC87A74FA
+
+Files\ViabilityIQ.Web\Components\Pages\TenantUsersPage.razor
+  7 299
+  2BB7F9E1F9C32CCD651BFB87528DAC78CF334651F69648DC62BC9547D53DA6B0
+
+Files\ViabilityIQ.Web\Services\TenantUserManagementService.cs
+  29 391
+  2F15169422E9ABCA98B06B3ACE7226044B8B5C986D6F9DFC8ED97C60149816E3
+

@@ -1,0 +1,19 @@
+VIABILITYIQ ASSESSMENT BUDGETING USER MANUAL - MANIFEST
+Package date: 2026-09-29
+
+FILES
+-----
+Files\ViabilityIQ.Web\wwwroot\documents\AssessmentAssumptionsHelp.html
+  Size: 31,548 bytes
+  SHA-256: 2BAADB6886C8064F9FE5FA35070FCFA285F4263144789831CE902C4F073D3714
+
+Files\ViabilityIQ.Web\wwwroot\documents\AssessmentAssumptionsHelp.pdf
+  Size: 254,971 bytes
+  SHA-256: C1DC0087EBAE19FA00BFB8FD7F2F63B68A9EE2A4EC14E5E521AAB352D42062AE
+
+VALIDATION
+----------
+- HTML and PDF content synchronized.
+- PDF budgeting chapter verified by text extraction.
+- No application build required for documentation-only replacement.
+

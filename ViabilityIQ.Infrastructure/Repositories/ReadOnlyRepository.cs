@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.DbFactory;
+using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Infrastructure.Repositories
@@ -19,13 +20,18 @@ namespace ViabilityIQ.Infrastructure.Repositories
                     StringComparer.OrdinalIgnoreCase);
 
         private readonly IDbConnectionFactory _dbConnectionFactory;
+        private readonly ITenantAuthorizationService _tenantAuthorizationService;
         private readonly string _tableName;
 
-        public ReadOnlyRepository(IDbConnectionFactory dbConnectionFactory)
+        public ReadOnlyRepository(
+            IDbConnectionFactory dbConnectionFactory,
+            ITenantAuthorizationService tenantAuthorizationService)
         {
 
             _dbConnectionFactory = dbConnectionFactory
                 ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            _tenantAuthorizationService = tenantAuthorizationService
+                ?? throw new ArgumentNullException(nameof(tenantAuthorizationService));
 
             var tableName = typeof(TDto).GetCustomAttribute<TableNameAttribute>()?.Name
                 ?? typeof(TDto).GetCustomAttribute<Dapper.Contrib.Extensions.TableAttribute>()?.Name;
@@ -40,16 +46,36 @@ namespace ViabilityIQ.Infrastructure.Repositories
         public async Task<IEnumerable<TDto>> GetAllAsync()
         {
             using var connection = _dbConnectionFactory.CreateConnection();
-            string sql = $"SELECT * FROM {_tableName};";
-            return await connection.QueryAsync<TDto>(sql);
+            var scope = await GetScopeAsync();
+            var where = scope is null
+                ? string.Empty
+                : $"WHERE {BuildScopePredicate(scope.Value.Metadata)}";
+            var sql = $"SELECT sourceRecord.* FROM {_tableName} sourceRecord {where};";
+            return await connection.QueryAsync<TDto>(
+                sql,
+                scope is null ? null : BuildScopeParameters(scope.Value.Context));
         }
 
         public async Task<IEnumerable<TDto>> GetListByIdAsync(string idFieldName, TId idValue)
         {
             var field = GetValidatedField(idFieldName);
             using var connection = _dbConnectionFactory.CreateConnection();
-            string sql = $"SELECT * FROM {_tableName} WHERE [{field}] = @Id;";
-            return await connection.QueryAsync<TDto>(sql, new { Id = idValue });
+            var scope = await GetScopeAsync();
+            var predicates = new List<string> { $"sourceRecord.[{field}] = @Id" };
+            if (scope is not null)
+            {
+                predicates.Add(BuildScopePredicate(scope.Value.Metadata));
+            }
+
+            var sql = $"""
+                SELECT sourceRecord.*
+                FROM {_tableName} sourceRecord
+                WHERE {string.Join(" AND ", predicates)};
+                """;
+            var parameters = scope is null
+                ? new DynamicParameters(new { Id = idValue })
+                : BuildScopeParameters(scope.Value.Context, new { Id = idValue });
+            return await connection.QueryAsync<TDto>(sql, parameters);
         }
 
 
@@ -57,8 +83,22 @@ namespace ViabilityIQ.Infrastructure.Repositories
         {
             var field = GetValidatedField(idFieldName);
             using var connection = _dbConnectionFactory.CreateConnection();
-            string sql = $"SELECT TOP 1 * FROM {_tableName} WHERE [{field}] = @Id;";
-            return await connection.QueryFirstOrDefaultAsync<TDto>(sql, new { Id = idValue });
+            var scope = await GetScopeAsync();
+            var predicates = new List<string> { $"sourceRecord.[{field}] = @Id" };
+            if (scope is not null)
+            {
+                predicates.Add(BuildScopePredicate(scope.Value.Metadata));
+            }
+
+            var sql = $"""
+                SELECT TOP 1 sourceRecord.*
+                FROM {_tableName} sourceRecord
+                WHERE {string.Join(" AND ", predicates)};
+                """;
+            var parameters = scope is null
+                ? new DynamicParameters(new { Id = idValue })
+                : BuildScopeParameters(scope.Value.Context, new { Id = idValue });
+            return await connection.QueryFirstOrDefaultAsync<TDto>(sql, parameters);
         }
 
         public async Task<DataTablePage<TDto>> GetPageAsync(
@@ -83,6 +123,12 @@ namespace ViabilityIQ.Infrastructure.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("Offset", offset);
             parameters.Add("PageSize", pageSize);
+            var scope = await GetScopeAsync(cancellationToken);
+            if (scope is not null)
+            {
+                AddScopeParameters(parameters, scope.Value.Context);
+                predicates.Add(BuildScopePredicate(scope.Value.Metadata));
+            }
 
             if (!string.IsNullOrWhiteSpace(query.SearchText) && searchFields.Length > 0)
             {
@@ -112,13 +158,13 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
             var sql = $"""
                 SELECT *
-                FROM {_tableName}
+                FROM {_tableName} sourceRecord
                 {where}
                 ORDER BY [{sortField}] {direction}{secondarySort}
                 OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
 
                 SELECT COUNT_BIG(1)
-                FROM {_tableName}
+                FROM {_tableName} sourceRecord
                 {where};
                 """;
 
@@ -135,6 +181,88 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 TotalCount = totalCount
             };
         }
+
+        private async Task<(ScopeMetadata Metadata, TenantAccessContext Context)?> GetScopeAsync(
+            CancellationToken cancellationToken = default)
+        {
+            if (!ScopeRegistry.TryGetValue(typeof(TDto).Name, out var metadata))
+            {
+                return null;
+            }
+
+            await _tenantAuthorizationService.EnsureCanReadOperationalDataAsync(cancellationToken);
+            return (
+                metadata,
+                await _tenantAuthorizationService.GetAccessContextAsync(cancellationToken));
+        }
+
+        private static string BuildScopePredicate(ScopeMetadata metadata) => $"""
+            EXISTS
+            (
+                SELECT 1
+                FROM [{metadata.BackingTable}] scopeRecord
+                WHERE scopeRecord.[{metadata.KeyField}] =
+                      sourceRecord.[{metadata.KeyField}]
+                  AND scopeRecord.TenantId = @TenantId
+                  AND
+                  (
+                      @CanReadAll = 1
+                      OR scopeRecord.CreatedBy = @UserId
+                      OR EXISTS
+                      (
+                          SELECT 1
+                          FROM tblTenantRecordGrant grantRecord
+                          WHERE grantRecord.TenantId = @TenantId
+                            AND grantRecord.TenantMembershipId = @MembershipId
+                            AND grantRecord.EntityType = '{metadata.EntityType}'
+                            AND grantRecord.EntityId = scopeRecord.[{metadata.KeyField}]
+                            AND grantRecord.Active = 1
+                            AND grantRecord.CanView = 1
+                      )
+                  )
+            )
+            """;
+
+        private static DynamicParameters BuildScopeParameters(
+            TenantAccessContext context,
+            object? values = null)
+        {
+            var parameters = values is null
+                ? new DynamicParameters()
+                : new DynamicParameters(values);
+            AddScopeParameters(parameters, context);
+            return parameters;
+        }
+
+        private static void AddScopeParameters(
+            DynamicParameters parameters,
+            TenantAccessContext context)
+        {
+            parameters.Add("TenantId", context.TenantId);
+            parameters.Add("UserId", context.UserId);
+            parameters.Add("MembershipId", context.MembershipId);
+            parameters.Add("CanReadAll", context.CanReadAllOperationalRecords);
+        }
+
+        private static readonly IReadOnlyDictionary<string, ScopeMetadata> ScopeRegistry =
+            new Dictionary<string, ScopeMetadata>(StringComparer.Ordinal)
+            {
+                ["AssessmentDto"] = new(
+                    "tblAssessments", "AssessmentId", TenantRecordTypes.Assessment),
+                ["BusinessDto"] = new(
+                    "tblBusiness", "BusinessId", TenantRecordTypes.Business),
+                ["ClientDto"] = new(
+                    "tblClient", "ClientId", TenantRecordTypes.Client),
+                ["CompanyDto"] = new(
+                    "tblCompany", "CompanyId", TenantRecordTypes.Company),
+                ["BranchDto"] = new(
+                    "tblBranch", "BranchId", TenantRecordTypes.Branch)
+            };
+
+        private sealed record ScopeMetadata(
+            string BackingTable,
+            string KeyField,
+            string EntityType);
 
         private static string GetValidatedField(string fieldName)
         {

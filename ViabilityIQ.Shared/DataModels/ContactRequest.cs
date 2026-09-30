@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace ViabilityIQ.Shared.DataModels
 {
@@ -18,17 +12,30 @@ namespace ViabilityIQ.Shared.DataModels
         [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
         public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "Please enter your company.")]
+        [StringLength(150)]
         public string Company { get; set; } = "";
 
-        [Required(ErrorMessage = "Please select an interest.")]
-        public string Interest { get; set; } = "";
+        [RegularExpression(
+            @"^$|^\+?[0-9 ()-]{7,30}$",
+            ErrorMessage = "Please enter a valid phone number.")]
+        [StringLength(30)]
+        public string PhoneNumber { get; set; } = "";
 
-        [Required(ErrorMessage = "Please tell us briefly about your project.")]
-        [StringLength(1000, MinimumLength = 10,
-            ErrorMessage = "Please provide at least 10 characters.")]
+        [Required(ErrorMessage = "Please select a subject.")]
+        [RegularExpression(
+            "^(Feedback|Support|Demo Request|Sales Enquiry|Partnership|Other)$",
+            ErrorMessage = "Please select a valid subject.")]
+        public string Subject { get; set; } = "";
+
+        [Required(ErrorMessage = "Please enter your message.")]
+        [StringLength(2000, MinimumLength = 10,
+            ErrorMessage = "Please provide between 10 and 2,000 characters.")]
         public string Message { get; set; } = "";
 
+        [Range(typeof(bool), "true", "true",
+            ErrorMessage = "Please agree to us processing this enquiry.")]
         public bool Consent { get; set; }
+
+        public string Website { get; set; } = "";
     }
 }

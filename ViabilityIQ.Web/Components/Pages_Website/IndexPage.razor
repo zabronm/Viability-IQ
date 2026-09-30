@@ -1,724 +1,223 @@
-﻿@page "/index"
+@page "/index"
 @page "/website/index"
 @page "/web/home"
-
-
+@using ViabilityIQ.Web.Components.Layout.Websites
+@using ViabilityIQ.Web.Components.Pages_Website.WebsiteComponents
 @layout PublicLayout
 
-<PageTitle>Viability.IQ — Understand. Project. Decide.</PageTitle>
+<PageTitle>ViabilityIQ | Financial viability, projections and decision intelligence</PageTitle>
 
 <div class="viq-home">
-
-    <!-- =====================================================
-         HERO
-         ===================================================== -->
-
-    <section class="viq-hero">
-
-        <div class="viq-container">
-
-            <div class="viq-hero-content">
-
-                <div class="viq-hero-eyebrow">
-                    Financial Modelling &amp; Business Viability
-                </div>
-
-                <h1 style="color: #033E3E !important;">
-                    Understand the Viability of a Business Before You Commit.
-                </h1>
-
-                <p class="viq-hero-description">
-                    Build a baseline. Model 12 months of business activity.
-                    Generate financial projections, test different scenarios
-                    and explore AI-powered insights.
+    <section class="home-hero" id="home">
+        <div class="home-container hero-grid">
+            <div class="hero-copy">
+                <span class="section-kicker"><i class="bi bi-stars"></i> Financial clarity before commitment</span>
+                <h1>Turn business assumptions into a decision-ready financial story.</h1>
+                <p class="hero-lead">
+                    ViabilityIQ brings structured data capture, 12-month projections,
+                    sensitivity testing, risk indicators and AI-assisted interpretation
+                    into one secure assessment workspace.
                 </p>
+                <div class="hero-actions">
+                    <a class="home-button primary" href="/identity/register">
+                        Start an assessment <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a class="home-button secondary" href="/website/index#contact">
+                        Request a demo
+                    </a>
+                </div>
+                <div class="hero-proof">
+                    <span><i class="bi bi-check-circle-fill"></i> Scenario-based planning</span>
+                    <span><i class="bi bi-check-circle-fill"></i> Explainable calculations</span>
+                    <span><i class="bi bi-check-circle-fill"></i> Exportable reports</span>
+                </div>
+            </div>
+
+            <div class="hero-visual" aria-label="ViabilityIQ dashboard preview">
+                <div class="visual-frame">
+                    <div class="visual-toolbar">
+                        <span></span><span></span><span></span>
+                        <small>Assessment intelligence workspace</small>
+                    </div>
+                    <img src="/images/hero-dashboard.png"
+                         alt="ViabilityIQ financial assessment dashboard"
+                         loading="eager" />
+                    <div class="visual-insight">
+                        <i class="bi bi-activity"></i>
+                        <span><strong>Know what changes the outcome.</strong> Compare the baseline with practical scenarios before deciding.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Platform strengths">
+        <div class="home-container trust-grid">
+            <span><i class="bi bi-calendar3"></i> 12-month projections</span>
+            <span><i class="bi bi-shield-lock"></i> Tenant-aware access</span>
+            <span><i class="bi bi-diagram-3"></i> Integrated operating model</span>
+            <span><i class="bi bi-file-earmark-bar-graph"></i> Decision-ready reporting</span>
+        </div>
+    </section>
+
+    <section class="home-section" id="capabilities">
+        <div class="home-container">
+            <div class="section-heading">
+                <span class="section-kicker">One connected assessment</span>
+                <h2>See how operations flow through to cash, risk and viability.</h2>
                 <p>
-                    Viability.IQ combines AI-driven viability scoring, market analysis,
-                    and financial modeling so you can see the real picture in minutes —
-                    not weeks.
+                    Capture the drivers of the business once, then use the same
+                    authoritative model across projections, alerts, scenarios and reports.
                 </p>
-                <p class="viq-hero-audience">
-                    For Entrepreneurs, Existing & Prospective Businesses, Investors and Shareholders.
-                </p>
-
-                <div class="viq-hero-actions">
-
-                    @* <a href="/assessment/new"
-                       class="viq-primary-button">
-                        Start Your Assessment
-                    </a> *@
-
-                    <a href="/request-demo"
-                       class="viq-secondary-button">
-                        Request a Demo <i class="bi bi-magic text-white"></i>
-                    </a>
-
-                </div>
-
             </div>
 
-
-            <!-- =================================================
-                 DASHBOARD PREVIEW
-                 ================================================= -->
-
-            <div class="viq-hero-visual">                
-                <div class="hero-visual">
-                    <img src="images/hero-dashboard.png"
-                         alt="Viability.IQ viability score dashboard"
-                         style="width:100%; border-radius:6px;" />
-                </div>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- =====================================================
-     ONE PLATFORM / MULTIPLE BUSINESS DECISIONS
-     ===================================================== -->
-
-    <section class="viq-decision-section">
-
-        <div class="viq-container">
-
-            <div class="viq-section-heading">
-
-                <div class="viq-section-eyebrow">
-                    One Platform! Multiple Decisions! Who must use               
-                    <span class="viq-logo-name">
-                        Viability<span class="viq-logo-dot">.</span><span class="viq-logo-iq">IQ</span> ??
-                    </span>
-                </div>
-                @*  <h2>
-                    Understand the Numbers Behind the Decision.
-                </h2> *@
-
-                <p>
-                    Whether you are starting a business, managing an existing
-                    operation or evaluating an investment, Viability.IQ gives
-                    you a structured financial view of the business and its
-                    potential scenarios.
-                    <br />
-                    Viability.IQ combines AI-driven viability scoring, market analysis,
-                    and financial modeling so you can see the real picture in minutes —
-                    not weeks.
-                </p>
-
-            </div>
-
-
-            <div class="viq-decision-grid">
-
-                <!-- =================================================
-                 ENTREPRENEURS
-                 ================================================= -->
-
-                <article class="viq-decision-card">
-
-                    <div class="viq-decision-icon">
-                        <i class="bi bi-rocket-takeoff"></i>
+            <div class="capability-grid">
+                <article class="capability-card featured">
+                    <div class="capability-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div>
+                        <span>Projection engine</span>
+                        <h3>Integrated financial projections</h3>
+                        <p>Model sales, operating costs, VAT, working capital, loans, assets and cash flow over a practical 12-month horizon.</p>
                     </div>
-
-                    <h3>
-                        Starting a Business
-                    </h3>
-
-                    <p>
-                        Build a financial baseline, model your expected
-                        business activity and explore whether the proposed
-                        business model can support the required costs,
-                        investment and working capital.
-                    </p>
-
-                    <a href="/features"
-                       class="viq-section-link">
-                        Explore Business Planning
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-
+                    <div class="card-graphic projection-bars" aria-hidden="true">
+                        <i style="height:32%"></i><i style="height:47%"></i><i style="height:42%"></i>
+                        <i style="height:68%"></i><i style="height:74%"></i><i style="height:88%"></i>
+                    </div>
                 </article>
 
-
-                <!-- =================================================
-                 EXISTING BUSINESSES
-                 ================================================= -->
-
-                <article class="viq-decision-card">
-
-                    <div class="viq-decision-icon">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-
-                    <h3>
-                        Existing Businesses
-                    </h3>
-
-                    <p>
-                        Start with the current financial position of the
-                        business, model the next 12 months and examine
-                        profitability, cash flow, working capital and
-                        other key viability indicators.
-                    </p>
-
-                    <a href="/features"
-                       class="viq-section-link">
-                        Explore Business Analysis
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-
+                <article class="capability-card">
+                    <div class="capability-icon"><i class="bi bi-sliders"></i></div>
+                    <span>Decision testing</span>
+                    <h3>Sensitivity and scenarios</h3>
+                    <p>Stress-test revenue, costs, collections, interest and investment assumptions without changing source records.</p>
                 </article>
 
-
-                <!-- =================================================
-                 INVESTORS / SHAREHOLDERS
-                 ================================================= -->
-
-                <article class="viq-decision-card">
-
-                    <div class="viq-decision-icon">
-                        <i class="bi bi-pie-chart"></i>
-                    </div>
-
-                    <h3>
-                        Investors &amp; Shareholders
-                    </h3>
-
-                    <p>
-                        Examine the financial structure of a business,
-                        model projected cash flows and explore different
-                        assumptions and scenarios before making an
-                        investment decision.
-                    </p>
-
-                    <a href="/investors"
-                       class="viq-section-link">
-                        Explore Investor Analysis
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-
+                <article class="capability-card">
+                    <div class="capability-icon"><i class="bi bi-exclamation-diamond"></i></div>
+                    <span>Early warning</span>
+                    <h3>Risk and break-even signals</h3>
+                    <p>Surface liquidity pressure, funding gaps, weak cover and narrow margins of safety with clear recommended actions.</p>
                 </article>
 
+                <article class="capability-card">
+                    <div class="capability-icon"><i class="bi bi-box-seam"></i></div>
+                    <span>Operational detail</span>
+                    <h3>Asset lifecycle intelligence</h3>
+                    <p>Track acquisitions, movements, depreciation, disposals and monthly opening and closing values.</p>
+                </article>
+
+                <article class="capability-card">
+                    <div class="capability-icon"><i class="bi bi-cpu"></i></div>
+                    <span>Assisted interpretation</span>
+                    <h3>Optional AI analysis</h3>
+                    <p>Interpret deterministic sensitivity results with evidence-backed summaries and recommendations while keeping calculations authoritative.</p>
+                </article>
+
+                <article class="capability-card">
+                    <div class="capability-icon"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+                    <span>Communication</span>
+                    <h3>Reports and exports</h3>
+                    <p>Prepare structured on-screen reports, spreadsheets and printable output for review and decision-making.</p>
+                </article>
             </div>
-
         </div>
-
     </section>
 
-    <!-- =====================================================
-         MORE HOME PAGE SECTIONS
-         ===================================================== -->
-
-    <section class="viq-home-introduction">
-
-        <div class="viq-container">
-
-            <!-- Additional home page sections will be added here -->
-
+    <section class="home-section soft-section" id="how-it-works">
+        <div class="home-container">
+            <div class="section-heading">
+                <span class="section-kicker">A disciplined workflow</span>
+                <h2>From source assumptions to a defensible decision.</h2>
+            </div>
+            <div class="process-grid">
+                <article><b>01</b><h3>Capture</h3><p>Set up the client, business and assessment, then record the commercial and financial drivers.</p></article>
+                <article><b>02</b><h3>Project</h3><p>Build the connected income, cash-flow, VAT, working-capital, debt and asset schedules.</p></article>
+                <article><b>03</b><h3>Challenge</h3><p>Compare scenarios and test the assumptions that matter most to resilience and funding.</p></article>
+                <article><b>04</b><h3>Decide</h3><p>Review alerts, KPIs and reports, then communicate the evidence behind the decision.</p></article>
+            </div>
         </div>
-
     </section>
 
+    <section class="home-section" id="who-its-for">
+        <div class="home-container audience-layout">
+            <div class="section-heading left">
+                <span class="section-kicker">Built for practical decisions</span>
+                <h2>One model, several decision-makers.</h2>
+                <p>ViabilityIQ supports people who need more than a spreadsheet total—they need the operational reasons behind it.</p>
+                <a class="text-link" href="/website/index#contact">Discuss your use case <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="audience-grid">
+                <article><i class="bi bi-rocket-takeoff"></i><div><h3>Entrepreneurs</h3><p>Test whether a proposed business can fund its setup, costs and growth assumptions.</p></div></article>
+                <article><i class="bi bi-building"></i><div><h3>Existing businesses</h3><p>Understand cash pressure, working-capital needs and the effect of operational changes.</p></div></article>
+                <article><i class="bi bi-briefcase"></i><div><h3>Advisers and assessors</h3><p>Apply a consistent assessment workflow and produce evidence-led recommendations.</p></div></article>
+                <article><i class="bi bi-pie-chart"></i><div><h3>Investors and funders</h3><p>Review the assumptions, downside exposure and funding requirements behind an opportunity.</p></div></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section plan-section" id="plans">
+        <div class="home-container">
+            <div class="section-heading">
+                <span class="section-kicker">Flexible SaaS access</span>
+                <h2>Choose the operating model that fits.</h2>
+                <p>Start individually or create an organisation workspace with controlled access for a wider team.</p>
+            </div>
+            <div class="plan-grid">
+                <article>
+                    <span class="plan-label">Standard</span>
+                    <h3>For an individual practitioner</h3>
+                    <p>A focused personal tenant for building and reviewing assessments in one secure workspace.</p>
+                    <ul>
+                        <li><i class="bi bi-check2"></i> One user</li>
+                        <li><i class="bi bi-check2"></i> Core assessment and projection tools</li>
+                        <li><i class="bi bi-check2"></i> Sensitivity and reporting</li>
+                    </ul>
+                    <a href="/identity/register" class="home-button secondary">Choose Standard</a>
+                </article>
+                <article class="recommended">
+                    <span class="plan-label">Open Plan</span>
+                    <h3>For organisations and teams</h3>
+                    <p>An organisation tenant with flexible seats, role assignment and authorised access to operational records.</p>
+                    <ul>
+                        <li><i class="bi bi-check2"></i> Multiple users and branches</li>
+                        <li><i class="bi bi-check2"></i> Tenant roles and record access</li>
+                        <li><i class="bi bi-check2"></i> Shared assessment workflows</li>
+                    </ul>
+                    <a href="/website/index#contact" class="home-button primary">Discuss Open Plan</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section contact-section" id="contact">
+        <div class="home-container contact-grid">
+            <div class="contact-copy">
+                <span class="section-kicker">Contact ViabilityIQ</span>
+                <h2>Let’s talk about the decision you need to make.</h2>
+                <p>Request a demonstration, ask for support, share feedback or discuss an organisation rollout.</p>
+
+                <div class="contact-methods">
+                    <article>
+                        <i class="bi bi-geo-alt"></i>
+                        <div><strong>Physical address</strong><address>35 Mercedes Street<br />5 Mamayila House<br />Dawn Park 1539<br />South Africa</address></div>
+                    </article>
+                    <article>
+                        <i class="bi bi-whatsapp"></i>
+                        <div>
+                            <strong>WhatsApp</strong>
+                            <a href="https://wa.me/27790757294?text=Hello%20ViabilityIQ%2C%20I%20would%20like%20to%20know%20more%20about%20the%20platform."
+                               target="_blank" rel="noopener noreferrer">
+                                +27 79 075 7294
+                            </a>
+                        </div>
+                    </article>
+                    <article>
+                        <i class="bi bi-clock"></i>
+                        <div><strong>Response target</strong><span>We aim to respond within one business day.</span></div>
+                    </article>
+                </div>
+            </div>
+            <ContactFormComponent />
+        </div>
+    </section>
 </div>
-
-
-
-
-<style type="text/css">
-    /* =========================================================
-               VIABILITYIQ PUBLIC WEBSITE
-               ========================================================= */
-
-    :root {
-        /* Brand */
-        --viq-teal: #0F8A7B;
-        --viq-orange: #D97706;
-        /* Button colours */
-        --viq-marble: #566D7E;
-        --viq-bottle-green: #006A4E;
-        /* General colours */
-        --viq-navy: #0F172A;
-        --viq-navy-light: #1E293B;
-        --viq-text: #334155;
-        --viq-text-light: #64748B;
-        --viq-white: #FFFFFF;
-        --viq-background: #F8FAFC;
-        --viq-border: #E2E8F0;
-        /* Layout */
-        --viq-container: 1240px;
-        /* Effects */
-        --viq-radius-sm: 6px;
-        --viq-radius-md: 10px;
-        --viq-radius-lg: 16px;
-        --viq-shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
-        --viq-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.10);
-        --viq-shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.14);
-    }
-
-
-    /* =========================================================
-               GLOBAL
-               ========================================================= */
-
-    .viq-public-site {
-        min-height: 100vh;
-        background: var(--viq-background);
-        color: var(--viq-text);
-        font-family: Inter, "Segoe UI", Arial, sans-serif;
-    }
-
-    .viq-public-main {
-        min-height: calc(100vh - 80px);
-    }
-
-    .viq-container {
-        width: 100%;
-        max-width: var(--viq-container);
-        margin: 0 auto;
-        padding-left: 24px;
-        padding-right: 24px;
-    }
-
-
-    /* =========================================================
-               VIABILITYIQ LOGO
-               ========================================================= */
-
-    .viq-logo {
-        display: inline-flex;
-        align-items: baseline;
-        text-decoration: none;
-        line-height: 1;
-        white-space: nowrap;
-    }
-
-    .viq-logo-name {
-        color: var(--viq-teal);
-        font-size: 27px;
-        font-weight: 800;
-        letter-spacing: -1.2px;
-    }
-
-    .viq-logo-dot,
-    .viq-logo-iq {
-        color: var(--viq-orange);
-    }
-
-    .viq-logo-dot {
-        margin-left: 1px;
-    }
-
-    .viq-logo-tagline {
-        display: block;
-        margin-top: 4px;
-        color: var(--viq-text-light);
-        font-size: 10px;
-        font-weight: 500;
-        letter-spacing: 0.7px;
-    }
-
-
-    /* =========================================================
-               PUBLIC NAVIGATION
-               ========================================================= */
-
-    .viq-public-nav {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: rgba(255, 255, 255, 0.96);
-        border-bottom: 1px solid var(--viq-border);
-        backdrop-filter: blur(12px);
-    }
-
-    .viq-nav-inner {
-        min-height: 76px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
-    }
-
-    .viq-nav-brand {
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-    }
-
-    .viq-nav-links {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 25px;
-        flex: 1;
-    }
-
-    .viq-nav-link {
-        color: var(--viq-text);
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 600;
-        transition: color 0.2s ease, transform 0.2s ease;
-    }
-
-        .viq-nav-link:hover {
-            color: var(--viq-bottle-green);
-            transform: translateY(-1px);
-        }
-
-    .viq-nav-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-shrink: 0;
-    }
-
-
-    /* =========================================================
-               BUTTONS
-               ========================================================= */
-
-    /*
-               All public-site buttons use the marble colour.
-               Hover changes them to bottle green.
-            */
-
-    .viq-primary-button,
-    .viq-secondary-button,
-    .viq-outline-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 42px;
-        padding: 0 20px;
-        border-radius: var(--viq-radius-sm);
-        background: var(--viq-marble);
-        border: 1px solid var(--viq-marble);
-        color: var(--viq-white);
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .viq-primary-button:hover,
-        .viq-secondary-button:hover,
-        .viq-outline-button:hover {
-            background: var(--viq-bottle-green);
-            border-color: var(--viq-bottle-green);
-            color: var(--viq-white);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(0, 106, 78, 0.20);
-        }
-
-
-    /* =========================================================
-               HERO
-               ========================================================= */
-
-    .viq-hero {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient( 135deg, #FFFFFF 0%, #F8FAFC 55%, #EEF5F3 100% );
-        padding: 72px 0 82px;
-    }
-
-        .viq-hero::before {
-            content: "";
-            position: absolute;
-            width: 420px;
-            height: 420px;
-            top: -180px;
-            right: -120px;
-            border-radius: 50%;
-            background: rgba(15, 138, 123, 0.06);
-        }
-
-        .viq-hero::after {
-            content: "";
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            bottom: -170px;
-            left: -120px;
-            border-radius: 50%;
-            background: rgba(217, 119, 6, 0.05);
-        }
-
-        .viq-hero .viq-container {
-            position: relative;
-            z-index: 1;
-        }
-
-    .viq-hero-content {
-        max-width: 620px;
-    }
-
-    .viq-hero-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        margin-bottom: 16px;
-        color: var(--viq-bottle-green);
-        font-size: 12px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-    }
-
-    .viq-hero h1 {
-        margin: 0 0 20px;
-        max-width: 650px;
-        /*
-                   Previous large heading was approximately 56px.
-                   Reduced by 50%.
-                */
-        font-size: 28px;
-        line-height: 1.15;
-        letter-spacing: -0.8px;
-        color: var(--viq-navy);
-        font-weight: 800;
-    }
-
-    .viq-hero-description {
-        max-width: 600px;
-        margin: 0 0 14px;
-        color: #033E3E; /* var(--viq-text); */
-        font-size: 16px;
-        line-height: 1.65;
-    }
-
-    .viq-hero-audience {
-        margin: 0 0 28px;
-        color: var(--viq-text-light);
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .viq-hero-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-
-    /* =========================================================
-               HERO LAYOUT
-               ========================================================= */
-
-    .viq-hero .viq-container {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
-        align-items: center;
-        gap: 70px;
-    }
-
-
-    /* =========================================================
-               DASHBOARD PREVIEW
-               ========================================================= */
-
-    .viq-hero-visual {
-        display: flex;
-        justify-content: center;
-    }
-
-    .viq-dashboard-placeholder {
-        width: 100%;
-        overflow: hidden;
-        background: #FFFFFF;
-        border: 1px solid var(--viq-border);
-        border-radius: var(--viq-radius-lg);
-        box-shadow: var(--viq-shadow-lg);
-        transform: perspective(1200px) rotateY(-3deg);
-    }
-
-    .viq-dashboard-top {
-        min-height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 18px;
-        background: var(--viq-navy);
-        color: white;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .viq-dashboard-body {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        padding: 18px;
-    }
-
-    .viq-dashboard-card {
-        min-height: 78px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 14px;
-        background: #F8FAFC;
-        border: 1px solid var(--viq-border);
-        border-radius: 8px;
-    }
-
-        .viq-dashboard-card span {
-            margin-bottom: 7px;
-            color: var(--viq-text-light);
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .viq-dashboard-card strong {
-            color: var(--viq-navy);
-            font-size: 18px;
-            font-weight: 800;
-        }
-
-    .viq-dashboard-chart {
-        grid-column: 1 / -1;
-        min-height: 180px;
-        padding: 16px;
-        background: #FFFFFF;
-        border: 1px solid var(--viq-border);
-        border-radius: 8px;
-    }
-
-        .viq-dashboard-chart > span {
-            display: block;
-            margin-bottom: 20px;
-            color: var(--viq-text);
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-    .viq-chart-lines {
-        height: 110px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        border-bottom: 1px solid var(--viq-border);
-    }
-
-        .viq-chart-lines div {
-            height: 1px;
-            width: 100%;
-            background: var(--viq-border);
-        }
-
-
-    /* =========================================================
-               FOOTER
-               ========================================================= */
-
-    .viq-public-footer {
-        background: var(--viq-navy);
-        color: #CBD5E1;
-        padding: 55px 0 25px;
-    }
-
-    .viq-footer-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-        gap: 50px;
-    }
-
-    .viq-footer-brand .viq-logo-name {
-        font-size: 25px;
-    }
-
-    .viq-footer-description {
-        max-width: 360px;
-        margin-top: 15px;
-        color: #94A3B8;
-        font-size: 13px;
-        line-height: 1.7;
-    }
-
-    .viq-footer-title {
-        margin-bottom: 15px;
-        color: #FFFFFF;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .viq-footer-links {
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-    }
-
-        .viq-footer-links a {
-            color: #94A3B8;
-            text-decoration: none;
-            font-size: 12px;
-            transition: color 0.2s ease;
-        }
-
-            .viq-footer-links a:hover {
-                color: #FFFFFF;
-            }
-
-    .viq-footer-bottom {
-        margin-top: 45px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.10);
-        color: #64748B;
-        font-size: 11px;
-    }
-
-
-    /* =========================================================
-               MOBILE MENU
-               ========================================================= */
-
-    .viq-mobile-menu-button {
-        display: none;
-        width: 40px;
-        height: 40px;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: 1px solid var(--viq-border);
-        border-radius: 7px;
-        color: var(--viq-navy);
-        cursor: pointer;
-    }
-
-    .viq-mobile-menu {
-        display: none;
-        padding: 15px 24px 20px;
-        border-top: 1px solid var(--viq-border);
-        background: #FFFFFF;
-    }
-
-        .viq-mobile-menu.open {
-            display: block;
-        }
-
-    .viq-mobile-menu-links {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-        .viq-mobile-menu-links a {
-            padding: 8px 0;
-            color: var(--viq-text);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-
-    /* =========================================================
-               RESPONSIVE
-               ========================================================= */
-
-   
-
-    
-    
-
-</style>
