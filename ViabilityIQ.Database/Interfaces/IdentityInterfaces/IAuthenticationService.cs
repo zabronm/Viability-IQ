@@ -13,6 +13,7 @@ namespace ViabilityIQ.Application.Interfaces.IdentityInterfaces
     public interface IAuthenticationService
     {
         Task<AuthResult> RegisterAsync(RegisterRequest request);
+        Task<AuthResult> UpdateProfileAsync(ClaimsPrincipal user, RegisterRequest request);
         Task<AuthResult> LoginAsync(LoginRequest request);
         Task LogoutAsync(ClaimsPrincipal user);
         Task<bool> IsUserAuthenticatedAsync();

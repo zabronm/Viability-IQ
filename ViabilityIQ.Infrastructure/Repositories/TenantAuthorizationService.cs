@@ -138,6 +138,8 @@ public sealed class TenantAuthorizationService : ITenantAuthorizationService
             SELECT
                 m.TenantMembershipId,
                 m.IsOwner,
+                m.DefaultBranchId AS BranchId,
+                COALESCE(b.BranchName, 'Unassigned') AS BranchName,
                 r.RoleCode
             FROM tblTenantMembership m
             INNER JOIN tblTenant t
@@ -149,6 +151,10 @@ public sealed class TenantAuthorizationService : ITenantAuthorizationService
                AND s.Status IN ('Active', 'Trial')
             LEFT JOIN tblTenantMembershipRole mr
                 ON mr.TenantMembershipId = m.TenantMembershipId
+            LEFT JOIN tblBranch b
+                ON b.BranchId = m.DefaultBranchId
+               AND b.TenantId = m.TenantId
+               AND b.Active = 1
             LEFT JOIN tblTenantRole r
                 ON r.TenantRoleId = mr.TenantRoleId
                AND r.TenantId = m.TenantId
@@ -180,6 +186,8 @@ public sealed class TenantAuthorizationService : ITenantAuthorizationService
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var isOwner = rows.Any(row => row.IsOwner)
             || roleCodes.Contains(TenantRoleCodes.Owner);
+        if (isOwner)
+            roleCodes.Add(TenantRoleCodes.Owner);
         var isAdministrator = roleCodes.Contains(TenantRoleCodes.Administrator);
         var isBranchManager = roleCodes.Contains(TenantRoleCodes.BranchManager);
         var isViewer = roleCodes.Contains(TenantRoleCodes.Viewer);
@@ -189,6 +197,8 @@ public sealed class TenantAuthorizationService : ITenantAuthorizationService
             TenantId = _sessionService.TenantId,
             UserId = _sessionService.UserId,
             MembershipId = _sessionService.TenantMembershipId,
+            BranchId = rows[0].BranchId,
+            BranchName = rows[0].BranchName,
             RoleCodes = roleCodes,
             CanReadAllOperationalRecords = isOwner || isAdministrator,
             CanWriteAllOperationalRecords = isOwner || isAdministrator,
@@ -205,6 +215,8 @@ public sealed class TenantAuthorizationService : ITenantAuthorizationService
     {
         public long TenantMembershipId { get; init; }
         public bool IsOwner { get; init; }
+        public long? BranchId { get; init; }
+        public string BranchName { get; init; } = "Unassigned";
         public string? RoleCode { get; init; }
     }
 }

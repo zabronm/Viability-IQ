@@ -50,7 +50,7 @@
     overflow: hidden;
     padding: 10px 12px 10px 14px; /* Removed/reduced inside padding */
     border: 1px solid #dbe4ec;
-    border-left: 4px solid var(--vat-kpi-accent);
+    border-left: 2px solid var(--vat-kpi-accent);
     border-radius: 10px;
     background: linear-gradient(145deg, #ffffff 0%, #fbfcfe 100%);
     box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
@@ -60,6 +60,7 @@
 }
 
     .vat-kpi-card:hover {
+        border-left: 3px solid var(--vat-kpi-accent);
         border-color: #566D7E;
         transform: translateY(-2.5px);
         box-shadow: 0 8px 20px rgba(71, 101, 157, 0.12);
@@ -104,9 +105,9 @@
     z-index: 1;
     overflow: hidden;
     color: #566D7E;
-    font-size: clamp(0.85rem, 1.1vw, 1.05rem); /* Reduced font size */
-    font-weight: 700;
-    line-height: 1.1;
+    font-size: 0.85rem; /*clamp(0.80rem, 0.90vw, 0.95rem);  Reduced font size */
+    font-weight: 600;
+    line-height: 1.0;
     text-overflow: ellipsis;
     white-space: nowrap;
 }

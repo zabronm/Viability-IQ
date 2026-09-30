@@ -9,7 +9,7 @@
      class="sensitivity-page assessment-print-page container-fluid p-0 position-relative dashboard-workspace">
     <PageHeading_Assessment _pageTitle="Sensitivity Analysis"
                             PageTitle="Sensitivity Analysis"
-                            CurrentPage="PageType.Reports" />
+                            CurrentPage="PageType.Sensitivity" />
     <div class="row bg-white g-3 mt-1 mb-1 py-0 px-2" style="border-radius: 6px;">
         <div class="sensitivity-actions">
             <span><i class="bi bi-shield-lock"></i> Baseline is read-only. Scenarios remain in memory and are not saved.</span>
@@ -553,9 +553,21 @@ case SensitivityTab.GroqAiAnalysis:
         @if (CurrentResult is not null && BaselineResult is not null)
         {
             <div class="kpi-grid">
-                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue)"><span>Revenue</span><strong>@CurrentResult.Metrics.Revenue.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") vs baseline</small></article>
-                <article class="kpi-card @GrossMarginKpiClass(CurrentResult.Metrics.GrossMarginPercent)"><span>Gross margin</span><strong>@(CurrentResult.Metrics.GrossMarginPercent?.ToString("N1") ?? "n/a")%</strong><small>Profitability quality</small></article>
-                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA)"><span>EBITDA</span><strong>@CurrentResult.Metrics.EBITDA.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA).ToString("+N0;-N0;0") vs baseline</small></article>
+                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue)">
+                    <span>Revenue</span>
+                    <strong>@CurrentResult.Metrics.Revenue.ToString("N0")</strong>
+                    <small>@Variance(CurrentResult.Metrics.Revenue, BaselineResult.Metrics.Revenue).ToString("+N0;-N0;0") vs baseline</small>
+                </article>
+                <article class="kpi-card @GrossMarginKpiClass(CurrentResult.Metrics.GrossMarginPercent)">
+                    <span>Gross margin</span>
+                    <strong>@(CurrentResult.Metrics.GrossMarginPercent?.ToString("N1") ?? "n/a")%</strong>
+                    <small>Profitability quality</small>
+                </article>
+                <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA)">
+                    <span>EBITDA</span>
+                    <strong>@CurrentResult.Metrics.EBITDA.ToString("N0")</strong>
+                    <small>@Variance(CurrentResult.Metrics.EBITDA, BaselineResult.Metrics.EBITDA).ToString("+N0;-N0;0") vs baseline</small>
+                </article>
                 <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax)"><span>Profit before tax</span><strong>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") vs baseline</small></article>
                 <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash)"><span>Closing cash</span><strong>@CurrentResult.Metrics.ClosingCash.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") vs baseline</small></article>
                 <article class="kpi-card @FundingShortfallKpiClass(CurrentResult.Metrics.FundingShortfall)"><span>Funding shortfall</span><strong>@CurrentResult.Metrics.FundingShortfall.ToString("N0")</strong><small>Minimum cash: @CurrentResult.Metrics.MinimumCash.ToString("N0") in M@(CurrentResult.Metrics.MinimumCashMonth)</small></article>

@@ -66,6 +66,7 @@ public class AuthController : ControllerBase
                 return Redirect("/login?error=InvalidCredentials");
             }
 
+            user.PreviousLoginAt = user.LastLoginAt;
             user.LastLoginAt = DateTime.UtcNow;
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
@@ -89,7 +90,9 @@ public class AuthController : ControllerBase
                 Metadata = new { request.RememberMe }
             });
 
-            return LocalRedirect("/home");
+            return LocalRedirect(user.MustChangePassword
+                ? "/identity/change-password"
+                : "/home");
         }
         catch (Exception ex)
         {
@@ -140,6 +143,17 @@ public class AuthController : ControllerBase
                 cancellationToken: HttpContext.RequestAborted);
 
             await _signInManager.SignOutAsync();
+
+            currentUser.LastLogoutAt = DateTime.UtcNow;
+            var logoutUpdateResult = await _userManager.UpdateAsync(currentUser);
+            if (!logoutUpdateResult.Succeeded)
+            {
+                _logger.LogError(
+                    "User {UserId} signed out, but LastLogoutAt could not be updated: {Errors}",
+                    currentUser.Id,
+                    string.Join("; ", logoutUpdateResult.Errors.Select(error => error.Description)));
+            }
+
             return LocalRedirect("/login");
         }
         catch (Exception ex)

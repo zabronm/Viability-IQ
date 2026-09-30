@@ -139,6 +139,16 @@
     margin-top: 2px;
 }
 
+.profile-role-primary {
+    font-weight: 700;
+    color: #000099;
+}
+
+.profile-role-secondary {
+    font-size: 0.62rem;
+    color: #64748b;
+}
+
 .profile-card-body {
     padding: 8px 0;
 }

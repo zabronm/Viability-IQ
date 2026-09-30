@@ -12,8 +12,11 @@
                 Welcome back, <span class="greeting-name">@CurrentUser?.FirstName</span>! 👋
             </h1>
             <p class="greeting-subtitle">
-                <span class="last-seen-label">Last seen:</span>
-                <span class="last-seen-time">@FormatLastLoginDate(LastLoginDate)</span>
+                <span class="last-seen-label">Previous sign-in:</span>
+                <span class="last-seen-time">@FormatActivityDate(PreviousLoginDate, "First sign-in")</span>
+                <span class="branch-separator">|</span>
+                <span class="last-seen-label">Last sign-out:</span>
+                <span class="last-seen-time">@FormatActivityDate(LastLogoutDate, "Not recorded")</span>
                 <span class="branch-separator">|</span>
                 <span class="branch-label">Your Branch:</span>
                 <span class="branch-name">@CurrentBranch</span>

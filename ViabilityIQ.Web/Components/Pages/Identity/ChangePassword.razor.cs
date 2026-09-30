@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using ViabilityIQ.Application.Dtos.IdentityDtos;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.Identity;
 
@@ -15,10 +17,10 @@ public partial class ChangePassword : ComponentBase
     [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+    [Inject] public UserManager<ViabilityIQ.Shared.DataModels.SecurityDataModels.ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] public ToastService ToastService { get; set; } = default!;
 
     public ChangePasswordRequest PasswordRequest { get; set; } = new();
-    public string ErrorMessage { get; set; } = string.Empty;
-    public string SuccessMessage { get; set; } = string.Empty;
     public bool ShowCurrentPassword { get; set; }
     public bool ShowNewPassword { get; set; }
     public bool ShowConfirmPassword { get; set; }
@@ -32,22 +34,20 @@ public partial class ChangePassword : ComponentBase
         }
 
         IsSubmitting = true;
-        ErrorMessage = string.Empty;
-        SuccessMessage = string.Empty;
 
         try
         {
             var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             if (authenticationState.User.Identity?.IsAuthenticated != true)
             {
-                ErrorMessage = "Please sign in before changing your password.";
+                ToastService.ShowWarning("Please sign in before changing your password.", "Authentication Required");
                 return;
             }
 
             var user = await AuthService.GetCurrentUserAsync(authenticationState.User);
             if (user == null)
             {
-                ErrorMessage = "Your user profile could not be resolved.";
+                ToastService.ShowError("Your user profile could not be resolved.", "Profile Unavailable");
                 return;
             }
 
@@ -58,12 +58,33 @@ public partial class ChangePassword : ComponentBase
 
             if (!result.Success)
             {
-                ErrorMessage = string.Join(" ", result.Messages);
+                ToastService.ShowError(
+                    result.Messages.Any()
+                        ? string.Join(" ", result.Messages)
+                        : "The password could not be updated.",
+                    "Update Failed");
                 return;
             }
 
-            SuccessMessage = "Password updated successfully.";
             PasswordRequest = new ChangePasswordRequest();
+
+            var identityUser = await UserManager.FindByIdAsync(user.Id.ToString());
+            if (identityUser is not null && identityUser.MustChangePassword)
+            {
+                identityUser.MustChangePassword = false;
+                var updateResult = await UserManager.UpdateAsync(identityUser);
+                if (!updateResult.Succeeded)
+                {
+                    Logger.LogError(
+                        "Password changed for user {UserId}, but MustChangePassword could not be cleared: {Errors}",
+                        user.Id,
+                        string.Join("; ", updateResult.Errors.Select(error => error.Description)));
+                    ToastService.ShowError(
+                        "The password changed, but the temporary-password restriction could not be cleared. Contact support.",
+                        "Account Update Incomplete");
+                    return;
+                }
+            }
 
             try
             {
@@ -87,11 +108,17 @@ public partial class ChangePassword : ComponentBase
                     "Password changed for user {UserId}, but activity recording failed",
                     user.Id);
             }
+
+            ToastService.ShowSuccess("Password updated successfully.", "Password Updated");
+            await Task.Delay(750);
+            Navigation.NavigateTo("/home", replace: true);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error changing password");
-            ErrorMessage = "An unexpected error occurred while updating your password. Please try again.";
+            ToastService.ShowError(
+                "An unexpected error occurred while updating your password. Please try again.",
+                "Update Failed");
         }
         finally
         {

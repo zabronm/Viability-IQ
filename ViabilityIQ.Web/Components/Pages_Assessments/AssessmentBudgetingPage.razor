@@ -1,0 +1,326 @@
+@page "/assessment/budgets/{AssessmentId:long}"
+@layout MainLayout_Assessment
+@using System.Globalization
+@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Shared.DataModels.SecurityDataModels
+@using ViabilityIQ.Shared.Reporting
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Web.Services
+@inject IAssessmentBudgetService BudgetService
+@inject ITenantAuthorizationService AuthorizationService
+@inject ISessionService SessionService
+@inject ToastService Toast
+@inject ILogger<AssessmentBudgetingPage> Logger
+
+<div class="budget-workspace container-fluid p-0">
+    <PageHeading_Assessment _pageTitle="Budgets"
+                            PageTitle="Assessment Budget"
+                            CurrentPage="PageType.Budgets" />
+    <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
+        @if (isLoading)
+        {
+            <section class="budget-state-card">
+                <span class="spinner-border spinner-border-sm text-primary"></span>
+                <span>Loading assessment budget...</span>
+            </section>
+        }
+        else if (!string.IsNullOrWhiteSpace(pageError))
+        {
+            <section class="budget-state-card budget-state-error">
+                <i class="bi bi-exclamation-octagon"></i>
+                <div>
+                    <strong>Budget unavailable</strong>
+                    <span>@pageError</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="LoadAsync">
+                    Retry
+                </button>
+            </section>
+        }
+        else if (workspace is null)
+        {
+            <section class="budget-empty">
+                <div class="budget-empty-icon"><i class="bi bi-calculator"></i></div>
+                <div>
+                    <span class="budget-eyebrow">Assessment budgeting</span>
+                    <h1>Create a working budget from this assessment</h1>
+                    <p>
+                        ViabilityIQ will copy the current 12-month financial projection into
+                        an editable budget. Future projection refreshes update the comparison
+                        values without overwriting your budget.
+                    </p>
+                </div>
+
+                @if (canCreate)
+                {
+                    <div class="budget-create-form">
+                        <label>
+                            Budget name
+                            <input class="form-control"
+                                   maxlength="150"
+                                   @bind="newBudgetName" />
+                        </label>
+                        <label>
+                            Planning notes <span>(optional)</span>
+                            <textarea class="form-control"
+                                      rows="3"
+                                      maxlength="1000"
+                                      @bind="newBudgetRemarks"></textarea>
+                        </label>
+                        <button type="button"
+                                class="btn btn-success"
+                                disabled="@isBusy"
+                                @onclick="CreateAsync">
+                            @if (isBusy)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            <i class="bi bi-stars me-1"></i>Create from assessment projection
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="budget-readonly-message">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        You have read access to this assessment, but your tenant role cannot create its budget.
+                    </div>
+                }
+            </section>
+        }
+        else
+        {
+            <section class="budget-hero">
+                <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="budget-eyebrow">Assessment-linked budget</span>
+                        <span class="@StatusBadgeClass">@workspace.Status</span>
+                        @if (isDirty)
+                        {
+                            <span class="badge rounded-pill text-bg-warning">Unsaved changes</span>
+                        }
+                    </div>
+                    <h1>@workspace.BudgetName</h1>
+                    <p>
+                        Projection snapshot imported
+                        @workspace.ProjectionImportedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm").
+                        Budget values remain independent until you explicitly edit or refresh them.
+                    </p>
+                </div>
+                <div class="budget-actions">
+                    @if (workspace.Status == AssessmentBudgetStatuses.Draft && workspace.CanEdit)
+                    {
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                disabled="@isBusy"
+                                title="Refresh comparison values without overwriting budget entries"
+                                @onclick="RefreshProjectionAsync">
+                            <i class="bi bi-arrow-repeat me-1"></i>Refresh projection
+                        </button>
+                        <button type="button"
+                                class="btn btn-success btn-sm"
+                                disabled="@(!isDirty || isBusy)"
+                                @onclick="SaveAsync">
+                            <i class="bi bi-check2-circle me-1"></i>Save draft
+                        </button>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                disabled="@isBusy"
+                                @onclick="SubmitAsync">
+                            <i class="bi bi-send me-1"></i>Submit
+                        </button>
+                    }
+                    else if (workspace.Status == AssessmentBudgetStatuses.Submitted && workspace.CanApprove)
+                    {
+                        <button type="button"
+                                class="btn btn-success btn-sm"
+                                disabled="@isBusy"
+                                @onclick="ApproveAsync">
+                            <i class="bi bi-patch-check me-1"></i>Approve budget
+                        </button>
+                    }
+                    else if (workspace.Status == AssessmentBudgetStatuses.Approved && workspace.CanApprove)
+                    {
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                disabled="@isBusy"
+                                @onclick="ReopenAsync">
+                            <i class="bi bi-unlock me-1"></i>Reopen as draft
+                        </button>
+                    }
+                </div>
+            </section>
+
+            <section class="budget-kpis" aria-label="Budget key metrics">
+                <article>
+                    <span>Budget revenue</span>
+                    <strong>@Money(BudgetTotal("REVENUE"))</strong>
+                    <small>@VarianceLabel("REVENUE")</small>
+                </article>
+                <article>
+                    <span>Profit before tax</span>
+                    <strong class="@ValueClass(workspace.BudgetProfitBeforeTax)">
+                        @Money(workspace.BudgetProfitBeforeTax)
+                    </strong>
+                    <small>@SignedMoney(workspace.BudgetProfitBeforeTax - workspace.ProjectedProfitBeforeTax) vs projection</small>
+                </article>
+                <article>
+                    <span>Net cash movement</span>
+                    <strong class="@ValueClass(workspace.BudgetNetCashflow)">
+                        @Money(workspace.BudgetNetCashflow)
+                    </strong>
+                    <small>@SignedMoney(workspace.BudgetNetCashflow - workspace.ProjectedNetCashflow) vs projection</small>
+                </article>
+                <article>
+                    <span>Closing cash</span>
+                    <strong class="@ValueClass(workspace.BudgetClosingBank)">
+                        @Money(workspace.BudgetClosingBank)
+                    </strong>
+                    <small>Projected @Money(workspace.ProjectedClosingBank)</small>
+                </article>
+            </section>
+
+            <section class="budget-alerts">
+                <header>
+                    <div>
+                        <span class="budget-eyebrow">Budget alerts</span>
+                        <h2>Exceptions requiring attention</h2>
+                    </div>
+                    <span class="badge rounded-pill text-bg-light">@alerts.Count</span>
+                </header>
+                <div class="budget-alert-list">
+                    @foreach (var alert in alerts)
+                    {
+                        <article class="@AlertClass(alert.Severity)">
+                            <i class="@AlertIcon(alert.Severity)"></i>
+                            <div><strong>@alert.Title</strong><span>@alert.Message</span></div>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="budget-editor">
+                <header class="budget-editor-toolbar">
+                    <div>
+                        <span class="budget-eyebrow">Monthly planning matrix</span>
+                        <h2>Budget and projection comparison</h2>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Budget display mode">
+                        <button type="button"
+                                class="btn @(displayMode == BudgetDisplayMode.Budget ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => displayMode = BudgetDisplayMode.Budget">
+                            Budget
+                        </button>
+                        <button type="button"
+                                class="btn @(displayMode == BudgetDisplayMode.Projection ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => displayMode = BudgetDisplayMode.Projection">
+                            Projection
+                        </button>
+                        <button type="button"
+                                class="btn @(displayMode == BudgetDisplayMode.Variance ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => displayMode = BudgetDisplayMode.Variance">
+                            Variance
+                        </button>
+                    </div>
+                </header>
+
+                <div class="budget-name-row">
+                    <label>
+                        Budget name
+                        <input class="form-control form-control-sm"
+                               maxlength="150"
+                               disabled="@(!workspace.CanEdit)"
+                               value="@workspace.BudgetName"
+                               @onchange="UpdateBudgetName" />
+                    </label>
+                    <label>
+                        Planning notes
+                        <input class="form-control form-control-sm"
+                               maxlength="1000"
+                               disabled="@(!workspace.CanEdit)"
+                               value="@workspace.Remarks"
+                               @onchange="UpdateRemarks" />
+                    </label>
+                </div>
+
+                <div class="table-responsive budget-table-frame">
+                    <table class="table table-sm mb-0 budget-table">
+                        <thead>
+                            <tr>
+                                <th class="budget-line-column">Budget line</th>
+                                @for (var month = 1; month <= 12; month++)
+                                {
+                                    <th>
+                                        <span>M-@month</span>
+                                        <small>@MonthLabel(month)</small>
+                                    </th>
+                                }
+                                <th class="budget-total-column">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var section in workspace.Lines.GroupBy(line => new { line.SectionCode, line.SectionName }))
+                            {
+                                <tr class="budget-section-row">
+                                    <td colspan="14">@section.Key.SectionName</td>
+                                </tr>
+                                @foreach (var line in section.OrderBy(item => item.DisplayOrder))
+                                {
+                                    <tr class="@(line.IsCalculated ? "budget-calculated-row" : null)">
+                                        <td class="budget-line-column">
+                                            <strong>@line.LineName</strong>
+                                            @if (line.IsCalculated)
+                                            {
+                                                <small>Calculated</small>
+                                            }
+                                        </td>
+                                        @for (var month = 0; month < 12; month++)
+                                        {
+                                            <td class="@CellClass(line, month)">
+                                                @if (displayMode == BudgetDisplayMode.Budget
+                                                    && workspace.CanEdit
+                                                    && !line.IsCalculated)
+                                                {
+                                                    var monthIndex = month;
+                                                    <input type="number"
+                                                           min="0"
+                                                           step="0.01"
+                                                           value="@line.BudgetMonths[monthIndex].ToString("F2", CultureInfo.InvariantCulture)"
+                                                           @onchange="args => UpdateMonth(line, monthIndex, args.Value?.ToString())" />
+                                                }
+                                                else
+                                                {
+                                                    @Money(CellValue(line, month))
+                                                }
+                                            </td>
+                                        }
+                                        <td class="@TotalClass(line)">
+                                            @Money(DisplayTotal(line))
+                                            @if (displayMode == BudgetDisplayMode.Budget && !line.IsCalculated)
+                                            {
+                                                <small>@SignedMoney(line.VarianceTotal) variance</small>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <footer>
+                    <span>
+                        <i class="bi bi-info-circle me-1"></i>
+                        Calculated rows update automatically. Projection refreshes never replace budget values.
+                    </span>
+                    <span>Last changed @workspace.ModifiedDate.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</span>
+                </footer>
+            </section>
+        }
+    </div>
+</div>
+
+<footer class="py-2 bg-light mt-3">
+    <BFooter />
+</footer>
+

@@ -6,20 +6,20 @@
 
 <div class="opr-page">
     <PageHeading _pageTitle="Reports" CurrentPage="PageType.Reports" _pageHeading="Operational & Management Reports" />
-
-    <section class="opr-hero">
-        <div>
+    <div class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
+    <section class="w-100 mb-3">
+        @* <div>
             <span class="opr-eyebrow">Authorised tenant reporting</span>
-            <h1>Operational insight across your assessment portfolio</h1>
+            <h1>Operational insights across your assessment portfolio</h1>
             <p>Search, analyse and distribute live assessment information within your permitted tenant scope.</p>
-        </div>
-        <div class="opr-scope">
+        </div> *@
+       @*  <div class="opr-scope"> *@
             <i class="bi bi-shield-check"></i>
-            <div>
-                <span>Current data scope</span>
+            @* <div> *@
+                <span>Current data scope >> </span>
                 <strong>@AccessScopeLabel</strong>
-            </div>
-        </div>
+            @* </div> *@
+      @*   </div> *@
     </section>
 
     @if (!string.IsNullOrWhiteSpace(AccessDeniedMessage))
@@ -39,26 +39,31 @@
                 <i class="bi bi-clipboard2-data"></i>
                 <span>Assessments</span>
                 <strong>@FilteredRows.Count</strong>
+                <small>Total records</small>
             </article>
             <article>
                 <i class="bi bi-check2-circle"></i>
                 <span>Completed</span>
                 <strong>@CompletedCount</strong>
+                <small>Successfully finalized</small>
             </article>
             <article>
                 <i class="bi bi-speedometer2"></i>
                 <span>Average readiness</span>
                 <strong>@AverageReadiness.ToString("0.0")%</strong>
+                <small>Overall progress</small>
             </article>
             <article>
                 <i class="bi bi-person-check"></i>
                 <span>Active advisors</span>
                 <strong>@ActiveAdvisorCount</strong>
+                <small>Engaged users</small>
             </article>
             <article class="@(StalledCount > 0 ? "opr-kpi-warning" : null)">
                 <i class="bi bi-hourglass-split"></i>
                 <span>Stalled 14+ days</span>
                 <strong>@StalledCount</strong>
+                <small>Requires attention</small>
             </article>
         </section>
 
@@ -281,6 +286,7 @@
             </main>
         </div>
     }
+</div>
 </div>
 
 <ReportEmailModal Visible="@ShowEmail"

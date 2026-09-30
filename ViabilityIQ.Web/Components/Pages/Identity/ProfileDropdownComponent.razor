@@ -5,12 +5,14 @@
 @using ViabilityIQ.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
 @using ViabilityIQ.Application.Interfaces.IdentityInterfaces
+@using ViabilityIQ.Application.Interfaces
 @implements IDisposable
 
 @inject IUserRepository UserRepository
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 @inject ILogger<ProfileDropdownComponent> Logger
+@inject ITenantAuthorizationService TenantAuthorizationService
 
 <!-- Full-screen backdrop covering the entire viewport when open -->
 @if (isProfileOpen)
@@ -54,13 +56,17 @@
                 </div>
                 <div class="profile-info">
                     <h4 class="profile-name">@CurrentUserName</h4>
-                    <span class="profile-role">@UserRole</span>
+                    <span class="profile-role profile-role-primary">@PrimaryRole</span>
+                    @if (AdditionalRoles.Count > 0)
+                    {
+                        <span class="profile-role profile-role-secondary">@string.Join(" · ", AdditionalRoles)</span>
+                    }
                 </div>
             </div>
 
             <!-- Profile Body - Menu Items -->
             <div class="profile-card-body">
-                <a href="/identity/register" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
+                <a href="/identity/profile" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
                     <i class="bi bi-person me-2"></i> My Profile
                 </a>
                 <a href="/identity/account-settings" class="profile-dropdown-item" @onclick="CloseProfileMenuImmediately">
@@ -92,7 +98,8 @@
     private bool IsAuthenticated = false;
     private string UserInitials = "N/A";
     private string CurrentUserName = "Loading...";
-    private string UserRole = "User";
+    private string PrimaryRole = "User";
+    private IReadOnlyList<string> AdditionalRoles = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -210,14 +217,15 @@
                 }
 
                 UserInitials = GetUserInitials(CurrentUserName);
-                UserRole = user.FindFirst(ClaimTypes.Role)?.Value ?? "User";
+                await LoadTenantRolesAsync(user);
             }
             else
             {
                 Logger.LogWarning("[ProfileDropdownComponent] ❌ User is NOT authenticated - returning anonymous state");
                 CurrentUserName = "Not Logged In";
                 UserInitials = "N/A";
-                UserRole = "Guest";
+                PrimaryRole = "Guest";
+                AdditionalRoles = [];
             }
         }
         catch (Exception ex)
@@ -235,6 +243,57 @@
         StateHasChanged();
         Logger.LogInformation("[ProfileDropdownComponent] ===== LOAD USER DATA COMPLETE =====");
     }
+
+    private async Task LoadTenantRolesAsync(ClaimsPrincipal user)
+    {
+        try
+        {
+            var context = await TenantAuthorizationService.GetAccessContextAsync();
+            var rankedRoles = context.RoleCodes
+                .Select(code => new { Code = code, Name = GetRoleName(code), Rank = GetRoleRank(code) })
+                .OrderBy(role => role.Rank)
+                .ThenBy(role => role.Name)
+                .ToArray();
+
+            if (rankedRoles.Length > 0)
+            {
+                PrimaryRole = rankedRoles[0].Name;
+                AdditionalRoles = rankedRoles.Skip(1).Select(role => role.Name).ToArray();
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Tenant roles could not be loaded for the profile dropdown");
+        }
+
+        var identityRoles = user.FindAll(ClaimTypes.Role)
+            .Select(claim => claim.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        PrimaryRole = identityRoles.FirstOrDefault() ?? "User";
+        AdditionalRoles = identityRoles.Skip(1).ToArray();
+    }
+
+    private static int GetRoleRank(string roleCode) => roleCode switch
+    {
+        TenantRoleCodes.Owner => 1,
+        TenantRoleCodes.Administrator => 2,
+        TenantRoleCodes.BranchManager => 3,
+        TenantRoleCodes.BillingManager => 4,
+        TenantRoleCodes.Viewer => 5,
+        _ => 100
+    };
+
+    private static string GetRoleName(string roleCode) => roleCode switch
+    {
+        TenantRoleCodes.Owner => "Tenant Owner",
+        TenantRoleCodes.Administrator => "Tenant Administrator",
+        TenantRoleCodes.BranchManager => "Branch Manager",
+        TenantRoleCodes.BillingManager => "Billing Manager",
+        TenantRoleCodes.Viewer => "Viewer",
+        _ => roleCode.Replace('_', ' ')
+    };
 
     private string GetUserInitials(string? userName)
     {

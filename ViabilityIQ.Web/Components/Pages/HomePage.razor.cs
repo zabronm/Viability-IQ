@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using ViabilityIQ.Application.Interfaces.HomePageInterfaces;
 using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
+using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories.HomePageRepositories;
 using ViabilityIQ.Shared.DataModels.HomePageModels;
 using ViabilityIQ.Shared.DataModels.SecurityDataModels;
@@ -25,6 +26,9 @@ namespace ViabilityIQ.Web.Components.Pages
         public IDashboardDataService DashboardDataService { get; set; }
 
         [Inject]
+        public ITenantAuthorizationService TenantAuthorizationService { get; set; }
+
+        [Inject]
         public NavigationManager NavigationManager { get; set; }
 
         [Inject]
@@ -42,12 +46,13 @@ namespace ViabilityIQ.Web.Components.Pages
        
         /// Current branch name
        
-        public string CurrentBranch { get; set; } = "Default Branch";
+        public string CurrentBranch { get; set; } = "Unassigned";
 
        
         /// Last login date/time for the user
        
-        public DateTime LastLoginDate { get; set; }
+        public DateTime? PreviousLoginDate { get; set; }
+        public DateTime? LastLogoutDate { get; set; }
 
        
         /// Loading state flag
@@ -184,12 +189,14 @@ namespace ViabilityIQ.Web.Components.Pages
                     return;
                 }
 
-                CurrentBranch = CurrentUser.BranchId?.ToString() ?? "Default Branch";
-                LastLoginDate = CurrentUser.LastLoginAt ?? DateTime.UtcNow.AddHours(-2);
+                var tenantContext = await TenantAuthorizationService.GetAccessContextAsync();
+                CurrentBranch = tenantContext.BranchName;
+                PreviousLoginDate = CurrentUser.PreviousLoginAt;
+                LastLogoutDate = CurrentUser.LastLogoutAt;
 
                 Logger.LogInformation(
                     "LoadUserData: Success - Email: {Email}, UserId: {UserId}, BranchId: {BranchId}",
-                    email, CurrentUser.Id, CurrentUser.BranchId);
+                    email, CurrentUser.Id, tenantContext.BranchId);
             }
             catch (InvalidOperationException ex)
             {
@@ -281,10 +288,17 @@ namespace ViabilityIQ.Web.Components.Pages
 
         /// <param name="date">The last login date</param>
         /// <returns>Formatted date string</returns>
-        private string FormatLastLoginDate(DateTime date)
+        private string FormatActivityDate(DateTime? date, string emptyText)
         {
+            if (!date.HasValue)
+                return emptyText;
+
             var now = DateTime.UtcNow;
-            var diff = now - date;
+            var value = DateTime.SpecifyKind(date.Value, DateTimeKind.Utc);
+            var diff = now - value;
+
+            if (diff < TimeSpan.Zero)
+                diff = TimeSpan.Zero;
 
             // Less than 1 hour: show minutes
             if (diff.TotalHours < 1)
@@ -300,7 +314,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
             // 1 week or more: show absolute date
             else
-                return date.ToString("MMM d, h:mm tt");
+                return value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
         }
 
 

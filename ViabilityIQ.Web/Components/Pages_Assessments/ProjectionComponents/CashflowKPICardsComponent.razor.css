@@ -12,8 +12,8 @@
     --cfkpi-accent: #64748b;
     position: relative;
     min-width: 0;
-    min-height: 6.4rem; /* (1) Reduced overall card min-height */
-    padding: 0.65rem 0.8rem 0.6rem; /* (1) Reduced internal padding */
+    min-height: 5.8rem; /* (1) Reduced overall card min-height */
+    padding: 0.45rem 0.6rem 0.4rem; /* (1) Reduced internal padding */
     overflow: hidden;
     border: 1px solid #dce4eb;
     border-left: 2px solid var(--cfkpi-accent);
@@ -46,6 +46,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+    font-weight: 450;
 }
 
 .cfkpi-label {
@@ -71,11 +72,11 @@
 }
 
 .cfkpi-value {
-    margin-top: 0.35rem; /* (1) Reduced gap above value */
+    margin-top: 0.10rem; /* (1) Reduced gap above value */
     overflow: hidden;
     color: #566D7E;
-    font-size: clamp(0.75rem, 1.1vw, 0.9rem);
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 600;
     letter-spacing: -0.025em;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -88,7 +89,7 @@
     overflow: hidden;
     color: #718096;
     font-size: 0.60rem;
-    font-weight: 600;
+    font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
