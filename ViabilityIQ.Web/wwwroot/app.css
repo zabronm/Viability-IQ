@@ -1684,3 +1684,40 @@ form-control-compact:focus,
     background-color: #DBE9FA !important;
     color: #000080 !important;    
 }
+/* Blazor Server reconnect state */
+#components-reconnect-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, .36);
+}
+
+#components-reconnect-modal.components-reconnect-show,
+#components-reconnect-modal.components-reconnect-failed,
+#components-reconnect-modal.components-reconnect-rejected {
+    display: flex;
+}
+
+#components-reconnect-modal.components-reconnect-hide {
+    display: none;
+}
+
+.viq-reconnect-card {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    max-width: 34rem;
+    margin: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: .5rem;
+    background: #fff;
+    box-shadow: 0 .75rem 2rem rgba(15, 23, 42, .22);
+}
+
+#components-reconnect-modal:not(.components-reconnect-show) .components-reconnect-show,
+#components-reconnect-modal:not(.components-reconnect-failed) .components-reconnect-failed,
+#components-reconnect-modal:not(.components-reconnect-rejected) .components-reconnect-rejected {
+    display: none;
+}

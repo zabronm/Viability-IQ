@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Viability.IQ Assessment, Budgeting &amp; Tenant Administration User Guide</title>
+<title>Viability.IQ Assessment, Budgeting, Tenant Administration &amp; Session Resilience User Guide</title>
 <style>
 @page{size:A4;margin:16mm}
 body{font-family:Arial,sans-serif;color:#243b4a;font-size:10pt;line-height:1.45}
@@ -27,9 +27,9 @@ footer{margin-top:20px;color:#718294;font-size:8pt}
 </style>
 </head>
 <body>
-<h1>Viability.IQ Assessment, Budgeting &amp; Tenant Administration</h1>
-<p class="lead">Practical guidance for registration, tenant administration and preparing a credible 12-month SME projection and budget.</p>
-<p>This guide explains registration and subscription workspaces, tenant user administration, assessment baseline preparation, Sensitivity Analysis and assessment-linked budgeting. It supports government-programme assessment and management discussion; it is not a substitute for audited accounts, professional tax advice or a guarantee of future performance.</p>
+<h1>Viability.IQ Assessment, Budgeting, Tenant Administration &amp; Session Resilience</h1>
+<p class="lead">Practical guidance for registration, tenant administration, secure session use and preparing a credible 12-month SME projection and budget.</p>
+<p>This guide explains registration and subscription workspaces, tenant user administration, secure session behaviour, assessment baseline preparation, Sensitivity Analysis and assessment-linked budgeting. It supports government-programme assessment and management discussion; it is not a substitute for audited accounts, professional tax advice or a guarantee of future performance.</p>
 <div class="note"><strong>Recommended sequence:</strong> capture verified opening facts, enter reasonable baseline assumptions, review readiness, confirm the baseline, test uncertainty with Sensitivity Analysis, and then create the assessment budget for management approval and monitoring.</div>
 
 <h2>1. Opening Position</h2>
@@ -459,6 +459,95 @@ footer{margin-top:20px;color:#718294;font-size:8pt}
 <tr><td>Existing account is found instead of a new account being created</td><td>This is expected. Viability.IQ attaches the existing identity to the tenant and retains its password.</td></tr>
 <tr><td>Billing Manager cannot open assessments</td><td>Billing Manager does not grant operational access; assign an appropriate additional role if justified.</td></tr></table>
 
+<div class="page"></div>
+<h2>11. Database Availability, Connection Recovery &amp; Secure Sessions</h2>
+<p>Viability.IQ uses Blazor Server, which keeps an interactive connection between the browser and the application server. Temporary network interruptions, a sleeping computer, a database restart or an overloaded SQL Server can interrupt that connection without meaning that the user's account or assessment data has been lost.</p>
+<div class="note"><strong>What is protected:</strong> the authenticated user remains governed by the secure authentication cookie. The active tenant membership and assessment identifiers are stored in encrypted browser session storage for the current tab only. After reconnection or a new circuit, Viability.IQ reloads the related information from the database and checks authorization again before restoring the workspace.</div>
+
+<h3>11.1 Application startup and database availability</h3>
+<p>When Viability.IQ starts, it verifies the Identity and application databases and applies outstanding migrations. A temporary SQL Server connection failure is retried up to five times, with a five-second delay between attempts.</p>
+<ul>
+<li>The web server starts before database initialization, so the browser receives a branded <strong>Service temporarily unavailable</strong> page instead of appearing to hang.</li>
+<li>While initialization or a retry is in progress, the page reports the current attempt and refreshes automatically.</li>
+<li>If the database becomes available during the retry period, startup continues normally.</li>
+<li>If every startup attempt fails, the web server remains online only to display the database-unavailable page. Login and all normal application routes remain blocked.</li>
+<li>The health endpoint returns HTTP 503 while the database is unavailable and HTTP 200 after initialization succeeds.</li>
+<li>The full technical exception is recorded through Serilog for support and diagnostics.</li>
+<li>Database credentials and raw SQL exception details are not displayed to end users.</li>
+</ul>
+<div class="warning"><strong>Administrator action:</strong> if startup repeatedly fails, confirm that SQL Server is running, the configured database is reachable, the application identity has permission, and the connection string targets the intended environment. Restart the application after correcting the underlying problem.</div>
+
+<h3>11.2 Database errors during normal use</h3>
+<p>During normal use, connection attempts and read operations use controlled timeouts and transient connection retries. The standard settings allow 15 seconds to establish a connection and 60 seconds for a command to complete.</p>
+<table><tr><th>User message</th><th>Meaning</th><th>Recommended response</th></tr>
+<tr><td>Database Timeout</td><td>The database did not complete the operation within the configured period.</td><td>Wait briefly and select <strong>Try again</strong>. If it repeats, record the error reference and contact support.</td></tr>
+<tr><td>Database Temporarily Unavailable</td><td>A transient connection, network or SQL Server availability problem was detected.</td><td>Allow the service time to recover, then retry the page or operation.</td></tr>
+<tr><td>Database Operation Failed</td><td>The operation failed for a database reason that should not be automatically repeated.</td><td>Do not repeatedly submit a write operation. Give support the displayed error reference.</td></tr>
+</table>
+<p>Each global error message includes an error reference that can be matched to the Serilog and detailed error records. Write operations are not blindly repeated because doing so could duplicate an insert, payment, movement or other transaction when the original result is uncertain.</p>
+
+<h3>11.3 Blazor Server connection recovery</h3>
+<p>The server sends a connection keep-alive every 15 seconds and allows up to 60 seconds without a client response before treating the connection as interrupted. A disconnected circuit is retained for three minutes to allow the same browser tab to reconnect without immediately discarding its in-memory component state.</p>
+<table><tr><th>Screen message</th><th>What to do</th></tr>
+<tr><td>Reconnecting to Viability.IQ...</td><td>Wait while the application attempts to restore the connection. Do not repeatedly click Save.</td></tr>
+<tr><td>Connection could not be restored</td><td>Select <strong>Reload</strong>. The active tenant and assessment context will be restored after validation where possible.</td></tr>
+<tr><td>This session is no longer available</td><td>Select <strong>Start a new session</strong>. Sign in again if the authentication session has expired.</td></tr>
+</table>
+<p>A brief reconnection does not count as user inactivity and does not itself sign the user out. If the interruption lasts beyond the retained-circuit period, Viability.IQ creates a new circuit and restores the protected per-tab context.</p>
+
+<h3>11.4 Browser Back, Forward, refresh and restored context</h3>
+<p>Browser navigation can recreate a Blazor circuit, particularly after a full page load, refresh, external navigation or an expired disconnected circuit. Viability.IQ protects the minimum context needed to continue:</p>
+<ul>
+<li>authenticated user identifier;</li>
+<li>active tenant membership identifier; and</li>
+<li>active assessment identifier, when an assessment is open.</li>
+</ul>
+<p>The information is stored only for the current browser tab. Another tab establishes its own context. On restoration, Viability.IQ confirms that the signed-in user still owns the stored tenant membership, that the membership and subscription remain active, and that the assessment remains accessible. It then reloads tenant, business, client, assessment and data-status details from the database.</p>
+<div class="danger"><strong>Authorization always wins:</strong> protected browser storage is a continuity aid, not an authorization source. If a role, membership, subscription or record grant has changed, the old context is rejected or cleared rather than restored.</div>
+
+<h3>11.5 Inactivity warning and automatic logout</h3>
+<p>A signed-in session closes automatically after <strong>30 minutes without user interaction</strong>. Five minutes before logout, a Toast warns that the session is expiring.</p>
+<ul>
+<li>Mouse, keyboard, touch and scroll activity reset the inactivity timer.</li>
+<li>Background server processing or an open page with no user interaction does not reset the timer.</li>
+<li>At the timeout, the browser performs a secure sign-out and returns to Login.</li>
+<li>The Login page confirms that the previous session expired because of inactivity.</li>
+<li>The authentication cookie is removed before logout auditing is attempted, so a database outage cannot keep an inactive user signed in.</li>
+</ul>
+<p>After signing in again, return to the required assessment and confirm any unsaved form values. Session restoration preserves navigation context; it does not save partially entered form data that was never submitted.</p>
+
+<h3>11.6 Closing a tab, using several tabs and shared computers</h3>
+<ul>
+<li>Tenant and assessment context is isolated per browser tab and is not intentionally shared between tabs.</li>
+<li>Closing a tab removes access to that tab's protected session storage when the browser clears the tab session.</li>
+<li>The authentication cookie may still apply to another open tab until inactivity timeout or explicit sign-out.</li>
+<li>On a shared computer, always use <strong>Sign Out</strong>; do not rely only on closing the browser window.</li>
+<li>Do not use browser Back or Forward to assume that an unsaved edit was committed. Confirm the success Toast before leaving a form.</li>
+</ul>
+
+<h3>11.7 Configuration reference for administrators</h3>
+<table><tr><th>Setting</th><th>Default</th><th>Purpose</th></tr>
+<tr><td>ConnectionTimeoutSeconds</td><td>15 seconds</td><td>Maximum time allowed to establish a SQL connection.</td></tr>
+<tr><td>ConnectionRetryCount</td><td>3</td><td>Number of low-level SQL connection retries.</td></tr>
+<tr><td>ConnectionRetryIntervalSeconds</td><td>2 seconds</td><td>Delay between SQL connection retries.</td></tr>
+<tr><td>CommandTimeoutSeconds</td><td>60 seconds</td><td>Maximum normal EF Core or Dapper command duration.</td></tr>
+<tr><td>StartupMaxAttempts</td><td>5</td><td>Maximum database-initialization attempts before normal application access remains blocked by the availability page.</td></tr>
+<tr><td>StartupRetryDelaySeconds</td><td>5 seconds</td><td>Delay between transient startup attempts.</td></tr>
+<tr><td>IdleTimeoutMinutes</td><td>30 minutes</td><td>Total inactivity period before automatic sign-out.</td></tr>
+<tr><td>IdleWarningMinutes</td><td>5 minutes</td><td>Warning period immediately before automatic sign-out.</td></tr></table>
+<p>These values are maintained in <strong>ViabilityIQ.Web/appsettings.json</strong> under <strong>DatabaseResilience</strong> and <strong>SessionManagement</strong>. Environment-specific configuration may override them. Increase timeouts only after investigating query performance, SQL blocking, server capacity and network reliability.</p>
+
+<h3>11.8 Troubleshooting checklist</h3>
+<ol>
+<li>Note the time, page, action and displayed error reference.</li>
+<li>Determine whether the message describes database availability, Blazor reconnection or inactivity.</li>
+<li>For a connection interruption, wait for automatic reconnection before using Reload.</li>
+<li>After Reload or browser Back/Forward, confirm the displayed tenant and assessment before continuing.</li>
+<li>For repeated database timeouts, inspect the Serilog files and SQL Server health rather than continually increasing timeout values.</li>
+<li>For automatic logout, sign in again and verify whether the previous form operation showed a success Toast before the timeout.</li>
+<li>Escalate persistent incidents with the error reference and relevant log period; never send passwords or connection-string secrets.</li>
+</ol>
+
 <h2>Recommended overall review sequence</h2>
 <ol>
 <li>Verify the opening date and balances.</li>
@@ -471,6 +560,6 @@ footer{margin-top:20px;color:#718294;font-size:8pt}
 <li>Create the assessment budget, document material variances and review cash requirements.</li>
 <li>Submit and approve the budget through the authorized workflow.</li>
 </ol>
-<footer>Viability.IQ — Assessment, Budgeting &amp; Tenant Administration User Guide — September 2026</footer>
+<footer>Viability.IQ — Assessment, Budgeting, Tenant Administration &amp; Session Resilience User Guide — October 2026</footer>
 </body>
 </html>

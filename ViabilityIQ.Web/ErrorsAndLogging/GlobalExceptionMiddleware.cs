@@ -1,4 +1,5 @@
 ﻿using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Web.ErrorsAndLogging;
 using ViabilityIQ.Web.Services;
 
@@ -93,29 +94,27 @@ namespace ViabilityIQ.Web.ErrorsAndLogging
         {
             try
             {
-                // Database Connection Errors
-                if (exception is TimeoutException)
+                if (DatabaseExceptionClassifier.IsTimeout(exception))
                 {
                     toastService.ShowError(
-                        "The request took too long to complete. The database or service may be unavailable. Please try again.",
-                        "Request Timeout");
+                        $"{errorDetails.ErrorMessage} Error reference: {errorDetails.ErrorCode}",
+                        "Database Timeout");
                     return;
                 }
 
-                if (exception is InvalidOperationException invalidOpEx &&
-                    invalidOpEx.Message.Contains("database", StringComparison.OrdinalIgnoreCase))
+                if (DatabaseExceptionClassifier.IsTransient(exception))
                 {
                     toastService.ShowError(
-                        "Database connection failed. Please ensure your database server is running and accessible.",
-                        "Database Connection Error");
+                        $"{errorDetails.ErrorMessage} Error reference: {errorDetails.ErrorCode}",
+                        "Database Temporarily Unavailable");
                     return;
                 }
 
-                if (exception is Microsoft.Data.SqlClient.SqlException sqlEx)
+                if (DatabaseExceptionClassifier.IsDatabaseException(exception))
                 {
                     toastService.ShowError(
-                        $"Database error: {sqlEx.Message}. Please check your database connection.",
-                        "Database Error");
+                        $"{errorDetails.ErrorMessage} Error reference: {errorDetails.ErrorCode}",
+                        "Database Operation Failed");
                     return;
                 }
 

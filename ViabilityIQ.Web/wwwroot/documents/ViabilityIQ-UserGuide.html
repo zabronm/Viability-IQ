@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viability.IQ Complete User Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root {
+    --primary-navy: #173d59;
+    --primary-teal: #176b63;
+    --accent-teal: #8bd3c7;
+    --text-dark: #243b4a;
+    --sidebar-bg: #f1f5f9;
+    --border-color: #d8e3ec;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--text-dark);
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #fff;
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,.04);
+    z-index: 1000;
+    height: 70px;
+    flex-shrink: 0;
+}
+header .logo-container {
+    display: flex;
+    align-items: center;
+    height: 46px;
+}
+header .logo-container img {
+    display: block;
+    width: auto;
+    height: 44px;
+    max-width: 185px;
+    object-fit: contain;
+}
+header .header-title { font-size: 13pt; font-weight: bold; color: var(--primary-navy); margin: 0; }
+.app-container { display: flex; flex: 1; overflow: hidden; }
+nav {
+    width: 345px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    padding: 20px 15px;
+    flex-shrink: 0;
+}
+nav h3.toc-heading {
+    font-size: 11pt;
+    color: var(--primary-navy);
+    margin: 0 0 15px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 2px solid var(--accent-teal);
+    padding-bottom: 5px;
+}
+nav ul { list-style: none; padding: 0; margin: 0; }
+nav li { margin-bottom: 6px; }
+nav a { text-decoration: none; }
+nav > ul > li > a {
+    color: var(--primary-navy);
+    font-size: 10.5pt;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: #e2e8f0;
+}
+nav > ul > li > a:hover { background: var(--accent-teal); }
+nav > ul > li > a.section-link { background: var(--primary-navy); color: #fff; }
+nav ul.sub-menu {
+    padding-left: 18px;
+    margin: 6px 0 8px;
+    border-left: 2px solid var(--border-color);
+    display: none;
+}
+nav ul.sub-menu.expanded { display: block; }
+nav ul.sub-menu a {
+    color: #475569;
+    font-size: 8.5pt;
+    display: block;
+    padding: 3px 6px;
+    border-radius: 3px;
+}
+nav ul.sub-menu a:hover { background: #e2e8f0; color: var(--primary-teal); }
+.toggle-icon { font-size: 9pt; }
+main { flex: 1; overflow-y: auto; padding: 30px 40px; background: #fff; scroll-behavior: smooth; }
+h1 { color: var(--primary-navy); font-size: 22pt; margin: 0 0 8px; }
+h2 { color: var(--primary-teal); border-bottom: 2px solid var(--accent-teal); padding-bottom: 6px; margin-top: 35px; font-size: 14pt; }
+h3 { color: #245a73; margin: 20px 0 6px; font-size: 12pt; }
+h4 { color: var(--primary-navy); margin: 15px 0 5px; font-size: 10.5pt; }
+p { margin: 6px 0 12px; }
+ol, ul { margin-top: 6px; }
+li { margin-bottom: 4px; }
+.lead { color: #587080; font-size: 11pt; font-weight: 500; margin-bottom: 20px; }
+.section-banner {
+    margin: 35px 0 20px;
+    padding: 24px;
+    border-radius: 8px;
+    color: #fff;
+    background: linear-gradient(120deg, var(--primary-navy), var(--primary-teal));
+    break-before: page;
+}
+.section-banner h1 { color: #fff; font-size: 20pt; }
+.section-banner p { margin-bottom: 0; font-size: 11pt; }
+.note, .warning, .danger {
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+    font-size: 9.5pt;
+}
+.note { border-left: 4px solid #2ba88f; background: #eefaf7; }
+.warning { border-left: 4px solid #d97706; background: #fff8e8; }
+.danger { border-left: 4px solid #c2414b; background: #fff1f2; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 9.5pt; }
+th, td { padding: 8px 10px; border: 1px solid var(--border-color); vertical-align: top; }
+th { background: var(--primary-navy); color: #fff; text-align: left; }
+code { color: #8b2f54; background: #f5f1f4; padding: 1px 4px; border-radius: 3px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 12px; background: #e5f4f1; color: var(--primary-teal); font-weight: bold; font-size: 8.5pt; }
+.green { color: #136a4b; font-weight: bold; }
+.amber { color: #9a5a02; font-weight: bold; }
+.red { color: #a12631; font-weight: bold; }
+footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border-color); color: #718294; font-size: 8pt; text-align: center; }
+.back-to-top {
+    position: fixed;
+    right: 26px;
+    bottom: 24px;
+    z-index: 1200;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border: 1px solid rgba(23, 61, 89, .18);
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(23, 61, 89, .92);
+    box-shadow: 0 6px 18px rgba(15, 42, 67, .24);
+    font: inherit;
+    font-size: 9pt;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s ease, background .2s ease;
+}
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.back-to-top:hover,
+.back-to-top:focus-visible {
+    background: var(--primary-teal);
+    outline: 3px solid rgba(139, 211, 199, .55);
+    outline-offset: 2px;
+}
+.back-to-top i { font-size: 11pt; }
+@media (max-width: 900px) {
+    .app-container { flex-direction: column; }
+    nav { width: 100%; height: 240px; }
+    main { padding: 20px; }
+    header .logo-container img { height: 36px; max-width: 150px; }
+    header .header-title { font-size: 10.5pt; text-align: right; }
+    .back-to-top { right: 16px; bottom: 16px; }
+}
+@media print {
+    body { display: block; height: auto; overflow: visible; }
+    header, nav, .back-to-top { display: none; }
+    .app-container, main { display: block; overflow: visible; padding: 0; }
+    .section-banner { color: #000; background: #fff; border: 2px solid var(--primary-navy); }
+    .section-banner h1 { color: var(--primary-navy); }
+    h2, h3, table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<header>
+    <div class="logo-container">
+        <img src="../images/ViabilityIQ_logo_0.png" alt="Viability.IQ">
+    </div>
+    <h1 class="header-title">Complete User Guide</h1>
+</header>
+
+<div class="app-container">
+<nav>
+    <h3 class="toc-heading">Table of Contents</h3>
+    <ul>
+        <li><a href="#welcome">Welcome &amp; Guide Structure</a></li>
+        <li><a href="#section-a" class="section-link">Section A — Administration</a></li>
+        <li>
+            <a href="javascript:void(0);" onclick="toggleSubMenu(this)"><span>1. Subscriptions &amp; Access</span><i class="bi bi-chevron-right toggle-icon"></i></a>
+            <ul class="sub-menu">
+                <li><a href="#plans">1.1 Plans, registration and seats</a></li>
+                <li><a href="#signin">1.2 Signing in and out</a></li>
+                <li><a href="#profile">1.3 Profile menu and Activity Log</a></li>
+                <li><a href="#account-settings">1.4 Account settings</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="javascript:void(0);" onclick="toggleSubMenu(this)"><span>2. User Management</span><i class="bi bi-chevron-right toggle-icon"></i></a>
+            <ul class="sub-menu">
+                <li><a href="#roles">2.1 Roles and access</a></li>
+                <li><a href="#manage-users">2.2 Add and manage users</a></li>
+                <li><a href="#user-security">2.3 Branches, status and security</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="javascript:void(0);" onclick="toggleSubMenu(this)"><span>3. Setting Up the System</span><i class="bi bi-chevron-right toggle-icon"></i></a>
+            <ul class="sub-menu">
+                <li><a href="#setup-order">3.1 Recommended setup order</a></li>
+                <li><a href="#master-data">3.2 Master data</a></li>
+                <li><a href="#clients-businesses">3.3 Clients and businesses</a></li>
+                <li><a href="#assessment-setup">3.4 Create an assessment</a></li>
+            </ul>
+        </li>
+        <li><a href="#notifications"><span>4. Notifications &amp; Tasks</span></a></li>
+        <li><a href="#system-reports"><span>5. System Reports</span></a></li>
+
+        <li><a href="#section-b" class="section-link">Section B — Assessments</a></li>
+        <li>
+            <a href="javascript:void(0);" onclick="toggleSubMenu(this)"><span>6. Assessment Lifecycle</span><i class="bi bi-chevron-right toggle-icon"></i></a>
+            <ul class="sub-menu">
+                <li><a href="#open-assessment">6.1 Open and navigate</a></li>
+                <li><a href="#lifecycle">6.2 Readiness, review and closing</a></li>
+            </ul>
+        </li>
+        <li><a href="#assumptions"><span>7. Assumptions &amp; Readiness</span></a></li>
+        <li><a href="#dashboards"><span>8. Dashboards</span></a></li>
+        <li>
+            <a href="javascript:void(0);" onclick="toggleSubMenu(this)"><span>9. Assessment Data</span><i class="bi bi-chevron-right toggle-icon"></i></a>
+            <ul class="sub-menu">
+                <li><a href="#assets">9.1 Assets</a></li>
+                <li><a href="#sales">9.2 Sales and income</a></li>
+                <li><a href="#working-capital">9.3 Debtors and creditors</a></li>
+                <li><a href="#stock">9.4 Stock</a></li>
+                <li><a href="#expenses">9.5 Expenses</a></li>
+                <li><a href="#loans">9.6 Loans</a></li>
+                <li><a href="#vat">9.7 VAT</a></li>
+            </ul>
+        </li>
+        <li><a href="#assessment-reports"><span>10. Assessment Reports</span></a></li>
+        <li><a href="#sensitivity"><span>11. Sensitivity &amp; GroqCloud AI</span></a></li>
+        <li><a href="#budget"><span>12. Assessment Budget</span></a></li>
+
+        <li><a href="#section-c" class="section-link">Section C — Safe Operation</a></li>
+        <li><a href="#sessions"><span>13. Sessions &amp; Availability</span></a></li>
+        <li><a href="#support"><span>14. Troubleshooting &amp; Support</span></a></li>
+        <li><a href="#checklists"><span>15. Operational Checklists</span></a></li>
+    </ul>
+</nav>
+
+<main>
+    <h1 id="welcome" tabindex="-1">Viability.IQ Complete User Guide</h1>
+    <p class="lead">A practical guide to administering a workspace, setting up core information, completing financial assessments, analysing results and operating the application safely.</p>
+    <p>Viability.IQ supports subscription-based workspaces in which authorised users maintain clients and businesses, prepare 12-month assessments, review financial viability, test scenarios and create management budgets. Features shown to each user depend on the subscription, tenant membership, role, branch and record permissions.</p>
+    <table>
+        <tr><th>Section</th><th>Who should use it</th><th>Purpose</th></tr>
+        <tr><td>Section A — Subscription &amp; System Administration</td><td>Subscribers, Tenant Owners, Tenant Administrators and authorised operational staff</td><td>Register, manage access, configure master data, create clients/businesses, use notifications and run portfolio reports.</td></tr>
+        <tr><td>Section B — Working with an Assessment</td><td>Advisors, analysts, branch managers, reviewers and authorised viewers</td><td>Capture evidence, produce projections, review dashboards/reports, test sensitivity and prepare a budget.</td></tr>
+        <tr><td>Section C — Secure Operation &amp; Support</td><td>All users and support administrators</td><td>Understand session recovery, inactivity, database availability, safe working practices and troubleshooting.</td></tr>
+    </table>
+    <div class="warning"><strong>Professional-use notice:</strong> Viability.IQ supports assessment and management decisions. It does not replace audited accounts, contractual records, tax advice or professional judgement, and it does not guarantee future performance.</div>
+
+    <div class="section-banner" id="section-a">
+        <h1>Section A — Subscription &amp; System Administration</h1>
+        <p>Set up the workspace in the correct order so that users, branches, master data, clients, businesses and assessments are linked consistently.</p>
+    </div>
+
+    <h2 id="plans">1.1 Plans, registration and seats</h2>
+    <p>A new subscriber registers at <code>/identity/register</code>, chooses a plan, supplies identity and organisation information, accepts the terms and creates the first tenant workspace.</p>
+    <table>
+        <tr><th>Concept</th><th>User meaning</th></tr>
+        <tr><td>Standard / Individual plan</td><td>A personal workspace with one included active user seat.</td></tr>
+        <tr><td>Open / Organisation plan</td><td>An organisation workspace intended for multiple users, branches and role-controlled collaboration.</td></tr>
+        <tr><td>Tenant</td><td>The private workspace that owns its users, clients, businesses, assessments, branches, notifications and budgets.</td></tr>
+        <tr><td>Seat</td><td>One active tenant membership. Suspended or removed memberships do not consume an active seat.</td></tr>
+        <tr><td>Subscription status</td><td>Controls whether the tenant can continue using subscribed functionality. Renewal and upgrade actions are handled by the authorised account owner or administrator.</td></tr>
+    </table>
+    <ol>
+        <li>Choose the plan appropriate to the number of expected users and administration needs.</li>
+        <li>Enter accurate owner details and an email address that can receive account messages.</li>
+        <li>Select the applicable province and branch where requested.</li>
+        <li>After registration, sign in and verify the workspace name, plan and owner role.</li>
+    </ol>
+
+    <h2 id="signin">1.2 Signing in, password recovery and signing out</h2>
+    <ul>
+        <li><strong>Sign in:</strong> open Login, enter the registered email and password, and select Sign In.</li>
+        <li><strong>Temporary password:</strong> a newly invited user must change the temporary password before entering normal application routes.</li>
+        <li><strong>Forgotten password:</strong> use Forgot Password, follow the reset message, and choose a password that satisfies the displayed policy.</li>
+        <li><strong>Sign out:</strong> open the profile menu and select Sign Out. Always sign out on a shared computer.</li>
+        <li><strong>Inactive session:</strong> the default session warns after 25 inactive minutes and signs out at 30 minutes.</li>
+    </ul>
+    <div class="note"><strong>Home page context:</strong> after sign-in, verify the displayed user, tenant, branch, last login and active assessment before processing records.</div>
+
+    <h2 id="profile">1.3 User Profile component and Activity Log</h2>
+    <p>The avatar in the application header opens the User Profile menu. It displays the signed-in user, highest-ranked role and any additional roles.</p>
+    <table>
+        <tr><th>Menu item</th><th>Function</th></tr>
+        <tr><td>My Profile</td><td>Review and update personal registration information such as names and contact details.</td></tr>
+        <tr><td>Account Settings</td><td>Review subscription dates and configure province, branch, interface and notification preferences.</td></tr>
+        <tr><td>Activity Log</td><td>Open a read-only audit history of workspace actions. Search by actor, record, assessment, module or remarks; filter by action, entity and date; expand details; print; or export the current page to CSV.</td></tr>
+        <tr><td>Change Password</td><td>Replace the current password securely.</td></tr>
+        <tr><td>Sign Out</td><td>Ends the authenticated session and records the logout where database availability permits.</td></tr>
+    </table>
+    <p>The Activity Log is evidence of recorded application actions; it is not an editable transaction screen. Report incorrect entries to an administrator rather than attempting to alter history.</p>
+
+    <h2 id="account-settings">1.4 Account settings</h2>
+    <p>Account Settings contains read-only subscription information and user-maintained preferences.</p>
+    <ul>
+        <li><strong>Subscription &amp; Licensing:</strong> plan, registration date and expiry date.</li>
+        <li><strong>Regional Configuration:</strong> province and branch. Choose the province first so that the relevant branches can be listed.</li>
+        <li><strong>Interface Preferences:</strong> theme and language options where supported.</li>
+        <li><strong>Notification Channels:</strong> email, SMS and phone-call preferences. Availability also depends on configured delivery services.</li>
+    </ul>
+    <p>Select <strong>Save Settings</strong> and wait for success confirmation before leaving the page.</p>
+
+    <h2 id="roles">2.1 Tenant roles and access</h2>
+    <table>
+        <tr><th>Role</th><th>Typical responsibility</th></tr>
+        <tr><td>Tenant Owner</td><td>Protected highest-level tenant role; subscription, security, user management and full operational oversight.</td></tr>
+        <tr><td>Tenant Administrator</td><td>User, role, branch and operational administration without replacing the protected owner.</td></tr>
+        <tr><td>Branch Manager</td><td>Manages authorised operational records within assigned branch scope.</td></tr>
+        <tr><td>Viewer</td><td>Read-only access to permitted records and reports.</td></tr>
+        <tr><td>Billing Manager</td><td>Subscription and billing duties; this role alone does not grant operational assessment access.</td></tr>
+    </table>
+    <p>A user may hold more than one role. Access is the combined result of tenant membership, membership status, subscription status, branch scope, roles and any explicit record grants. Assign the least privilege needed.</p>
+
+    <h2 id="manage-users">2.2 Adding and managing users</h2>
+    <ol>
+        <li>Open <strong>Settings &gt; Users</strong>.</li>
+        <li>Select Add and enter the user’s name, email, branch and required role or roles.</li>
+        <li>Save. For a new identity, the system creates a secure temporary password and attempts to email it. An existing Viability.IQ identity is linked to the tenant without creating a duplicate account.</li>
+        <li>Ask the user to sign in and change a temporary password immediately.</li>
+        <li>Return to Users to change roles, default branch or membership status when responsibilities change.</li>
+    </ol>
+    <p>Use <strong>Settings &gt; User Groups / Roles</strong> to review role assignments and protected access profiles. Maintain at least one active Tenant Owner.</p>
+
+    <h2 id="user-security">2.3 Branches, membership status and security</h2>
+    <ul>
+        <li><strong>Suspend</strong> to block access temporarily while retaining history.</li>
+        <li><strong>Reactivate</strong> only after confirming the user still requires access and a seat is available.</li>
+        <li><strong>Remove</strong> the tenant membership when access must end; historical audit references remain.</li>
+        <li><strong>Default branch</strong> determines the user’s normal operating context. Confirm it after saving and after the user signs in again.</li>
+        <li><strong>Explicit grants</strong> may permit View, Edit or Delete for selected records but never override tenant isolation.</li>
+    </ul>
+
+    <h2 id="setup-order">3.1 Recommended system setup order</h2>
+    <ol>
+        <li>Confirm company, province, service-centre/branch and tenant security information.</li>
+        <li>Create shared classification data needed by forms.</li>
+        <li>Create the client or business owner/contact.</li>
+        <li>Create the business and link it to the correct client and classifications.</li>
+        <li>Create the assessment for that business and set its assessment period.</li>
+        <li>Open the assessment and complete assumptions before detailed monthly data.</li>
+    </ol>
+    <div class="warning"><strong>Avoid duplicates:</strong> search existing lists before adding a client, business, product/service, funder or classification. Inactivate obsolete records instead of creating slightly different spellings.</div>
+
+    <h2 id="master-data">3.2 System settings and master data</h2>
+    <table>
+        <tr><th>Setup area</th><th>Purpose</th></tr>
+        <tr><td>Company</td><td>Maintains the organisation identity used by the tenant.</td></tr>
+        <tr><td>Provinces and service centres/branches</td><td>Provide regional and branch routing for users and records.</td></tr>
+        <tr><td>Business Sectors</td><td>Classify the industries in which assessed businesses operate.</td></tr>
+        <tr><td>Client Categories</td><td>Group clients for operational and assessment purposes.</td></tr>
+        <tr><td>Revenue Streams / Income Types</td><td>Distinguish Sales from grants, donations, disposals and other income.</td></tr>
+        <tr><td>Product/Service Categories and Products/Services</td><td>Standardise what businesses sell or provide.</td></tr>
+        <tr><td>Asset Categories and Asset Types</td><td>Standardise asset classification and support depreciation-related entry.</td></tr>
+        <tr><td>Expense Types and Expense Items</td><td>Standardise operating-cost groups and recurring expense lines.</td></tr>
+        <tr><td>Loan Types</td><td>Classify overdraft, vehicle, mortgage, asset-finance and other facilities.</td></tr>
+        <tr><td>Banks/Funders</td><td>Maintain banks, government institutions, international funders and other finance providers.</td></tr>
+    </table>
+
+    <h2 id="clients-businesses">3.3 Creating clients and businesses</h2>
+    <h3>Clients</h3>
+    <ol>
+        <li>Open <strong>Settings &gt; Clients</strong>.</li>
+        <li>Add the person or organisation contact, select the appropriate category, and capture reliable communication details.</li>
+        <li>Save and confirm the record appears once in the list.</li>
+    </ol>
+    <h3>Businesses</h3>
+    <ol>
+        <li>Open <strong>Settings &gt; Businesses</strong>.</li>
+        <li>Add the legal/trading identity and link the correct client, sector and regional information.</li>
+        <li>Save, then open the record to verify the relationship before creating an assessment.</li>
+    </ol>
+
+    <h2 id="assessment-setup">3.4 Creating and setting up an assessment</h2>
+    <ol>
+        <li>Open <strong>My Assessments</strong> and select Add.</li>
+        <li>Select the business. The case number is system-generated.</li>
+        <li>Enter the assessment start date, optional finish date and useful internal remarks.</li>
+        <li>Keep the assessment active while it is available for processing.</li>
+        <li>Save, then select the case number to initialise the assessment workspace.</li>
+    </ol>
+    <p>Do not create a second assessment merely because data entry is incomplete. Continue the existing active case unless a genuinely separate review period or assignment is required.</p>
+
+    <h2 id="notifications">4. Notifications, tasks and direct messages</h2>
+    <p>Open Notifications from the main navigation. The unread badge shows outstanding items.</p>
+    <table>
+        <tr><th>View</th><th>Use</th></tr>
+        <tr><td>All Alerts</td><td>Shows all authorised notifications, tasks and messages, including unread status.</td></tr>
+        <tr><td>Assigned Tasks</td><td>Shows pending and completed tasks, due dates and linked assessment case numbers.</td></tr>
+        <tr><td>Direct Messages</td><td>Shows workspace messages sent directly to the user.</td></tr>
+    </table>
+    <ol>
+        <li>Select an item to open details; opening it marks it read where applicable.</li>
+        <li>For a task, review the due date and case, perform the work, then select <strong>Mark Done</strong>.</li>
+        <li>Use <strong>Create Task / Send Message</strong> to choose the recipient, message type, title, details, optional case and due date.</li>
+        <li>Use notification preferences in Account Settings for supported external channels.</li>
+    </ol>
+
+    <h2 id="system-reports">5. System reports</h2>
+    <p>System Reports provide tenant-level operational oversight within the signed-in user’s authorised branch and record scope.</p>
+    <table>
+        <tr><th>Report</th><th>Management question</th></tr>
+        <tr><td>Assessment Register</td><td>Which cases exist, who owns them, what is their status and when did they start?</td></tr>
+        <tr><td>Workflow &amp; Readiness</td><td>Which assessments are incomplete, ready, completed or stalled for 14 or more days?</td></tr>
+        <tr><td>Advisor Performance</td><td>How do workload, completion and readiness compare by assessment creator/advisor?</td></tr>
+        <tr><td>Branch Performance</td><td>How does assessment delivery compare across authorised branches?</td></tr>
+    </table>
+    <ol>
+        <li>Select a report from the catalogue.</li>
+        <li>Filter by search text, branch, status, advisor, date range and active-only status.</li>
+        <li>Select <strong>Run report</strong> and review the current data-scope label.</li>
+        <li>Use PDF, Excel or Email only after confirming filters and authorised recipients.</li>
+    </ol>
+
+    <div class="section-banner" id="section-b">
+        <h1>Section B — Working with an Assessment</h1>
+        <p>Viability.IQ’s financial engine joins the information entered across the assessment into one month-by-month business picture. Sales influence cash receipts, debtors, stock, cost of Sales and VAT; expenses, assets, loans and creditor timing influence payments, profit, cash and the balance sheet. The engine then presents the same underlying projection through dashboards and formal reports. Sensitivity Analysis lets the user test “what if” changes without altering the approved source data, while Budgeting converts the projection into a separate management plan. Because the areas are connected, accurate source information and a readiness review are more important than manually adjusting a final report.</p>
+    </div>
+
+    <h2 id="open-assessment">6.1 Opening and navigating an assessment</h2>
+    <ol>
+        <li>Open <strong>My Assessments</strong>.</li>
+        <li>Select the case number. Confirm the case, business, client and period in the assessment header.</li>
+        <li>Use the assessment navigation for Assumptions, Dashboards, Assets, Sales/Income, Debtors/Creditors, Stock, Expenses, Loans, VAT, Reports, Sensitivity Analysis and Budgets.</li>
+        <li>Watch the status indicators: a warning means that area has not yet been populated or verified.</li>
+    </ol>
+    <p>Browser Back, Forward and Refresh can recreate the interactive session. The application restores the active tenant and assessment only after checking access again; always confirm the displayed case before continuing.</p>
+
+    <h2 id="lifecycle">6.2 Assessment readiness, review and closing</h2>
+    <table>
+        <tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td>Draft</td><td>The case exists but material assessment work has not started.</td></tr>
+        <tr><td>In Progress</td><td>Data is being captured and readiness is developing.</td></tr>
+        <tr><td>Ready for Review</td><td>Required readiness checks pass and the case has been submitted for review.</td></tr>
+        <tr><td>Completed</td><td>An authorised reviewer has finalised the assessment. Completion details are recorded.</td></tr>
+        <tr><td>Archived</td><td>The case is retained for history but no longer active operational work.</td></tr>
+    </table>
+    <ol>
+        <li>Select <strong>View Readiness</strong> and resolve all blocking items.</li>
+        <li>Select <strong>Submit for Review</strong>. The system re-evaluates readiness.</li>
+        <li>Review dashboards, source data, assumptions and formal reports.</li>
+        <li>Select <strong>Mark Complete</strong> only when the status is Ready for Review and the review is finished.</li>
+        <li>If an authorised correction is later required, use <strong>Re-open</strong>; the case returns to In Progress and completion details are cleared.</li>
+    </ol>
+
+    <h2 id="assumptions">7. Assumptions and Projection Readiness</h2>
+    <p>Assumptions define the opening position and the expected behaviour that cannot be derived reliably from monthly records alone.</p>
+    <table>
+        <tr><th>Area</th><th>What to confirm</th></tr>
+        <tr><td>Opening position</td><td>Opening bank, stock, debtors, creditors, VAT, other current assets/liabilities and asset balances agree to supporting records.</td></tr>
+        <tr><td>Sales</td><td>Growth rate/start month, cash Sales share, income classification and fallback cost of Sales are reasonable.</td></tr>
+        <tr><td>Debtors and creditors</td><td>Ageing distribution, payment timing, bad debt and VAT inclusion reflect actual trading behaviour.</td></tr>
+        <tr><td>Expenses and wages</td><td>Expense escalation, contingency, director numbers, wages and increase timing are supported.</td></tr>
+        <tr><td>VAT</td><td>Registration status, rate, payment frequency and opening payable/refundable balance are correct.</td></tr>
+        <tr><td>Funding and assets</td><td>Loan terms, minimum cash reserve, acquisition timing and depreciation inputs agree to contracts/registers.</td></tr>
+    </table>
+    <p><span class="tag">Percentage mode</span> captures ageing shares. <span class="tag">Actual values mode</span> captures known balances and converts them to projection percentages.</p>
+    <p>Use assumption notes to record source, date, owner and reasoning. Confirmation records that the baseline was reviewed; it is not a guarantee.</p>
+    <div class="note"><strong>Readiness result:</strong> Incomplete means a required item is missing; Ready with warnings means core information exists but advisory issues remain; Ready means minimum automated checks pass.</div>
+
+    <h2 id="dashboards">8. Assessment dashboards</h2>
+    <p>Dashboards present the live 12-month projection as decision-focused summaries. Review:</p>
+    <ul>
+        <li>KPI cards for revenue, gross profit, operating result, closing cash and related indicators.</li>
+        <li>Monthly profit/loss and cash trends rather than relying only on annual totals.</li>
+        <li>Business health and performance alerts, especially the first month of negative cash.</li>
+        <li>Working-capital distribution and debtor/creditor timing.</li>
+        <li>Financial viability indicators and explanatory ratios.</li>
+    </ul>
+    <p>A green indicator is not proof that every source record is correct. Return to source pages when a value looks unexpected; do not compensate by entering an unrelated adjustment.</p>
+
+    <h2 id="assets">9.1 Asset management</h2>
+    <ol>
+        <li>Add each asset with its category/type, opening cost, accumulated depreciation, acquisition date/month, depreciation method/rate and active status.</li>
+        <li>Use bulk import only after checking the template, classifications and duplicate risk.</li>
+        <li>Open asset details to review opening value, monthly movements, depreciation and monthly closing value.</li>
+        <li>Add movements such as acquisitions, improvements, disposals or corrections in the month they occur.</li>
+        <li>Deactivate an asset only when it should no longer participate in the active projection; retain records needed for history.</li>
+    </ol>
+    <p>Months before a planned acquisition do not carry the asset. The acquisition month introduces the value and depreciation follows the configured treatment.</p>
+
+    <h2 id="sales">9.2 Sales and other income</h2>
+    <ol>
+        <li>Create Sales Categories and link the correct income type and product/service category.</li>
+        <li>Classify true Sales separately from grants, donations, sundry income and disposal proceeds.</li>
+        <li>Enter monthly Sales/income for Months 1–12 and save before leaving the page.</li>
+        <li>Review category markup/cost basis, cash Sales percentage and opening stock relationship.</li>
+    </ol>
+    <div class="warning"><strong>Classification matters:</strong> only true Sales should drive gross profit, debtors, stock, cost of Sales and break-even calculations. Do not classify a grant or asset disposal as Sales merely to increase revenue.</div>
+
+    <h2 id="working-capital">9.3 Debtors and creditors management</h2>
+    <p>Debtors control when credit Sales become cash. Creditors control when supplier purchases become cash payments.</p>
+    <ul>
+        <li>Use ageing percentages when reliable collection/payment patterns are known.</li>
+        <li>Use actual values when an aged ledger is available; the application derives percentages.</li>
+        <li>Confirm whether captured balances include VAT.</li>
+        <li>Review bad debt separately from timing: bad debt reduces collectible Sales; timing only shifts collection.</li>
+        <li>Check that total percentages equal 100% and that average days are commercially plausible.</li>
+    </ul>
+
+    <h2 id="stock">9.4 Stock management</h2>
+    <ol>
+        <li>Capture opening stock by the relevant Sales/Product category rather than as an unsupported duplicate total.</li>
+        <li>Enter monthly stock movements or requirements using the available assessment form.</li>
+        <li>Maintain a reasonable minimum closing-stock level where the business carries inventory.</li>
+        <li>Review purchases, cost of Sales and closing stock together; unexplained stock growth can overstate assets and understate cost.</li>
+    </ol>
+
+    <h2 id="expenses">9.5 Expense management</h2>
+    <ol>
+        <li>Select standard expense items or create authorised master data first.</li>
+        <li>Enter monthly amounts, VAT treatment, recurrence and applicable increase timing.</li>
+        <li>Use bulk entry/import carefully and review every mapped item before saving.</li>
+        <li>Keep director wages and known recurring costs explicit; do not hide known expenses in contingency.</li>
+    </ol>
+    <p>Wait for the success Toast after saving. Reopen or refresh the page to confirm material entries persisted.</p>
+
+    <h2 id="loans">9.6 Loans and repayments</h2>
+    <ol>
+        <li>Add each facility with funder, loan type, opening/new balance, interest rate, term, start month and contractual instalment.</li>
+        <li>Review the generated repayment schedule and edit a movement only when supported by the agreement.</li>
+        <li>Distinguish principal repayments from interest: principal reduces the liability; interest affects expense and cash.</li>
+        <li>Record new facilities in the correct month so proceeds and repayment timing are not shifted.</li>
+    </ol>
+
+    <h2 id="vat">9.7 VAT management</h2>
+    <p>The VAT workspace combines taxable Sales, purchases/stock and VAT-bearing expenses to estimate output VAT, input VAT and settlement.</p>
+    <ul>
+        <li>Confirm the VAT rate and payment frequency in Assumptions.</li>
+        <li>Review opening VAT payable or refundable and ensure only one opening position is used.</li>
+        <li>Enter supported VAT adjustments in the relevant month with a clear reason.</li>
+        <li>Review the projected settlement months and compare them with filed returns before relying on cashflow.</li>
+    </ul>
+
+    <h2 id="assessment-reports">10. Assessment reports</h2>
+    <p>Assessment Reports are generated from the live central projection. Select a report, choose Months 1–12 or a narrower period, and select Generate.</p>
+    <table>
+        <tr><th>Report</th><th>What it communicates</th></tr>
+        <tr><td>Assessment Summary</td><td>A narrative planning and viability overview with deterministic financial findings.</td></tr>
+        <tr><td>Profit &amp; Loss</td><td>Monthly Sales/revenue, cost of Sales, gross profit, expenses, depreciation, interest and projected result.</td></tr>
+        <tr><td>Cashflow / Cashbook</td><td>Projected receipts, payments and bank position by month, including the timing effects of working capital.</td></tr>
+        <tr><td>Balance Sheet</td><td>Projected assets, liabilities and residual net assets by month.</td></tr>
+        <tr><td>VAT Report</td><td>Output VAT, input VAT and projected settlement/refund position.</td></tr>
+    </table>
+    <p>Use Print/PDF, Excel or Email after verifying case, period and recipient. A report is only as reliable as the live source records; regenerate after changing assessment data.</p>
+
+    <h2 id="sensitivity">11. Sensitivity Analysis and GroqCloud AI</h2>
+    <p>Sensitivity Analysis tests alternative conditions without changing the assessment’s saved source records.</p>
+    <h3>Deterministic analysis</h3>
+    <ul>
+        <li><strong>Scenario Builder:</strong> combine changes to Sales, costs, expenses, bad debt, collection/payment timing, loan interest or asset acquisition.</li>
+        <li><strong>Sensitivity Results:</strong> vary one driver across a range to identify the most influential assumption.</li>
+        <li><strong>Scenario Comparison:</strong> compare the baseline with up to three named cases.</li>
+        <li><strong>Risk &amp; Break-even:</strong> estimate practical thresholds and cash-reserve pressure.</li>
+    </ul>
+    <table>
+        <tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td><span class="green">Green</span></td><td>No tested key threshold is breached.</td></tr>
+        <tr><td><span class="amber">Amber</span></td><td>A cash reserve or coverage warning requires investigation.</td></tr>
+        <tr><td><span class="red">Red</span></td><td>The tested case produces negative cash or a projected loss.</td></tr>
+    </table>
+    <h3>GroqCloud AI analysis</h3>
+    <ol>
+        <li>Open the <strong>GroqCloud AI</strong> tab. The server must show the provider as enabled and configured.</li>
+        <li>Read the disclosure. Only de-identified calculated results are sent; names and raw source records should not be included.</li>
+        <li>Give explicit consent for the current assessment session.</li>
+        <li>Select <strong>Generate GroqCloud Analysis</strong> and review the executive summary and findings.</li>
+        <li>Verify every recommendation against source records, deterministic calculations and professional judgement.</li>
+        <li>Use Clear to remove the current in-memory result.</li>
+    </ol>
+    <div class="danger"><strong>AI limitations:</strong> GroqCloud output is advisory, may be incomplete or wrong, and is not saved as the authoritative assessment. Consent and generated output apply to the current session. Never put the API key in source control.</div>
+
+    <h2 id="budget">12. Assessment Budget</h2>
+    <p>The budget is a separate 12-month management plan created from a snapshot of the assessment projection.</p>
+    <ol>
+        <li>Complete material assessment data and review readiness.</li>
+        <li>Open Budgets and select <strong>Create from assessment projection</strong>.</li>
+        <li>Enter a meaningful name and planning notes.</li>
+        <li>Edit white monthly fields and select <strong>Save draft</strong>.</li>
+        <li>Use Budget, Projection and Variance views to compare management targets with the imported assessment snapshot.</li>
+        <li>If source data changes while the budget is Draft, use <strong>Refresh projection</strong> deliberately; review resulting variances again.</li>
+        <li>Submit the budget for approval and approve only through an authorised role.</li>
+    </ol>
+    <table>
+        <tr><th>Status</th><th>Effect</th></tr>
+        <tr><td>Draft</td><td>Editable and refreshable.</td></tr>
+        <tr><td>Submitted</td><td>Read-only while awaiting approval.</td></tr>
+        <tr><td>Approved</td><td>Locked as the approved management plan.</td></tr>
+    </table>
+    <p>Review monthly gross profit, EBITDA/operating result, profit before tax, funding shortfalls, loss-making months and material differences from the projection.</p>
+
+    <div class="section-banner" id="section-c">
+        <h1>Section C — Secure Operation &amp; Support</h1>
+        <p>Protect the signed-in session, understand recovery behaviour and provide useful information when requesting support.</p>
+    </div>
+
+    <h2 id="sessions">13. Sessions, browser recovery and database availability</h2>
+    <h3>Connection recovery</h3>
+    <p>Blazor Server keeps an interactive browser connection. A brief interruption displays the reconnect overlay. Wait for reconnection; use Reload only when automatic recovery fails. A disconnected circuit is retained for a limited period.</p>
+    <h3>Protected context</h3>
+    <p>The minimum active context—user, tenant membership and assessment identifiers—is protected per browser tab. On a new circuit, the application reloads records and checks authorisation before restoring them. Another tab has independent context.</p>
+    <h3>Inactivity</h3>
+    <p>Mouse, keyboard, touch and scroll activity reset the inactivity timer. At the configured timeout, the application securely removes the authentication cookie and returns to Login. Unsaved form input is not preserved.</p>
+    <h3>Database availability</h3>
+    <ul>
+        <li>During startup, temporary database failures are retried.</li>
+        <li>The web host displays a branded HTTP 503 page instead of leaving the browser apparently hanging.</li>
+        <li>After final failure, normal routes remain blocked and the page shows a safe error reference; support details remain in Serilog.</li>
+        <li>During normal use, safe timeout/unavailable messages provide references without exposing connection details.</li>
+    </ul>
+
+    <h2 id="support">14. Troubleshooting and support</h2>
+    <table>
+        <tr><th>Symptom</th><th>Recommended response</th></tr>
+        <tr><td>Wrong tenant, branch or case</td><td>Stop entry, verify the header/profile context, return to the relevant list and reopen the correct record. Sign out/in after an authorised branch change.</td></tr>
+        <tr><td>Save appears unsuccessful</td><td>Wait for the success Toast, check validation messages, refresh and verify the record. Do not repeatedly submit a financial transaction when the result is uncertain.</td></tr>
+        <tr><td>Database Timeout / Temporarily Unavailable</td><td>Wait briefly, retry once where safe, record the error reference and time, and contact support if repeated.</td></tr>
+        <tr><td>Connection cannot be restored</td><td>Select Reload. The application will restore only context that remains authorised.</td></tr>
+        <tr><td>Session expired</td><td>Sign in again, reopen the case and verify whether the previous action had a success Toast.</td></tr>
+        <tr><td>Report differs from expected data</td><td>Confirm the case and period, inspect source pages and assumptions, save corrections, then regenerate the report.</td></tr>
+        <tr><td>GroqCloud analysis unavailable</td><td>Use deterministic results. Give support the displayed correlation/reference ID; do not send the API key.</td></tr>
+        <tr><td>User cannot access a function</td><td>Check subscription, active tenant membership, branch, roles and explicit grants. Do not grant Tenant Owner merely to bypass a configuration issue.</td></tr>
+    </table>
+    <p>When escalating, provide the time, signed-in user, tenant, branch, case number, page/action, displayed reference and whether the operation was retried. Never send passwords, connection strings, API keys or unredacted sensitive records.</p>
+
+    <h2 id="checklists">15. Operational checklists</h2>
+    <h3>Before starting an assessment</h3>
+    <ol>
+        <li>Confirm subscription and user access are active.</li>
+        <li>Confirm branch, client and business records.</li>
+        <li>Collect bank statements, management accounts, VAT returns, aged ledgers, stock count, asset register and loan statements.</li>
+        <li>Create one assessment for the intended business and period.</li>
+    </ol>
+    <h3>Before submitting for review</h3>
+    <ol>
+        <li>Resolve all required readiness checks.</li>
+        <li>Reconcile opening balances and income classification.</li>
+        <li>Review monthly Sales, expenses, stock, assets, loans and VAT.</li>
+        <li>Review minimum cash month, warnings and dashboard trends.</li>
+        <li>Generate all five assessment reports and investigate inconsistencies.</li>
+        <li>Run at least one downside sensitivity scenario.</li>
+        <li>Document material assumptions, evidence and mitigations.</li>
+    </ol>
+    <h3>Before marking complete</h3>
+    <ol>
+        <li>Confirm the assessment is Ready for Review.</li>
+        <li>Confirm reviewer comments and corrections are complete.</li>
+        <li>Confirm exported or emailed reports use the correct period and recipients.</li>
+        <li>Mark Complete and verify the completion status.</li>
+    </ol>
+
+    <footer>Viability.IQ — Complete User Guide — October 2026</footer>
+</main>
+</div>
+
+<button id="backToTop"
+        class="back-to-top"
+        type="button"
+        aria-label="Return to the top of the user guide"
+        title="Back to top">
+    <i class="bi bi-arrow-up" aria-hidden="true"></i>
+    <span>Top</span>
+</button>
+
+<script>
+function toggleSubMenu(element) {
+    const subMenu = element.nextElementSibling;
+    const icon = element.querySelector('.toggle-icon');
+    if (!subMenu || !subMenu.classList.contains('sub-menu')) return;
+    subMenu.classList.toggle('expanded');
+    icon.classList.toggle('bi-chevron-right');
+    icon.classList.toggle('bi-chevron-down');
+}
+
+const guideContent = document.querySelector('main');
+const backToTop = document.getElementById('backToTop');
+
+function updateBackToTopVisibility() {
+    const halfwayPoint = (guideContent.scrollHeight - guideContent.clientHeight) / 2;
+    backToTop.classList.toggle('visible', guideContent.scrollTop > halfwayPoint);
+}
+
+guideContent.addEventListener('scroll', updateBackToTopVisibility, { passive: true });
+window.addEventListener('resize', updateBackToTopVisibility);
+backToTop.addEventListener('click', () => {
+    guideContent.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('welcome').focus({ preventScroll: true });
+});
+updateBackToTopVisibility();
+</script>
+</body>
+</html>

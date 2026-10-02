@@ -10,6 +10,7 @@
 <div class="p-0">
     <PageHeading _pageTitle="Security Settings" CurrentPage="PageType.Settings" _pageHeading="Tenant Users" />
 
+    <div class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
     <nav aria-label="breadcrumb" class="px-3 pt-3">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="/settings/settings">Settings</a></li>
@@ -29,8 +30,8 @@
             <section class="tenant-security-summary">
                 <div>
                     <span class="tenant-security-eyebrow">ACTIVE TENANT</span>
-                    <h2>@snapshot.TenantName</h2>
-                    <p>Manage tenant membership, branch allocation, access status and roles.</p>
+                    <h3 class="mb-0 pt-0" style="font-size: 1.4rem !important; font-weight: 700 !important;">@snapshot.TenantName</h3>
+                    <span style="font-size: 0.85rem !important; color: #566D7E !important;">Manage tenant membership, branch allocation, access status and roles.</span>
                 </div>
                 <div class="tenant-seat-card">
                     <span>Subscribed seats</span>
@@ -98,6 +99,8 @@
         }
     </main>
 </div>
+</div>
+
 
 @code {
     [Inject] private ViabilityIQ.Application.Interfaces.ITenantUserManagementService UserManagementService { get; set; } = default!;

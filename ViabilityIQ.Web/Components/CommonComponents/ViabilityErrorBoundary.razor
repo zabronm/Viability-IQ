@@ -1,0 +1,66 @@
+@inherits ErrorBoundaryBase
+@inject ILogger<ViabilityErrorBoundary> Logger
+@inject NavigationManager Navigation
+@inject ToastService ToastService
+@using ViabilityIQ.Infrastructure.DbFactory
+@using ViabilityIQ.Web.Services
+
+@if (CurrentException is null)
+{
+    @ChildContent
+}
+else
+{
+    <div class="container py-5">
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <h1 class="h5">The page could not complete the request</h1>
+            <p class="mb-2">@UserMessage</p>
+            <p class="small mb-3">Error reference: <strong>@ErrorReference</strong></p>
+            <button type="button" class="btn btn-primary" @onclick="ReloadPage">
+                <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    private string ErrorReference { get; set; } = string.Empty;
+    private string UserMessage { get; set; } =
+        "An unexpected error occurred. Please try again.";
+
+    protected override Task OnErrorAsync(Exception exception)
+    {
+        ErrorReference = Guid.NewGuid().ToString("N");
+        UserMessage = GetUserMessage(exception);
+
+        Logger.LogError(
+            exception,
+            "Unhandled Blazor circuit exception. ErrorReference: {ErrorReference}, IsDatabaseError: {IsDatabaseError}, IsTransient: {IsTransient}, IsTimeout: {IsTimeout}",
+            ErrorReference,
+            DatabaseExceptionClassifier.IsDatabaseException(exception),
+            DatabaseExceptionClassifier.IsTransient(exception),
+            DatabaseExceptionClassifier.IsTimeout(exception));
+
+        ToastService.ShowError(
+            $"{UserMessage} Error reference: {ErrorReference}",
+            DatabaseExceptionClassifier.IsDatabaseException(exception)
+                ? "Database Error"
+                : "Application Error");
+
+        return Task.CompletedTask;
+    }
+
+    private static string GetUserMessage(Exception exception)
+    {
+        if (DatabaseExceptionClassifier.IsTimeout(exception))
+            return "The database took too long to respond. Please wait a moment and try again.";
+        if (DatabaseExceptionClassifier.IsTransient(exception))
+            return "The database is temporarily unavailable. Please wait a moment and try again.";
+        if (DatabaseExceptionClassifier.IsDatabaseException(exception))
+            return "A database operation failed. Please try again or contact support.";
+
+        return "An unexpected error occurred. Please try again.";
+    }
+
+    private void ReloadPage() => Navigation.Refresh(forceReload: true);
+}

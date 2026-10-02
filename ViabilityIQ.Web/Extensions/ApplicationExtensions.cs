@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ViabilityIQ.Application.Interfaces;
@@ -34,6 +35,13 @@ namespace ViabilityIQ.Web.Extensions
                 throw new InvalidOperationException(
                     "Connection string 'ViabilityIQ_Connection' not found in appsettings.json");
             }
+            var commandTimeoutSeconds =
+                int.TryParse(
+                    configuration["DatabaseResilience:CommandTimeoutSeconds"],
+                    out var configuredCommandTimeout)
+                && configuredCommandTimeout > 0
+                    ? configuredCommandTimeout
+                    : 60;
 
             // Identity DbContext
             services.AddDbContext<IdentityDbContext>(options =>
@@ -41,6 +49,7 @@ namespace ViabilityIQ.Web.Extensions
                 {
                     sqlOptions.MigrationsAssembly("ViabilityIQ.Infrastructure");
                     sqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+                    sqlOptions.CommandTimeout(commandTimeoutSeconds);
                 }));
 
             // Application DbContext
@@ -49,6 +58,7 @@ namespace ViabilityIQ.Web.Extensions
                 {
                     sqlOptions.MigrationsAssembly("ViabilityIQ.Infrastructure");
                     sqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null);
+                    sqlOptions.CommandTimeout(commandTimeoutSeconds);
                 }));
 
             // ============================================================================
@@ -84,12 +94,21 @@ namespace ViabilityIQ.Web.Extensions
             services.AddScoped<SignInManager<ApplicationUser>>();
             services.AddScoped<UserManager<ApplicationUser>>();
             services.AddScoped<RoleManager<ApplicationRole>>();
+            services.AddScoped<ProtectedSessionStorage>();
 
             // ============================================================================
             // 3. AUTHENTICATION
             // ============================================================================
             services.ConfigureApplicationCookie(options =>
             {
+                var idleTimeoutMinutes =
+                    int.TryParse(
+                        configuration["SessionManagement:IdleTimeoutMinutes"],
+                        out var configuredIdleTimeout)
+                    && configuredIdleTimeout > 0
+                        ? configuredIdleTimeout
+                        : 30;
+
                 options.LoginPath = "/login";
                 options.LogoutPath = "/logout";
                 options.AccessDeniedPath = "/access-denied";
@@ -97,7 +116,7 @@ namespace ViabilityIQ.Web.Extensions
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.ExpireTimeSpan = TimeSpan.FromHours(24);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(idleTimeoutMinutes);
                 options.SlidingExpiration = true;
             });
 

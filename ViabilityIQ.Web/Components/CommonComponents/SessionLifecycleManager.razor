@@ -1,0 +1,238 @@
+@implements IAsyncDisposable
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using ViabilityIQ.Application.Dtos
+@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Application.Interfaces.IdentityInterfaces
+@using ViabilityIQ.Web.Services
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthenticationService AuthenticationService
+@inject ITenantService TenantService
+@inject IReadOnlyRepository<AssessmentDto, long> AssessmentRepository
+@inject IAssessmentDataValidationService AssessmentDataValidationService
+@inject ISessionService SessionService
+@inject ProtectedSessionStorage ProtectedSessionStorage
+@inject IConfiguration Configuration
+@inject IJSRuntime JSRuntime
+@inject ILogger<SessionLifecycleManager> Logger
+@inject ToastService ToastService
+
+@code {
+    private const string StorageKey = "ViabilityIQ.SessionContext";
+    private readonly SemaphoreSlim persistenceLock = new(1, 1);
+    private DotNetObjectReference<SessionLifecycleManager>? componentReference;
+    private bool initialized;
+    private bool disposed;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        SessionService.OnSessionChanged += HandleSessionChanged;
+        componentReference = DotNetObjectReference.Create(this);
+
+        await RestoreContextAsync();
+
+        var idleMinutes = ReadPositiveInt("SessionManagement:IdleTimeoutMinutes", 30);
+        var warningMinutes = ReadPositiveInt("SessionManagement:IdleWarningMinutes", 5);
+        await JSRuntime.InvokeVoidAsync(
+            "viabilitySession.initialize",
+            componentReference,
+            TimeSpan.FromMinutes(idleMinutes).TotalMilliseconds,
+            TimeSpan.FromMinutes(warningMinutes).TotalMilliseconds);
+
+        initialized = true;
+        await PersistContextAsync();
+    }
+
+    [JSInvokable]
+    public Task ShowIdleWarningAsync(int remainingMinutes)
+    {
+        ToastService.ShowWarning(
+            $"Your session will close in {remainingMinutes} minutes due to inactivity. Interact with the page to remain signed in.",
+            "Session Expiring");
+        return Task.CompletedTask;
+    }
+
+    private async Task RestoreContextAsync()
+    {
+        try
+        {
+            var authenticationState =
+                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authenticationState.User.Identity?.IsAuthenticated != true)
+            {
+                await ProtectedSessionStorage.DeleteAsync(StorageKey);
+                return;
+            }
+
+            var user = await AuthenticationService.GetCurrentUserAsync(authenticationState.User);
+            if (user is null)
+                return;
+
+            var storedResult =
+                await ProtectedSessionStorage.GetAsync<SessionContextSnapshot>(StorageKey);
+            var storedContext = storedResult.Success ? storedResult.Value : null;
+
+            if (!SessionService.IsAuthenticated || SessionService.UserId != user.Id)
+            {
+                var displayName = string.Join(
+                    " ",
+                    new[] { user.FirstName, user.LastName }
+                        .Where(value => !string.IsNullOrWhiteSpace(value)));
+
+                SessionService.EstablishUserSession(
+                    user.Id,
+                    string.IsNullOrWhiteSpace(displayName)
+                        ? user.UserName ?? user.Email ?? string.Empty
+                        : displayName,
+                    user.Email ?? string.Empty,
+                    0,
+                    user.BranchId ?? 0,
+                    user.ProvinceId ?? 0);
+            }
+
+            var tenants = await TenantService.GetUserTenantsAsync(user.Id);
+            var tenant = storedContext?.UserId == user.Id
+                ? tenants.SingleOrDefault(
+                    item => item.MembershipId == storedContext.TenantMembershipId)
+                : null;
+            tenant ??= tenants.FirstOrDefault();
+            if (tenant is null)
+                return;
+
+            SessionService.SetActiveTenant(
+                tenant.TenantId,
+                tenant.TenantName,
+                tenant.TenantType,
+                tenant.PlanCode,
+                tenant.SubscriptionStatus,
+                tenant.MembershipId,
+                tenant.IsOwner);
+
+            if (storedContext?.UserId != user.Id
+                || storedContext.AssessmentId is not long assessmentId
+                || assessmentId <= 0)
+            {
+                return;
+            }
+
+            var assessment = await AssessmentRepository.GetFirstOrDefaultAsync(
+                nameof(AssessmentDto.AssessmentId),
+                assessmentId);
+            if (assessment is null)
+            {
+                SessionService.ClearAssessment();
+                return;
+            }
+
+            var dataStatus =
+                await AssessmentDataValidationService.ValidateAssessmentDataAsync(assessmentId);
+            SessionService.SetActiveAssessment(
+                assessment.CaseNumber ?? string.Empty,
+                assessment.AssessmentId,
+                assessment.BusinessId,
+                assessment.BusinessName ?? string.Empty,
+                assessment.ClientId,
+                assessment.BusinessOwner ?? string.Empty,
+                assessment.AssessmentTypeName ?? string.Empty,
+                dataStatus.HasAssets,
+                dataStatus.HasExpenses,
+                dataStatus.HasSales,
+                dataStatus.HasStock,
+                dataStatus.HasReports,
+                dataStatus.HasReviews,
+                dataStatus.HasReviews,
+                dataStatus.HasDebtorsCreditors,
+                dataStatus.HasLoans);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(
+                exception,
+                "The protected browser session context could not be restored. A new context will be established.");
+            await TryDeleteStoredContextAsync();
+        }
+    }
+
+    private void HandleSessionChanged()
+    {
+        if (!initialized || disposed)
+            return;
+
+        _ = InvokeAsync(PersistContextAsync);
+    }
+
+    private async Task PersistContextAsync()
+    {
+        await persistenceLock.WaitAsync();
+        try
+        {
+            if (!SessionService.IsAuthenticated || SessionService.UserId <= 0)
+            {
+                await ProtectedSessionStorage.DeleteAsync(StorageKey);
+                return;
+            }
+
+            await ProtectedSessionStorage.SetAsync(
+                StorageKey,
+                new SessionContextSnapshot(
+                    SessionService.UserId,
+                    SessionService.TenantMembershipId,
+                    SessionService.AssessmentId));
+        }
+        catch (JSDisconnectedException)
+        {
+            Logger.LogDebug("Session context persistence was skipped because the browser disconnected.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "The browser session context could not be persisted.");
+        }
+        finally
+        {
+            persistenceLock.Release();
+        }
+    }
+
+    private async Task TryDeleteStoredContextAsync()
+    {
+        try
+        {
+            await ProtectedSessionStorage.DeleteAsync(StorageKey);
+        }
+        catch (Exception exception) when (
+            exception is JSException
+            or JSDisconnectedException
+            or InvalidOperationException)
+        {
+            Logger.LogDebug(exception, "The invalid browser session context could not be removed.");
+        }
+    }
+
+    private int ReadPositiveInt(string key, int defaultValue) =>
+        int.TryParse(Configuration[key], out var value) && value > 0
+            ? value
+            : defaultValue;
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        SessionService.OnSessionChanged -= HandleSessionChanged;
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("viabilitySession.dispose");
+        }
+        catch (Exception exception) when (
+            exception is JSException
+            or JSDisconnectedException
+            or InvalidOperationException)
+        {
+            Logger.LogDebug(exception, "Session lifecycle JavaScript was already unavailable.");
+        }
+        componentReference?.Dispose();
+        componentReference?.Dispose();
+    }
+}

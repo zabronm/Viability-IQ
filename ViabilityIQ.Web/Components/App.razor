@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -40,10 +39,22 @@
 </head>
 
 <body>
-        <!-- CRITICAL: CascadingAuthenticationState wrapper for authentication to work -->
-    <CascadingAuthenticationState>
-        <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)"  />
-    </CascadingAuthenticationState>
+    <ApplicationShell @rendermode="new InteractiveServerRenderMode(prerender: false)" />
+
+    <div id="components-reconnect-modal" class="components-reconnect-hide" role="status">
+        <div class="viq-reconnect-card">
+            <div class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></div>
+            <span class="components-reconnect-show">Reconnecting to Viability.IQ...</span>
+            <span class="components-reconnect-failed">
+                Connection could not be restored.
+                <button type="button" class="btn btn-sm btn-primary ms-2" onclick="location.reload()">Reload</button>
+            </span>
+            <span class="components-reconnect-rejected">
+                This session is no longer available.
+                <button type="button" class="btn btn-sm btn-primary ms-2" onclick="location.reload()">Start a new session</button>
+            </span>
+        </div>
+    </div>
     
 
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -52,6 +63,7 @@
     <script src="/scripts/viqscript.js"></script>
     <script src="/js/viqcharts.js"></script>
     <script src="js/zabOffCanvas.js"></script>
+    <script src="/js/session-lifecycle.js"></script>
     <script src="scripts/assessmentAssetDetailsCharts.js"></script>
     <script src="scripts/assessmentPagePrint.js"></script>
     <script src="scripts/reportOutput.js"></script>

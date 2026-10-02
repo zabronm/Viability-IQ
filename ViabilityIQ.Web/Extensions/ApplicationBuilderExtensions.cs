@@ -7,6 +7,13 @@ namespace ViabilityIQ.Web.Extensions
     
     public static class ApplicationBuilderExtensions
     {
+        public static WebApplication UseDatabaseStartupStatusPage(
+            this WebApplication app)
+        {
+            app.UseMiddleware<ErrorsAndLogging.DatabaseStartupStatusMiddleware>();
+            return app;
+        }
+
         
         /// Configures the HTTP request pipeline
         

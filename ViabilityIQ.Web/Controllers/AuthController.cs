@@ -104,7 +104,7 @@ public class AuthController : ControllerBase
 
     //=====  SIGN OUT PROCEDURE  =====//
     [HttpPost("signout-form")]
-    public async Task<IActionResult> SignOutForm()
+    public async Task<IActionResult> SignOutForm([FromForm] string? reason = null)
     {
         try
         {
@@ -116,54 +116,57 @@ public class AuthController : ControllerBase
             return Redirect("/api/auth/signout-confirmation?error=InvalidRequest");
         }
 
-        var currentUser = User.Identity?.IsAuthenticated == true
-            ? await _userManager.GetUserAsync(User)
-            : null;
+        var userId = long.TryParse(
+            User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+            out var parsedUserId)
+            ? parsedUserId
+            : 0;
+        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
         try
         {
-            if (currentUser == null)
-            {
-                return LocalRedirect("/login");
-            }
-
-            await _activityLogWriter.RecordAsync(
-                new ActivityLogWriteRequest
-                {
-                    Action = ActivityAction.Logout,
-                    EntityType = nameof(ActivityEntityType.User),
-                    EntityId = currentUser.Id,
-                    EntityName = currentUser.Email,
-                    UserId = currentUser.Id,
-                    ActorName = GetActorName(currentUser),
-                    Module = "Identity",
-                    Page = "/logout",
-                    Remarks = "User initiated secure sign out."
-                },
-                cancellationToken: HttpContext.RequestAborted);
-
             await _signInManager.SignOutAsync();
-
-            currentUser.LastLogoutAt = DateTime.UtcNow;
-            var logoutUpdateResult = await _userManager.UpdateAsync(currentUser);
-            if (!logoutUpdateResult.Succeeded)
-            {
-                _logger.LogError(
-                    "User {UserId} signed out, but LastLogoutAt could not be updated: {Errors}",
-                    currentUser.Id,
-                    string.Join("; ", logoutUpdateResult.Errors.Select(error => error.Description)));
-            }
-
-            return LocalRedirect("/login");
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Logout was not completed because mandatory activity recording or sign-out failed for user {UserId}",
-                currentUser?.Id);
-            return Redirect("/api/auth/signout-confirmation?error=AuditFailure");
+            _logger.LogError(ex, "Authentication cookie sign-out failed for user {UserId}", userId);
+            return Redirect("/api/auth/signout-confirmation?error=SignOutFailure");
         }
+
+        await RecordLogoutAfterSignOutAsync(
+            userId,
+            email,
+            string.Equals(reason, "idle", StringComparison.OrdinalIgnoreCase));
+
+        return LocalRedirect(
+            string.Equals(reason, "idle", StringComparison.OrdinalIgnoreCase)
+                ? "/login?reason=SessionExpired"
+                : "/login");
+    }
+
+    [HttpGet("idle-signout")]
+    public IActionResult IdleSignOut()
+    {
+        var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+        var encoder = HtmlEncoder.Default;
+        var requestToken = encoder.Encode(tokens.RequestToken ?? string.Empty);
+        var formFieldName = encoder.Encode(tokens.FormFieldName);
+
+        return Content(
+            $$"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head><meta charset="utf-8"><title>Session expired</title></head>
+            <body>
+                <form id="idle-signout" method="post" action="/api/auth/signout-form">
+                    <input type="hidden" name="{{formFieldName}}" value="{{requestToken}}">
+                    <input type="hidden" name="reason" value="idle">
+                </form>
+                <script>document.getElementById("idle-signout").submit();</script>
+            </body>
+            </html>
+            """,
+            "text/html; charset=utf-8");
     }
 
 
@@ -191,6 +194,12 @@ public class AuthController : ControllerBase
                 """
             <div class="alert">
                 The sign-out request expired or was invalid. Please submit it again.
+            </div>
+            """,
+            "SignOutFailure" =>
+                """
+            <div class="alert">
+                The authentication session could not be closed. Please submit sign out again.
             </div>
             """,
             _ => string.Empty
@@ -301,6 +310,58 @@ public class AuthController : ControllerBase
                 "Successful {Action} for user {UserId} was not written to the activity log",
                 request.Action,
                 request.UserId);
+        }
+    }
+
+    private async Task RecordLogoutAfterSignOutAsync(
+        long userId,
+        string? email,
+        bool idleTimeout)
+    {
+        try
+        {
+            var currentUser = userId > 0
+                ? await _userManager.FindByIdAsync(userId.ToString())
+                : null;
+
+            await _activityLogWriter.RecordAsync(
+                new ActivityLogWriteRequest
+                {
+                    Action = ActivityAction.Logout,
+                    EntityType = nameof(ActivityEntityType.User),
+                    EntityId = userId,
+                    EntityName = currentUser?.Email ?? email,
+                    UserId = userId,
+                    ActorName = currentUser is null
+                        ? email ?? "User"
+                        : GetActorName(currentUser),
+                    Module = "Identity",
+                    Page = "/logout",
+                    Remarks = idleTimeout
+                        ? "User signed out automatically after 30 minutes of inactivity."
+                        : "User initiated secure sign out."
+                },
+                cancellationToken: HttpContext.RequestAborted);
+
+            if (currentUser is null)
+                return;
+
+            currentUser.LastLogoutAt = DateTime.UtcNow;
+            var updateResult = await _userManager.UpdateAsync(currentUser);
+            if (!updateResult.Succeeded)
+            {
+                _logger.LogError(
+                    "User {UserId} signed out, but LastLogoutAt could not be updated: {Errors}",
+                    currentUser.Id,
+                    string.Join("; ", updateResult.Errors.Select(error => error.Description)));
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "User {UserId} was signed out, but logout auditing could not be completed.",
+                userId);
         }
     }
 

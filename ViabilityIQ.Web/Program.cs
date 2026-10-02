@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using ViabilityIQ.Application.ExtensionServices;
 using ViabilityIQ.Application.Interfaces;
@@ -50,11 +51,21 @@ namespace ViabilityIQ.Web
                     Console.WriteLine("[STEP 3] Adding Razor components...");
                     try
                     {
-                        builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-                        builder.Services.Configure<CircuitOptions>(options =>
-                        {
-                            options.DetailedErrors = true;
-                        });
+                        builder.Services
+                            .AddRazorComponents()
+                            .AddInteractiveServerComponents(options =>
+                            {
+                                options.DetailedErrors = builder.Environment.IsDevelopment();
+                                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
+                                options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
+                                options.MaxBufferedUnacknowledgedRenderBatches = 20;
+                            })
+                            .AddHubOptions(options =>
+                            {
+                                options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+                                options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+                                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                            });
                         Console.WriteLine("[STEP 3] ✓ Success");
                     }
                     catch (Exception ex)
@@ -87,6 +98,7 @@ namespace ViabilityIQ.Web
                     try
                     {
                         builder.Services.AddErrorHandlingServices();
+                        builder.Services.AddDatabaseStartupAvailability();
                         Console.WriteLine("[STEP 4] ✓ Success");
                     }
                     catch (Exception ex)
@@ -210,6 +222,7 @@ namespace ViabilityIQ.Web
                         Console.WriteLine("[STEP 10] Configuring middleware pipeline...");
                         try
                         {
+                            app.UseDatabaseStartupStatusPage();
                             // Add global error handling middleware FIRST
                             app.UseGlobalErrorHandling();
                             Console.WriteLine("[STEP 10.1] ✓ Global error handling middleware added");
@@ -235,65 +248,24 @@ namespace ViabilityIQ.Web
                         }
 
                         // ============================================================================
-                        // INITIALIZE DATABASE
-                        // ============================================================================
-                        Console.WriteLine("[STEP 11] Initializing database...");
-                        try
-                        {
-                            Log.Information("Initializing database...");
-                            await app.InitializeDatabaseAsync();
-                            Log.Information("Database initialized successfully");
-                            Console.WriteLine("[STEP 11] ✓ Database initialized");
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Fatal(ex, "Fatal error during database initialization");
-                            Console.WriteLine($"[STEP 11] ✗ Database initialization failed");
-                            Console.WriteLine($"[STEP 11] Message: {ex.Message}");
-
-                            try
-                            {
-                                var toastService = app.Services.GetRequiredService<ToastService>();
-                                toastService.ShowError(
-                                    "Failed to initialize database. Please check that your database server is running and the connection string is correct.",
-                                    "Database Initialization Failed");
-                            }
-                            catch { }
-
-                            throw;
-                        }
-
-                        // ============================================================================
                         // CONFIGURE APPLICATION PIPELINE
                         // ============================================================================
-                        Console.WriteLine("[STEP 12] Configuring application pipeline...");
+                        Console.WriteLine("[STEP 11] Configuring application pipeline...");
                         try
                         {
                             app.UseApplicationPipeline(app.Environment);
-                            Console.WriteLine("[STEP 12] ✓ Application pipeline configured");
+                            app.MapControllers();
+                            Console.WriteLine("[STEP 11] ✓ Application pipeline configured");
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"[STEP 12] ✗ FAILED: {ex.GetType().Name}");
-                            Console.WriteLine($"[STEP 12] Message: {ex.Message}");
+                            Console.WriteLine($"[STEP 11] ✗ FAILED: {ex.GetType().Name}");
+                            Console.WriteLine($"[STEP 11] Message: {ex.Message}");
                             throw;
                         }
 
-                        // ============================================================================
-                        // MAP API CONTROLLERS
-                        // ============================================================================
-                        Console.WriteLine("[STEP 12.5] Mapping API controllers...");
-                        try
-                        {
-                            app.MapControllers();
-                            Console.WriteLine("[STEP 12.5] ✓ API controllers mapped");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"[STEP 12.5] ✗ FAILED: {ex.GetType().Name}");
-                            Console.WriteLine($"[STEP 12.5] Message: {ex.Message}");
-                            throw;
-                        }
+                        if (!await app.StartWithDatabaseAvailabilityAsync())
+                            return;
 
                         // ============================================================================
                         // CONFIGURE FOR DEPLOYMENT
@@ -347,7 +319,7 @@ namespace ViabilityIQ.Web
                         // ============================================================================
                         Console.WriteLine("[STEP 16] Starting application...");
                         Log.Information("Application started successfully");
-                        await app.RunAsync();
+                        await app.WaitForShutdownAsync();
                     }
                     catch (Exception ex)
                     {

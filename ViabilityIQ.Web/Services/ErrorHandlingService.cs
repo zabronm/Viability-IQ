@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Data.Common;
 using System.Text;
+using ViabilityIQ.Infrastructure.DbFactory;
 using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Web.Services
@@ -63,7 +64,11 @@ namespace ViabilityIQ.Web.Services
 
         private int GetStatusCode(Exception ex)
         {
-            // You can customize this method to return different status codes based on exception types
+            if (DatabaseExceptionClassifier.IsTimeout(ex))
+                return StatusCodes.Status504GatewayTimeout;
+            if (DatabaseExceptionClassifier.IsTransient(ex))
+                return StatusCodes.Status503ServiceUnavailable;
+
             return ex switch
             {
                 TimeoutException => StatusCodes.Status408RequestTimeout,
@@ -90,6 +95,21 @@ namespace ViabilityIQ.Web.Services
 
         public string GetErrorMessage(Exception ex)
         {
+            if (DatabaseExceptionClassifier.IsTimeout(ex))
+            {
+                return "The database took too long to respond. Please wait a moment and try again.";
+            }
+
+            if (DatabaseExceptionClassifier.IsTransient(ex))
+            {
+                return "The database is temporarily unavailable. Please wait a moment and try again.";
+            }
+
+            if (DatabaseExceptionClassifier.IsDatabaseException(ex))
+            {
+                return "A database operation failed. Please retry or contact support with the error reference.";
+            }
+
             return ex switch
             {
                 TimeoutException => "The request timed out. Please try again later.",
@@ -101,7 +121,7 @@ namespace ViabilityIQ.Web.Services
                 HttpRequestException => "An error occurred while making an HTTP request.",
 
                 //Database specific errors
-                SqlException => "A database error occurred.",
+                SqlException => "A database operation failed. Please retry or contact support with the error reference.",
                 DbUpdateException => "A database update error occurred.",
                 DBConcurrencyException => "A concurrency conflict occurred while accessing the database.",
                 DuplicateNameException => "A duplicate name error occurred in the database.",

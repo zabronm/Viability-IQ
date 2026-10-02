@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.Identity
 {
@@ -6,6 +7,7 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
     {
         [Inject] public NavigationManager Navigation { get; set; } = default!;
         [Inject] public ILogger<Login> Logger { get; set; } = default!;
+        [Inject] public ToastService ToastService { get; set; } = default!;
 
         private string? ErrorMessage;
         private bool showPassword = false;
@@ -24,6 +26,14 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                     "FieldsAreRequired" => "Please fill in all required fields.",
                     _ => "Authentication failed. Please try again."
                 };
+            }
+
+            if (queryParams.TryGetValue("reason", out var reason)
+                && reason.ToString() == "SessionExpired")
+            {
+                ToastService.ShowWarning(
+                    "You were signed out after 30 minutes of inactivity. Please sign in to continue.",
+                    "Session Expired");
             }
         }
 

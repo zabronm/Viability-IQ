@@ -1,0 +1,12 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Shared
+
+<ToastComponent />
+
+<CascadingAuthenticationState>
+    <SessionLifecycleManager />
+    <ViabilityErrorBoundary>
+        <Routes />
+    </ViabilityErrorBoundary>
+</CascadingAuthenticationState>
