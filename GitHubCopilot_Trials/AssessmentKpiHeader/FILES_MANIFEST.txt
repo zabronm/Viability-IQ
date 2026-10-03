@@ -1,9 +1,0 @@
-ASSESSMENT KPI CARDS HEADER - FILE MANIFEST
-===========================================
-
-Files\ViabilityIQ.Web\Components\Pages_Assessments\CommonComponents\AssessmentKpiCardsComponent.razor
-Files\ViabilityIQ.Web\Components\Pages_Assessments\CommonComponents\AssessmentKpiCardsComponent.razor.cs
-Files\ViabilityIQ.Web\Components\Pages_Assessments\CommonComponents\AssessmentKpiCardsComponent.razor.css
-
-DEPLOYMENT_INSTRUCTIONS.txt
-FILES_MANIFEST.txt

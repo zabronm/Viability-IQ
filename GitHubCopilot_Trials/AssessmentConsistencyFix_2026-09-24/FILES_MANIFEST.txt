@@ -1,8 +1,0 @@
-ASSESSMENT KPI AND SESSION CONSISTENCY FIX - FILE MANIFEST
-==========================================================
-
-Files\ViabilityIQ.Web\Components\Pages\AssessmentsPage.razor.cs
-Files\ViabilityIQ.Web\Components\Pages\HomePageComponents\RecentAssessmentsSnapshotComponent.razor.cs
-
-DEPLOYMENT_INSTRUCTIONS.txt
-FILES_MANIFEST.txt

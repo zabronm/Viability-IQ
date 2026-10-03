@@ -1,8 +1,0 @@
-EXPENSES PAGE LAYOUT CORRECTION - FILE MANIFEST
-Generated: 2026-09-22
-
-REPLACE
-ViabilityIQ.Web\Components\Pages_Assessments\AssessmentExpensesPage.razor
-ViabilityIQ.Web\Components\Pages_Assessments\AssessmentExpensesPage.razor.css
-
-TOTAL PRODUCTION FILES: 2

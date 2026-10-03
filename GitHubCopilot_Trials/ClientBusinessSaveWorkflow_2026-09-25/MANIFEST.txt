@@ -1,7 +1,0 @@
-ViabilityIQ.Shared\SharedModels\SaveResult.cs
-ViabilityIQ.Web\Services\OffCanvasStateService.cs
-ViabilityIQ.Web\Components\Layout\MainLayout.razor.cs
-ViabilityIQ.Web\Components\Pages\PageFormComponents\BusinessFormComponent.razor.cs
-ViabilityIQ.Web\Components\Pages\PageFormComponents\ClientFormComponent.razor.cs
-ViabilityIQ.Web\Components\Pages\BusinessPage.razor.cs
-ViabilityIQ.Web\Components\Pages\ClientPage.razor.cs

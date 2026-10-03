@@ -1,8 +1,0 @@
-ASSESSMENT ASSET FORM - FILE MANIFEST
-=====================================
-
-Files\ViabilityIQ.Web\Components\Pages_Assessments\AssetFormComponents\AssessmentAssetFormComponent.razor
-Files\ViabilityIQ.Web\Components\Pages_Assessments\AssetFormComponents\AssessmentAssetFormComponent.razor.css
-
-DEPLOYMENT_INSTRUCTIONS.txt
-FILES_MANIFEST.txt

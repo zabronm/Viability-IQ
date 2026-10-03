@@ -1,8 +1,0 @@
-ASSESSMENT VAT PAGE NULL-GUARD - FILE MANIFEST
-Generated: 2026-09-22
-
-REPLACE
-ViabilityIQ.Web\Components\Pages_Assessments\AssessmentVATPage.razor
-ViabilityIQ.Web\Components\Pages_Assessments\AssessmentVATPage.razor.cs
-
-TOTAL PRODUCTION FILES: 2
