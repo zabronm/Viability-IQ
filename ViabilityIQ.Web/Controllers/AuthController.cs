@@ -43,6 +43,8 @@ public class AuthController : ControllerBase
     {
         try
         {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+
             if (string.IsNullOrWhiteSpace(request?.Email)
                 || string.IsNullOrWhiteSpace(request.Password))
             {
@@ -93,6 +95,11 @@ public class AuthController : ControllerBase
             return LocalRedirect(user.MustChangePassword
                 ? "/identity/change-password"
                 : "/home");
+        }
+        catch (AntiforgeryValidationException ex)
+        {
+            _logger.LogWarning(ex, "Rejected sign-in request with an invalid antiforgery token");
+            return Redirect("/login?error=InvalidRequest");
         }
         catch (Exception ex)
         {

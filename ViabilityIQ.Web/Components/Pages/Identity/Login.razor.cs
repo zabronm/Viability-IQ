@@ -24,6 +24,7 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                 {
                     "InvalidCredentials" => "Invalid email or password. Please try again.",
                     "FieldsAreRequired" => "Please fill in all required fields.",
+                    "InvalidRequest" => "The sign-in request expired or was invalid. Please refresh the page and try again.",
                     _ => "Authentication failed. Please try again."
                 };
             }

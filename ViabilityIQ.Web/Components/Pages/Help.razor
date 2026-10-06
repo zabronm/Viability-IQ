@@ -1,18 +1,9 @@
 ﻿@page "/help"
 
-@using ViabilityIQ.Web.Components.CommonComponents
-@inject NavigationManager Nav0
+@inject NavigationManager NavigationManager
 
 
-<div class="p-0">
-    <PageHeading _pageTitle="Assessments" CurrentPage="PageType.Help" _pageHeading="Help & Support" />
-
-    <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
-        <div class="app-workspace-shell">
-            &nbsp;           
-        </div>
-    </main>
-    <footer class="py-4 bg-light mt-auto">
-        <BFooter />
-    </footer>
-</div>
+@code {
+    protected override void OnInitialized() =>
+        NavigationManager.NavigateTo("/viq-help", replace: true);
+}

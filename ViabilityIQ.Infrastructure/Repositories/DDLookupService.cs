@@ -65,9 +65,9 @@ public sealed class DDLookupService : IDDLookupService
                 "AssessmentSalesCategoryId",
                 "AssessmentSalesCategoryName"),
             [DDLookupEnums.AssessmentLoans] = AssessmentChild(
-                "vw_assessment_loans",
+                "vw_assessment_loans_list",
                 "AssessmentLoanId",
-                "LoanDescription")
+                "LoanTypeName")
         };
 
     public DDLookupService(

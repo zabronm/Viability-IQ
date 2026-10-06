@@ -34,7 +34,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         #region Private Fields
 
-        private bool blAlert { get; set; } = false;
         private AlertSeverity AlertSeverity { get; set; } = AlertSeverity.Warning;
         private string AlertHeading { get; set; } = "Loan Notice:";
         private string AlertMessage { get; set; } = "Welcome to the loans module. Please note that calculations are done based on selected loan calculation method";
@@ -46,9 +45,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private long? SelectedLoanTypeId { get; set; } = null;
         private bool IsLoading { get; set; } = false;
         private string ActivePanelTitle { get; set; } = "Loan Administration Module";
+        private long LoadedAssessmentId { get; set; }
+        private bool IsProjectionSubscribed { get; set; }
 
         private List<LoanRepaymentRowViewModel> LoanProfilesDataset { get; set; } = new();
-        private List<AssessmentLoanRepaymentDto> LoanTypeLookupList { get; set; } = new();
         private decimal TotalLoanValue => LoanProfilesDataset.Sum(loan => loan.LoanAmount);
         private decimal ExpectedRepayments => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Expected));
         private decimal InterestCost => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Interest));
@@ -71,23 +71,33 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         #region Lifecycle Methods
 
-        protected override async Task OnInitializedAsync()
+        protected override async Task OnParametersSetAsync()
         {
+            if (LoadedAssessmentId == AssessmentId)
+            {
+                return;
+            }
+
             try
             {
-                AssessmentId = sessionService?.AssessmentId ?? 0;
+                if (AssessmentId <= 0)
+                {
+                    throw new InvalidOperationException(
+                        "A valid assessment is required to load loan repayments.");
+                }
 
                 Logger?.LogInformation(
                     "AssessmentLoanRepaymentsPage initialized for assessment {AssessmentId}",
                     AssessmentId);
 
-                await LoadLookupDataAsync();
                 await LoadLoanRepaymentsDataAsync();
+                LoadedAssessmentId = AssessmentId;
 
                 // Subscribe to projection changes
-                if (projectionStateManager != null)
+                if (projectionStateManager != null && !IsProjectionSubscribed)
                 {
                     projectionStateManager.ProjectionChanged += OnProjectionChanged;
+                    IsProjectionSubscribed = true;
 
                     Logger?.LogDebug("AssessmentLoanRepaymentsPage subscribed to ProjectionChanged events");
                 }
@@ -117,25 +127,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         #region Private Methods
 
-        private async Task LoadLookupDataAsync()
-        {
-            try
-            {
-                Logger?.LogDebug("Loading loan type lookup data");
-
-                var list = await ViqCrudService!.GetListAsync<AssessmentLoanRepaymentDto>("vw_loantypes_lookup", new { }, "Name");
-                LoanTypeLookupList = list?.ToList() ?? new();
-                blAlert = true;
-
-                Logger?.LogDebug("Loaded {LoanCount} loan types", LoanTypeLookupList.Count);
-            }
-            catch (Exception ex)
-            {
-                Logger?.LogError(ex, "Error loading loan type lookup data");
-                LoanTypeLookupList = new();
-            }
-        }
-
         private async Task LoadLoanRepaymentsDataAsync()
         {
             try
@@ -147,7 +138,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
                 var rawData = await ViqCrudService!.GetListAsync<AssessmentLoanRepaymentDto>(
                     "vw_assessment_loan_repayment_list",
-                    new { AssessmentId = sessionService?.AssessmentId ?? 0, Active = true },
+                    new { AssessmentId, Active = true },
                     "AssessmentLoanId"
                 );
 
@@ -447,9 +438,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             try
             {
-                if (projectionStateManager != null)
+                if (projectionStateManager != null && IsProjectionSubscribed)
                 {
                     projectionStateManager.ProjectionChanged -= OnProjectionChanged;
+                    IsProjectionSubscribed = false;
                     Logger?.LogDebug("AssessmentLoanRepaymentsPage unsubscribed from ProjectionChanged events");
                 }
             }

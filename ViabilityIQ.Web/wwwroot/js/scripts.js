@@ -6,8 +6,6 @@
 //
 // Scripts
 // 
-console.log("scripts.js loaded");
-
 window.addEventListener('DOMContentLoaded', event => {
 
     // Toggle the side navigation
@@ -242,5 +240,4 @@ window.blazorDropZone = {
         dropZone.addEventListener('drop', handler, { once: true });
     }
 };
-
 

@@ -34,27 +34,17 @@
 
   <ItemGroup>
     <Content Remove="Components\CommonComponents\BFooter.razor" />
-    <Content Remove="Components\Pages\AppInitializer.razor" />
     <Content Remove="Components\Pages_Assessments\AssetFormComponents\AssetMovementsListComponent.razor" />
     <Content Remove="Components\Pages_Assessments\CommonComponents\CashFlowSummaryDetailComponent.razor" />
     <Content Remove="Components\Pages_Assessments\CommonComponents\ConsolidatedRevenueAnalysisComponent.razor" />
     <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeDonationsFormComponent.razor" />
     <Content Remove="Components\Pages_Assessments\PageFormComponents\IncomeSundryFormComponent.razor" />
-    <Content Remove="wwwroot\css\AssessmentSettings.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Components\Pages\AppInitializer.razor.css" />
-  </ItemGroup>
+  </ItemGroup> 
 
   <ItemGroup>
     <Content Include="Components\Pages\ReportsPage.razor.cs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\css\AssessmentSettings.css" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Blazor.Bootstrap" Version="3.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.29" />

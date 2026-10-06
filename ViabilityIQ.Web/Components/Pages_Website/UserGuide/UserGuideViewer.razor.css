@@ -1,0 +1,15 @@
+.user-guide-viewer,
+.user-guide-viewer iframe {
+    width: 100%;
+    height: 100%;
+}
+
+.user-guide-viewer {
+    min-height: 100dvh;
+    background: #fff;
+}
+
+.user-guide-viewer iframe {
+    display: block;
+    border: 0;
+}

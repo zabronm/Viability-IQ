@@ -28,6 +28,7 @@
 
         @* Native form post: No JavaScript, no fetch, browser handles cookies & submission automatically *@
         <form method="post" action="/api/auth/signin-form">
+            <AntiforgeryToken />
             <div class="form-group-custom">
                 <label class="form-label-custom">Email Address</label>
                 <div class="input-icon-wrapper">
@@ -36,6 +37,9 @@
                            name="Email"
                            class="form-control-custom"
                            placeholder="name@company.com"
+                           autocomplete="username"
+                           autocapitalize="none"
+                           spellcheck="false"
                            required />
                 </div>
             </div>
@@ -51,6 +55,7 @@
                            name="Password"
                            class="form-control-custom"
                            placeholder="••••••••"
+                           autocomplete="current-password"
                            required />
                     <button type="button"
                             class="password-toggle-btn"
