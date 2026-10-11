@@ -82,7 +82,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     {
                         Success = false,
                         ClosePanel = false,
-                        Message = "Error encountered while saving province."
+                        Message = "Error encountered while saving Region."
                     };
                     await OffcanvasService!.PublishResultAsync(saveResult);
                 }

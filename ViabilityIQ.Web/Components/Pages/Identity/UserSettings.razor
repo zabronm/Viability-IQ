@@ -57,11 +57,11 @@
             <div class="settings-section-title mt-2 mb-2">Regional Configuration</div>
             <div class="form-row-custom">
                 <div class="form-group-custom flex-fill">
-                    <label class="form-label-custom" for="province">Province</label>
+                    <label class="form-label-custom" for="province">Region</label>
                     <div class="input-icon-wrapper">
                         <i class="bi bi-map icon-addon"></i>
-                        <InputSelect id="province" @bind-Value="SettingsRequest.ProvinceId" @bind-Value:after="OnProvinceChanged" class="form-control-custom" disabled="@IsSubmitting">
-                            <option value="0">-- Select Province --</option>
+                        <InputSelect id="province" @bind-Value="SettingsRequest.ProvinceId" class="form-control-custom" disabled="true">
+                            <option value="0">-- Select Region --</option>
                             @foreach (var province in Provinces)
                             {
                                 <option value="@province.Id">@province.Name</option>
@@ -72,12 +72,12 @@
                 </div>
 
                 <div class="form-group-custom flex-fill">
-                    <label class="form-label-custom" for="branch">Branch</label>
+                    <label class="form-label-custom" for="branch">Site</label>
                     <div class="input-icon-wrapper">
                         <i class="bi bi-shop icon-addon"></i>
-                        <InputSelect id="branch" @bind-Value="SettingsRequest.BranchId" class="form-control-custom" disabled="@(IsSubmitting || SettingsRequest.ProvinceId == 0)">
-                            <option value="0">-- Select Branch --</option>
-                            @foreach (var branch in FilteredBranches)
+                        <InputSelect id="branch" @bind-Value="SettingsRequest.BranchId" @bind-Value:after="OnSiteChanged" class="form-control-custom" disabled="@IsSubmitting">
+                            <option value="0">-- Select Site --</option>
+                            @foreach (var branch in Branches)
                             {
                                 <option value="@branch.Id">@branch.Name</option>
                             }

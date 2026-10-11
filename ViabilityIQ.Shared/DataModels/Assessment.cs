@@ -19,6 +19,9 @@ namespace ViabilityIQ.Shared.DataModels
         [Dapper.Contrib.Extensions.Key] public long AssessmentId { get; set; }
         public long? TenantId { get; set; }
         [Computed] public string? CaseNumber { get; set; }
+        public long BranchId { get; set; }
+        [Computed] public int CaseYear { get; set; }
+        [Computed] public int CaseSequence { get; set; }
 
         [Required(ErrorMessage ="Assessment type is required")]
         public long AssessmentTypeId { get; set; }      //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors        

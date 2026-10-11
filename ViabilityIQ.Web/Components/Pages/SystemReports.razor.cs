@@ -68,8 +68,8 @@ public abstract class SystemReportsBase : ComponentBase, IAsyncDisposable
             "bi bi-person-badge"),
         new(
             OperationalReportType.BranchPerformance,
-            "Branch Performance",
-            "Management roll-up of assessment delivery by branch.",
+            "Site Performance",
+            "Management roll-up of assessment delivery by Site.",
             "bi bi-diagram-3")
     ];
 

@@ -67,10 +67,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     var saveResult = isNewRecord
                         ? SaveResult.SavedAndNew(
                             businessModel,
-                            $"{businessName} added successfully")
+                            $"{businessName} added with Business Code {businessModel.BusinessCode}.")
                         : SaveResult.SavedAndClose(
                             businessModel,
-                            $"{businessName} updated successfully");
+                            $"{businessName} updated. Business Code {businessModel.BusinessCode} remains unchanged.");
 
                     await OffcanvasService!.PublishResultAsync(saveResult);
 

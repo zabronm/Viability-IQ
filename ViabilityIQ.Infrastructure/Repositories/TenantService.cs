@@ -39,15 +39,19 @@ public sealed class TenantService : ITenantService
         }
 
         var isOpenPlan = planCode == SubscriptionPlanCodes.Open;
-        var tenantName = isOpenPlan
-            ? request.OrganisationName.Trim()
-            : $"{request.FirstName} {request.LastName}".Trim();
+        var tenantName = request.OrganisationName.Trim();
 
         if (string.IsNullOrWhiteSpace(tenantName))
         {
-            return Failed(isOpenPlan
-                ? "An organisation name is required for Open Plan."
-                : "A tenant name could not be determined.");
+            return Failed("A Company / Organisation name is required.");
+        }
+
+        var regionName = request.InitialRegionName.Trim();
+        var siteName = request.InitialSiteName.Trim();
+        if (string.IsNullOrWhiteSpace(regionName)
+            || string.IsNullOrWhiteSpace(siteName))
+        {
+            return Failed("An initial Region and Site are required.");
         }
 
         var requestedSeats = isOpenPlan ? Math.Max(2, request.RequestedSeats) : 1;
@@ -98,30 +102,138 @@ public sealed class TenantService : ITenantService
                 """,
                 new
                 {
-                    TenantType = isOpenPlan ? TenantTypes.Organisation : TenantTypes.Personal,
+                    TenantType = TenantTypes.Organisation,
                     TenantName = tenantName,
                     TenantSlug = slug,
                     OwnerUserId = request.UserId,
-                    request.ProvinceId,
+                    ProvinceId = (long?)null,
                     Status = TenantSubscriptionStatuses.Active,
                     CreatedDate = now,
                     CreatedBy = request.UserId
                 },
                 transaction);
 
+            var regionId = await connection.ExecuteScalarAsync<long>(
+                """
+                INSERT INTO tblProvince
+                    (TenantId, ProvinceName, ShortName, Manager_UserId,
+                     Active, CreatedDate, CreatedBy, ModifiedDate, ModifiedBy)
+                OUTPUT INSERTED.ProvinceId
+                VALUES
+                    (@TenantId, @ProvinceName, @ShortName, @ManagerUserId,
+                     1, @CreatedDate, @CreatedBy, @ModifiedDate, @ModifiedBy);
+                """,
+                new
+                {
+                    TenantId = tenantId,
+                    ProvinceName = regionName,
+                    ShortName = regionName.Length <= 12
+                        ? regionName
+                        : regionName[..12],
+                    ManagerUserId = request.UserId,
+                    CreatedDate = now,
+                    CreatedBy = request.UserId,
+                    ModifiedDate = now,
+                    ModifiedBy = request.UserId
+                },
+                transaction);
+
+            var companyId = await connection.ExecuteScalarAsync<long>(
+                """
+                INSERT INTO tblCompany
+                    (TenantId, CompanyName, CKNumber,
+                     ContactPerson, Street_Address, Suburb, CityTown,
+                     ProvinceId, Country, PostalCode, Telephone, Mobile, Email, Website, Active,
+                     CreatedDate, CreatedBy, ModifiedDate, ModifiedBy)
+                OUTPUT INSERTED.CompanyId
+                VALUES
+                    (@TenantId, @CompanyName, @CKNumber,
+                     @ContactPerson, @StreetAddress, @Suburb, @CityTown,
+                     @ProvinceId, @Country, @PostalCode, @Telephone, @Mobile, @Email, @Website, 1,
+                     @CreatedDate, @CreatedBy, @ModifiedDate, @ModifiedBy);
+                """,
+                new
+                {
+                    TenantId = tenantId,
+                    CompanyName = tenantName,
+                    CKNumber = request.CompanyRegistrationNumber,
+                    ContactPerson = string.IsNullOrWhiteSpace(request.CompanyContactPerson)
+                        ? $"{request.FirstName} {request.LastName}".Trim()
+                        : request.CompanyContactPerson.Trim(),
+                    StreetAddress = request.CompanyStreetAddress,
+                    Suburb = request.CompanySuburb,
+                    CityTown = request.CompanyCityTown,
+                    ProvinceId = regionId,
+                    Country = request.CompanyCountry,
+                    PostalCode = request.CompanyPostalCode,
+                    Telephone = request.CompanyTelephone,
+                    Mobile = request.CompanyMobile,
+                    Email = request.CompanyEmail,
+                    Website = request.CompanyWebsite,
+                    CreatedDate = now,
+                    CreatedBy = request.UserId,
+                    ModifiedDate = now,
+                    ModifiedBy = request.UserId
+                },
+                transaction);
+
+            var siteCode = await CreateUniqueSiteCodeAsync(
+                connection,
+                transaction,
+                tenantId,
+                siteName,
+                cancellationToken);
+            var siteId = await connection.ExecuteScalarAsync<long>(
+                """
+                INSERT INTO tblBranch
+                    (TenantId, BranchCode, BranchName, ProvinceId,
+                     Manager_UserId, Active, CreatedDate, CreatedBy,
+                     ModifiedDate, ModifiedBy)
+                OUTPUT INSERTED.BranchId
+                VALUES
+                    (@TenantId, @BranchCode, @BranchName, @ProvinceId,
+                     @ManagerUserId, 1, @CreatedDate, @CreatedBy,
+                     @ModifiedDate, @ModifiedBy);
+                """,
+                new
+                {
+                    TenantId = tenantId,
+                    BranchCode = siteCode,
+                    BranchName = siteName,
+                    ProvinceId = regionId,
+                    ManagerUserId = request.UserId,
+                    CreatedDate = now,
+                    CreatedBy = request.UserId,
+                    ModifiedDate = now,
+                    ModifiedBy = request.UserId
+                },
+                transaction);
+
+            await connection.ExecuteAsync(
+                """
+                UPDATE tblTenant
+                SET ProvinceId = @ProvinceId
+                WHERE TenantId = @TenantId;
+                """,
+                new { ProvinceId = regionId, TenantId = tenantId },
+                transaction);
+
             var membershipId = await connection.ExecuteScalarAsync<long>(
                 """
                 INSERT INTO tblTenantMembership
-                    (TenantId, UserId, MembershipStatus, IsOwner, JoinedDate, Active)
+                    (TenantId, UserId, MembershipStatus, IsOwner,
+                     DefaultBranchId, JoinedDate, Active)
                 OUTPUT INSERTED.TenantMembershipId
                 VALUES
-                    (@TenantId, @UserId, @Status, 1, @JoinedDate, 1);
+                    (@TenantId, @UserId, @Status, 1,
+                     @DefaultBranchId, @JoinedDate, 1);
                 """,
                 new
                 {
                     TenantId = tenantId,
                     UserId = request.UserId,
                     Status = TenantMembershipStatuses.Active,
+                    DefaultBranchId = siteId,
                     JoinedDate = now
                 },
                 transaction);
@@ -190,7 +302,14 @@ public sealed class TenantService : ITenantService
                 transaction);
 
             transaction.Commit();
-            return new TenantProvisioningResult { Success = true, TenantId = tenantId };
+            return new TenantProvisioningResult
+            {
+                Success = true,
+                TenantId = tenantId,
+                CompanyId = companyId,
+                RegionId = regionId,
+                SiteId = siteId
+            };
         }
         catch
         {
@@ -222,6 +341,8 @@ public sealed class TenantService : ITenantService
                 s.Status AS SubscriptionStatus,
                 s.SeatQuantity,
                 m.TenantMembershipId AS MembershipId,
+                m.DefaultBranchId AS BranchId,
+                COALESCE(branch.ProvinceId, 0) AS ProvinceId,
                 m.IsOwner
             FROM tblTenantMembership m
             INNER JOIN tblTenant t ON t.TenantId = m.TenantId
@@ -229,6 +350,10 @@ public sealed class TenantService : ITenantService
                 ON s.TenantId = t.TenantId AND s.Active = 1
             INNER JOIN tblSubscriptionPlan p
                 ON p.SubscriptionPlanId = s.SubscriptionPlanId
+            LEFT JOIN tblBranch branch
+                ON branch.BranchId = m.DefaultBranchId
+               AND branch.TenantId = m.TenantId
+               AND branch.Active = 1
             WHERE m.UserId = @UserId
               AND m.Active = 1
               AND m.MembershipStatus = @MembershipStatus
@@ -248,6 +373,65 @@ public sealed class TenantService : ITenantService
 
     private static TenantProvisioningResult Failed(string message) =>
         new() { Success = false, ErrorMessage = message };
+
+    private static async Task<string> CreateUniqueSiteCodeAsync(
+        IDbConnection connection,
+        IDbTransaction transaction,
+        long tenantId,
+        string siteName,
+        CancellationToken cancellationToken)
+    {
+        var candidates = OperationalReferenceService.BuildThreeLetterCandidates(siteName);
+        foreach (var candidate in candidates)
+        {
+            if (!await SiteCodeExistsAsync(
+                    connection,
+                    transaction,
+                    tenantId,
+                    candidate,
+                    cancellationToken))
+            {
+                return candidate;
+            }
+        }
+
+        var baseCode = candidates[0];
+        for (var suffix = 0; suffix < int.MaxValue; suffix++)
+        {
+            var suffixText = suffix.ToString();
+            var candidate =
+                $"{baseCode[..Math.Min(baseCode.Length, 12 - suffixText.Length)]}{suffixText}";
+            if (!await SiteCodeExistsAsync(
+                    connection,
+                    transaction,
+                    tenantId,
+                    candidate,
+                    cancellationToken))
+            {
+                return candidate;
+            }
+        }
+
+        throw new InvalidOperationException("No available Site Code could be generated.");
+    }
+
+    private static async Task<bool> SiteCodeExistsAsync(
+        IDbConnection connection,
+        IDbTransaction transaction,
+        long tenantId,
+        string siteCode,
+        CancellationToken cancellationToken) =>
+        await connection.ExecuteScalarAsync<long>(
+            new CommandDefinition(
+                """
+                SELECT COUNT_BIG(1)
+                FROM tblBranch WITH (UPDLOCK, HOLDLOCK)
+                WHERE TenantId = @TenantId
+                  AND BranchCode = @BranchCode;
+                """,
+                new { TenantId = tenantId, BranchCode = siteCode },
+                transaction,
+                cancellationToken: cancellationToken)) > 0;
 
     private static string GetRoleName(string roleCode) => roleCode switch
     {

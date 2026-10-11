@@ -98,7 +98,7 @@ else
     }
 
     private RenderFragment ReadOnlyBalance(string label, string note, decimal value, string icon) => @<div class="ob-readonly">
-        <i class="bi @icon"></i><div><span>@label</span><small>@note</small></div><strong>R @value.ToString("N2")</strong>
+        <i class="bi @icon"></i><div class="ob-border"><span>@label</span><small>@note</small></div><strong>R @value.ToString("N2")</strong>
     </div>;
 
     private RenderFragment MoneyInput(string label, string note, decimal value, Action<decimal> setter, bool allowNegative = false) => @<label class="ob-field">

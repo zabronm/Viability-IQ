@@ -42,7 +42,7 @@ public sealed class AssessmentOperationalReportRow
     [DisplayName("Client")]
     public string ClientName { get; init; } = string.Empty;
 
-    [DisplayName("Branch")]
+    [DisplayName("Site")]
     public string BranchName { get; init; } = "Unassigned";
 
     [DisplayName("Advisor")]
@@ -86,7 +86,7 @@ public sealed class AssessmentRegisterExportRow
     public string BusinessName { get; init; } = string.Empty;
     [DisplayName("Client")]
     public string ClientName { get; init; } = string.Empty;
-    [DisplayName("Branch")]
+    [DisplayName("Site")]
     public string BranchName { get; init; } = string.Empty;
     [DisplayName("Advisor")]
     public string AdvisorName { get; init; } = string.Empty;
@@ -116,7 +116,7 @@ public sealed class WorkflowReadinessReportRow
     public long ReadinessPercentage { get; init; }
     [DisplayName("Advisor")]
     public string AdvisorName { get; init; } = string.Empty;
-    [DisplayName("Branch")]
+    [DisplayName("Site")]
     public string BranchName { get; init; } = string.Empty;
     [DisplayName("Start Date")]
     public DateTime? StartDate { get; init; }
@@ -130,7 +130,7 @@ public sealed class AdvisorPerformanceReportRow
 {
     [DisplayName("Advisor")]
     public string AdvisorName { get; init; } = string.Empty;
-    [DisplayName("Branch")]
+    [DisplayName("Site")]
     public string BranchName { get; init; } = string.Empty;
     [DisplayName("Assessments")]
     public int TotalAssessments { get; init; }
@@ -150,7 +150,7 @@ public sealed class AdvisorPerformanceReportRow
 
 public sealed class BranchPerformanceReportRow
 {
-    [DisplayName("Branch")]
+    [DisplayName("Site")]
     public string BranchName { get; init; } = string.Empty;
     [DisplayName("Advisors")]
     public int AdvisorCount { get; init; }

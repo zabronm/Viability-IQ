@@ -9,26 +9,6 @@
 
 <div class="registration-page font-def">
     <div class="auth-card">
-        @if (!string.IsNullOrEmpty(ErrorMessage))
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-circle-fill me-2"></i>
-                <strong>@(IsEditProfileMode ? "Update Failed" : "Registration Failed")</strong>
-                <p class="mb-0 mt-1">@ErrorMessage</p>
-                <button type="button" class="btn-close" @onclick="() => { ErrorMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(SuccessMessage))
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>Success</strong>
-                <p class="mb-0 mt-1">@SuccessMessage</p>
-                <button type="button" class="btn-close" @onclick="() => { SuccessMessage = string.Empty; StateHasChanged(); }" aria-label="Close"></button>
-            </div>
-        }
-
         <EditForm Model="@RegisterRequest" OnSubmit="HandleFormSubmit" FormName="UserAccountForm">
             <DataAnnotationsValidator />
 
@@ -51,8 +31,8 @@
                             <span class="plan-icon"><i class="bi bi-person-fill"></i></span>
                             <span class="plan-copy">
                                 <span class="plan-title-row"><strong>Standard</strong><span class="plan-seat">1 seat</span></span>
-                                <small>Personal workspace for an individual subscriber.</small>
-                                <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Private tenant</span>
+                                <small>Single-seat Company workspace for an owner-managed organisation.</small>
+                                <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Company tenant</span>
                                 <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Upgrade at any time</span>
                             </span>
                             <span class="selection-mark"><i class="bi bi-check-lg"></i></span>
@@ -65,7 +45,7 @@
                             <span class="plan-icon"><i class="bi bi-buildings-fill"></i></span>
                             <span class="plan-copy">
                                 <span class="plan-title-row"><strong>Open Plan</strong><span class="plan-seat">2+ seats</span></span>
-                                <small>Organisation workspace for teams and branches.</small>
+                                <small>Organisation workspace for teams and Sites.</small>
                                 <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Flexible users</span>
                                 <span class="plan-feature"><i class="bi bi-check-circle-fill"></i> Role-ready workspace</span>
                             </span>
@@ -79,35 +59,99 @@
                     </section>
                 }
 
-                <section class="registration-panel">
+                <div class="registration-main-workspace">
+                    @if (!IsEditProfileMode)
+                    {
+                        <div class="registration-tabs" role="tablist" aria-label="Registration sections">
+                            <button type="button"
+                                    role="tab"
+                                    aria-selected="@(ActiveTab == RegistrationTab.Company)"
+                                    class="registration-tab @(ActiveTab == RegistrationTab.Company ? "active" : null)"
+                                    @onclick="() => SelectTab(RegistrationTab.Company)">
+                                <i class="bi bi-buildings-fill"></i>
+                                <span>Company</span>
+                            </button>
+                            <button type="button"
+                                    role="tab"
+                                    aria-selected="@(ActiveTab == RegistrationTab.Tenant)"
+                                    class="registration-tab @(ActiveTab == RegistrationTab.Tenant ? "active" : null)"
+                                    @onclick="() => SelectTab(RegistrationTab.Tenant)">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <span>Tenant &amp; Owner</span>
+                            </button>
+                        </div>
+                    }
+
+                <section class="registration-panel registration-tab-panel @(!IsEditProfileMode && ActiveTab != RegistrationTab.Company ? "hidden" : null)">
                     <div class="panel-heading">
                         <span class="panel-step">@(IsEditProfileMode ? "1" : "2")</span>
                         <div>
-                            <h2>Subscriber Details</h2>
-                            <p>Your identity and workspace information.</p>
+                            <h2>@(IsEditProfileMode ? "Subscriber Details" : "Company Profile")</h2>
+                            <p>@(IsEditProfileMode ? "Your identity and workspace information." : "The subscribing organisation represented by this tenant.")</p>
                         </div>
                     </div>
 
-                    @if (!IsEditProfileMode && IsOpenPlan)
+                    @if (!IsEditProfileMode)
                     {
-                        <div class="organisation-fields">
-                            <div class="form-group-custom">
-                                <label class="form-label-custom">Organisation Name</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-building icon-addon"></i>
-                                    <InputText @bind-Value="RegisterRequest.OrganisationName" class="form-control-custom" placeholder="Your organisation" disabled="@IsSubmitting" />
-                                </div>
+                        <div class="registration-form-grid">
+                            <div class="form-group-custom form-span-2">
+                                <label class="form-label-custom">Company / Organisation Name</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-building icon-addon"></i><InputText @bind-Value="RegisterRequest.OrganisationName" class="form-control-custom" placeholder="Registered or trading name" disabled="@IsSubmitting" /></div>
+                                <ValidationMessage For="@(() => RegisterRequest.OrganisationName)" class="auth-error-msg" />
                             </div>
                             <div class="form-group-custom">
-                                <label class="form-label-custom">Initial Seats</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-people icon-addon"></i>
-                                    <InputNumber @bind-Value="RegisterRequest.RequestedSeats" class="form-control-custom" min="2" disabled="@IsSubmitting" />
-                                </div>
+                                <label class="form-label-custom">Registration Number</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-card-text icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyRegistrationNumber" class="form-control-custom" placeholder="Registration / CK number" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Customer Code</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-upc-scan icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyCustomerCode" class="form-control-custom" placeholder="Generated automatically" disabled /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Contact Person</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-person-lines-fill icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyContactPerson" class="form-control-custom" placeholder="Primary company contact" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Company Email</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-envelope icon-addon"></i><InputText type="email" @bind-Value="RegisterRequest.CompanyEmail" class="form-control-custom" placeholder="company@example.com" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Telephone</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-telephone icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyTelephone" class="form-control-custom" placeholder="+27 00 000 0000" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Mobile</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-phone icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyMobile" class="form-control-custom" placeholder="+27 00 000 0000" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Street Address</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-geo-alt icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyStreetAddress" class="form-control-custom" placeholder="Company street address" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Suburb</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-signpost icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanySuburb" class="form-control-custom" placeholder="Suburb" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">City / Town</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-pin-map icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyCityTown" class="form-control-custom" placeholder="City or town" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Postal Code</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-mailbox icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyPostalCode" class="form-control-custom" placeholder="Postal code" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Website</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-globe icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyWebsite" class="form-control-custom" placeholder="https://www.example.com" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Country</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-globe-africa icon-addon"></i><InputText @bind-Value="RegisterRequest.CompanyCountry" class="form-control-custom" placeholder="Country" disabled="@IsSubmitting" /></div>
                             </div>
                         </div>
                     }
 
+                    @if (IsEditProfileMode)
+                    {
                     <div class="form-group-custom">
                         <label class="form-label-custom">First Name</label>
                         <div class="input-icon-wrapper">
@@ -141,68 +185,86 @@
                             <InputText @bind-Value="RegisterRequest.JobTitle" class="form-control-custom" placeholder="Job title" disabled="@IsSubmitting" />
                         </div>
                     </div>
-
-                    <div class="form-group-custom">
-                        <label class="form-label-custom">Province</label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-map icon-addon"></i>
-                            <InputSelect @bind-Value="RegisterRequest.ProvinceId" class="form-control-custom" disabled="@IsSubmitting">
-                                <option value="0">-- Select Province --</option>
-                                @foreach (var province in Provinces)
-                                {
-                                    <option value="@province.Id">@province.Name</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <ValidationMessage For="@(() => RegisterRequest.ProvinceId)" class="auth-error-msg" />
-                    </div>
+                    }
                 </section>
 
-                <section class="registration-panel">
+                <section class="registration-panel registration-tab-panel @(!IsEditProfileMode && ActiveTab != RegistrationTab.Tenant ? "hidden" : null)">
                     <div class="panel-heading">
                         <span class="panel-step">@(IsEditProfileMode ? "2" : "3")</span>
                         <div>
-                            <h2>Contact & Security</h2>
-                            <p>Contact details and secure account access.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group-custom">
-                        <label class="form-label-custom">Email Address</label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-envelope icon-addon"></i>
-                            <InputText type="email" @bind-Value="RegisterRequest.Email" class="form-control-custom" placeholder="your@email.com" disabled="@(IsSubmitting || IsEditProfileMode)" />
-                        </div>
-                        <ValidationMessage For="@(() => RegisterRequest.Email)" class="auth-error-msg" />
-                    </div>
-
-                    <div class="form-group-custom">
-                        <label class="form-label-custom">Phone Number</label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-telephone icon-addon"></i>
-                            <InputText @bind-Value="RegisterRequest.PhoneNumber" class="form-control-custom" placeholder="+27 00 000 0000" disabled="@IsSubmitting" />
-                        </div>
-                        <ValidationMessage For="@(() => RegisterRequest.PhoneNumber)" class="auth-error-msg" />
-                    </div>
-
-                    <div class="form-group-custom">
-                        <label class="form-label-custom">Street Address</label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-geo-alt icon-addon"></i>
-                            <InputText @bind-Value="RegisterRequest.Address" class="form-control-custom" placeholder="Street address" disabled="@IsSubmitting" />
-                        </div>
-                    </div>
-
-                    <div class="form-group-custom">
-                        <label class="form-label-custom">City / Town</label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-pin-map icon-addon"></i>
-                            <InputText @bind-Value="RegisterRequest.City" class="form-control-custom" placeholder="City or town" disabled="@IsSubmitting" />
+                            <h2>@(IsEditProfileMode ? "Contact & Security" : "Tenant & Owner")</h2>
+                            <p>@(IsEditProfileMode ? "Contact details and secure account access." : "Initial Region, Site, subscription and Tenant Owner access.")</p>
                         </div>
                     </div>
 
                     @if (!IsEditProfileMode)
                     {
+                        <div class="organisation-fields">
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Initial Region</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-map icon-addon"></i><InputText @bind-Value="RegisterRequest.InitialRegionName" class="form-control-custom" placeholder="e.g. Free State" disabled="@IsSubmitting" /></div>
+                                <ValidationMessage For="@(() => RegisterRequest.InitialRegionName)" class="auth-error-msg" />
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Initial Site</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-geo-fill icon-addon"></i><InputText @bind-Value="RegisterRequest.InitialSiteName" class="form-control-custom" placeholder="e.g. Bloemfontein" disabled="@IsSubmitting" /></div>
+                                <ValidationMessage For="@(() => RegisterRequest.InitialSiteName)" class="auth-error-msg" />
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Initial Seats</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-people icon-addon"></i><InputNumber @bind-Value="RegisterRequest.RequestedSeats" class="form-control-custom" min="1" disabled="@IsSubmitting" /></div>
+                            </div>
+                        </div>
+
+                        <div class="registration-form-grid">
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">First Name</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-person icon-addon"></i><InputText @bind-Value="RegisterRequest.FirstName" class="form-control-custom" placeholder="First name" disabled="@IsSubmitting" /></div>
+                                <ValidationMessage For="@(() => RegisterRequest.FirstName)" class="auth-error-msg" />
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Last Name</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-person icon-addon"></i><InputText @bind-Value="RegisterRequest.LastName" class="form-control-custom" placeholder="Last name" disabled="@IsSubmitting" /></div>
+                                <ValidationMessage For="@(() => RegisterRequest.LastName)" class="auth-error-msg" />
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Department</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-diagram-3 icon-addon"></i><InputText @bind-Value="RegisterRequest.Department" class="form-control-custom" placeholder="Department" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Job Title</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-briefcase icon-addon"></i><InputText @bind-Value="RegisterRequest.JobTitle" class="form-control-custom" placeholder="Job title" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Email Address</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-envelope icon-addon"></i>
+                                    <InputText type="email" @bind-Value="RegisterRequest.Email" class="form-control-custom" placeholder="your@email.com" disabled="@IsSubmitting" />
+                                </div>
+                                <ValidationMessage For="@(() => RegisterRequest.Email)" class="auth-error-msg" />
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Phone Number</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-telephone icon-addon"></i>
+                                    <InputText @bind-Value="RegisterRequest.PhoneNumber" class="form-control-custom" placeholder="+27 00 000 0000" disabled="@IsSubmitting" />
+                                </div>
+                                <ValidationMessage For="@(() => RegisterRequest.PhoneNumber)" class="auth-error-msg" />
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Street Address</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-geo-alt icon-addon"></i>
+                                    <InputText @bind-Value="RegisterRequest.Address" class="form-control-custom" placeholder="Street address" disabled="@IsSubmitting" />
+                                </div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">City / Town</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-pin-map icon-addon"></i>
+                                    <InputText @bind-Value="RegisterRequest.City" class="form-control-custom" placeholder="City or town" disabled="@IsSubmitting" />
+                                </div>
+                            </div>
                         <div class="form-group-custom">
                             <label class="form-label-custom">Password</label>
                             <div class="input-icon-wrapper">
@@ -226,8 +288,32 @@
                             </div>
                             <ValidationMessage For="@(() => RegisterRequest.ConfirmPassword)" class="auth-error-msg" />
                         </div>
+                        </div>
+                    }
+
+                    @if (IsEditProfileMode)
+                    {
+                        <div class="registration-form-grid">
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Email Address</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-envelope icon-addon"></i><InputText type="email" @bind-Value="RegisterRequest.Email" class="form-control-custom" disabled /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Phone Number</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-telephone icon-addon"></i><InputText @bind-Value="RegisterRequest.PhoneNumber" class="form-control-custom" placeholder="+27 00 000 0000" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">Street Address</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-geo-alt icon-addon"></i><InputText @bind-Value="RegisterRequest.Address" class="form-control-custom" placeholder="Street address" disabled="@IsSubmitting" /></div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label class="form-label-custom">City / Town</label>
+                                <div class="input-icon-wrapper"><i class="bi bi-pin-map icon-addon"></i><InputText @bind-Value="RegisterRequest.City" class="form-control-custom" placeholder="City or town" disabled="@IsSubmitting" /></div>
+                            </div>
+                        </div>
                     }
                 </section>
+                </div>
             </div>
 
             <div class="registration-footer">
@@ -313,13 +399,91 @@
 
     .registration-card-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        align-items: stretch;
+        grid-template-columns: minmax(270px, 0.72fr) minmax(0, 2fr);
+        align-items: start;
         gap: 12px;
     }
 
     .registration-card-grid.profile-mode {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .registration-main-workspace {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #b8c7d8;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 7px 20px rgba(15, 42, 67, 0.08);
+    }
+
+    .registration-tabs {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.2rem;
+        min-height: 42px;
+        padding: 0.35rem 0.65rem 0;
+        border-bottom: 1px solid #cbd5e1;
+        background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+    }
+
+    .registration-tab {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 34px;
+        padding: 0.42rem 0.72rem 0.5rem;
+        margin-bottom: -1px;
+        border: 1px solid transparent;
+        border-bottom: 2px solid transparent;
+        border-radius: 6px 6px 0 0;
+        color: #526174;
+        background: transparent;
+        font-size: 0.74rem;
+        font-weight: 650;
+        line-height: 1;
+        cursor: pointer;
+        transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .registration-tab:hover {
+        color: #075fc9;
+        border-color: #d4e1ef #d4e1ef #93b9e8;
+        background: #f2f7fd;
+        box-shadow: 0 -2px 8px rgba(15, 42, 67, 0.06);
+    }
+
+    .registration-tab.active {
+        color: #2563eb;
+        border-color: #b8c7d8 #b8c7d8 #fff;
+        background: #fff;
+        box-shadow: 0 -3px 10px rgba(37, 99, 235, 0.08);
+    }
+
+    .registration-tab.active::after {
+        position: absolute;
+        right: 0.55rem;
+        bottom: -2px;
+        left: 0.55rem;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        background: #2563eb;
+        content: "";
+    }
+
+    .registration-tab-panel.hidden {
+        display: none;
+    }
+
+    .registration-form-grid {
+        display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 12px;
+    }
+
+    .registration-form-grid .form-span-2 {
+        grid-column: 1 / -1;
     }
 
     .registration-panel {
@@ -329,6 +493,19 @@
         border-radius: 12px;
         background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
         box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    .registration-main-workspace .registration-tab-panel {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .registration-card-grid.profile-mode .registration-main-workspace {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .plan-panel {
@@ -493,7 +670,7 @@
 
     .organisation-fields {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 112px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
         margin: -2px 0 9px;
         padding: 9px;
@@ -504,36 +681,6 @@
 
     .organisation-fields .form-group-custom {
         margin-bottom: 0;
-    }
-
-    .alert {
-        border-radius: 8px;
-        border: 1px solid;
-        margin-bottom: 16px;
-        font-size: 0.85rem;
-        padding: 10px 14px;
-    }
-
-    .alert-danger {
-        background-color: #fee2e2;
-        border-color: #fca5a5;
-        color: #991b1b;
-    }
-
-    .alert-success {
-        background-color: #d1fae5;
-        border-color: #6ee7b7;
-        color: #065f46;
-    }
-
-    .btn-close {
-        background: none;
-        border: none;
-        font-size: 1rem;
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
     }
 
     .form-row-custom {
@@ -776,6 +923,14 @@
 
         .organisation-fields {
             grid-template-columns: 1fr;
+        }
+
+        .registration-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .registration-form-grid .form-span-2 {
+            grid-column: auto;
         }
 
         .registration-footer {

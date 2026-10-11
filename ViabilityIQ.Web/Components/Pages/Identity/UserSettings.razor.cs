@@ -25,7 +25,6 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
 
         public List<ProvinceLookupDto> Provinces { get; set; } = new();
         public List<BranchLookupDto> Branches { get; set; } = new();
-        public List<BranchLookupDto> FilteredBranches { get; set; } = new();
         private TenantUserManagementSnapshot? TenantSnapshot { get; set; }
         private TenantMemberRow? CurrentMembership { get; set; }
         private ViabilityIQ.Shared.DataModels.SecurityDataModels.ApplicationUser? CurrentUser { get; set; }
@@ -79,9 +78,8 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                 if (CurrentUser is null || CurrentMembership is null)
                     throw new InvalidOperationException("The current user or tenant membership could not be resolved.");
 
-                SettingsRequest.ProvinceId = CurrentUser.ProvinceId ?? 0;
-                OnProvinceChanged();
                 SettingsRequest.BranchId = CurrentMembership.BranchId ?? 0;
+                OnSiteChanged();
                 SettingsRequest.ThemeMode = "light";
                 SettingsRequest.Language = "en-US";
                 SettingsRequest.SubscriptionPackage = SessionService.SubscriptionPlanCode;
@@ -93,13 +91,11 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
             }
         }
 
-        private void OnProvinceChanged()
+        private void OnSiteChanged()
         {
-            FilteredBranches = Branches.Where(b => b.ProvinceId == SettingsRequest.ProvinceId).ToList();
-            if (!FilteredBranches.Any(b => b.Id == SettingsRequest.BranchId))
-            {
-                SettingsRequest.BranchId = 0;
-            }
+            SettingsRequest.ProvinceId = Branches
+                .SingleOrDefault(branch => branch.Id == SettingsRequest.BranchId)
+                ?.ProvinceId ?? 0;
             StateHasChanged();
         }
 
@@ -124,9 +120,11 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                     });
                 if (!branchResult.Succeeded)
                 {
-                    ToastService.ShowError(branchResult.Message, "Branch Update Failed");
+                    ToastService.ShowError(branchResult.Message, "Site Update Failed");
                     return;
                 }
+
+                OnSiteChanged();
 
                 var profileResult = await AuthService.UpdateProfileAsync(
                     (await AuthStateProvider.GetAuthenticationStateAsync()).User,
@@ -149,7 +147,7 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                     ToastService.ShowError(
                         profileResult.Messages.Any()
                             ? string.Join(" ", profileResult.Messages)
-                            : "The province could not be updated.",
+                            : "The Region could not be updated.",
                         "Settings Partially Updated");
                     return;
                 }
@@ -158,7 +156,7 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
                 CurrentMembership = TenantSnapshot!.Members
                     .Single(member => member.MembershipId == CurrentMembership.MembershipId);
                 ToastService.ShowSuccess(
-                    "Your province and tenant branch were saved successfully.",
+                    "Your Region and tenant Site were saved successfully.",
                     "Regional Settings Updated");
             }
             catch (Exception ex)

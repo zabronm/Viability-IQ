@@ -113,6 +113,7 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
             SELECT
                 branch.BranchId,
                 branch.ProvinceId,
+                branch.BranchCode,
                 branch.BranchName
             FROM tblBranch branch
             WHERE branch.TenantId = @TenantId
@@ -190,7 +191,7 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
         if (!await HasSeatAvailableAsync(connection, context.TenantId, cancellationToken))
             return Failed("The tenant has reached its subscribed user-seat limit.");
         if (!await BranchIsValidAsync(connection, context.TenantId, request.BranchId, cancellationToken))
-            return Failed("The selected branch is not active in this tenant.");
+            return Failed("The selected Site is not active in this tenant.");
 
         var existingUser = await _userManager.FindByEmailAsync(email);
         var existingMembership = existingUser is null
@@ -306,6 +307,13 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
                     context.UserId,
                     roleCodes,
                     cancellationToken);
+                await SynchronizeUserSiteAsync(
+                    connection,
+                    transaction,
+                    context.TenantId,
+                    user.Id,
+                    request.BranchId,
+                    cancellationToken);
                 transaction.Commit();
             }
             catch
@@ -353,7 +361,7 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
         using var connection = _dbConnectionFactory.CreateConnection();
         await OpenAsync(connection, cancellationToken);
         if (!await BranchIsValidAsync(connection, context.TenantId, request.BranchId, cancellationToken))
-            return Failed("The selected branch is not active in this tenant.");
+            return Failed("The selected Site is not active in this tenant.");
 
         var target = await connection.QuerySingleOrDefaultAsync<MemberTarget>(
             new CommandDefinition(
@@ -370,10 +378,11 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
         if (target.IsOwner)
         {
             if (target.UserId != context.UserId)
-                return Failed("Only the Tenant Owner can change their own branch.");
+                return Failed("Only the Tenant Owner can change their own Site.");
             if (request.MembershipStatus != "Active")
                 return Failed("The Tenant Owner membership must remain active.");
 
+            using var ownerTransaction = connection.BeginTransaction();
             var rowsAffected = await connection.ExecuteAsync(
                 new CommandDefinition(
                     """
@@ -393,10 +402,26 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
                         context.UserId,
                         BranchId = request.BranchId
                     },
+                    ownerTransaction,
                     cancellationToken: cancellationToken));
+            if (rowsAffected == 1)
+            {
+                await SynchronizeUserSiteAsync(
+                    connection,
+                    ownerTransaction,
+                    context.TenantId,
+                    target.UserId,
+                    request.BranchId,
+                    cancellationToken);
+                ownerTransaction.Commit();
+            }
+            else
+            {
+                ownerTransaction.Rollback();
+            }
 
             return rowsAffected == 1
-                ? new TenantUserOperationResult(true, "Your tenant branch was updated successfully.")
+                ? new TenantUserOperationResult(true, "Your tenant Site was updated successfully.")
                 : Failed("Your active Tenant Owner membership could not be updated.");
         }
 
@@ -453,6 +478,13 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
                     request.MembershipId,
                     context.UserId,
                     roleCodes,
+                    cancellationToken);
+                await SynchronizeUserSiteAsync(
+                    connection,
+                    transaction,
+                    context.TenantId,
+                    target.UserId,
+                    request.BranchId,
                     cancellationToken);
             }
 
@@ -556,7 +588,7 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
         CancellationToken cancellationToken)
     {
         if (branchId is null or <= 0)
-            return true;
+            return false;
         return await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(
                 """
@@ -568,6 +600,34 @@ public sealed class TenantUserManagementService : ITenantUserManagementService
                 """,
                 new { BranchId = branchId, TenantId = tenantId },
                 cancellationToken: cancellationToken)) == 1;
+    }
+
+    private static async Task SynchronizeUserSiteAsync(
+        IDbConnection connection,
+        IDbTransaction transaction,
+        long tenantId,
+        long userId,
+        long? branchId,
+        CancellationToken cancellationToken)
+    {
+        var rowsAffected = await connection.ExecuteAsync(
+            new CommandDefinition(
+                """
+                UPDATE appUser
+                SET BranchId = branch.BranchId,
+                    ProvinceId = branch.ProvinceId
+                FROM tblApplicationUsers appUser
+                INNER JOIN tblBranch branch
+                    ON branch.BranchId = @BranchId
+                   AND branch.TenantId = @TenantId
+                   AND branch.Active = 1
+                WHERE appUser.UserId = @UserId;
+                """,
+                new { TenantId = tenantId, UserId = userId, BranchId = branchId },
+                transaction,
+                cancellationToken: cancellationToken));
+        if (rowsAffected != 1)
+            throw new InvalidOperationException("The selected Site could not be synchronized to the user profile.");
     }
 
     private static Task<ExistingMembership?> GetExistingMembershipAsync(

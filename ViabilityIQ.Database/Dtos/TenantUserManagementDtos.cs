@@ -43,6 +43,7 @@ public sealed class TenantBranchOption
 {
     public long BranchId { get; init; }
     public long ProvinceId { get; init; }
+    public string BranchCode { get; init; } = string.Empty;
     public string BranchName { get; init; } = string.Empty;
 }
 

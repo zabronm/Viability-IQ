@@ -13,6 +13,11 @@ namespace ViabilityIQ.Application.Dtos
     {
         [Key] public long AssessmentId { get; set; }
         public string? CaseNumber { get; set; }
+        public long BranchId { get; set; }
+        public string? BranchCode { get; set; }
+        public string? BranchName { get; set; }
+        public int CaseYear { get; set; }
+        public int CaseSequence { get; set; }
         public long AssessmentTypeId { get; set; }               //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors
         public string? AssessmentTypeName { get; set; }     //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors
         public long BusinessId { get; set; }

@@ -13,6 +13,7 @@
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 @inject ILogger<ProfileDropdownComponent> Logger
 @inject ITenantAuthorizationService TenantAuthorizationService
+@inject ISessionService SessionService
 
 <!-- Full-screen backdrop covering the entire viewport when open -->
 @if (isProfileOpen)
@@ -246,25 +247,37 @@
 
     private async Task LoadTenantRolesAsync(ClaimsPrincipal user)
     {
-        try
+        if (SessionService.IsAuthenticated
+            && SessionService.UserId > 0
+            && SessionService.TenantId > 0
+            && SessionService.TenantMembershipId > 0)
         {
-            var context = await TenantAuthorizationService.GetAccessContextAsync();
-            var rankedRoles = context.RoleCodes
-                .Select(code => new { Code = code, Name = GetRoleName(code), Rank = GetRoleRank(code) })
-                .OrderBy(role => role.Rank)
-                .ThenBy(role => role.Name)
-                .ToArray();
-
-            if (rankedRoles.Length > 0)
+            try
             {
-                PrimaryRole = rankedRoles[0].Name;
-                AdditionalRoles = rankedRoles.Skip(1).Select(role => role.Name).ToArray();
-                return;
+                var context = await TenantAuthorizationService.GetAccessContextAsync();
+                var rankedRoles = context.RoleCodes
+                    .Select(code => new { Code = code, Name = GetRoleName(code), Rank = GetRoleRank(code) })
+                    .OrderBy(role => role.Rank)
+                    .ThenBy(role => role.Name)
+                    .ToArray();
+
+                if (rankedRoles.Length > 0)
+                {
+                    PrimaryRole = rankedRoles[0].Name;
+                    AdditionalRoles = rankedRoles.Skip(1).Select(role => role.Name).ToArray();
+                    return;
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Tenant roles could not be loaded for the profile dropdown");
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.LogDebug(
+                    ex,
+                    "Tenant role context is not available while the profile dropdown is initializing");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Tenant roles could not be loaded for the profile dropdown");
+            }
         }
 
         var identityRoles = user.FindAll(ClaimTypes.Role)
@@ -289,7 +302,7 @@
     {
         TenantRoleCodes.Owner => "Tenant Owner",
         TenantRoleCodes.Administrator => "Tenant Administrator",
-        TenantRoleCodes.BranchManager => "Branch Manager",
+        TenantRoleCodes.BranchManager => "Site Manager",
         TenantRoleCodes.BillingManager => "Billing Manager",
         TenantRoleCodes.Viewer => "Viewer",
         _ => roleCode.Replace('_', ' ')

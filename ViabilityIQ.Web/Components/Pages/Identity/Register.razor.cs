@@ -17,18 +17,15 @@ public partial class Register : ComponentBase
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     [Inject] public CustomAuthenticationStateProvider AuthStateProvider { get; set; } = default!;
     [Inject] public ILogger<Register> Logger { get; set; } = default!;
-    [Inject] public IGenericDataRepository<Province> ProvinceRepository { get; set; } = default!;
     [Inject] public ToastService ToastService { get; set; } = default!;
 
     public RegisterRequest RegisterRequest { get; set; } = new();
-    public string ErrorMessage { get; set; } = string.Empty;
-    public string SuccessMessage { get; set; } = string.Empty;
     public bool ShowPassword { get; set; }
     public bool ShowConfirmPassword { get; set; }
     public bool AgreedToTerms { get; set; }
     public bool IsSubmitting { get; set; }
     public bool IsEditProfileMode { get; set; }
-    public List<ProvinceLookupDto> Provinces { get; set; } = new();
+    public RegistrationTab ActiveTab { get; set; } = RegistrationTab.Company;
     public bool IsOpenPlan =>
         RegisterRequest.PlanCode == SubscriptionPlanCodes.Open;
 
@@ -36,7 +33,6 @@ public partial class Register : ComponentBase
     {
         try
         {
-            await LoadLookupsAsync();
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
@@ -49,22 +45,10 @@ public partial class Register : ComponentBase
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error initializing user account component");
-            ErrorMessage = "An error occurred while loading account details.";
+            ToastService.ShowError(
+                "An error occurred while loading account details.",
+                "Account Details");
         }
-    }
-
-    private async Task LoadLookupsAsync()
-    {
-        var provinces = await ProvinceRepository.GetAllAsync();
-        Provinces = provinces
-            .Where(province => province.Active)
-            .OrderBy(province => province.ProvinceName)
-            .Select(province => new ProvinceLookupDto
-            {
-                Id = province.ProvinceId,
-                Name = province.ProvinceName ?? string.Empty
-            })
-            .ToList();
     }
 
     private void SelectPlan(string planCode)
@@ -72,8 +56,6 @@ public partial class Register : ComponentBase
         RegisterRequest.PlanCode = planCode;
         if (planCode == SubscriptionPlanCodes.Standard)
         {
-            RegisterRequest.BranchId = 0;
-            RegisterRequest.OrganisationName = string.Empty;
             RegisterRequest.RequestedSeats = 1;
         }
         else
@@ -110,8 +92,6 @@ public partial class Register : ComponentBase
         }
 
         IsSubmitting = true;
-        ErrorMessage = string.Empty;
-        SuccessMessage = string.Empty;
 
         try
         {
@@ -138,11 +118,17 @@ public partial class Register : ComponentBase
             var result = await AuthService.RegisterAsync(RegisterRequest);
             if (!result.Success)
             {
-                ErrorMessage = string.Join(" ", result.Messages);
+                ToastService.ShowError(
+                    result.Messages.Any()
+                        ? string.Join(" ", result.Messages)
+                        : "The workspace could not be registered.",
+                    "Registration Failed");
                 return;
             }
 
-            SuccessMessage = "Registration successful! Redirecting to login...";
+            ToastService.ShowSuccess(
+                "Registration successful. Redirecting to login...",
+                "Workspace Created");
 
             try
             {
@@ -160,6 +146,8 @@ public partial class Register : ComponentBase
                     Metadata = new
                     {
                         RegisterRequest.ProvinceId,
+                        RegisterRequest.InitialRegionName,
+                        RegisterRequest.InitialSiteName,
                         RegisterRequest.PlanCode,
                         RegisterRequest.OrganisationName,
                         RegisterRequest.RequestedSeats,
@@ -181,7 +169,9 @@ public partial class Register : ComponentBase
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error during registration form submission");
-            ErrorMessage = "An unexpected error occurred. Please try again.";
+            ToastService.ShowError(
+                "An unexpected error occurred. Please try again.",
+                IsEditProfileMode ? "Profile Update Failed" : "Registration Failed");
         }
         finally
         {
@@ -194,15 +184,16 @@ public partial class Register : ComponentBase
     {
         if (string.IsNullOrWhiteSpace(RegisterRequest.FirstName)
             || string.IsNullOrWhiteSpace(RegisterRequest.LastName)
-            || string.IsNullOrWhiteSpace(RegisterRequest.Email)
-            || RegisterRequest.ProvinceId <= 0)
+            || string.IsNullOrWhiteSpace(RegisterRequest.Email))
         {
             return false;
         }
 
-        if (IsOpenPlan
+        if (!IsEditProfileMode
             && (string.IsNullOrWhiteSpace(RegisterRequest.OrganisationName)
-                || RegisterRequest.RequestedSeats < 2))
+                || string.IsNullOrWhiteSpace(RegisterRequest.InitialRegionName)
+                || string.IsNullOrWhiteSpace(RegisterRequest.InitialSiteName)
+                || RegisterRequest.RequestedSeats < (IsOpenPlan ? 2 : 1)))
         {
             return false;
         }
@@ -215,6 +206,13 @@ public partial class Register : ComponentBase
 
     public void TogglePasswordVisibility() => ShowPassword = !ShowPassword;
     public void ToggleConfirmPasswordVisibility() => ShowConfirmPassword = !ShowConfirmPassword;
+    public void SelectTab(RegistrationTab tab) => ActiveTab = tab;
+}
+
+public enum RegistrationTab
+{
+    Company,
+    Tenant
 }
 
 public class ProvinceLookupDto

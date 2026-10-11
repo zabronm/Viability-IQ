@@ -48,6 +48,13 @@
                                @bind-Value="businessModel.BusinessName" />
                     <ValidationMessage For="@(() => businessModel.BusinessName)" class="viq-form-validation" />
                 </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="businessCode">Business code</label>
+                    <InputText id="businessCode" class="viq-form-control"
+                               @bind-Value="businessModel.BusinessCode"
+                               placeholder="Generated when saved" disabled style="background-color:#DBE9FA !important;" />
+                    <small class="viq-form-help" style="font-size: 0.65rem !important;">This permanent code is system generated and used in assessment case numbers.</small>
+                </div>
 
                 <div class="viq-form-field">
                     <label>Business sector <span class="viq-required">*</span></label>
@@ -131,7 +138,7 @@
                     <ValidationMessage For="@(() => businessModel.CityTown)" class="viq-form-validation" />
                 </div>
                 <div class="viq-form-field viq-form-span-2">
-                    <label>Province</label>
+                    <label>Region</label>
                     <DDLookupComponent SourceKey="DDLookupEnums.Provinces"
                                        @bind-Value="businessModel.ProvinceId" />
                     <ValidationMessage For="@(() => businessModel.ProvinceId)" class="viq-form-validation" />

@@ -165,7 +165,9 @@ namespace ViabilityIQ.Web.Services
             string subscriptionPlanCode,
             string subscriptionStatus,
             long tenantMembershipId,
-            bool isTenantOwner)
+            bool isTenantOwner,
+            long branchId,
+            long provinceId)
         {
             _tenantId = tenantId;
             _tenantName = tenantName ?? string.Empty;
@@ -174,6 +176,8 @@ namespace ViabilityIQ.Web.Services
             _subscriptionStatus = subscriptionStatus ?? string.Empty;
             _tenantMembershipId = tenantMembershipId;
             _isTenantOwner = isTenantOwner;
+            _branchId = branchId;
+            _provinceId = provinceId;
             NotifyStateChanged();
         }
 

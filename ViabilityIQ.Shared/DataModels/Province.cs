@@ -9,9 +9,10 @@ using ViabilityIQ.Shared.DataModelsInterfaces;
 namespace ViabilityIQ.Shared.DataModels
 {
     [Table("tblProvince")]
-    public class Province: IEntity, ISortableEntity, IAuditableEntity
+    public class Province: IEntity, ISortableEntity, IAuditableEntity, ITenantEntity
     {
         [Key] public long ProvinceId { get; set; }
+        public long? TenantId { get; set; }
         public string? ShortName { get; set; }
         public string? ProvinceName { get; set; }
         public string? Address_Street {get; set;} 

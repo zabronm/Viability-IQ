@@ -32,12 +32,29 @@ namespace ViabilityIQ.Application.Dtos
         public string PlanCode { get; set; } = SubscriptionPlanCodes.Standard;
 
         public string OrganisationName { get; set; } = string.Empty;
+        public string CompanyCustomerCode { get; set; } = string.Empty;
+        public string CompanyRegistrationNumber { get; set; } = string.Empty;
+        public string CompanyContactPerson { get; set; } = string.Empty;
+        public string CompanyEmail { get; set; } = string.Empty;
+        public string CompanyTelephone { get; set; } = string.Empty;
+        public string CompanyMobile { get; set; } = string.Empty;
+        public string CompanyWebsite { get; set; } = string.Empty;
+        public string CompanyStreetAddress { get; set; } = string.Empty;
+        public string CompanySuburb { get; set; } = string.Empty;
+        public string CompanyCityTown { get; set; } = string.Empty;
+        public string CompanyPostalCode { get; set; } = string.Empty;
+        public string CompanyCountry { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Initial Region name is required")]
+        public string InitialRegionName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Initial Site name is required")]
+        public string InitialSiteName { get; set; } = string.Empty;
 
         [Range(1, 10000, ErrorMessage = "Seat quantity must be between 1 and 10,000")]
         public int RequestedSeats { get; set; } = 1;
 
         // Relational numeric keys
-        [Range(1, long.MaxValue, ErrorMessage = "Please select a valid province")]
         public long ProvinceId { get; set; }
 
         public long BranchId { get; set; }

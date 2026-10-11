@@ -157,7 +157,20 @@ namespace ViabilityIQ.Application.ServicesMisc
                         PlanCode = request.PlanCode,
                         OrganisationName = request.OrganisationName,
                         RequestedSeats = request.RequestedSeats,
-                        ProvinceId = request.ProvinceId
+                        CompanyCustomerCode = request.CompanyCustomerCode,
+                        CompanyRegistrationNumber = request.CompanyRegistrationNumber,
+                        CompanyContactPerson = request.CompanyContactPerson,
+                        CompanyEmail = request.CompanyEmail,
+                        CompanyTelephone = request.CompanyTelephone,
+                        CompanyMobile = request.CompanyMobile,
+                        CompanyWebsite = request.CompanyWebsite,
+                        CompanyStreetAddress = request.CompanyStreetAddress,
+                        CompanySuburb = request.CompanySuburb,
+                        CompanyCityTown = request.CompanyCityTown,
+                        CompanyPostalCode = request.CompanyPostalCode,
+                        CompanyCountry = request.CompanyCountry,
+                        InitialRegionName = request.InitialRegionName,
+                        InitialSiteName = request.InitialSiteName
                     });
 
                 if (!tenantResult.Success)
@@ -174,6 +187,17 @@ namespace ViabilityIQ.Application.ServicesMisc
                     result.Success = false;
                     result.Messages.Add(tenantResult.ErrorMessage);
                     return result;
+                }
+
+                user.ProvinceId = tenantResult.RegionId;
+                user.BranchId = tenantResult.SiteId;
+                var userContextUpdate = await _userManager.UpdateAsync(user);
+                if (!userContextUpdate.Succeeded)
+                {
+                    _logger.LogWarning(
+                        "User {UserId} was provisioned but legacy Region/Site profile fields could not be synchronized: {Errors}",
+                        user.Id,
+                        string.Join(", ", userContextUpdate.Errors.Select(error => error.Description)));
                 }
 
                 result.Success = true;

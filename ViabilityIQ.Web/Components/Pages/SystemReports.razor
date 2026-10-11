@@ -109,9 +109,9 @@
                             </div>
                         </label>
                         <label>
-                            <span>Branch</span>
+                            <span>Site</span>
                             <select class="form-select form-select-sm" @bind="Filter.BranchId">
-                                <option value="">All authorised branches</option>
+                                <option value="">All authorised Sites</option>
                                 @foreach (var branch in FilterOptions.Branches)
                                 {
                                     <option value="@branch.Id">@branch.Name</option>
@@ -217,7 +217,7 @@
                             @if (SelectedReport == OperationalReportType.AssessmentRegister)
                             {
                                 <table class="table table-sm opr-table">
-                                    <thead><tr><th>Case</th><th>Business / Client</th><th>Branch</th><th>Advisor</th><th>Status</th><th>Readiness</th><th>Start</th><th>Days</th></tr></thead>
+                                    <thead><tr><th>Case</th><th>Business / Client</th><th>Site</th><th>Advisor</th><th>Status</th><th>Readiness</th><th>Start</th><th>Days</th></tr></thead>
                                     <tbody>
                                         @foreach (var row in FilteredRows)
                                         {
@@ -238,7 +238,7 @@
                             else if (SelectedReport == OperationalReportType.WorkflowReadiness)
                             {
                                 <table class="table table-sm opr-table">
-                                    <thead><tr><th>Case</th><th>Business</th><th>Status</th><th>Readiness</th><th>Advisor</th><th>Branch</th><th>Last updated</th><th>Days open</th></tr></thead>
+                                    <thead><tr><th>Case</th><th>Business</th><th>Status</th><th>Readiness</th><th>Advisor</th><th>Site</th><th>Last updated</th><th>Days open</th></tr></thead>
                                     <tbody>
                                         @foreach (var row in WorkflowRows)
                                         {
@@ -259,7 +259,7 @@
                             else if (SelectedReport == OperationalReportType.AdvisorPerformance)
                             {
                                 <table class="table table-sm opr-table">
-                                    <thead><tr><th>Advisor</th><th>Branch</th><th>Total</th><th>Draft</th><th>In progress</th><th>Review</th><th>Completed</th><th>Avg readiness</th><th>Completion</th></tr></thead>
+                                    <thead><tr><th>Advisor</th><th>Site</th><th>Total</th><th>Draft</th><th>In progress</th><th>Review</th><th>Completed</th><th>Avg readiness</th><th>Completion</th></tr></thead>
                                     <tbody>
                                         @foreach (var row in AdvisorRows)
                                         {
@@ -271,7 +271,7 @@
                             else
                             {
                                 <table class="table table-sm opr-table">
-                                    <thead><tr><th>Branch</th><th>Advisors</th><th>Total</th><th>Draft</th><th>In progress</th><th>Review</th><th>Completed</th><th>Avg readiness</th><th>Completion</th></tr></thead>
+                                    <thead><tr><th>Site</th><th>Advisors</th><th>Total</th><th>Draft</th><th>In progress</th><th>Review</th><th>Completed</th><th>Avg readiness</th><th>Completion</th></tr></thead>
                                     <tbody>
                                         @foreach (var row in BranchRows)
                                         {

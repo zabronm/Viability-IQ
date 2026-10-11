@@ -14,6 +14,7 @@ namespace ViabilityIQ.Shared.DataModels
     public class BusinessDto
     {
         [Dapper.Contrib.Extensions.Key] public long BusinessId { get; set; }     
+        public string? BusinessCode { get; set; }
         public string? BusinessName { get; set; }
         public bool Registered { get; set; }
         public bool VATRegistered { get; set; }

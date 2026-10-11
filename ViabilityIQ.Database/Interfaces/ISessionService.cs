@@ -83,7 +83,9 @@ namespace ViabilityIQ.Application.Interfaces
             string subscriptionPlanCode,
             string subscriptionStatus,
             long tenantMembershipId,
-            bool isTenantOwner);
+            bool isTenantOwner,
+            long branchId,
+            long provinceId);
 
         // ====================================================
         // ASSESSMENT

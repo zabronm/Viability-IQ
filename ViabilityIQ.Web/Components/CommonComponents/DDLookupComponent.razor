@@ -1,17 +1,14 @@
-﻿@using System.Linq.Expressions
+﻿@using Microsoft.AspNetCore.Components.Forms
 @using ViabilityIQ.Application.Interfaces
 @using ViabilityIQ.Shared.SharedModels
+@inherits InputBase<long>
 
 @inject IDDLookupService LookupService
 
 <div class="form-group lookup-dropdown-group">
-    @*  <select class="form-select form-select-sm @FieldClass"
-            value="@Value"
-            @onchange="HandleChange"
-            disabled="@(IsDisabled || _isLoading || Readonly)"> *@
-
-    <select class="form-select form-select-sm @FieldClass @SelectedStyleClass"
-            value="@Value"
+    <select id="@InputId"
+            class="form-select form-select-sm @CssClass @SelectedStyleClass"
+            value="@CurrentValueAsString"
             @onchange="HandleChange"
             disabled="@(IsDisabled || _isLoading || Readonly)">
 
@@ -50,15 +47,13 @@
 
 
 @code {
-    private IEnumerable<LookupItem> _options = Array.Empty<LookupItem>();
+    private IReadOnlyList<LookupItem> _options = [];
     private bool _isLoading = true;
-    private FieldIdentifier _fieldIdentifier;
-
-    [CascadingParameter] private EditContext? EditContext { get; set; }
-
-    [Parameter] public long Value { get; set; }
-    [Parameter] public EventCallback<long> ValueChanged { get; set; }
-    [Parameter] public Expression<Func<long>>? ValueExpression { get; set; }
+    private bool _hasLoaded;
+    private DDLookupEnums _loadedSourceKey;
+    private string? _loadedFilterField;
+    private object? _loadedFilterValue;
+    private readonly string _generatedInputId = $"ddlookup-{Guid.NewGuid():N}";
 
     [Parameter] public DDLookupEnums SourceKey { get; set; }
 
@@ -71,7 +66,9 @@
     [Parameter] public bool IsDisabled { get; set; } = false;
     [Parameter] public bool Readonly { get; set; } = false;
     [Parameter] public string StyleOption { get; set; } = "normal";
+    [Parameter] public string? Id { get; set; }
 
+    private string InputId => string.IsNullOrWhiteSpace(Id) ? _generatedInputId : Id;
     private string SelectedStyleClass => StyleOption switch
     {
         "bold" => "dd-bold",
@@ -79,36 +76,57 @@
         _ => "dd-normal"
     };
 
-    private string FieldClass => EditContext != null && ValueExpression != null &&
-                                 EditContext.GetValidationMessages(_fieldIdentifier).Any()
-                                 ? "is-invalid" : "";
-
-    protected override void OnParametersSet()
-    {
-        if (EditContext != null && ValueExpression != null)
-        {
-            _fieldIdentifier = FieldIdentifier.Create(ValueExpression);
-        }
-    }
-
     protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
+
+        if (_hasLoaded
+            && _loadedSourceKey == SourceKey
+            && string.Equals(
+                _loadedFilterField,
+                FilterField,
+                StringComparison.Ordinal)
+            && Equals(_loadedFilterValue, FilterValue))
+        {
+            return;
+        }
+
         _isLoading = true;
-        // Pass field name and value to the service
-        _options = await LookupService.GetLookupOptionsAsync(SourceKey, FilterField, FilterValue);
-        _isLoading = false;
+        try
+        {
+            _options = (await LookupService.GetLookupOptionsAsync(
+                SourceKey,
+                FilterField,
+                FilterValue)).ToArray();
+            _loadedSourceKey = SourceKey;
+            _loadedFilterField = FilterField;
+            _loadedFilterValue = FilterValue;
+            _hasLoaded = true;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
-    private async Task HandleChange(ChangeEventArgs e)
+    private void HandleChange(ChangeEventArgs e)
     {
-        if (long.TryParse(e.Value?.ToString(), out long result))
-        {
-            await ValueChanged.InvokeAsync(result);
+        CurrentValueAsString = e.Value?.ToString();
+    }
 
-            if (EditContext != null && ValueExpression != null)
-            {
-                EditContext.NotifyFieldChanged(_fieldIdentifier);
-            }
+    protected override bool TryParseValueFromString(
+        string? value,
+        out long result,
+        out string? validationErrorMessage)
+    {
+        if (long.TryParse(value, out result))
+        {
+            validationErrorMessage = null;
+            return true;
         }
+
+        result = 0;
+        validationErrorMessage = $"The {FieldIdentifier.FieldName} field is invalid.";
+        return false;
     }
 }

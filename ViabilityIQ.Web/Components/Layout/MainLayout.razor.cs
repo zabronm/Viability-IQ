@@ -216,7 +216,9 @@ namespace ViabilityIQ.Web.Components.Layout
                 tenant.PlanCode,
                 tenant.SubscriptionStatus,
                 tenant.MembershipId,
-                tenant.IsOwner);
+                tenant.IsOwner,
+                tenant.BranchId,
+                tenant.ProvinceId);
         }
 
         private void HandleSessionChanged()

@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
         services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
         services.AddScoped<MasterDataService>();
+        services.AddScoped<IOperationalReferenceService, OperationalReferenceService>();
 
         //=========== REPORTING AND EMAIL SERVICES ===========
         services.AddScoped<IExcelEPPlusExportService, ExcelEPPlusExportService>();

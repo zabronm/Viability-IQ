@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="viq-form-field">
-                    <label>Client Type / Category <span class="viq-required">*</span></label>
+                    <label for="clientTypeId">Client Type / Category <span class="viq-required">*</span></label>
                     <DDLookupComponent SourceKey="DDLookupEnums.ClientTypes" @bind-Value="clientModel.ClientTypeId" />
                     <ValidationMessage For="() => clientModel.ClientTypeId" class="viq-form-validation" />
                 </div>
@@ -58,7 +58,7 @@
                 <div class="viq-form-field"><label for="street">Street Address</label><InputText id="street" class="viq-form-control" @bind-Value="clientModel.Address_Street" /><ValidationMessage For="@(() => clientModel.Address_Street)" class="viq-form-validation" /></div>
                 <div class="viq-form-field"><label for="suburb">Suburb</label><InputText id="suburb" class="viq-form-control" @bind-Value="clientModel.Address_Surburb" /><ValidationMessage For="@(() => clientModel.Address_Surburb)" class="viq-form-validation" /></div>
                 <div class="viq-form-field"><label for="city">City / Town</label><InputText id="city" class="viq-form-control" @bind-Value="clientModel.Address_CityTown" /><ValidationMessage For="@(() => clientModel.Address_CityTown)" class="viq-form-validation" /></div>
-                <div class="viq-form-field"><label>Province</label><DDLookupComponent SourceKey="DDLookupEnums.Provinces" @bind-Value="clientModel.ProvinceId" /><ValidationMessage For="() => clientModel.ProvinceId" class="viq-form-validation" /></div>
+                <div class="viq-form-field"><label>Region</label><DDLookupComponent SourceKey="DDLookupEnums.Provinces" @bind-Value="clientModel.ProvinceId" /><ValidationMessage For="() => clientModel.ProvinceId" class="viq-form-validation" /></div>
             </div>
         </section>
 

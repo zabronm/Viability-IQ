@@ -13,11 +13,11 @@
     <EditForm Model="@companyModel" OnValidSubmit="HandleFormSubmissionAsync" class="viq-data-form">
         <DataAnnotationsValidator />
         <ValidationSummary class="viq-form-validation-summary" />
-
+@* 
         <div class="viq-form-intro">
             <span class="viq-form-intro-icon"><i class="bi bi-buildings"></i></span>
             <div><h2>Company details</h2><p>Maintain the organisation identity and primary contact information.</p></div>
-        </div>
+        </div> *@
 
         <section class="viq-form-section">
             <div class="viq-form-section-heading"><span><i class="bi bi-building"></i></span><div><h3>Organisation</h3><p>Core company and customer reference information.</p></div></div>
@@ -29,9 +29,27 @@
                 </div>
                 <div class="viq-form-field">
                     <label for="customerCode">Customer Code</label>
-                    <InputText id="customerCode" class="viq-form-control" @bind-Value="companyModel.CompanyCustomerCode" />
+                    <InputText id="customerCode" class="viq-form-control" @bind-Value="companyModel.CompanyCustomerCode" disabled />
                     <ValidationMessage For="@(() => companyModel.CompanyCustomerCode)" class="viq-form-validation" />
                 </div>
+                <div class="viq-form-field">
+                    <label for="registrationNumber">Registration Number</label>
+                    <InputText id="registrationNumber" class="viq-form-control" @bind-Value="companyModel.CKNumber" />
+                </div>
+                <div class="viq-form-field">
+                    <label>Primary Region</label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Provinces" @bind-Value="companyModel.ProvinceId" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-geo-alt-fill"></i></span><div><h3>Company address</h3><p>Registered or primary operational address.</p></div></div>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field viq-form-span-2"><label for="streetAddress">Street Address</label><InputText id="streetAddress" class="viq-form-control" @bind-Value="companyModel.Street_Address" /></div>
+                <div class="viq-form-field"><label for="suburb">Suburb</label><InputText id="suburb" class="viq-form-control" @bind-Value="companyModel.Suburb" /></div>
+                <div class="viq-form-field"><label for="cityTown">City / Town</label><InputText id="cityTown" class="viq-form-control" @bind-Value="companyModel.CityTown" /></div>
+                <div class="viq-form-field"><label for="postalCode">Postal Code</label><InputText id="postalCode" class="viq-form-control" @bind-Value="companyModel.PostalCode" /></div>
             </div>
         </section>
 

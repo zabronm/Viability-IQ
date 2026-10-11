@@ -67,19 +67,17 @@
                     <div class="viq-form-section-heading">
                         <span><i class="bi bi-shield-lock"></i></span>
                         <div>
-                            <h3>@(member.IsOwner ? "Owner branch" : "Tenant access")</h3>
-                            <p>@(member.IsOwner
-                                ? "Change your branch without altering the protected Tenant Owner membership."
-                                : "Branch ownership and one or more access profiles.")</p>
+                            <h3>Tenant access</h3>
+                            <p>Select the user's Site and one or more access profiles. The Region is derived from the Site.</p>
                         </div>
                     </div>
                     <div class="viq-form-field">
-                        <label>Branch</label>
+                        <label>Site</label>
                         <InputSelect class="viq-form-control" @bind-Value="createRequest.BranchId">
-                            <option value="">Unassigned</option>
+                            <option value="">Select Site...</option>
                             @foreach (var branch in snapshot.Branches)
                             {
-                                <option value="@branch.BranchId">@branch.BranchName</option>
+                                <option value="@branch.BranchId">@branch.BranchName (@branch.BranchCode)</option>
                             }
                         </InputSelect>
                     </div>
@@ -122,15 +120,15 @@
                 <section class="viq-form-section">
                     <div class="viq-form-section-heading">
                         <span><i class="bi bi-shield-lock"></i></span>
-                        <div><h3>Tenant access</h3><p>Branch ownership and one or more access profiles.</p></div>
+                        <div><h3>Tenant access</h3><p>Site ownership and one or more access profiles.</p></div>
                     </div>
                     <div class="viq-form-field">
-                        <label>Branch</label>
+                        <label>Site</label>
                         <InputSelect class="viq-form-control" @bind-Value="updateRequest.BranchId">
-                            <option value="">Unassigned</option>
+                            <option value="">Select Site...</option>
                             @foreach (var branch in snapshot.Branches)
                             {
-                                <option value="@branch.BranchId">@branch.BranchName</option>
+                                <option value="@branch.BranchId">@branch.BranchName (@branch.BranchCode)</option>
                             }
                         </InputSelect>
                     </div>
@@ -173,7 +171,7 @@
                         Cancel
                     </button>
                     <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessing">
-                        <i class="bi bi-check2-square"></i><span>@(member.IsOwner ? "Update branch" : "Update user")</span>
+                        <i class="bi bi-check2-square"></i><span>@(member.IsOwner ? "Update Site" : "Update user")</span>
                     </button>
                 </div>
             </EditForm>

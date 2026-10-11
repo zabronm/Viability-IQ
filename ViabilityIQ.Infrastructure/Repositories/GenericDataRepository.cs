@@ -22,12 +22,14 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
     private readonly ISessionService _sessionService;
     private readonly IActivityLogWriter _activityLogWriter;
     private readonly ITenantAuthorizationService _tenantAuthorizationService;
+    private readonly IOperationalReferenceService _operationalReferenceService;
 
     public GenericDataRepository(
         IDbConnectionFactory dbConnectionFactory,
         ISessionService sessionService,
         IActivityLogWriter activityLogWriter,
-        ITenantAuthorizationService tenantAuthorizationService)
+        ITenantAuthorizationService tenantAuthorizationService,
+        IOperationalReferenceService operationalReferenceService)
     {
         _dbConnectionFactory = dbConnectionFactory
             ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
@@ -37,6 +39,8 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
             ?? throw new ArgumentNullException(nameof(activityLogWriter));
         _tenantAuthorizationService = tenantAuthorizationService
             ?? throw new ArgumentNullException(nameof(tenantAuthorizationService));
+        _operationalReferenceService = operationalReferenceService
+            ?? throw new ArgumentNullException(nameof(operationalReferenceService));
     }
 
     public async Task<T?> GetByIdAsync(long id)
@@ -192,8 +196,6 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                 tenantEntity.TenantId = _sessionService.TenantId;
             }
 
-            await ValidateForeignKeysAsync(connection, transaction, entity, scope);
-
             if (entity is IAuditableEntity auditable)
             {
                 if (isCreate)
@@ -201,9 +203,6 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                     auditable.CreatedDate = DateTime.UtcNow;
                     auditable.CreatedBy = _sessionService.UserId;
                     auditable.Active = true;
-
-                    entityId = await connection.InsertAsync(entity, transaction);
-                    saved = entityId > 0;
                 }
                 else
                 {
@@ -215,7 +214,38 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
 
                     auditable.ModifiedDate = DateTime.UtcNow;
                     auditable.ModifiedBy = _sessionService.UserId;
-                    saved = await connection.UpdateAsync(entity, transaction);
+                }
+            }
+
+            await PrepareOperationalReferencesAsync(
+                entity, isCreate, connection, transaction);
+            if (isCreate && entity is Company)
+            {
+                var companyCount = await connection.ExecuteScalarAsync<long>(
+                    """
+                    SELECT COUNT_BIG(1)
+                    FROM tblCompany
+                    WHERE TenantId = @TenantId;
+                    """,
+                    new { TenantId = _sessionService.TenantId },
+                    transaction);
+                if (companyCount > 0)
+                {
+                    throw new InvalidOperationException(
+                        "This tenant already has an Organisation Profile.");
+                }
+            }
+            await ValidateForeignKeysAsync(connection, transaction, entity, scope);
+
+            if (isCreate)
+            {
+                entityId = await connection.InsertAsync(entity, transaction);
+                saved = entityId > 0;
+                if (saved && entity is Assessment assessment)
+                {
+                    await _operationalReferenceService
+                        .FinalizeAssessmentCaseNumberAsync(
+                            assessment, entityId, connection, transaction);
                 }
             }
             else
@@ -611,6 +641,53 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                     connection, transaction, "tblClient", "ClientId",
                     TenantRecordTypes.Client, clientId.Value, scope.Value.Context);
             }
+
+            if (entity is Assessment assessment && assessment.BranchId > 0)
+            {
+                var branchCount = await connection.ExecuteScalarAsync<long>(
+                    """
+                    SELECT COUNT_BIG(1)
+                    FROM tblBranch
+                    WHERE BranchId = @BranchId
+                      AND TenantId = @TenantId
+                      AND Active = 1;
+                    """,
+                    new
+                    {
+                        assessment.BranchId,
+                        TenantId = scope.Value.Context.TenantId
+                    },
+                    transaction);
+                if (branchCount == 0)
+                {
+                    throw new InvalidOperationException(
+                        "The selected Site is inactive or outside your tenant.");
+                }
+            }
+
+            var provinceId = ReadLongProperty(entity, "ProvinceId");
+            if (provinceId.HasValue)
+            {
+                var regionCount = await connection.ExecuteScalarAsync<long>(
+                    """
+                    SELECT COUNT_BIG(1)
+                    FROM tblProvince
+                    WHERE ProvinceId = @ProvinceId
+                      AND TenantId = @TenantId
+                      AND Active = 1;
+                    """,
+                    new
+                    {
+                        ProvinceId = provinceId.Value,
+                        TenantId = scope.Value.Context.TenantId
+                    },
+                    transaction);
+                if (regionCount == 0)
+                {
+                    throw new InvalidOperationException(
+                        "The selected Region is inactive or outside your tenant.");
+                }
+            }
         }
 
         foreach (var reference in ActiveReferenceFields)
@@ -642,6 +719,29 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                 throw new InvalidOperationException(
                     $"The selected {reference.Key} is inactive or unavailable.");
             }
+        }
+    }
+
+    private async Task PrepareOperationalReferencesAsync(
+        T entity,
+        bool isCreate,
+        IDbConnection connection,
+        IDbTransaction transaction)
+    {
+        switch (entity)
+        {
+            case Business business:
+                await _operationalReferenceService.PrepareBusinessCodeAsync(
+                    business, connection, transaction);
+                break;
+            case Branch branch:
+                await _operationalReferenceService.PrepareBranchCodeAsync(
+                    branch, connection, transaction);
+                break;
+            case Assessment assessment:
+                await _operationalReferenceService.PrepareAssessmentAsync(
+                    assessment, isCreate, connection, transaction);
+                break;
         }
     }
 
@@ -706,7 +806,6 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                 ["IncomeTypeId"] = ("tblIncomeType", "IncomeTypeId"),
                 ["LoanTypeId"] = ("tblLoanType", "LoanTypeId"),
                 ["ProductCategoryId"] = ("tblProductCategory", "ProductCategoryId"),
-                ["ProvinceId"] = ("tblProvince", "ProvinceId"),
                 ["RaceId"] = ("tblRace", "RaceId")
             };
 

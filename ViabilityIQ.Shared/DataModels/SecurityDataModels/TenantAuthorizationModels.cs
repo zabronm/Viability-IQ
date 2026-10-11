@@ -7,6 +7,7 @@ public static class TenantRecordTypes
     public const string Client = "Client";
     public const string Company = "Company";
     public const string Branch = "Branch";
+    public const string Region = "Region";
 }
 
 public enum TenantRecordAccess

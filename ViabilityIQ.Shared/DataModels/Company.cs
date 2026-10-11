@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ViabilityIQ.Shared.DataModelsInterfaces;
+using Computed = Dapper.Contrib.Extensions.ComputedAttribute;
+using DapperKey = Dapper.Contrib.Extensions.KeyAttribute;
+using DapperTable = Dapper.Contrib.Extensions.TableAttribute;
 
 namespace ViabilityIQ.Shared.DataModels
 {
-    [Table("tblCompany")]
+    [DapperTable("tblCompany")]
     public class Company: IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
     {
-        [Key] public long CompanyId { get; set; }
+        [DapperKey] public long CompanyId { get; set; }
         public long? TenantId { get; set; }
+        [Required(ErrorMessage = "Company name is required.")]
         public string? CompanyName { get; set; }
+        [Computed]
         public string? CompanyCustomerCode { get; set; }
         public string? CKNumber { get; set; }        
         public string? ContactPerson { get; set; }

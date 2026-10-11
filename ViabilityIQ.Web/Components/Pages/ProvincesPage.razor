@@ -6,14 +6,14 @@
 
 
 <div class="p-0 position-relative">
-    <PageHeading _pageTitle="Provinces" CurrentPage="PageType.Province" _pageHeading="Provinces" />
+    <PageHeading _pageTitle="Regions" CurrentPage="PageType.Province" _pageHeading="Regions" />
 
     <main class="p-3 bg-white mt-2 mb-4" style="border-radius:8px;">
         <div class="app-workspace-shell">
 
-            <ZabDataTableAdvanced TItem="ProvinceDto"
+            <ZabDataTableAdvanced TItem="Province"
                                   Items="@provincesList"
-                                  ItemName="Province"
+                                  ItemName="Region"
                                   Columns="@tableColumns"
                                   IsLoading="@loadingStateActive"                                  
                                   ShowAdd="true"

@@ -34,8 +34,9 @@ public sealed class DDLookupService : IDDLookupService
                 "tblProductCategory", "ProductCategoryId", "ProductCategoryName"),
             [DDLookupEnums.Products] = Global(
                 "tblProduct", "ProductServiceId", "ProductServiceName"),
-            [DDLookupEnums.Provinces] = Global(
-                "tblProvince", "ProvinceId", "ProvinceName"),
+            [DDLookupEnums.Provinces] = Tenant(
+                "tblProvince", "ProvinceId", "ProvinceName",
+                TenantRecordTypes.Region),
             [DDLookupEnums.Sectors] = Global(
                 "tblBusinessSector", "BusinessSectorId", "BusinessSectorName"),
             [DDLookupEnums.ClientTypes] = Global(
@@ -160,11 +161,11 @@ public sealed class DDLookupService : IDDLookupService
         var context = await _tenantAuthorizationService.GetAccessContextAsync();
         const string query = """
             SELECT
-                users.Id,
+                users.UserId AS Id,
                 LTRIM(RTRIM(CONCAT(users.FirstName, ' ', users.LastName))) AS Description
             FROM tblTenantMembership membership
             INNER JOIN tblApplicationUsers users
-                ON users.Id = membership.UserId
+                ON users.UserId = membership.UserId
                AND users.IsActive = 1
             WHERE membership.TenantId = @TenantId
               AND membership.Active = 1

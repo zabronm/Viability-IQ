@@ -16,6 +16,8 @@ namespace ViabilityIQ.Shared.DataModels
     {
         [Dapper.Contrib.Extensions.Key] public long BusinessId { get; set; }
         public long? TenantId { get; set; }
+        [StringLength(12)]
+        public string? BusinessCode { get; set; }
         [Required(ErrorMessage = "Business Name is required.")]
         public string? BusinessName { get; set; }
 

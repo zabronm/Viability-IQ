@@ -1,0 +1,59 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="viq-form-shell">
+    @if (isProcessingData)
+    {
+        <div class="viq-form-busy"><div class="viq-form-busy-card"><span class="viq-form-spinner"></span><div><strong>Saving Site</strong><span>Applying Site identity and Region settings...</span></div></div></div>
+    }
+
+    <EditForm Model="branchModel" OnValidSubmit="HandleFormSubmissionAsync" class="viq-data-form">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="viq-form-validation-summary" />
+
+        @* <div class="viq-form-intro">
+            <span class="viq-form-intro-icon"><i class="bi bi-geo-alt"></i></span>
+            <div><h2>Site details</h2><p>Maintain the Site identity used for access control and assessment case numbers.</p></div>
+        </div> *@
+
+        <section class="viq-form-section">
+            <div class="viq-form-section-heading"><span><i class="bi bi-geo-alt"></i></span><div><h3>Site identity</h3><p>The Site code is generated once and remains stable.</p></div></div>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="siteName">Site name <span class="viq-required">*</span></label>
+                    <InputText id="siteName" class="viq-form-control" @bind-Value="branchModel.BranchName" />
+                    <ValidationMessage For="@(() => branchModel.BranchName)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="siteCode">Site code</label>
+                    <InputText id="siteCode" class="viq-form-control" @bind-Value="branchModel.BranchCode" placeholder="System generated ..." disabled style="background-color:#EBF4FA !important;" />
+                    <small class="viq-form-help" style="font-size: 0.63rem !important;">Used in new assessment case numbers.</small>
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label>Region <span class="viq-required">*</span></label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Provinces" @bind-Value="branchModel.ProvinceId" />
+                    <ValidationMessage For="@(() => branchModel.ProvinceId)" class="viq-form-validation" />
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <label>Site manager</label>
+                    <DDLookupComponent SourceKey="DDLookupEnums.Users" @bind-Value="branchModel.Manager_UserId" />
+                </div>
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <label class="viq-toggle-card viq-toggle-card-wide" for="isActive">
+                <span><strong>@(isRowActive ? "Site active" : "Site inactive")</strong><small>Inactive Sites remain available in historical assessment records.</small></span>
+                <InputCheckbox id="isActive" class="viq-switch" @bind-Value="isRowActive" />
+            </label>
+        </section>
+
+        <div class="viq-form-actions">
+            <button type="submit" class="viq-button viq-button-primary" disabled="@isProcessingData">
+                @if (isProcessingData) { <span class="spinner-border spinner-border-sm" role="status"></span><span>Saving...</span> }
+                else { <i class="bi bi-check2-square"></i><span>@(BranchId == 0 ? "Add Site" : "Update Site")</span> }
+            </button>
+        </div>
+    </EditForm>
+</div>

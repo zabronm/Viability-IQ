@@ -62,7 +62,7 @@ namespace ViabilityIQ.Web.Components.Pages
                     Value = x => x.Race ?? "", Filterable = true
                 },
                 new() {
-                    Title = "Province", ServerField = nameof(ClientDto.ProvinceName),
+                    Title = "Region", ServerField = nameof(ClientDto.ProvinceName),
                     Value = x => x.ProvinceName ?? "", Filterable = true
                 },
                 new() {

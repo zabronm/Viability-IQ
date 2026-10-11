@@ -17,8 +17,7 @@ namespace ViabilityIQ.Web.Components.Pages
 {
     public partial class ProvincesPage
     {
-        [Inject] IReadOnlyRepository<ProvinceDto, long>? ProvinceRepository { get; set; }
-        [Inject] private IGenericDataRepository<Province> provinceGenRepository { get; set; } = default!;
+        [Inject] private IGenericDataRepository<Province> ProvinceRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
         [Inject] private OffCanvasStateService OffcanvasService { get; set; } = default!;
@@ -26,19 +25,19 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
-        private List<ProvinceDto> provincesList = new();
-        private List<ZabDataTableAdvanced<ProvinceDto>.ColumnDefinition<ProvinceDto>> tableColumns = new();
+        private List<Province> provincesList = new();
+        private List<ZabDataTableAdvanced<Province>.ColumnDefinition<Province>> tableColumns = new();
         private bool loadingStateActive = false;
 
         protected override async Task OnInitializedAsync()
         {
             _ = LoadGridDatasetAsync();
 
-            tableColumns = new List<ZabDataTableAdvanced<ProvinceDto>.ColumnDefinition<ProvinceDto>>
+            tableColumns = new List<ZabDataTableAdvanced<Province>.ColumnDefinition<Province>>
             {
-                new() { Title = "Province Name", Value = x => x.ProvinceName },
+                new() { Title = "Region Name", Value = x => x.ProvinceName },
                 new() { Title = "Short Name", Value = x => x.ShortName ?? "" },
-                new() { Title = "Manager", Value = x => x.Manager ?? "" },
+                new() { Title = "Manager User ID", Value = x => x.Manager_UserId == 0 ? "" : x.Manager_UserId.ToString() },
                 new() { Title = "Telephone", Value = x => x.Telephone ?? "" },
                 new() { Title = "Mobile", Value = x => x.Mobile ?? "" },
                 new() { Title = "Email", Value = x => x.Email ?? "" },
@@ -60,8 +59,8 @@ namespace ViabilityIQ.Web.Components.Pages
 
             try
             {
-                var resultSet = await ProvinceRepository!.GetAllAsync();
-                provincesList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<ProvinceDto>();
+                var resultSet = await ProvinceRepository.GetAllAsync();
+                provincesList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Province>();
             }
             finally
             {
@@ -72,7 +71,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            var formTitle = extractedRecordId == 0 ? "Add New Province" : "Modify Province Details";
+            var formTitle = extractedRecordId == 0 ? "Add New Region" : "Modify Region Details";
 
             await OffcanvasService.ShowAsync(new CanvasRequest
             {
@@ -87,15 +86,9 @@ namespace ViabilityIQ.Web.Components.Pages
             });
         }
 
-        private async Task DeleteSelectedProvince(ProvinceDto targetProvinceDto)
+        private async Task DeleteSelectedProvince(Province targetProvince)
         {
-            var targetProvince = new Province
-            {
-                ProvinceId = targetProvinceDto.ProvinceId,
-                ProvinceName = targetProvinceDto.ProvinceName
-            };
-
-            var success = await provinceGenRepository!.DeleteAsync(targetProvince);
+            var success = await ProvinceRepository.DeleteAsync(targetProvince);
             if (success)
             {
                 _Toast!.ShowSuccess("Record discarded successfully.", sessionService!.AppTitle);
@@ -118,7 +111,7 @@ namespace ViabilityIQ.Web.Components.Pages
             StateHasChanged();
         }
 
-        private async Task ExecutePrintFormatProcess(List<ProvinceDto> targetedDataset)
+        private async Task ExecutePrintFormatProcess(List<Province> targetedDataset)
         {
             try
             {
@@ -129,14 +122,14 @@ namespace ViabilityIQ.Web.Components.Pages
                 {
                     ProvinceName = item.ProvinceName,
                     ShortName = item.ShortName,
-                    Manager = item.Manager,
+                    Manager = item.Manager_UserId == 0 ? "" : item.Manager_UserId.ToString(),
                     Telephone = item.Telephone,
                     Email = item.Email,
                     Mobile = item.Mobile,
                     Status = item.Active
                 }).ToList();
 
-                byte[] pdfReportBytes = await PdfService.GenerateReportDataPdfAsync(PrintDataSet, "Provinces List Summary");
+                byte[] pdfReportBytes = await PdfService.GenerateReportDataPdfAsync(PrintDataSet, "Regions List Summary");
                 string targetFileName = $"Province_List_Summary_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
 
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", targetFileName, Convert.ToBase64String(pdfReportBytes));
@@ -153,13 +146,13 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteExcelExportProcess(List<ProvinceDto> targetedDataset)
+        private async Task ExecuteExcelExportProcess(List<Province> targetedDataset)
         {
             try
             {
                 loadingStateActive = true;
 
-                byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Provinces List Summary");
+                byte[] excelBytes = await ExcelService.GenerateDataReportExcelAsync(targetedDataset, "Regions List Summary");
                 string fileName = $"Province_List_Summary_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
                 await JS.InvokeVoidAsync("ZabFileSaver.DownloadBinaryStream", fileName, Convert.ToBase64String(excelBytes));
@@ -176,7 +169,7 @@ namespace ViabilityIQ.Web.Components.Pages
             }
         }
 
-        private async Task ExecuteEmailDistributionProcess(List<ProvinceDto> targetedDataset)
+        private async Task ExecuteEmailDistributionProcess(List<Province> targetedDataset)
         {
             try
             {
@@ -195,7 +188,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private class ProvinceListPrintDto
         {
-            [DisplayName("Province Name")]
+            [DisplayName("Region Name")]
             public string? ProvinceName { get; set; }
 
             [DisplayName("Short Name")]

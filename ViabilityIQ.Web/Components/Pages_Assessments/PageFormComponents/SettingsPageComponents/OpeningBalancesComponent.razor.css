@@ -94,110 +94,119 @@
 .ob-readonly small { color: #81909d; font-size: .48rem }
 .ob-readonly strong { color: #173d59; font-size: .64rem }
 
-.ob-field {
-    display: grid;
-    gap: .18rem;
-    margin: 0
+.ob-readonly-grid {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
-
-    .ob-field > span {
-        color: #344f63;
-        font-size: .70rem;
-        font-weight: 700
+    .ob-readonly-grid :hover {
+        border-color: #98AFC7;
+        box-shadow: 0 4px 12px rgba(152, 175, 199, 0.25); /* Small, soft shadow matching the hue */
     }
 
-    .ob-field small {
-        color: #81909d;
-        font-size: .51rem
-    }
 
-.ob-input {
-    display: flex;
-    overflow: hidden;
-    height: 2rem;
-    border: 1px solid #cad6df;
-    border-radius: .4rem;
-    background: #fff
-}
-
-    .ob-input:focus-within {
-        border-color: #2a9d8f;
-        box-shadow: 0 0 0 2px rgba(42,157,143,.12)
-    }
-
-    .ob-input span {
+    .ob-field {
         display: grid;
-        min-width: 2rem;
-        place-items: center;
-        background: #f1f5f8;
-        color: #607486;
-        font-size: .65rem;
-        font-weight: 700
+        gap: .18rem;
+        margin: 0
     }
 
-    .ob-input input {
-        width: 100%;
-        min-width: 0;
-        padding: .3rem .45rem;
-        border: 0;
-        outline: 0;
-        color: #29475d;
-        text-align: right;
-        font-size: .90rem;
-        font-weight: 500
-    }
-
-.ob-suffix input {
-    order: 0
-}
-
-.ob-suffix span {
-    order: 1
-}
-
-.ob-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: .6rem .75rem;
-    border-top: 1px solid #dce5ec;
-    background: #f8fafc
-}
-
-    .ob-footer > span {
-        color: #718294;
-        font-size: .54rem
-    }
-
-    .ob-footer button {
-        display: inline-flex;
-        align-items: center;
-        gap: .3rem;
-        padding: .42rem .7rem;
-        border: 1px solid #62cbb8;
-        border-radius: .42rem;
-        background: #2ba88f;
-        color: #fff;
-        font-size: .61rem;
-        font-weight: 800
-    }
-
-        .ob-footer button:hover {
-            background: #238d79
+        .ob-field > span {
+            color: #344f63;
+            font-size: .70rem;
+            font-weight: 700
         }
 
-@media(max-width:700px) {
-    .ob-grid {
-        grid-template-columns: 1fr
+        .ob-field small {
+            color: #81909d;
+            font-size: .51rem
+        }
+
+    .ob-input {
+        display: flex;
+        overflow: hidden;
+        height: 2rem;
+        border: 1px solid #cad6df;
+        border-radius: .4rem;
+        background: #fff
+    }
+
+        .ob-input:focus-within {
+            border-color: #2a9d8f;
+            box-shadow: 0 0 0 2px rgba(42,157,143,.12)
+        }
+
+        .ob-input span {
+            display: grid;
+            min-width: 2rem;
+            place-items: center;
+            background: #f1f5f8;
+            color: #607486;
+            font-size: .65rem;
+            font-weight: 700
+        }
+
+        .ob-input input {
+            width: 100%;
+            min-width: 0;
+            padding: .3rem .45rem;
+            border: 0;
+            outline: 0;
+            color: #29475d;
+            text-align: right;
+            font-size: .90rem;
+            font-weight: 500
+        }
+
+    .ob-suffix input {
+        order: 0
+    }
+
+    .ob-suffix span {
+        order: 1
     }
 
     .ob-footer {
-        align-items: stretch;
-        flex-direction: column
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .6rem .75rem;
+        border-top: 1px solid #dce5ec;
+        background: #f8fafc
     }
 
-        .ob-footer button {
-            justify-content: center
+        .ob-footer > span {
+            color: #718294;
+            font-size: .54rem
         }
-}
+
+        .ob-footer button {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .42rem .7rem;
+            border: 1px solid #62cbb8;
+            border-radius: .42rem;
+            background: #2ba88f;
+            color: #fff;
+            font-size: .61rem;
+            font-weight: 800
+        }
+
+            .ob-footer button:hover {
+                background: #238d79
+            }
+
+    @media(max-width:700px) {
+        .ob-grid {
+            grid-template-columns: 1fr
+        }
+
+        .ob-footer {
+            align-items: stretch;
+            flex-direction: column
+        }
+
+            .ob-footer button {
+                justify-content: center
+            }
+    }

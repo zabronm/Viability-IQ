@@ -30,8 +30,8 @@ namespace ViabilityIQ.Web.Components.Pages
         //---------------------------------------------------------
         private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
-        private string AlertHeading = "Company Register";
-        private string AlertMessage = "Register your company details here. All users will be registered under your company tenant; All reports will be based on information from this section.";
+        private string AlertHeading = "Organisation Profile";
+        private string AlertMessage = "This is the single Company represented by your tenant. Regions, Sites, users and subscriptions operate beneath this organisation.";
 
         private List<Company> companyList = new();
         private List<ZabDataTableAdvanced<Company>.ColumnDefinition<Company>> tableColumns = new();
@@ -42,8 +42,6 @@ namespace ViabilityIQ.Web.Components.Pages
         {
             // ✅ Subscribe to OffCanvas callbacks
             OffcanvasService!.OnShow += HandleCanvasShow;
-
-            _ = LoadGridDatasetAsync();
 
             tableColumns = new List<ZabDataTableAdvanced<Company>.ColumnDefinition<Company>>
             {
@@ -59,6 +57,8 @@ namespace ViabilityIQ.Web.Components.Pages
                     BadgeClass = x => x.Active == true ? "badge-approved" : "badge-rejected"
                 }
             };
+
+            await LoadGridDatasetAsync();
         }
 
         // ✅ Handle when canvas opens
@@ -77,6 +77,13 @@ namespace ViabilityIQ.Web.Components.Pages
                 var resultSet = await companyRepository.GetAllAsync();
                 companyList = resultSet != null && resultSet.Any() ? resultSet.ToList() : new List<Company>();
             }
+            catch (Exception exception)
+            {
+                companyList = new List<Company>();
+                _Toast!.ShowError(
+                    $"Organisation Profile could not be loaded: {exception.Message}",
+                    sessionService!.AppTitle);
+            }
             finally
             {
                 loadingStateActive = false;
@@ -87,7 +94,7 @@ namespace ViabilityIQ.Web.Components.Pages
         // ✅ Open form via service
         private async Task HandleFormExecution(long extractedRecordId)
         {
-            string formTitle = extractedRecordId == 0 ? "Add Company Details" : "Modify Company Details";
+            string formTitle = extractedRecordId == 0 ? "Create Organisation Profile" : "Modify Organisation Profile";
 
             await OffcanvasService!.ShowAsync(new CanvasRequest
             {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Dapper.Contrib.Extensions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,11 +10,14 @@ using ViabilityIQ.Shared.DataModelsInterfaces;
 namespace ViabilityIQ.Shared.DataModels
 {
 
-	[Table("tblBranch")]
+	[Dapper.Contrib.Extensions.Table("tblBranch")]
 	public class Branch : IEntity, IAuditableEntity, ISortableEntity, ITenantEntity
 	{
-		[Key] public long BranchId { get; set; }
+		[Dapper.Contrib.Extensions.Key] public long BranchId { get; set; }
         public long? TenantId { get; set; }
+        [StringLength(12)]
+        public string? BranchCode { get; set; }
+        [Required(ErrorMessage = "Site name is required.")]
 		public string? BranchName { get; set; }
 	    public string? Address_Street { get; set; }
         public string? Address_Location { get; set; }
@@ -24,6 +27,7 @@ namespace ViabilityIQ.Shared.DataModels
         public string? Address_PostalLocation { get; set; }
         public string? Address_PostalCity { get; set; }
         public string? Address_PostalCode { get; set; }
+        [Range(1, long.MaxValue, ErrorMessage = "Region is required.")]
         public long ProvinceId { get; set; }
         public long Manager_UserId { get; set; }
         public string? Telephone { get; set; }

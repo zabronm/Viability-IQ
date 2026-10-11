@@ -1,13 +1,13 @@
 ﻿@using ViabilityIQ.Infrastructure.Repositories
 
-<div class="viq-form-shell">
+<div class="viq-form-shell" style="padding: 3px;">
     @if (loadingStateActive)
     {
         <div class="viq-form-busy" role="status" aria-live="polite">
             <div class="viq-form-busy-card">
                 <span class="viq-form-spinner" aria-hidden="true"></span>
                 <div>
-                    <strong>Loading VAT settings</strong>
+                    <strong>Loading VAT settings ...</strong>
                     <span>Please wait while the assessment context is prepared.</span>
                 </div>
             </div>
@@ -29,79 +29,85 @@
 
             <ValidationSummary class="viq-form-validation-summary" />
 
-            <section class="viq-form-section">
-                <header class="viq-form-section-heading">
-                    <span><i class="bi bi-calendar3-range" aria-hidden="true"></i></span>
-                    <div>
-                        <h3>Assessment context</h3>
-                        <p>Read-only case, period and business information.</p>
-                    </div>
-                </header>
+            <div class="row g-3 vat-workarea">
+                <div class="col-12 col-lg-7">
+                    <section class="viq-form-section vat-panel">
+                        <header class="viq-form-section-heading">
+                            <span><i class="bi bi-calendar3-range" aria-hidden="true"></i></span>
+                            <div>
+                                <h3>Assessment context</h3>
+                                <p>Read-only case, period and business information.</p>
+                            </div>
+                        </header>
 
-                <div class="viq-form-grid viq-form-grid-2">
-                    <div class="viq-form-field">
-                        <label for="vatCaseNumber">Case number</label>
-                        <input id="vatCaseNumber" class="viq-form-control"
-                               value="@vatUpdateModel.CaseNumber" readonly disabled />
-                    </div>
+                        <div class="viq-form-grid viq-form-grid-2">
+                            <div class="viq-form-field">
+                                <label for="vatCaseNumber">Case number</label>
+                                <input id="vatCaseNumber" class="viq-form-control"
+                                       value="@vatUpdateModel.CaseNumber" readonly disabled />
+                            </div>
 
-                    <div class="viq-form-field">
-                        <label for="vatBusiness">Business</label>
-                        <div id="vatBusiness">
-                            <DDLookupComponent SourceKey="DDLookupEnums.Businesses" Label="Business"
-                                               @bind-Value="@vatUpdateModel.BusinessId" IsDisabled="true" />
+                            <div class="viq-form-field">
+                                <label for="vatBusiness">Business</label>
+                                <div id="vatBusiness">
+                                    <DDLookupComponent SourceKey="DDLookupEnums.Businesses" Label="Business"
+                                                       @bind-Value="@vatUpdateModel.BusinessId" IsDisabled="true" />
+                                </div>
+                            </div>
+
+                            <div class="viq-form-field">
+                                <label for="vatPeriodStart">Period start</label>
+                                <input id="vatPeriodStart" class="viq-form-control"
+                                       value="@vatUpdateModel.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
+                            </div>
+
+                            <div class="viq-form-field">
+                                <label for="vatPeriodEnd">Period end</label>
+                                <input id="vatPeriodEnd" class="viq-form-control"
+                                       value="@vatUpdateModel.AssessmentFinishDate?.ToString("yyyy-MM-dd")" readonly disabled />
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="viq-form-field">
-                        <label for="vatPeriodStart">Period start</label>
-                        <input id="vatPeriodStart" class="viq-form-control"
-                               value="@vatUpdateModel.AssessmentStartDate?.ToString("yyyy-MM-dd")" readonly disabled />
-                    </div>
-
-                    <div class="viq-form-field">
-                        <label for="vatPeriodEnd">Period end</label>
-                        <input id="vatPeriodEnd" class="viq-form-control"
-                               value="@vatUpdateModel.AssessmentFinishDate?.ToString("yyyy-MM-dd")" readonly disabled />
-                    </div>
+                    </section>
                 </div>
-            </section>
 
-            <section class="viq-form-section">
-                <header class="viq-form-section-heading">
-                    <span><i class="bi bi-percent" aria-hidden="true"></i></span>
-                    <div>
-                        <h3>Statutory settings</h3>
-                        <p>Set the VAT percentage applied to taxable projections.</p>
-                    </div>
-                </header>
+                <div class="col-12 col-lg-5">
+                    <section class="viq-form-section vat-panel">
+                        <header class="viq-form-section-heading">
+                            <span><i class="bi bi-percent" aria-hidden="true"></i></span>
+                            <div>
+                                <h3>Statutory settings</h3>
+                                <p>Set the VAT percentage applied to taxable projections.</p>
+                            </div>
+                        </header>
 
-                <div class="viq-form-grid viq-form-grid-2">
-                    <div class="viq-form-field viq-form-span-2">
-                        <label for="vatRate">VAT rate (%) <span class="viq-required">*</span></label>
-                        <input id="vatRate" class="viq-form-control" type="number" min="0" max="100" step="0.01"
-                               value="@vatUpdateModel.VatRate.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
-                               @onchange="SetVatRate" />
-                        <ValidationMessage For="@(() => vatUpdateModel.VatRate)" class="viq-form-validation" />
-                    </div>
+                        <div class="viq-form-grid">
+                            <div class="viq-form-field">
+                                <label for="vatRate">VAT rate (%) <span class="viq-required">*</span></label>
+                                <input id="vatRate" class="viq-form-control" type="number" min="0" max="100" step="0.01"
+                                       value="@vatUpdateModel.VatRate.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                       @onchange="SetVatRate" />
+                                <ValidationMessage For="@(() => vatUpdateModel.VatRate)" class="viq-form-validation" />
+                            </div>
+                        </div>
+
+                        <footer class="viq-form-actions vat-card-actions" style="padding: 3px; padding-bottom: 20px;">
+                            <span><i class="bi bi-info-circle" aria-hidden="true"></i> <span style="font-size: 0.56rem">The rate is applied to VAT-inclusive sales, purchases & expenses.</span></span>
+                            <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting" style="width:50px !important;">
+                                @if (IsSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span>Updating…</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                                    <span>Update VAT</span>
+                                }
+                            </button>
+                        </footer>
+                    </section>
                 </div>
-            </section>
-
-            <footer class="viq-form-actions">
-                <span><i class="bi bi-info-circle" aria-hidden="true"></i> The rate is applied to VAT-inclusive sales, purchases and expenses.</span>
-                <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">
-                    @if (IsSubmitting)
-                    {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span>Updating…</span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
-                        <span>Update VAT</span>
-                    }
-                </button>
-            </footer>
+            </div>
         </EditForm>
     }
 </div>

@@ -46,6 +46,10 @@ namespace ViabilityIQ.Web.Components.Pages
             tableColumns = new List<ZabDataTableAdvanced<BusinessDto>.ColumnDefinition<BusinessDto>>
             {
                 new() {
+                    Title = "Business Code",
+                    Value = x => x.BusinessCode ?? ""
+                },
+                new() {
                     Title = "Business Name", ServerField = nameof(BusinessDto.BusinessName),
                     Value = x => x.BusinessName ?? "", Filterable = true
                 },
@@ -61,12 +65,12 @@ namespace ViabilityIQ.Web.Components.Pages
                     Title = "Reg?", ServerField = nameof(BusinessDto.Registered),
                     Value = x => x.Registered ? "Yes" : "No", Searchable = false
                 },
+                //new() {
+                //    Title = "VAT Reg?", ServerField = nameof(BusinessDto.VATRegistered),
+                //    Value = x => x.VATRegistered ? "Yes" : "No", Searchable = false
+                //},
                 new() {
-                    Title = "VAT Reg?", ServerField = nameof(BusinessDto.VATRegistered),
-                    Value = x => x.VATRegistered ? "Yes" : "No", Searchable = false
-                },
-                new() {
-                    Title = "Province", ServerField = nameof(BusinessDto.ProvinceName),
+                    Title = "Region", ServerField = nameof(BusinessDto.ProvinceName),
                     Value = x => x.ProvinceName ?? "", Filterable = true
                 },
                 new() {
@@ -92,10 +96,20 @@ namespace ViabilityIQ.Web.Components.Pages
             await Task.CompletedTask;
         }
 
-        private Task<DataTablePage<BusinessDto>> LoadBusinessPageAsync(
+        private async Task<DataTablePage<BusinessDto>> LoadBusinessPageAsync(
             DataTableQuery query,
-            CancellationToken cancellationToken) =>
-            businessRepository.GetPageAsync(query, cancellationToken);
+            CancellationToken cancellationToken)
+        {
+            var page = await businessRepository.GetPageAsync(query, cancellationToken);
+            var codes = (await coreBusinessRepository.GetAllAsync())
+                .ToDictionary(item => item.BusinessId, item => item.BusinessCode);
+            foreach (var item in page.Items)
+            {
+                item.BusinessCode = codes.GetValueOrDefault(item.BusinessId);
+            }
+
+            return page;
+        }
 
         private Task HandleTableLoadError(Exception exception)
         {

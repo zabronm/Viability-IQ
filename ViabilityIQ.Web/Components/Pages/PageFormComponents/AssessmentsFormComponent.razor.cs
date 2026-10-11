@@ -41,6 +41,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 {
                     activeBusinessLookup = businesses.ToDictionary(x => x.BusinessId, x => x.BusinessName ?? $"ID: {x.BusinessId}");
                 }
+
             }
             catch { /* Graceful configuration fallback */ }
         }
@@ -125,6 +126,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 assessmentModel.blExpenses = boolExpenses ? 1 : 0;
                 assessmentModel.blSales = boolSales ? 1 : 0;
                 assessmentModel.blVat = boolVat ? 1 : 0;
+                assessmentModel.AssessmentTypeId = 4;           //Logic changed to credit, User will specify Debtor/Creditor profiles iun the Assumptions
 
                 bool operationSuccess = await assessmentRepository.SaveAsync(assessmentModel);
 
