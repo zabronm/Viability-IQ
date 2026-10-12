@@ -79,6 +79,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         // Sorting State
         private string currentSortColumn = "Description";
         private bool isAscending = true;
+        private long _lastLoadedAssessmentId;
+
 
         private IEnumerable<UnifiedIncomeViewModel> FilteredIncomeStreams
         {
@@ -102,33 +104,66 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         #endregion
 
         #region Lifecycle Methods
-
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
+            // Subscribe once for this component instance. Route parameters can
+            // change without recreating the component.
+            if (projectionStateManager != null)
+            {
+                projectionStateManager.ProjectionChanged += OnProjectionChanged;
+                Logger?.LogDebug("AssessmentSalesPage subscribed to ProjectionChanged events");
+            }
+        }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            // The route parameter is authoritative. Session state is only a
+            // fallback for non-routed callers that did not supply an ID.
+            var effectiveAssessmentId = AssessmentId > 0
+                ? AssessmentId
+                : sessionService?.AssessmentId ?? 0;
+
+            if (effectiveAssessmentId <= 0)
+            {
+                IsLoading = false;
+                AlertHeading = "ASSESSMENT REQUIRED:";
+                AlertMessage = "Open this page from a valid assessment before loading sales data.";
+                blAlert = true;
+                Logger?.LogWarning("AssessmentSalesPage received no valid assessment ID.");
+                return;
+            }
+
+            if (_lastLoadedAssessmentId == effectiveAssessmentId)
+                return;
+
+            AssessmentId = effectiveAssessmentId;
+            IsLoading = true;
+
             try
             {
-                AssessmentId = sessionService.AssessmentId ?? 0;
-
-                Logger.LogInformation(
-                    "AssessmentSalesPage initialized for assessment {AssessmentId}",
+                Logger?.LogInformation(
+                    "Loading AssessmentSalesPage for assessment {AssessmentId}",
                     AssessmentId);
 
                 await LoadAndMapSalesData();
                 await LoadProjectionAssumptionsAsync();
                 await CreateSummaries();
-                IsLoading = false;
-
-                // Subscribe to projection changes
-                projectionStateManager.ProjectionChanged += OnProjectionChanged;
-
-                Logger.LogDebug("AssessmentSalesPage subscribed to ProjectionChanged events");
+                _lastLoadedAssessmentId = effectiveAssessmentId;
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error initializing AssessmentSalesPage");
+                Logger?.LogError(ex, "Error loading AssessmentSalesPage for assessment {AssessmentId}", AssessmentId);
+                _lastLoadedAssessmentId = 0;
+                AlertHeading = "SALES COULD NOT BE LOADED:";
+                AlertMessage = "The sales information could not be loaded. Please retry or return to the assessment.";
+                blAlert = true;
+            }
+            finally
+            {
                 IsLoading = false;
             }
         }
+
 
         #endregion
 
