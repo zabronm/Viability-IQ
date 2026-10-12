@@ -39,7 +39,9 @@
 </head>
 
 <body>
-    <ApplicationShell @rendermode="new InteractiveServerRenderMode(prerender: false)" />
+
+    @* <ApplicationShell @rendermode="new InteractiveServerRenderMode(prerender: false)" /> *@
+    <ApplicationShell @rendermode="InteractiveServer" />
 
     <div id="components-reconnect-modal" class="components-reconnect-hide" role="status">
         <div class="viq-reconnect-card">

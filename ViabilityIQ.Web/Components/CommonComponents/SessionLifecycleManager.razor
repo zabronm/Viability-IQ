@@ -16,13 +16,71 @@
 @inject IJSRuntime JSRuntime
 @inject ILogger<SessionLifecycleManager> Logger
 @inject ToastService ToastService
+@inject NavigationManager NavigationManager
+
+
+@* @if (!initialized)
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100" role="status" aria-live="polite">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="presentation"></div>
+            <div class="mt-3">Restoring your session...</div>
+        </div>
+    </div>
+}
+else
+{
+    @ChildContent
+} *@
+
+@if (!initialized && !IsPublicRoute)
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100"
+         role="status" aria-live="polite">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="presentation"></div>
+            <div class="mt-3">Restoring your session...</div>
+        </div>
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+
 
 @code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
     private const string StorageKey = "ViabilityIQ.SessionContext";
     private readonly SemaphoreSlim persistenceLock = new(1, 1);
     private DotNetObjectReference<SessionLifecycleManager>? componentReference;
     private bool initialized;
     private bool disposed;
+
+
+    private bool IsPublicRoute
+{
+    get
+    {
+        var relativePath =
+            NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+        var path = relativePath
+            .Split('?', '#')[0]
+            .Trim('/')
+            .ToLowerInvariant();
+
+        return path is ""
+            or "login"
+            or "identity/login"
+            or "identity/forgot-password";
+    }
+}
+
+
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -34,16 +92,34 @@
 
         await RestoreContextAsync();
 
-        var idleMinutes = ReadPositiveInt("SessionManagement:IdleTimeoutMinutes", 30);
-        var warningMinutes = ReadPositiveInt("SessionManagement:IdleWarningMinutes", 5);
-        await JSRuntime.InvokeVoidAsync(
-            "viabilitySession.initialize",
-            componentReference,
-            TimeSpan.FromMinutes(idleMinutes).TotalMilliseconds,
-            TimeSpan.FromMinutes(warningMinutes).TotalMilliseconds);
-
-        initialized = true;
-        await PersistContextAsync();
+        // Restore authentication, tenant membership and assessment context before
+        // rendering Routes. Their components may query tenant-scoped repositories
+        // as soon as their lifecycle methods run.
+        try
+        {
+            var idleMinutes = ReadPositiveInt("SessionManagement:IdleTimeoutMinutes", 30);
+            var warningMinutes = ReadPositiveInt("SessionManagement:IdleWarningMinutes", 5);
+            await JSRuntime.InvokeVoidAsync(
+                "viabilitySession.initialize",
+                componentReference,
+                TimeSpan.FromMinutes(idleMinutes).TotalMilliseconds,
+                TimeSpan.FromMinutes(warningMinutes).TotalMilliseconds);
+        }
+        catch (Exception exception) when (
+            exception is JSException
+            or JSDisconnectedException
+            or InvalidOperationException)
+        {
+            // Session restoration must not leave the whole app permanently on
+            // the loading screen just because the idle-timeout script is unavailable.
+            Logger.LogWarning(exception, "Session idle-timeout JavaScript could not be initialized.");
+        }
+        finally
+        {
+            initialized = true;
+            await PersistContextAsync();
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     [JSInvokable]
@@ -234,7 +310,6 @@
         {
             Logger.LogDebug(exception, "Session lifecycle JavaScript was already unavailable.");
         }
-        componentReference?.Dispose();
         componentReference?.Dispose();
     }
 }
