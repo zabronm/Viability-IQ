@@ -2,35 +2,40 @@
     <AccountsProjectionAlerts Alerts="@Projection.Alerts"
                               Heading="Consolidated working-capital alerts" />
 
-    <div class="accounts-kpis">
-        <article class="accounts-kpi">
+    <div class="acc-kpis">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-wallet2"></i></div>
             <span>Cash collected</span>
             <strong>@Money(Projection.TotalCollections)</strong>
             <small>Projected debtor receipts</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-credit-card"></i></div>
             <span>Suppliers paid</span>
             <strong>@Money(Projection.TotalPayments)</strong>
             <small>Projected creditor payments</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-arrow-left-right"></i></div>
             <span>Net cash movement</span>
             <strong class="@ValueClass(NetCashMovement)">@Money(NetCashMovement)</strong>
             <small>Collections less payments</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-journal-minus"></i></div>
             <span>Closing debtors</span>
             <strong>@Money(Projection.ClosingDebtors)</strong>
             <small>Year-end receivables</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-pie-chart"></i></div>
             <span>Net working capital</span>
             <strong class="@ValueClass(Projection.NetWorkingCapital)">@Money(Projection.NetWorkingCapital)</strong>
             <small>Debtors less creditors</small>
         </article>
     </div>
 
-    <article class="accounts-card mb-3">
+    <article class="accounts-card mb-3 article-main">
         <header class="accounts-card-header">
             <h2>Receipts versus supplier payments</h2>
             <div class="chart-legend">
@@ -54,7 +59,7 @@
         </div>
     </article>
 
-    <article class="accounts-card mb-3">
+    <article class="accounts-card mb-3 article-main">
         <header class="accounts-card-header">
             <h2>Consolidated working-capital outlook</h2>
             <span>Amounts available to the cashflow forecast</span>

@@ -2,28 +2,33 @@
     <AccountsProjectionAlerts Alerts="@Projection.Alerts"
                               Heading="Creditors and cashflow alerts" />
 
-    <div class="accounts-kpis">
-        <article class="accounts-kpi">
+    <div class="acc-kpis">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-wallet2"></i></div>
             <span>Opening creditors</span>
             <strong>@Money(OpeningCreditors)</strong>
             <small>From active sales categories</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-credit-card"></i></div>
             <span>Stock purchases</span>
             <strong>@Money(Projection.TotalPurchases)</strong>
             <small>Live AssessmentStock values</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-arrow-left-right"></i></div>
             <span>Supplier payments</span>
             <strong>@Money(Projection.TotalPayments)</strong>
             <small>Within the projection period</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-journal-minus"></i></div>
             <span>Closing creditors</span>
             <strong>@Money(Projection.ClosingCreditors)</strong>
             <small>Includes post-year payments</small>
         </article>
-        <article class="accounts-kpi">
+        <article class="acc-kpi">
+            <div class="acc-kpi-icon-wrapper"><i class="bi bi-pie-chart"></i></div>
             <span>Payment coverage</span>
             <strong>@PaymentCoverage.ToString("N1")%</strong>
             <small>Payments / opening plus purchases</small>
@@ -31,7 +36,7 @@
     </div>
 
     <div class="accounts-grid">
-        <article class="accounts-card">
+        <article class="accounts-card article-main">
             <header class="accounts-card-header">
                 <h2>Creditor payment profile</h2>
                 <span>Total @Projection.Profile.CreditorPercentageTotal.ToString("N1")%</span>
@@ -55,7 +60,7 @@
             </div>
         </article>
 
-        <article class="accounts-card">
+        <article class="accounts-card article-main ">
             <header class="accounts-card-header">
                 <h2>Supplier payments and closing creditors</h2>
                 <div class="chart-legend">
@@ -80,7 +85,7 @@
         </article>
     </div>
 
-    <article class="accounts-card mb-3">
+    <article class="accounts-card mb-3 article-main">
         <header class="accounts-card-header">
             <h2>Monthly creditor movement</h2>
             <span>Opening + stock purchases - supplier payments = closing</span>
@@ -130,7 +135,7 @@
         </div>
     </article>
 
-    <article class="accounts-card">
+    <article class="accounts-card article-main">
         <header class="accounts-card-header">
             <h2>Purchase-category distribution</h2>
             <span>Opening creditors and annual stock purchases</span>
