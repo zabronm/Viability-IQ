@@ -56,12 +56,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal ScheduledOutflow => ExpectedRepayments + InterestCost + ExtraRepayments;
         private IReadOnlyList<AssessmentKpiCardItem> LoanKpis =>
         [
+            new("Active Loans", LoanProfilesDataset.Count.ToString("N0"), "Active loan profiles", "bi bi-list-check", "kpi-slate"),
             new("Total Loan Value", Money(TotalLoanValue), "Original principal value", "bi bi-bank", "kpi-blue"),
+            new("Extra Repayments", Money(ExtraRepayments), "Additional repayments", "bi bi-plus-circle", "kpi-cyan"),
             new("Scheduled Outflow", Money(ScheduledOutflow), "Total projected repayments", "bi bi-cash-stack", "kpi-teal"),
             new("Expected Repayments", Money(ExpectedRepayments), "Scheduled principal repayments", "bi bi-calendar-check", "kpi-purple"),
-            new("Interest Cost", Money(InterestCost), "Projected finance cost", "bi bi-percent", "kpi-red"),
-            new("Extra Repayments", Money(ExtraRepayments), "Additional repayments", "bi bi-plus-circle", "kpi-cyan"),
-            new("Active Loans", LoanProfilesDataset.Count.ToString("N0"), "Active loan profiles", "bi bi-list-check", "kpi-slate")
+            new("Interest Cost", Money(InterestCost), "Projected finance cost", "bi bi-percent", "kpi-red"),                     
         ];
 
         // Sorting State for Loan Profile Type
