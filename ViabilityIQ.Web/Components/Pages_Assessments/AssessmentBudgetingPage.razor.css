@@ -124,32 +124,87 @@
     margin-top: .75rem;
 }
 
-.budget-kpis article {
-    background: #fff;
-    border: 1px solid #dce6e7;
-    border-radius: .6rem;
-    box-shadow: 0 2px 9px rgba(31, 62, 70, .05);
-    display: grid;
-    gap: .2rem;
-    padding: .85rem 1rem;
+    .budget-kpis article {
+        background: #fff;
+        border: 1px solid #dce6e7;
+        border-left: 2px solid #6E7F80; /* 2px left border */
+        border-radius: 12px;
+        box-shadow: 0 2px 9px rgba(31, 62, 70, .05);
+        display: flex;
+        flex-direction: column;
+        gap: .2rem;
+        padding: .85rem 1rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+
+        /* Marble color border on hover */
+        .budget-kpis article:hover {
+            border-left: 3px solid #566D7E; /* 2px left border */
+            border-color: #566D7E;
+            box-shadow: 0 4px 14px rgba(86, 109, 126, 0.18);
+        }
+
+        /* Semi-circle feature in bottom-right corner */
+        .budget-kpis article::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 65px;
+            height: 65px;
+            background: #eff6ff;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+    /* Keep text content above the semi-circle */
+    .budget-kpis span,
+    .budget-kpis strong,
+    .budget-kpis small {
+        position: relative;
+        z-index: 1;
+    }
+
+    .budget-kpis span {
+        color: #637589;
+        font-size: .68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-right: 2.5rem; /* Leaves room for top-right icon */
+    }
+
+    .budget-kpis strong {
+        color: #102c46;
+        font-size: 1.25rem;
+    }
+
+    .budget-kpis small {
+        color: #778899;
+        font-size: .67rem;
+    }
+
+
+/* Top-right Icon Wrapper Badge */
+.kpi-icon-wrapper {
+    position: absolute;
+    top: .75rem;
+    right: .75rem;
+    width: 34px;
+    height: 34px;
+    background: #eff6ff;
+    color: #566D7E;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    z-index: 1;
 }
 
-.budget-kpis span {
-    color: #637589;
-    font-size: .68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.budget-kpis strong {
-    color: #102c46;
-    font-size: 1.25rem;
-}
-
-.budget-kpis small {
-    color: #778899;
-    font-size: .67rem;
-}
 
 .budget-alerts {
     padding: 1rem;

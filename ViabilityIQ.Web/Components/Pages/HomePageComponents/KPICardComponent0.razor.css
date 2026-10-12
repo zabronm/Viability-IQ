@@ -2,7 +2,7 @@
 .kpi-card {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
-    border-left: 3px solid #616D7E; /* Marble left border color */
+    border-left: 1px solid #616D7E; /* Marble left border color */
     border-radius: 10px; /* (4) Increased border radius by 2px (from 12px) */
     padding: 8px 12px; /* (1) Reduced overall vertical padding */
     display: flex;
@@ -18,7 +18,7 @@
 }
 
     .kpi-card:hover {
-        border-left: 4px solid #566D7E; /* Marble left border color */
+        border-left: 2px solid #566D7E; /* Marble left border color */
         transform: translateY(-4px);
         box-shadow: 0 6px 14px rgba(86, 109, 126, 0.15);
         border-color: #94a3b8;

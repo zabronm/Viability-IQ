@@ -36,7 +36,7 @@
     min-width: 0;
     padding: 0.65rem;
     border: 1px solid #d8e4ee;
-    border-left: 3px solid var(--asmkpi-accent);
+    border-left: 1px solid var(--asmkpi-accent);
     border-radius: 0.55rem;
     background: #fff;
     position: relative; /* Required for semi-circle positioning */
@@ -62,7 +62,8 @@
 
     .asmkpi-card:hover {
         transform: translateY(-2px);
-        border-color: var(--asmkpi-accent);
+        border-left: 2px solid #566D7E;
+        border: solid 1px #566D7E;
         box-shadow: 0 7px 15px rgba(15, 42, 67, 0.09);
     }
 

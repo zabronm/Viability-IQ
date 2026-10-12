@@ -9,7 +9,7 @@
             <span>Assessment Balance Sheet</span>
         </div>
         <button type="button"
-                class="btn btn-outline-success btn-sm"
+                class="btn btn-outline-success zdt-button-outline "
                 disabled="@(IsPrinting || IsLoadingAssets || IsLoadingProjection || Projection is null)"
                 @onclick="PreparePrintAsync">
             @if (IsPrinting)

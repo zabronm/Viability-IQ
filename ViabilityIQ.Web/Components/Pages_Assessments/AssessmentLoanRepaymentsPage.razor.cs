@@ -42,7 +42,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private string StatusMessage { get; set; } = "";
 
         private string SearchQuery { get; set; } = string.Empty;
-        private long? SelectedLoanTypeId { get; set; } = null;
+        private long SelectedLoanTypeId { get; set; } = 0L;
         private bool IsLoading { get; set; } = false;
         private string ActivePanelTitle { get; set; } = "Loan Administration Module";
         private long LoadedAssessmentId { get; set; }
@@ -231,7 +231,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             return name.Substring(0, 18) + "..";
         }
 
-        private void OnLoanTypeFilterChanged(long? selectedValue)
+        private void OnLoanTypeFilterChanged(long selectedValue)
         {
             SelectedLoanTypeId = selectedValue;
             StateHasChanged();
@@ -241,9 +241,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             var query = LoanProfilesDataset.AsEnumerable();
 
-            if (SelectedLoanTypeId.HasValue && SelectedLoanTypeId.Value > 0)
+            if (SelectedLoanTypeId > 0)
             {
-                query = query.Where(x => x.LoanId == SelectedLoanTypeId.Value);
+                query = query.Where(x => x.LoanId == SelectedLoanTypeId);
             }
 
             if (!string.IsNullOrWhiteSpace(SearchQuery))

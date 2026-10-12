@@ -23,18 +23,19 @@
         <div class="col-12">
             <div class="d-flex align-items-center justify-content-between mb-0 flex-wrap gap-2 assessment-page-toolbar">
                 <div>
-                    @* <button type="button" class="btn btn-success text-xs shadow-sm px-3" @onclick="() => OpenLoanFormAsync(0)">
+                    <button type="button" class="zdt-add-button" @onclick="() => OpenLoanFormAsync(0)">
                         <i class="bi bi-plus-lg me-1.5 fw-bold"></i>Add Loan
-                    </button *@
+                    </button>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
                     <AssessmentPrintButton />
-                    <div class="assessment-page-filter">
+                    <div class="assessment-page-filter">                       
                         <DDLookupComponent SourceKey="DDLookupEnums.AssessmentLoans"
                                            FilterValue="@AssessmentId"
-                                           Value="SelectedLoanTypeId ?? 0L"
+                                           Value="SelectedLoanTypeId"
                                            ValueChanged="@(val => SelectedLoanTypeId = val)"
+                                           ValueExpression="@(() =>SelectedLoanTypeId)"
                                            Placeholder="Filter by loan" />
                     </div>
 

@@ -55,14 +55,14 @@
             <div class="px-0 my-3 asset-summary-toolbar">
                 <div class="row g-2 align-items-center">
                     <div class="col-md-6 d-flex gap-2">
-                        <button class="btn btn-success  text-xs shadow-sm" @onclick="AddAsset">
+                        <button class="zdt-add-button" @onclick="AddAsset">
                             <i class="bi bi-plus-circle me-1"></i>
                             Add Asset
                         </button>
                     </div>
 
                     <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
-                        <button class="btn btn-outline-success btn-sm text-xs shadow-sm"
+                        <button class="btn btn-outline-success zdt-button-outline "
                                 disabled="@IsPrinting"
                                 @onclick="PrintPageAsync">
                             <i class="bi bi-printer me-1"></i>

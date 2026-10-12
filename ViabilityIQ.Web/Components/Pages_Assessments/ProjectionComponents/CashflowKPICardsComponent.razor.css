@@ -16,7 +16,7 @@
     padding: 0.45rem 0.6rem 0.4rem; /* (1) Reduced internal padding */
     overflow: hidden;
     border: 1px solid #dce4eb;
-    border-left: 2px solid var(--cfkpi-accent);
+    border-left: 1px solid var(--cfkpi-accent);
     border-radius: 0.78rem; /* (3) Increased border radius by ~2px */
     background: linear-gradient(145deg, #ffffff 5%, #f8fafc 100%);
     box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
@@ -38,7 +38,7 @@
         transform: translateY(-3px);
         border-color: #566D7E;
         box-shadow: 0 10px 25px rgba(86, 109, 126, 0.15);
-        border-left: 4px solid var(--cfkpi-accent);
+        border-left: 2px solid var(--cfkpi-accent);
     }
 
 .cfkpi-heading {

@@ -16,7 +16,7 @@
                 @if (!IsEditProfileMode)
                 {
                     <section class="registration-panel plan-panel">
-                        <div class="panel-heading">
+                        <div class="panel-heading mb-3">
                             <span class="panel-step">1</span>
                             <div>
                                 <h2>Choose Plan</h2>
@@ -24,6 +24,7 @@
                             </div>
                         </div>
 
+                        <div class="my-3" style="margin-top: 3rem !important;">
                         <button type="button"
                                 class="plan-option @(RegisterRequest.PlanCode == "STANDARD" ? "selected" : "")"
                                 @onclick='() => SelectPlan("STANDARD")'
@@ -37,7 +38,11 @@
                             </span>
                             <span class="selection-mark"><i class="bi bi-check-lg"></i></span>
                         </button>
-
+                        <div class="d-flex align-items-center my-4">
+    <hr class="flex-grow-1 border-secondary opacity-50 m-0">
+    <span class="h4 mx-3 text-secondary mb-0">OR</span>
+    <hr class="flex-grow-1 border-secondary opacity-50 m-0">
+</div>
                         <button type="button"
                                 class="plan-option @(RegisterRequest.PlanCode == "OPEN" ? "selected" : "")"
                                 @onclick='() => SelectPlan("OPEN")'
@@ -55,6 +60,7 @@
                         <div class="plan-note">
                             <i class="bi bi-info-circle-fill"></i>
                             Standard can be upgraded to Open Plan without moving your data.
+                        </div>
                         </div>
                     </section>
                 }

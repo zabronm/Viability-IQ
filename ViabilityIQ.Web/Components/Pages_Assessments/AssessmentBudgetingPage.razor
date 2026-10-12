@@ -32,7 +32,7 @@
                     <strong>Budget unavailable</strong>
                     <span>@pageError</span>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="LoadAsync">
+                <button type="button" class="btn btn-outline-danger zdt-button-outline" @onclick="LoadAsync">
                     Retry
                 </button>
             </section>
@@ -68,7 +68,7 @@
                                       @bind="newBudgetRemarks"></textarea>
                         </label>
                         <button type="button"
-                                class="btn btn-success"
+                                class="btn zdt-add-button"
                                 disabled="@isBusy"
                                 @onclick="CreateAsync">
                             @if (isBusy)
@@ -111,20 +111,20 @@
                     @if (workspace.Status == AssessmentBudgetStatuses.Draft && workspace.CanEdit)
                     {
                         <button type="button"
-                                class="btn btn-outline-primary btn-sm"
+                                class="btn btn-outline-primary zdt-button-outline"
                                 disabled="@isBusy"
                                 title="Refresh comparison values without overwriting budget entries"
                                 @onclick="RefreshProjectionAsync">
                             <i class="bi bi-arrow-repeat me-1"></i>Refresh projection
                         </button>
                         <button type="button"
-                                class="btn btn-success btn-sm"
+                                class="zdt-add-button"
                                 disabled="@(!isDirty || isBusy)"
                                 @onclick="SaveAsync">
                             <i class="bi bi-check2-circle me-1"></i>Save draft
                         </button>
                         <button type="button"
-                                class="btn btn-primary btn-sm"
+                                class="zdt-add-button "
                                 disabled="@isBusy"
                                 @onclick="SubmitAsync">
                             <i class="bi bi-send me-1"></i>Submit
@@ -133,7 +133,7 @@
                     else if (workspace.Status == AssessmentBudgetStatuses.Submitted && workspace.CanApprove)
                     {
                         <button type="button"
-                                class="btn btn-success btn-sm"
+                                class="zdt-add-button"
                                 disabled="@isBusy"
                                 @onclick="ApproveAsync">
                             <i class="bi bi-patch-check me-1"></i>Approve budget
@@ -142,7 +142,7 @@
                     else if (workspace.Status == AssessmentBudgetStatuses.Approved && workspace.CanApprove)
                     {
                         <button type="button"
-                                class="btn btn-outline-secondary btn-sm"
+                                class="zdt-button-outline"
                                 disabled="@isBusy"
                                 @onclick="ReopenAsync">
                             <i class="bi bi-unlock me-1"></i>Reopen as draft
@@ -151,13 +151,21 @@
                 </div>
             </section>
 
+
+            <!-- KPI CARDS  -->
             <section class="budget-kpis" aria-label="Budget key metrics">
                 <article>
+                    <div class="kpi-icon-wrapper">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
                     <span>Budget revenue</span>
                     <strong>@Money(BudgetTotal("REVENUE"))</strong>
                     <small>@VarianceLabel("REVENUE")</small>
                 </article>
                 <article>
+                    <div class="kpi-icon-wrapper">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
                     <span>Profit before tax</span>
                     <strong class="@ValueClass(workspace.BudgetProfitBeforeTax)">
                         @Money(workspace.BudgetProfitBeforeTax)
@@ -165,6 +173,9 @@
                     <small>@SignedMoney(workspace.BudgetProfitBeforeTax - workspace.ProjectedProfitBeforeTax) vs projection</small>
                 </article>
                 <article>
+                    <div class="kpi-icon-wrapper">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
                     <span>Net cash movement</span>
                     <strong class="@ValueClass(workspace.BudgetNetCashflow)">
                         @Money(workspace.BudgetNetCashflow)
@@ -172,6 +183,9 @@
                     <small>@SignedMoney(workspace.BudgetNetCashflow - workspace.ProjectedNetCashflow) vs projection</small>
                 </article>
                 <article>
+                    <div class="kpi-icon-wrapper">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
                     <span>Closing cash</span>
                     <strong class="@ValueClass(workspace.BudgetClosingBank)">
                         @Money(workspace.BudgetClosingBank)
@@ -207,17 +221,17 @@
                     </div>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Budget display mode">
                         <button type="button"
-                                class="btn @(displayMode == BudgetDisplayMode.Budget ? "btn-primary" : "btn-outline-primary")"
+                                class="btn px-3 py-2 @(displayMode == BudgetDisplayMode.Budget ? "zdt-add-button" : "btn-outline-success zdt-button-outline")"
                                 @onclick="() => displayMode = BudgetDisplayMode.Budget">
                             Budget
                         </button>
                         <button type="button"
-                                class="btn @(displayMode == BudgetDisplayMode.Projection ? "btn-primary" : "btn-outline-primary")"
+                                class="btn px-3 py-2 @(displayMode == BudgetDisplayMode.Projection ? "zdt-add-button" : "btn-outline-success zdt-button-outline")"
                                 @onclick="() => displayMode = BudgetDisplayMode.Projection">
                             Projection
                         </button>
                         <button type="button"
-                                class="btn @(displayMode == BudgetDisplayMode.Variance ? "btn-primary" : "btn-outline-primary")"
+                                class="btn px-3 py-2 @(displayMode == BudgetDisplayMode.Variance ? "zdt-add-button" : "btn-outline-success zdt-button-outline")"
                                 @onclick="() => displayMode = BudgetDisplayMode.Variance">
                             Variance
                         </button>

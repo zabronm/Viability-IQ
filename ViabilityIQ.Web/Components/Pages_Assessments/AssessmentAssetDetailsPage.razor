@@ -25,68 +25,7 @@
         </div>
     }
     else
-    {
-        @* @if (ShowAlertsContainer)
-        {
-            <section class="aad-panel aad-alert-panel" aria-labelledby="aad-alerts-heading">
-                <div class="aad-section-heading">
-                    <div>
-                        <span class="aad-eyebrow">Attention required</span>
-                        <h2 id="aad-alerts-heading">Asset alerts</h2>
-                    </div>
-                    <div class="aad-alert-heading-actions">
-                        <span class="aad-alert-count">@AssetAlerts.Count alert@(AssetAlerts.Count == 1 ? string.Empty : "s")</span>
-                        <button type="button"
-                                class="aad-alert-dismiss"
-                                title="Dismiss asset alerts"
-                                aria-label="Dismiss asset alerts"
-                                @onclick="DismissAlerts">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-                </div>
-
-                @if (AssetAlerts.Count == 0)
-                {
-                    <div class="aad-empty-alert">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>No asset risks or data-quality issues were detected.</span>
-                    </div>
-                }
-                else if (ShowAllAlerts)
-                {
-                    <div class="aad-alert-grid">
-                        @foreach (var alert in VisibleAlerts)
-                        {
-                            <article class="aad-alert aad-alert-@alert.Severity">
-                                <span class="aad-alert-icon"><i class="@alert.Icon"></i></span>
-                                <div>
-                                    <strong>@alert.Title</strong>
-                                    <p>@alert.Message</p>
-                                </div>
-                                @if (alert.AssessmentAssetId > 0)
-                                {
-                                    <button type="button"
-                                            class="btn btn-sm btn-light"
-                                            @onclick="() => OpenAssetDetailsAsync(alert.AssessmentAssetId)">
-                                        Review
-                                    </button>
-                                }
-                            </article>
-                        }
-                    </div>
-
-                }
-
-                @if (AssetAlerts.Count > 0)
-                {
-                    <button type="button" class="aad-alert-toggle" @onclick="ToggleAlerts">
-                        @(ShowAllAlerts ? "Hide asset alerts" : $"See all {AssetAlerts.Count} alerts")
-                        <i class="bi @(ShowAllAlerts ? "bi-chevron-up" : "bi-chevron-down")"></i>
-                    </button>
-                }
-            </section>
-        } *@
+    {       
         <div class="row bg-white g-3 my-0 py-1 px-2" style="border-radius: 6px;">
             <div class="col-12 py-0">
                 @* <section class="aad-panel aad-metrics-panel" aria-label="Asset performance metrics"> *@
@@ -99,29 +38,22 @@
                                                    TotalNetValue="TotalClosingNetBookValue" />
                 </div>
         
-                <div class="px-0 my-3 py-2 asset-summary-toolbar">
-                    <div class="aad-movement-toolbar">
-                        <div>
-                            <span class="aad-eyebrow">Monthly roll-forward</span>
-                            <h2 id="aad-movement-heading">Asset movement details</h2>
-                        </div>
-                    </div>
-
+                <div class="px-0 my-3 py-2 asset-summary-toolbar">  
                     <div class="aad-data-toolbar">
-                        <button type="button" class="btn btn-success  text-xs shadow-sm" @onclick="AddAssetAsync">
+                        <button type="button" class="zdt-add-button" @onclick="AddAssetAsync">
                             <i class="bi bi-plus-circle me-1"></i>
                             Add Asset
                         </button>
                         <div class="aad-toolbar-actions">
                             <div class="aad-print-actions" aria-label="Print asset details">
                                 <span><i class="bi bi-printer"></i> Print</span>
-                                <button type="button"
+                                <button type="button" class="zdt-button-outline"
                                         disabled="@IsPrinting"
                                         @onclick="PrintSummaryAsync"
                                         title="Print with all asset movement rows collapsed">
                                     Summary
                                 </button>
-                                <button type="button"
+                                <button type="button" class="zdt-button-outline"
                                         disabled="@IsPrinting"
                                         @onclick="PrintDetailedAsync"
                                         title="Print with all asset movement rows expanded">
