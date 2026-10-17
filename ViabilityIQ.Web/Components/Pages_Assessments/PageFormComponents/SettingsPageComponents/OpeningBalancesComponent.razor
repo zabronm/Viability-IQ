@@ -3,9 +3,9 @@
 @using ViabilityIQ.Infrastructure.Repositories
 @using ViabilityIQ.Shared.DataModels
 @inject IGenericDataRepository<AssessmentSalesCategory> CategoryRepository
+@inject IGenericDataRepository<AssessmentStock> StockRepository
 @inject IGenericDataRepository<AssessmentAsset> AssetRepository
 @inject IGenericDataRepository<AssessmentLoan> LoanRepository
-@inject IGenericDataRepository<IncomeType> IncomeTypeRepository
 @inject IAssetDepreciationEngine DepreciationEngine
 
 @if (loadingStateActive)
@@ -29,7 +29,7 @@ else
 
             <div class="ob-section-title"><span>Calculated from detailed records</span><small>Read-only authoritative totals</small></div>
             <div class="ob-grid ob-readonly-grid">
-                @ReadOnlyBalance("Opening stock", "Read-only total from active Sales Category opening balances; used as Month 1 opening stock.", OpeningStock, "bi-box-seam")
+                @ReadOnlyBalance("Opening stock", "Read-only total from active stock item opening balances; used as Month 1 opening stock.", OpeningStock, "bi-box-seam")
                 @ReadOnlyBalance("Opening debtors", "Sum of active category debtor balances.", OpeningDebtors, "bi-person-up")
                 @ReadOnlyBalance("Opening creditors", "Sum of active category creditor balances.", OpeningCreditors, "bi-person-down")
                 @ReadOnlyBalance("Opening loan balance", "Sum of active assessment loan balances.", OpeningLoans, "bi-bank")
@@ -76,17 +76,15 @@ else
         {
             var id = openingBalancesModel.AssessmentId;
             var categoriesTask = CategoryRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
+            var stockTask = StockRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
             var assetsTask = AssetRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
             var loansTask = LoanRepository.GetAllAsync(x => x.AssessmentId == id && x.Active);
-            var incomeTypesTask = IncomeTypeRepository.GetAllAsync();
             var depreciationTask = DepreciationEngine.CalculateAnnualDepreciationAsync(id);
-            await Task.WhenAll(categoriesTask, assetsTask, loansTask, incomeTypesTask, depreciationTask);
+            await Task.WhenAll(categoriesTask, stockTask, assetsTask, loansTask, depreciationTask);
             var categories = (await categoriesTask).ToArray();
+            var stockItems = (await stockTask).ToArray();
             var assets = (await assetsTask).ToArray();
-            var classifier = new IncomeTypeClassifier(await incomeTypesTask);
-            OpeningStock = categories
-                .Where(x => classifier.Classify(x) == IncomeSourceKind.Sales)
-                .Sum(x => x.OpeningStock);
+            OpeningStock = stockItems.Sum(x => x.OpeningBalance);
             OpeningDebtors = categories.Sum(x => x.OpeningDebtorsAmount);
             OpeningCreditors = categories.Sum(x => x.OpeningCreditorsAmount);
             OpeningLoans = (await loansTask).Sum(x => x.LoanBalanceAtAssessmentDate);
@@ -98,7 +96,7 @@ else
     }
 
     private RenderFragment ReadOnlyBalance(string label, string note, decimal value, string icon) => @<div class="ob-readonly">
-        <i class="bi @icon"></i><div class="ob-border"><span>@label</span><small>@note</small></div><strong>R @value.ToString("N2")</strong>
+        <i class="bi @icon"></i><div><span>@label</span><small>@note</small></div><strong>R @value.ToString("N2")</strong>
     </div>;
 
     private RenderFragment MoneyInput(string label, string note, decimal value, Action<decimal> setter, bool allowNegative = false) => @<label class="ob-field">

@@ -9,6 +9,7 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
     private readonly IGenericDataRepository<Assessment> _assessmentRepository;
     private readonly IGenericDataRepository<AssessmentProjectionAssumptions> _assumptionsRepository;
     private readonly IGenericDataRepository<AssessmentSalesCategory> _categoryRepository;
+    private readonly IGenericDataRepository<AssessmentStock> _stockRepository;
     private readonly IGenericDataRepository<AssessmentSales> _salesRepository;
     private readonly IGenericDataRepository<AssessmentExpenses> _expenseRepository;
     private readonly IGenericDataRepository<AssessmentLoan> _loanRepository;
@@ -19,6 +20,7 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         IGenericDataRepository<Assessment> assessmentRepository,
         IGenericDataRepository<AssessmentProjectionAssumptions> assumptionsRepository,
         IGenericDataRepository<AssessmentSalesCategory> categoryRepository,
+        IGenericDataRepository<AssessmentStock> stockRepository,
         IGenericDataRepository<AssessmentSales> salesRepository,
         IGenericDataRepository<AssessmentExpenses> expenseRepository,
         IGenericDataRepository<AssessmentLoan> loanRepository,
@@ -28,6 +30,7 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         _assessmentRepository = assessmentRepository;
         _assumptionsRepository = assumptionsRepository;
         _categoryRepository = categoryRepository;
+        _stockRepository = stockRepository;
         _salesRepository = salesRepository;
         _expenseRepository = expenseRepository;
         _loanRepository = loanRepository;
@@ -40,6 +43,7 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         var assessmentTask = _assessmentRepository.GetByIdAsync(assessmentId);
         var assumptionsTask = _assumptionsRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var categoriesTask = _categoryRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
+        var stockTask = _stockRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var salesTask = _salesRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var expensesTask = _expenseRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var loansTask = _loanRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
@@ -47,7 +51,7 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         var profilesTask = _profileRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
 
         await Task.WhenAll(
-            assessmentTask, assumptionsTask, categoriesTask, salesTask,
+            assessmentTask, assumptionsTask, categoriesTask, stockTask, salesTask,
             expensesTask, loansTask, assetsTask, profilesTask);
 
         var assessment = await assessmentTask;
@@ -55,6 +59,7 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
             .OrderByDescending(item => item.AssessmentProjectionAssumptionsId)
             .FirstOrDefault();
         var categories = (await categoriesTask).ToArray();
+        var stockItems = (await stockTask).ToArray();
         var sales = (await salesTask).ToArray();
         var expenses = (await expensesTask).ToArray();
         var loans = (await loansTask).ToArray();
@@ -64,9 +69,9 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         var hasOpeningPosition = assessment is not null
             && (assessment.OpeningBalance_Bank != 0m
                 || assessment.OpeningBalance_Assets != 0m
+                || stockItems.Any(item => item.OpeningBalance != 0m)
                 || categories.Any(category =>
-                    category.OpeningStock != 0m
-                    || category.OpeningDebtorsAmount != 0m
+                    category.OpeningDebtorsAmount != 0m
                     || category.OpeningCreditorsAmount != 0m));
         var profile = profiles.FirstOrDefault();
         var profileValid = profile is not null

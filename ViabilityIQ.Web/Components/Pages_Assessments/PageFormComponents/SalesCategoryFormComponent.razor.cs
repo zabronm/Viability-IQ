@@ -14,7 +14,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         [Inject] private ISessionService sessionService { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentSalesCategory> DataRepository { get; set; } = default!;
-        [Inject] private IGenericDataRepository<AssessmentSales> salesRepository { get; set; }
+        [Inject] private IGenericDataRepository<AssessmentSales> salesRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentStock> stockRepository { get; set; } = default!;
 
 
@@ -127,6 +127,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         {
                             AssessmentId = Model.AssessmentId,
                             Active = true,
+                            Description = Model.AssessmentSalesCategoryName ?? string.Empty,
                             AssessmentSalesCategoryId = Model.AssessmentSalesCategoryId,
                             Remarks = Model.Remarks,
                             CreatedDate = DateTime.UtcNow,

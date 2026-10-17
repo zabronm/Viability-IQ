@@ -9,6 +9,7 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
 {
     private readonly IGenericDataRepository<Assessment> _assessments;
     private readonly IGenericDataRepository<AssessmentSalesCategory> _categories;
+    private readonly IGenericDataRepository<AssessmentProjectionAssumptions> _assumptions;
     private readonly IGenericDataRepository<AssessmentSales> _sales;
     private readonly IGenericDataRepository<IncomeType> _incomeTypes;
     private readonly IGenericDataRepository<AssessmentStock> _stock;
@@ -24,6 +25,7 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
     public CashflowProjectionService(
         IGenericDataRepository<Assessment> assessments,
         IGenericDataRepository<AssessmentSalesCategory> categories,
+        IGenericDataRepository<AssessmentProjectionAssumptions> assumptions,
         IGenericDataRepository<AssessmentSales> sales,
         IGenericDataRepository<IncomeType> incomeTypes,
         IGenericDataRepository<AssessmentStock> stock,
@@ -38,6 +40,7 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
     {
         _assessments = assessments;
         _categories = categories;
+        _assumptions = assumptions;
         _sales = sales;
         _incomeTypes = incomeTypes;
         _stock = stock;
@@ -64,6 +67,8 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
 
             var categoriesTask = _categories.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
+            var assumptionsTask = _assumptions.GetAllAsync(x =>
+                x.AssessmentId == assessmentId && x.Active);
             var salesTask = _sales.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
             var incomeTypesTask = _incomeTypes.GetAllAsync();
@@ -83,6 +88,7 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
 
             await Task.WhenAll(
                 categoriesTask,
+                assumptionsTask,
                 salesTask,
                 incomeTypesTask,
                 stockTask,
@@ -97,6 +103,9 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
             return CashflowProjectionCalculator.Calculate(new CashflowCalculationInput(
                 assessment,
                 (await categoriesTask).ToList(),
+                (await assumptionsTask)
+                    .OrderByDescending(x => x.AssessmentProjectionAssumptionsId)
+                    .FirstOrDefault()?.CostOfSalesPercentage,
                 (await salesTask).ToList(),
                 (await incomeTypesTask).ToList(),
                 (await stockTask).ToList(),

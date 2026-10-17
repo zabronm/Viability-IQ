@@ -6,6 +6,7 @@ namespace ViabilityIQ.Application.FinancialCalculations;
 public sealed record CashflowCalculationInput(
     Assessment Assessment,
     IReadOnlyList<AssessmentSalesCategory> Categories,
+    decimal? CostOfSalesPercentage,
     IReadOnlyList<AssessmentSales> Sales,
     IReadOnlyList<IncomeType> IncomeTypes,
     IReadOnlyList<AssessmentStock> Stock,
@@ -42,7 +43,8 @@ public static class CashflowProjectionCalculator
         var salesCategories = input.Categories
             .Where(x => classifier.Classify(x) == IncomeSourceKind.Sales)
             .ToList();
-        var openingStock = salesCategories.Sum(x => x.OpeningStock);
+        var stockItems = input.Stock;
+        var openingStock = stockItems.Sum(x => x.OpeningBalance);
         var openingLoan = input.Loans.Sum(x => x.LoanBalanceAtAssessmentDate);
         var debtorMonths = BuildSalesDebtorProjection(
             classifiedSales,
@@ -101,7 +103,7 @@ public static class CashflowProjectionCalculator
                 : MovementTotal(input.AssetMovements, month, "Disposal");
             var assetDisposalNet = classifiedDisposalNet + movementDisposal;
             var assetDisposalGross = classifiedDisposalGross + movementDisposal;
-            var stockPurchases = input.Stock.Sum(x => Value(x.MonthlyValues, index));
+            var stockPurchases = stockItems.Sum(x => Value(x.MonthlyValues, index));
             var cogs = CalculateCogs(input, classifiedSales, index, warnings, false);
             var cogsInclusive = CalculateCogs(input, classifiedSales, index, warnings, true);
             var operatingExpenses = input.Expenses.Sum(x => Value(x.MonthlyValues, index))
@@ -121,7 +123,7 @@ public static class CashflowProjectionCalculator
                 : salesGross;
             var supplierPayments = input.Assessment.blDebtorsCreditors == 1
                 ? accountsMonth?.CreditorPayments ?? 0m
-                : input.Stock.Sum(x => x.blIncludeVAT
+                : stockItems.Sum(x => x.blIncludeVAT
                     ? Gross(Value(x.MonthlyValues, index), x.TotalNoVAT, x.TotalWithVAT)
                     : Value(x.MonthlyValues, index));
 
@@ -144,7 +146,17 @@ public static class CashflowProjectionCalculator
             var closingFixedAssets = input.AssetMovements
                 .Sum(x => Math.Max(0m, x.GetNetBookValue(month) ?? 0m));
 
-            runningStock = Math.Max(0m, runningStock + stockPurchases - cogs);
+            var projectedClosingStock = runningStock + stockPurchases - cogs;
+            if (projectedClosingStock < 0m
+                && warnings.All(x => x.Code != "stock-shortfall"))
+            {
+                warnings.Add(new(
+                    "stock-shortfall",
+                    CashflowAlertSeverity.Warning,
+                    "Projected stock shortfall",
+                    $"Estimated cost of sales exceeds opening inventory plus purchases by R {Math.Abs(projectedClosingStock):N2} in Month {month}. Review purchases, sales, markup and opening stock."));
+            }
+            runningStock = Math.Max(0m, projectedClosingStock);
             runningLoan = Math.Max(0m, runningLoan - principal);
             var inflows = salesReceipts
                           + sundryGross
@@ -260,6 +272,15 @@ public static class CashflowProjectionCalculator
                     ? netCogs * StockVatFactor(input.Stock, category.AssessmentSalesCategoryId)
                     : netCogs;
             }
+            else if (input.CostOfSalesPercentage.HasValue)
+            {
+                var netCogs = categorySales
+                    * Math.Clamp(input.CostOfSalesPercentage.Value, 0m, 100m)
+                    / 100m;
+                result += vatInclusive
+                    ? netCogs * StockVatFactor(input.Stock, category.AssessmentSalesCategoryId)
+                    : netCogs;
+            }
             else
             {
                 result += input.Stock
@@ -274,8 +295,8 @@ public static class CashflowProjectionCalculator
                     warnings.Add(new(
                         code,
                         CashflowAlertSeverity.Warning,
-                        "Missing category markup",
-                        $"{category.AssessmentSalesCategoryName ?? "Unnamed category"} uses stock purchases as COGS fallback."));
+                        "Missing cost-of-sales inputs",
+                        $"{category.AssessmentSalesCategoryName ?? "Unnamed category"} has no category markup or fallback cost-of-sales percentage; stock purchases are used as cost of sales."));
                 }
             }
         }

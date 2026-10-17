@@ -19,14 +19,13 @@
         else
         {
             <div class="scl-table-wrap"><table class="scl-table">
-                <thead><tr><th>#</th><th>Category</th><th class="text-end">Markup</th><th class="text-end">Opening stock</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <thead><tr><th>#</th><th>Category</th><th class="text-end">Markup</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
                 <tbody>
                 @{ var row = 1; }
                 @foreach (var category in Categories)
                 {
                     <tr><td>@row</td><td><strong>@category.AssessmentSalesCategoryName</strong></td>
                         <td class="text-end"><span class="scl-rate">@category.MarkupPercentage.ToString("N2")%</span></td>
-                        <td class="text-end">R @category.OpeningStock.ToString("N2")</td>
                         <td class="text-center"><span class="scl-status @(category.Active ? "active" : "inactive")">@(category.Active ? "Active" : "Inactive")</span></td>
                         <td class="text-center"><button class="scl-edit" type="button" title="Edit category" @onclick="() => OnEditRequested.InvokeAsync(category.AssessmentSalesCategoryId)"><i class="bi bi-pencil-square"></i></button></td>
                     </tr>
@@ -36,5 +35,5 @@
             </table></div>
         }
     </div>
-    <footer><i class="bi bi-info-circle"></i> Markup supports cost-of-Sales estimates; opening stock feeds the starting working-capital position.</footer>
+    <footer><i class="bi bi-info-circle"></i> Markup supports cost-of-sales estimates. Register opening stock by item in Stock Management.</footer>
 </section>

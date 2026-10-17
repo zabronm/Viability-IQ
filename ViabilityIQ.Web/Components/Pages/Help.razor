@@ -1,9 +1,117 @@
-﻿@page "/help"
+@page "/help"
 
-@inject NavigationManager NavigationManager
+<PageTitle>JobTracker | User guide</PageTitle>
 
+<div class="help-page">
+    <header class="help-hero">
+        <div class="help-hero-copy">
+            <span class="help-eyebrow"><i class="bi bi-life-preserver" aria-hidden="true"></i> JOBTRACKER WORKSPACE GUIDE</span>
+            <h1>Get your workshop ready</h1>
+            <p>A practical guide to setting up master data and maintaining product manufacturing definitions. This guide will grow alongside the application.</p>
+        </div>
+        <div class="help-hero-mark" aria-hidden="true"><i class="bi bi-journal-text"></i></div>
+    </header>
 
-@code {
-    protected override void OnInitialized() =>
-        NavigationManager.NavigateTo("/viq-help", replace: true);
-}
+    <div class="help-layout">
+        <nav class="help-toc" aria-label="Guide contents">
+            <strong>In this guide</strong>
+            <a href="#start">Start here</a>
+            <a href="#setup-order">Recommended setup order</a>
+            <a href="#master-data">Master data details</a>
+            <a href="#products">Products, BOMs and routes</a>
+            <a href="#international">International data</a>
+            <a href="#data-exchange">Product import and export</a>
+            <a href="#not-yet">What is still planned</a>
+            <a href="#troubleshooting">Troubleshooting</a>
+        </nav>
+
+        <main class="help-content">
+            <section class="help-callout help-callout-info" id="start">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                <div><strong>About this guide</strong><p>JobTracker is being built in stages. The instructions below cover the setup and product-definition features currently available. Quoting, order processing, purchasing transactions and shop-floor job execution are planned workflow areas; they are not described as operational features yet.</p></div>
+            </section>
+
+            <section class="help-section" id="setup-order">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-list-ol" aria-hidden="true"></i></span><div><span class="help-eyebrow">FIRST-TIME CONFIGURATION</span><h2>Recommended setup order</h2></div></div>
+                <p>Use the <a href="/setup">Setup</a> page as the starting point. Set up reference records before products so that drop-downs and cost calculations have valid choices.</p>
+                <ol class="help-steps">
+                    <li><span class="step-number">1</span><div><strong>Review the company workspace</strong><p>Confirm the tenant/company details and workshop defaults when company profile editing becomes available. The current screen is a development workspace and may show placeholder identity details.</p></div></li>
+                    <li><span class="step-number">2</span><div><strong>Create units and conversion rules</strong><p>Define the units your materials and products use, then add direct conversion factors for equivalent units. Do this before importing product data or entering BOM quantities.</p></div></li>
+                    <li><span class="step-number">3</span><div><strong>Create product groups and material categories</strong><p>Use product groups to organize manufactured products. Use raw-material categories to classify purchased stock independently.</p></div></li>
+                    <li><span class="step-number">4</span><div><strong>Set up suppliers and customers</strong><p>Enter supplier records first because materials, supplier price lists and machine service/calibration records can refer to suppliers. Mark subcontractors as suppliers that also perform external work. Add customers for product-specific references and later commercial workflows.</p></div></li>
+                    <li><span class="step-number">5</span><div><strong>Build store locations</strong><p>Create each store, then its shelves, then bins under the selected shelf. Bins are shared locations: a bin can contain more than one material. The location listing is intended to let staff query which materials are held in a bin.</p></div></li>
+                    <li><span class="step-number">6</span><div><strong>Enter raw materials and supplier prices</strong><p>Give each material a unique code, description, category, unit, preferred supplier, and optional store/shelf/bin location. Maintain supplier price records with effective dates so the source and timing of a price are visible.</p></div></li>
+                    <li><span class="step-number">7</span><div><strong>Configure machines and work-centres</strong><p>Record the machine identity, category/use, location, acquisition and useful-life information, hourly rate, and in-use status where applicable. Add calibration and service schedule entries, including the supplier and next due date when known.</p></div></li>
+                    <li><span class="step-number">8</span><div><strong>Set up routes, departments and people</strong><p>Create manufacturing processes/phases and assign a department. Mark whether each process is performed in-house or subcontracted. Then create technician grades with default labour rates and assign technicians to departments and grades.</p></div></li>
+                    <li><span class="step-number">9</span><div><strong>Create products and verify their costs</strong><p>Enter product details, then maintain the bill of materials, operations and drawing revisions. Review the estimated material, processing and unit costs before using the product definition downstream.</p></div></li>
+                </ol>
+            </section>
+
+            <section class="help-section" id="master-data">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-sliders2" aria-hidden="true"></i></span><div><span class="help-eyebrow">REFERENCE RECORDS</span><h2>Master data details</h2></div></div>
+                <div class="help-card-grid">
+                    <article class="help-card"><h3><i class="bi bi-rulers" aria-hidden="true"></i> Units of measure</h3><p>Use clear, consistent codes such as <em>Each</em>, <em>Millimetre</em> or <em>Kilogram</em>. Choose a base unit convention that fits how the workshop buys and consumes the material.</p><a href="/setup/units-of-measure">Open units of measure <i class="bi bi-arrow-right"></i></a></article>
+                    <article class="help-card"><h3><i class="bi bi-arrow-left-right" aria-hidden="true"></i> Unit conversions</h3><p>Enter a direct conversion between a source and target unit with its multiplier. For example, if 1 metre equals 1,000 millimetres, define that factor explicitly. The system can use the inverse relationship; it does not infer multi-step conversion chains.</p></article>
+                    <article class="help-card"><h3><i class="bi bi-boxes" aria-hidden="true"></i> Raw materials</h3><p>Codes should be stable and unique within the company. Set a default unit and category, then maintain supplier-specific prices separately. Keep opening stock and physical location accurate; shared bins do not reserve a bin to one item.</p><a href="/setup/raw-materials">Open raw materials <i class="bi bi-arrow-right"></i></a></article>
+                    <article class="help-card"><h3><i class="bi bi-geo-alt" aria-hidden="true"></i> Stores, shelves and bins</h3><p>Use a store for a physical or logical stock area, shelves to divide that area, and bins for the final pick location. Create bins under shelves; assign materials to a location through their material record. A bin may be shared by multiple materials.</p><a href="/setup/stores">Open stores &amp; locations <i class="bi bi-arrow-right"></i></a></article>
+                    <article class="help-card"><h3><i class="bi bi-gear-wide-connected" aria-hidden="true"></i> Machines</h3><p>Set an hourly machine rate for costing and keep calibration/service schedules current. These setup records describe resources; actual machine usage is expected to be recorded when production execution is implemented.</p><a href="/setup/machines">Open machines <i class="bi bi-arrow-right"></i></a></article>
+                    <article class="help-card"><h3><i class="bi bi-signpost-split" aria-hidden="true"></i> Routes and technicians</h3><p>A process represents a phase of work and its department. Product operations set the sequence and estimated setup/cycle time and rates. Technician grade rates provide labour-cost defaults; individual rates may be configured on a technician.</p><a href="/setup/processes">Open routes &amp; phases <i class="bi bi-arrow-right"></i></a> <a href="/setup/technicians">Open technicians <i class="bi bi-arrow-right"></i></a></article>
+                </div>
+            </section>
+
+            <section class="help-section" id="products">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><div><span class="help-eyebrow">PRODUCT ENGINEERING</span><h2>Products, BOMs and routes</h2></div></div>
+                <p>Open <a href="/setup/products">Products &amp; BOMs</a>, choose <strong>Add product</strong> or edit a product, and save its main details first. A product can be a finished item and can also be used as a component in another product's BOM when marked as an assembly component.</p>
+                <div class="help-instruction-list">
+                    <details open><summary>1. Complete the product details</summary><p>Enter a unique product code and description, select its product group and unit, and fill in planning/costing fields that apply. Store location is optional. Use the active flag to control whether the product is available for new use while retaining its history.</p></details>
+                    <details><summary>2. Add raw-material and product components</summary><p>In the BOM tab, add each raw material or assembly product used for one finished unit. Select the component and enter the quantity per product. Component type, unit and current unit cost are shown from the selected component. The system calculates the estimated line cost from quantity and cost. BOM detail editors stay open while you save individual lines; close when the set of edits is complete.</p></details>
+                    <details><summary>3. Define manufacturing operations</summary><p>Add operations in the intended sequence. Select the process/phase and, where applicable, a machine/work-centre. Enter setup minutes per batch, cycle minutes per unit, machine and labour rates, subcontract cost if relevant, and work instructions. Review the estimated operation cost shown by the product.</p></details>
+                    <details><summary>4. Maintain drawing revisions</summary><p>Add a revision/version number and effective date. Mark the current revision and attach the drawing PDF, AutoCAD DXF and optional preview image. Add revision notes to explain what changed. Product revision history records snapshots of product changes; it is an audit trail and does not currently restore an older version.</p></details>
+                    <details><summary>5. Add customer-specific references</summary><p>Use customer references when a customer calls the same product by its own part number or has customer-specific drawing, price or currency details. These references supplement the product's main identity and sell price.</p></details>
+                    <details><summary>6. Print a product reference</summary><p>From the BOM tab, select the BOM lines and choose the columns to include in the BOM report. From the Operations tab, select route rows and choose columns for the route report. Both reports include the product summary.</p></details>
+                </div>
+            </section>
+
+            <section class="help-section" id="international">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-globe2" aria-hidden="true"></i></span><div><span class="help-eyebrow">MULTI-REGION READINESS</span><h2>International data</h2></div></div>
+                <ul class="help-bullets">
+                    <li><strong>Use unit conversions deliberately.</strong> Define the conversion needed between the imported/product quantity unit and the product's stored unit. Conversion is direct or inverse only; do not rely on an unstated chain.</li>
+                    <li><strong>Keep customer pricing separate.</strong> Customer-specific currency and price data belongs on the customer reference, not in the product's general sell price.</li>
+                    <li><strong>Use consistent numeric CSV values.</strong> Product CSV numeric values use a dot decimal separator (for example, <code>12.5</code>), regardless of regional display settings.</li>
+                    <li><strong>Choose unambiguous codes.</strong> Use clear UOM codes and stable product/material identifiers so imports and cross-company references are understandable.</li>
+                </ul>
+                <div class="help-callout help-callout-warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><div><strong>Regional settings are still evolving</strong><p>Full localization, tax rules, multi-currency accounting and region-specific document formats are not covered by the current setup guide.</p></div></div>
+            </section>
+
+            <section class="help-section" id="data-exchange">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span><div><span class="help-eyebrow">BULK PRODUCT DATA</span><h2>Product import and export</h2></div></div>
+                <ol class="help-steps compact-steps">
+                    <li><span class="step-number">1</span><div><strong>Start from the template or an export.</strong><p>Open Products &amp; BOMs → Import / export and download the CSV template or export existing product master records.</p></div></li>
+                    <li><span class="step-number">2</span><div><strong>Prepare product master rows.</strong><p>Keep product codes unique, use existing product group and unit codes, and use the dot decimal separator for numeric values. A different quantity unit is accepted only when a matching conversion is configured.</p></div></li>
+                    <li><span class="step-number">3</span><div><strong>Review the preview and validation.</strong><p>Import shows validation issues before saving. Correct unknown groups/units, invalid numbers, duplicate product codes within the file and missing unit conversions before continuing.</p></div></li>
+                    <li><span class="step-number">4</span><div><strong>Apply the import.</strong><p>Import supports up to 500 rows per file and applies a valid batch transactionally. Review created/updated counts and inspect product revision history where needed.</p></div></li>
+                </ol>
+                <p class="help-small-note">The current CSV exchange covers product master fields only. It does not import or export BOM rows, operations, drawing files or customer references.</p>
+            </section>
+
+            <section class="help-section help-planned" id="not-yet">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span><div><span class="help-eyebrow">ROADMAP</span><h2>What is still planned</h2></div></div>
+                <p>The following workflow areas are part of the intended manufacturing system, but should not yet be treated as available end-to-end processes:</p>
+                <div class="help-roadmap-grid"><span><i class="bi bi-receipt"></i> Quotations and repeat quotes</span><span><i class="bi bi-cart-check"></i> Sales orders and purchasing</span><span><i class="bi bi-calendar2-week"></i> Job scheduling and dispatch</span><span><i class="bi bi-tools"></i> Technician job pick/release and scrap</span><span><i class="bi bi-clock-history"></i> Actual machine/labour timesheets</span><span><i class="bi bi-truck"></i> Delivery and production reports</span><span><i class="bi bi-shield-lock"></i> Full user authentication and permissions</span><span><i class="bi bi-arrow-repeat"></i> BOM/route bulk exchange and revision restore</span></div>
+            </section>
+
+            <section class="help-section" id="troubleshooting">
+                <div class="help-section-title"><span class="help-section-icon"><i class="bi bi-wrench-adjustable-circle" aria-hidden="true"></i></span><div><span class="help-eyebrow">QUICK CHECKS</span><h2>Troubleshooting</h2></div></div>
+                <div class="help-instruction-list">
+                    <details><summary>A drop-down has no options</summary><p>Check that the referenced master records exist and are active. For example, create a unit before assigning it to a material, and create a supplier before setting it as a preferred supplier.</p></details>
+                    <details><summary>A save button is disabled</summary><p>Check required fields, select a valid value from each required drop-down, and correct any validation message. A product must be saved before adding or editing its BOM, operations or drawings.</p></details>
+                    <details><summary>A bin cannot be selected</summary><p>Confirm the store, shelf and bin hierarchy has been created. Bins are children of shelves, and shelves are children of stores.</p></details>
+                    <details><summary>An import row fails unit validation</summary><p>Confirm both UOM codes are set up and that the required direct conversion exists. The import does not infer a chain through a third unit.</p></details>
+                    <details><summary>Where can I ask for help?</summary><p>Use the Help &amp; support link in the navigation. As this guide is being refined with the application, report which page and step you were using and include the message shown.</p></details>
+                </div>
+            </section>
+
+            <footer class="help-footer"><i class="bi bi-arrow-up-circle" aria-hidden="true"></i><a href="#start">Back to the beginning</a><span>Guide updated 14 October 2026 · Contents will be revised as features change.</span></footer>
+        </main>
+    </div>
+</div>

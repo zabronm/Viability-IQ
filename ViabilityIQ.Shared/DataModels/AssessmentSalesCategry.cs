@@ -25,7 +25,6 @@ namespace ViabilityIQ.Shared.DataModels
         [Range (0,1000,ErrorMessage ="Markup must be greater than zero (0)")]
         [Required(ErrorMessage ="Markup is required, please specify here.")]
         public decimal MarkupPercentage { get; set; }
-        public decimal OpeningStock { get; set; }       //Opening stock will be summed to  opening stock of all products
         public decimal OpeningDebtorsAmount { get; set; }   //Opening balances for debtors on this sales category
         public decimal OpeningCreditorsAmount { get; set; } //Opening balance for creditors in this sales category
         public bool Active { get; set; }

@@ -19,6 +19,7 @@ namespace ViabilityIQ.Shared.SharedModels
     {
         public long Id { get; set; }           // Ensure this line exists
         public string Description { get; set; } = string.Empty;
+        public decimal OpeningBalance { get; set; }
         public string AssessmentSalesCategoryName { get; set; } = string.Empty;
         public string StockItemName { get; set; } = string.Empty;
         public long TypeId { get; set; }

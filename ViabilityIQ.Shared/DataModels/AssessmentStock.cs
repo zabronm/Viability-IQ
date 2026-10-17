@@ -1,6 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,14 @@ namespace ViabilityIQ.Shared.DataModels
     [Dapper.Contrib.Extensions.Table("tblAssessmentStock")]
     public class AssessmentStock : IEntity, IAuditableEntity, ISortableEntity
     {
-        [Key] public long AssessmentStockId { get; set; }
+        [Dapper.Contrib.Extensions.Key] public long AssessmentStockId { get; set; }
         public long AssessmentId { get; set; }
         public long AssessmentSalesCategoryId { get; set; }        
-        public string? Description { get; set; }
+        [Required(ErrorMessage = "Stock item name is required.")]
+        public string Description { get; set; } = string.Empty;
+        [Range(typeof(decimal), "0", "79228162514264337593543950335",
+            ErrorMessage = "Opening stock balance cannot be negative.")]
+        public decimal OpeningBalance { get; set; }
         public bool blIncludeVAT { get; set; }        
         public decimal SameMonthlyAmount { get; set; }
         public decimal Month_1 { get; set; }
