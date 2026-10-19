@@ -24,7 +24,7 @@
     <div class="pnl-chart">
         <div class="pnl-axis">
             <span>@Compact(MaximumAbsoluteProfit)</span>
-            <span>R 0</span>
+            <span>@FormatCurrency(0m)</span>
             <span>@Compact(-MaximumAbsoluteProfit)</span>
         </div>
 
@@ -39,7 +39,7 @@
                     <div class="pnl-bar-area">
                         <div class="pnl-bar @(month.ProfitBeforeTax >= 0m ? "pnl-profit" : "pnl-loss")"
                              style="@BarStyle(month.ProfitBeforeTax)"
-                             title="@($"{month.MonthLabel}: R {month.ProfitBeforeTax:N0}")">
+                        title="@($"{month.MonthLabel}: {FormatCurrency(month.ProfitBeforeTax)}")">
                         </div>
                     </div>
                     <span>@month.MonthLabel</span>
@@ -51,7 +51,7 @@
     <footer class="pnl-footer">
         <span><i class="legend-profit"></i> Profit before tax</span>
         <strong class="@(Projection.Summary.ProfitBeforeTax >= 0m ? "text-success" : "text-danger")">
-            Period total: R @Projection.Summary.ProfitBeforeTax.ToString("N0")
+            Period total: @FormatCurrency(Projection.Summary.ProfitBeforeTax)
         </strong>
     </footer>
     }
@@ -69,16 +69,17 @@
             : FormattableString.Invariant($"height:{height:F2}%;top:50%;");
     }
 
-    private static string Compact(decimal value)
+    private string Compact(decimal value)
     {
         var absoluteValue = Math.Abs(value);
         var sign = value < 0m ? "-" : string.Empty;
+        var currencyCode = SessionService?.CurrencyCode ?? "ZAR";
 
         return absoluteValue switch
         {
-            >= 1_000_000m => $"{sign}R {absoluteValue / 1_000_000m:F1}m",
-            >= 1_000m => $"{sign}R {absoluteValue / 1_000m:F0}k",
-            _ => $"{sign}R {absoluteValue:F0}"
+            >= 1_000_000m => $"{sign}{currencyCode} {FormatNumber(absoluteValue / 1_000_000m, "N1")}m",
+            >= 1_000m => $"{sign}{currencyCode} {FormatNumber(absoluteValue / 1_000m, "N0")}k",
+            _ => $"{sign}{currencyCode} {FormatNumber(absoluteValue, "N0")}"
         };
     }
 }

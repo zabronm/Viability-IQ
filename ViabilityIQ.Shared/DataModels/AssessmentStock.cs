@@ -22,6 +22,21 @@ namespace ViabilityIQ.Shared.DataModels
         [Range(typeof(decimal), "0", "79228162514264337593543950335",
             ErrorMessage = "Opening stock balance cannot be negative.")]
         public decimal OpeningBalance { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335",
+            ErrorMessage = "Standard unit cost cannot be negative.")]
+        public decimal StandardUnitCost { get; set; }
+        public decimal ProductionUnits_Month_1 { get; set; }
+        public decimal ProductionUnits_Month_2 { get; set; }
+        public decimal ProductionUnits_Month_3 { get; set; }
+        public decimal ProductionUnits_Month_4 { get; set; }
+        public decimal ProductionUnits_Month_5 { get; set; }
+        public decimal ProductionUnits_Month_6 { get; set; }
+        public decimal ProductionUnits_Month_7 { get; set; }
+        public decimal ProductionUnits_Month_8 { get; set; }
+        public decimal ProductionUnits_Month_9 { get; set; }
+        public decimal ProductionUnits_Month_10 { get; set; }
+        public decimal ProductionUnits_Month_11 { get; set; }
+        public decimal ProductionUnits_Month_12 { get; set; }
         public bool blIncludeVAT { get; set; }        
         public decimal SameMonthlyAmount { get; set; }
         public decimal Month_1 { get; set; }
@@ -63,6 +78,28 @@ namespace ViabilityIQ.Shared.DataModels
             }
         } 
         [Write(false)] public decimal Month { get; set; }
+        [Write(false)] public decimal[] MonthlyProductionUnits
+        {
+            get => new[]
+            {
+                ProductionUnits_Month_1, ProductionUnits_Month_2, ProductionUnits_Month_3,
+                ProductionUnits_Month_4, ProductionUnits_Month_5, ProductionUnits_Month_6,
+                ProductionUnits_Month_7, ProductionUnits_Month_8, ProductionUnits_Month_9,
+                ProductionUnits_Month_10, ProductionUnits_Month_11, ProductionUnits_Month_12
+            };
+            set
+            {
+                if (value is null || value.Length != 12)
+                    throw new ArgumentException("MonthlyProductionUnits array must have exactly 12 elements.");
+
+                ProductionUnits_Month_1 = value[0]; ProductionUnits_Month_2 = value[1];
+                ProductionUnits_Month_3 = value[2]; ProductionUnits_Month_4 = value[3];
+                ProductionUnits_Month_5 = value[4]; ProductionUnits_Month_6 = value[5];
+                ProductionUnits_Month_7 = value[6]; ProductionUnits_Month_8 = value[7];
+                ProductionUnits_Month_9 = value[8]; ProductionUnits_Month_10 = value[9];
+                ProductionUnits_Month_11 = value[10]; ProductionUnits_Month_12 = value[11];
+            }
+        }
 
 
         long IEntity.Id => AssessmentStockId;

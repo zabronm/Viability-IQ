@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using ViabilityIQ.Application.Dtos;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
+using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.DataModels.HomePageModels;
+using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Pages.HomePageComponents;
@@ -14,6 +16,7 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
     private const int MaximumAssessmentCount = 10;
 
     [Inject] private IGenericDataRepository<AssessmentDto> AssessmentRepository { get; set; } = default!;
+    [Inject] private IGenericDataRepository<Assessment> CoreAssessmentRepository { get; set; } = default!;
     [Inject] private IAssessmentDataValidationService AssessmentDataValidationService { get; set; } = default!;
     [Inject] private ISessionService? SessionService { get; set; }
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -53,9 +56,19 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
             // assessments ordered by creation date as requested.
 
             RecentAssessments = query
+                //.OrderBy(assessment => assessment.CaseNumber)
                 .OrderByDescending(assessment => assessment.CreatedDate)
                 .Take(MaximumAssessmentCount)
                 .ToList();
+
+            await Task.WhenAll(RecentAssessments.Select(async assessment =>
+            {
+                var assessmentSettings = await CoreAssessmentRepository.GetByIdAsync(
+                    assessment.AssessmentId)
+                    ?? throw new InvalidOperationException(
+                        $"Assessment {assessment.AssessmentId} could not be loaded.");
+                assessment.AssessmentModeId = assessmentSettings.AssessmentModeId;
+            }));
         }
         catch (Exception ex)
         {
@@ -68,6 +81,18 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
             IsLoading = false;
         }
     }
+
+    private static string GetAssessmentModeName(int assessmentModeId) =>
+        Enum.IsDefined(typeof(AssessmentMode), assessmentModeId)
+            ? ((AssessmentMode)assessmentModeId) switch
+            {
+                AssessmentMode.Trading => "Trading",
+                AssessmentMode.Service => "Service",
+                AssessmentMode.ManufacturingSimplified => "Manufacturing",
+                AssessmentMode.Manufacturing => "Manufacturing",
+                _ => "Unknown mode"
+            }
+            : "Unknown mode";
 
     private async Task OpenAssessmentAsync(long assessmentId)
     {
@@ -108,6 +133,15 @@ public partial class RecentAssessmentsSnapshotComponent : ComponentBase
                 HasReviews: dataStatus.HasReviews,
                 HasDebtorsCreditorsData: dataStatus.HasDebtorsCreditors,
                 HasLoansData: dataStatus.HasLoans);
+            var assessmentSettings = await CoreAssessmentRepository.GetByIdAsync(
+                selectedRecord.AssessmentId);
+            if (assessmentSettings is not null)
+            {
+                SessionService.SetAssessmentModeAndLocale(
+                    assessmentSettings.AssessmentModeId,
+                    assessmentSettings.CurrencyCode,
+                    assessmentSettings.CultureName);
+            }
 
             Navigation.NavigateTo($"/assessment/dashboards/{selectedRecord.AssessmentId}");
         }

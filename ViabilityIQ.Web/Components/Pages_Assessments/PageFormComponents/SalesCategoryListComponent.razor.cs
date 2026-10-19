@@ -88,7 +88,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     new CanvasRequest
                     {
                         Title = ActivePanelTitle,
-                        Width = 350,
+                        Width = 450,
                         ComponentType = typeof(SalesCategoryFormComponent),
                         Parameters = new
                         {

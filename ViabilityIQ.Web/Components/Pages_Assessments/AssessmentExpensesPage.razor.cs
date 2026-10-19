@@ -9,6 +9,7 @@ using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.DataModels.FinCalculations;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.UtilityServices;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Services;
@@ -22,6 +23,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         #region Injected Services
 
         [Inject] MasterDataService? ViqCrudService { get; set; }
+        [Inject] IGenericDataRepository<AssessmentExpenses> ExpensesRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
@@ -169,23 +171,37 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             {
                 Logger?.LogDebug("Loading expenses data for assessment {AssessmentId}", AssessmentId);
 
-                var result = await ViqCrudService!.GetListAsync<AssessmentExpensesDto>("vw_assessment_expenses_list",
-                    new { AssessmentId }, "AssessmentId");
+                var resultTask = ViqCrudService!.GetListAsync<AssessmentExpensesDto>(
+                    "vw_assessment_expenses_list",
+                    new { AssessmentId },
+                    "AssessmentId");
+                var expenseRecordsTask = ExpensesRepository.GetAllAsync(x =>
+                    x.AssessmentId == AssessmentId && x.Active);
+                await Task.WhenAll(resultTask, expenseRecordsTask);
+                var expenseRecords = (await expenseRecordsTask)
+                    .ToDictionary(x => x.AssessmentExpenseId);
+                var result = await resultTask;
 
                 if (result != null)
                 {
-                    ExpenseStreams = result.Select(s => new UnifiedExpenseViewModel
+                    ExpenseStreams = result.Select(s =>
                     {
-                        Id = s.AssessmentExpensesId,
-                        Description = s.Description ?? "N/A",
-                        ExpenseItemId = s.ExpenseItemId,
-                        ExpenseItemName = s.ExpenseItemName ?? "N/A",
-                        TypeId = (long)s.ExpenseTypeId,
-                        TypeName = s.ExpenseTypeName ?? "N/A",
-                        blSendToCashBook = s.blSendToCashBook,
-                        blPercentageOfSalesUsed = s.blPercentageOfSalesUsed,
-                        MonthlyValues = new decimal[] { s.Month_1, s.Month_2, s.Month_3, s.Month_4, s.Month_5, s.Month_6,
-                                                    s.Month_7, s.Month_8, s.Month_9, s.Month_10, s.Month_11, s.Month_12 }
+                        expenseRecords.TryGetValue(s.AssessmentExpensesId, out var expenseRecord);
+                        return new UnifiedExpenseViewModel
+                        {
+                            Id = s.AssessmentExpensesId,
+                            Description = s.Description ?? "N/A",
+                            ExpenseItemId = s.ExpenseItemId,
+                            ExpenseItemName = s.ExpenseItemName ?? "N/A",
+                            TypeId = (long)s.ExpenseTypeId,
+                            TypeName = s.ExpenseTypeName ?? "N/A",
+                            IsDirectorWages = expenseRecord?.IsDirectorWages ?? false,
+                            IsDirectProductionCost = expenseRecord?.IsDirectProductionCost ?? false,
+                            blSendToCashBook = s.blSendToCashBook,
+                            blPercentageOfSalesUsed = s.blPercentageOfSalesUsed,
+                            MonthlyValues = new decimal[] { s.Month_1, s.Month_2, s.Month_3, s.Month_4, s.Month_5, s.Month_6,
+                                                        s.Month_7, s.Month_8, s.Month_9, s.Month_10, s.Month_11, s.Month_12 }
+                        };
                     }).ToList();
 
                     Logger?.LogInformation(
@@ -217,7 +233,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             await Task.CompletedTask;
         }
 
-        private static string Money(decimal value) => $"R {value:N0}";
+        private string Money(decimal value) =>
+            DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
         private static string Percent(decimal value) => $"{value:N1}%";
 
         private async Task AddExpenseStream() => await OpenExpenseFormPanel(new UnifiedExpenseViewModel());
@@ -230,6 +247,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 ExpenseItemId = stream.ExpenseItemId,
                 Description = stream.Description,
                 ExpenseTypeId = stream.TypeId,
+                IsDirectorWages = stream.IsDirectorWages,
+                IsDirectProductionCost = stream.IsDirectProductionCost,
                 MonthlyValues = stream.MonthlyValues
             };
 

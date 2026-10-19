@@ -17,6 +17,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
         [Inject] public ILogger<QuickActionsPanelComponent> Logger { get; set; } = default!;
         [Inject] public NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;
+        [Inject] private ToastService? Toast { get; set; } = default!;
 
         #endregion
 
@@ -167,13 +168,22 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
                 Logger.LogInformation(
                     "Quick action form completed successfully: {EntityType}",
                     entityType);
+                if (!string.IsNullOrWhiteSpace(result.Message))
+                {
+                    Toast?.ShowSuccess(result.Message, $"{entityType} saved");
+                }
             }
-            else
+            else if (!result.Cancelled)
             {
                 Logger.LogWarning(
                     "Quick action form failed: {EntityType} - {Message}",
                     entityType,
                     result.Message);
+                Toast?.ShowError(
+                    string.IsNullOrWhiteSpace(result.Message)
+                        ? $"Unable to save the {entityType.ToLowerInvariant()}."
+                        : result.Message,
+                    $"{entityType} not saved");
             }
 
             await Task.CompletedTask;

@@ -10,6 +10,8 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
     private readonly IGenericDataRepository<AssessmentProjectionAssumptions> _assumptionsRepository;
     private readonly IGenericDataRepository<AssessmentSalesCategory> _categoryRepository;
     private readonly IGenericDataRepository<AssessmentStock> _stockRepository;
+    private readonly IGenericDataRepository<AssessmentManufacturingMaterial> _manufacturingMaterialRepository;
+    private readonly IGenericDataRepository<AssessmentManufacturingBalances> _manufacturingBalancesRepository;
     private readonly IGenericDataRepository<AssessmentSales> _salesRepository;
     private readonly IGenericDataRepository<AssessmentExpenses> _expenseRepository;
     private readonly IGenericDataRepository<AssessmentLoan> _loanRepository;
@@ -21,6 +23,8 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         IGenericDataRepository<AssessmentProjectionAssumptions> assumptionsRepository,
         IGenericDataRepository<AssessmentSalesCategory> categoryRepository,
         IGenericDataRepository<AssessmentStock> stockRepository,
+        IGenericDataRepository<AssessmentManufacturingMaterial> manufacturingMaterialRepository,
+        IGenericDataRepository<AssessmentManufacturingBalances> manufacturingBalancesRepository,
         IGenericDataRepository<AssessmentSales> salesRepository,
         IGenericDataRepository<AssessmentExpenses> expenseRepository,
         IGenericDataRepository<AssessmentLoan> loanRepository,
@@ -31,6 +35,8 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         _assumptionsRepository = assumptionsRepository;
         _categoryRepository = categoryRepository;
         _stockRepository = stockRepository;
+        _manufacturingMaterialRepository = manufacturingMaterialRepository;
+        _manufacturingBalancesRepository = manufacturingBalancesRepository;
         _salesRepository = salesRepository;
         _expenseRepository = expenseRepository;
         _loanRepository = loanRepository;
@@ -44,6 +50,8 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         var assumptionsTask = _assumptionsRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var categoriesTask = _categoryRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var stockTask = _stockRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
+        var manufacturingMaterialsTask = _manufacturingMaterialRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
+        var manufacturingBalancesTask = _manufacturingBalancesRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var salesTask = _salesRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var expensesTask = _expenseRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
         var loansTask = _loanRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
@@ -51,7 +59,8 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
         var profilesTask = _profileRepository.GetAllAsync(item => item.AssessmentId == assessmentId && item.Active);
 
         await Task.WhenAll(
-            assessmentTask, assumptionsTask, categoriesTask, stockTask, salesTask,
+            assessmentTask, assumptionsTask, categoriesTask, stockTask,
+            manufacturingMaterialsTask, manufacturingBalancesTask, salesTask,
             expensesTask, loansTask, assetsTask, profilesTask);
 
         var assessment = await assessmentTask;
@@ -60,6 +69,8 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
             .FirstOrDefault();
         var categories = (await categoriesTask).ToArray();
         var stockItems = (await stockTask).ToArray();
+        var manufacturingMaterials = (await manufacturingMaterialsTask).ToArray();
+        var manufacturingBalances = (await manufacturingBalancesTask).ToArray();
         var sales = (await salesTask).ToArray();
         var expenses = (await expensesTask).ToArray();
         var loans = (await loansTask).ToArray();
@@ -70,6 +81,10 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
             && (assessment.OpeningBalance_Bank != 0m
                 || assessment.OpeningBalance_Assets != 0m
                 || stockItems.Any(item => item.OpeningBalance != 0m)
+                || manufacturingMaterials.Any(item => item.OpeningValue != 0m)
+                || manufacturingBalances.Any(balance =>
+                    balance.OpeningWorkInProgress != 0m
+                    || balance.OpeningFinishedGoods != 0m)
                 || categories.Any(category =>
                     category.OpeningDebtorsAmount != 0m
                     || category.OpeningCreditorsAmount != 0m));
@@ -82,6 +97,9 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
             && loan.InterestRatePerAnnum >= 0m
             && loan.RepaymentPeriodMonths > 0
             && loan.StartMonth is >= 1 and <= 12);
+        var directorWagesRecorded = expenses.Any(expense => expense.IsDirectorWages);
+        var legacyDirectorWagesRecorded =
+            (assessment?.MonthlyDirectorWagesAmountTotal ?? 0m) > 0m;
         var assetsComplete = assets.All(asset =>
             !asset.IsDepreciable
             || (asset.DepreciationRate > 0m && !string.IsNullOrWhiteSpace(asset.DepreciationMethod)));
@@ -97,12 +115,41 @@ public sealed class AssessmentReadinessService : IAssessmentReadinessService
             new("Monthly sales", sales.Any(HasMonthlyValue),
                 $"{sales.Length} active sales line(s) reviewed.",
                 "Enter at least one non-zero monthly sales or income value.", true),
+            new("Manufacturing raw materials",
+                assessment?.AssessmentModeId != (int)AssessmentMode.Manufacturing
+                    || manufacturingMaterials.Length > 0,
+                assessment?.AssessmentModeId == (int)AssessmentMode.Manufacturing
+                    ? $"{manufacturingMaterials.Length} active raw-material item(s) configured."
+                    : "Not required for this assessment mode.",
+                "Add raw-material items with opening balances and monthly purchase/closing quantities.", true),
+            new("Manufacturing inventory balances",
+                assessment?.AssessmentModeId != (int)AssessmentMode.Manufacturing
+                    || categories.Length > 0
+                        && categories.All(category => manufacturingBalances.Any(balance =>
+                        balance.AssessmentSalesCategoryId == category.AssessmentSalesCategoryId
+                        && balance.InventoryEstimatesConfirmed)),
+                assessment?.AssessmentModeId == (int)AssessmentMode.Manufacturing
+                    ? categories.Length > 0
+                        && categories.All(category => manufacturingBalances.Any(balance =>
+                        balance.AssessmentSalesCategoryId == category.AssessmentSalesCategoryId
+                        && balance.InventoryEstimatesConfirmed))
+                        ? "Opening and monthly closing WIP/finished-goods balances are confirmed for every sales category."
+                        : "One or more sales categories have missing or unconfirmed WIP/finished-goods balances."
+                    : "Not required for this assessment mode.",
+                "Enter and confirm opening WIP/finished goods and monthly closing inventory estimates for each sales category.", true),
             new("Debtor and creditor profile", profileValid,
                 profileValid ? "Collection and payment profiles are available." : "The profile is missing or ageing buckets exceed 100%.",
                 "Complete the debtor and creditor profile.", true),
             new("Operating expenses", expenses.Length > 0,
                 $"{expenses.Length} active expense line(s) found.",
                 "Enter the operating expenses required to run the business.", true),
+            new("Director wages", directorWagesRecorded || legacyDirectorWagesRecorded,
+                directorWagesRecorded
+                    ? "Director wages are recorded in the Expenses module."
+                    : legacyDirectorWagesRecorded
+                        ? "Legacy director-wage data is present; move it to an expense line when updating this assessment."
+                        : "No director-wage expense line is recorded.",
+                "Add one Director Wages expense line in Expenses. Enter zero if the business has no director remuneration.", true),
             new("VAT status", assessment?.blVat > 0 || assessment?.VATRate >= 0,
                 $"VAT configuration is recorded at {assessment?.VATRate ?? 0}%.",
                 "Confirm VAT registration and the default rate.", true),

@@ -5,6 +5,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.UtilityServices;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents.SettingsPageComponents;
 
@@ -13,6 +14,7 @@ public partial class DebtorsCreditorsComponent
     [Inject] private IGenericDataRepository<DebtorsCreditorsProfile> ProfileRepository { get; set; } = default!;
     [Inject] private MasterDataService ViqCrudService { get; set; } = default!;
     [Inject] private ILogger<DebtorsCreditorsComponent> Logger { get; set; } = default!;
+    [Inject] private ISessionService? sessionService { get; set; }
 
     [Parameter] public long AssessmentId { get; set; }
     [Parameter] public EventCallback<SaveResult> OnUpdate { get; set; }
@@ -34,7 +36,7 @@ public partial class DebtorsCreditorsComponent
     private long _loadedAssessmentId;
 
     private string ModeDescription => debtorsCreditorsModel?.EntryMode == true
-        ? "Enter the known Rand balances; percentages are calculated automatically."
+        ? $"Enter the known {sessionService?.CurrencyCode ?? "currency"} balances; percentages are calculated automatically."
         : "Enter the expected percentage distribution used by projections.";
 
     private decimal TotalCreditorsValue => SumValues(false);
@@ -100,16 +102,16 @@ public partial class DebtorsCreditorsComponent
     private DebtorsCreditorsProfile CreateDefaultProfile() => new()
     {
         AssessmentId = AssessmentId,
-        Creditors_30 = 50m,
-        Creditors_60 = 20m,
-        Creditors_90 = 10m,
-        Creditors_120 = 10m,
-        Creditors_120Plus = 10m,
-        Debtors_30 = 50m,
-        Debtors_60 = 20m,
-        Debtors_90 = 10m,
-        Debtors_120 = 10m,
-        Debtors_120Plus = 10m,
+        Creditors_30 = 100m,
+        Creditors_60 = 0m,
+        Creditors_90 = 0m,
+        Creditors_120 = 0m,
+        Creditors_120Plus = 0m,
+        Debtors_30 = 100m,
+        Debtors_60 = 0m,
+        Debtors_90 = 0m,
+        Debtors_120 = 0m,
+        Debtors_120Plus = 0m,
         BadDebtPercentage = 2m,
         EntryMode = false,
         Active = true
@@ -434,8 +436,8 @@ public partial class DebtorsCreditorsComponent
     private static decimal Clamp(decimal value, decimal minimum, decimal maximum) =>
         Math.Min(maximum, Math.Max(minimum, value));
 
-    private static string FormatCurrency(decimal value) =>
-        $"R {value:N2}";
+    private string FormatCurrency(decimal value) =>
+        DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
 
     private sealed record AgeBucket(int Index, string Label, string Description);
 }

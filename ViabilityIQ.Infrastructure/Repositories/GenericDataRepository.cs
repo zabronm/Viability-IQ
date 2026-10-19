@@ -191,6 +191,56 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                 }
             }
 
+            if (entity is Assessment assessmentEntity)
+            {
+                if (!Enum.IsDefined(typeof(AssessmentMode), assessmentEntity.AssessmentModeId)
+                    || (isCreate
+                        && assessmentEntity.AssessmentModeId == (int)AssessmentMode.ManufacturingSimplified))
+                {
+                    throw new InvalidOperationException(
+                        $"Assessment mode {assessmentEntity.AssessmentModeId} is not available for new assessments.");
+                }
+
+                if (assessmentEntity.AssessmentModeId == (int)AssessmentMode.Manufacturing
+                    && assessmentEntity.ManufacturingInputMethodId != (int)ManufacturingInputMethod.MonthlyEstimates)
+                {
+                    throw new InvalidOperationException(
+                        "Only Monthly Estimates is currently available for Manufacturing assessments.");
+                }
+
+                var locale = AssessmentLocaleOptions.EnglishCultures
+                    .FirstOrDefault(option => option.CultureName == assessmentEntity.CultureName);
+                if (locale is null
+                    || !AssessmentLocaleOptions.CurrencyCodes.Contains(
+                        assessmentEntity.CurrencyCode,
+                        StringComparer.OrdinalIgnoreCase)
+                    || !string.Equals(
+                        assessmentEntity.CountryCode,
+                        locale.CountryCode,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        "Select a supported English country/format locale and reporting currency.");
+                }
+
+                if (!isCreate)
+                {
+                    var currentMode = await connection.QuerySingleOrDefaultAsync<int?>(
+                        """
+                        SELECT AssessmentModeId
+                        FROM dbo.tblAssessments
+                        WHERE AssessmentId = @AssessmentId;
+                        """,
+                        new { AssessmentId = entityId },
+                        transaction);
+                    if (currentMode.HasValue && currentMode.Value != assessmentEntity.AssessmentModeId)
+                    {
+                        throw new InvalidOperationException(
+                            "Assessment mode cannot be changed after registration.");
+                    }
+                }
+            }
+
             if (entity is ITenantEntity tenantEntity)
             {
                 tenantEntity.TenantId = _sessionService.TenantId;
@@ -241,6 +291,21 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
             {
                 entityId = await connection.InsertAsync(entity, transaction);
                 saved = entityId > 0;
+                if (saved)
+                {
+                    var keyProperty = typeof(T).GetProperty(
+                        GetKeyColumnName(),
+                        BindingFlags.Instance | BindingFlags.Public);
+                    if (keyProperty?.CanWrite == true)
+                    {
+                        var keyType = Nullable.GetUnderlyingType(keyProperty.PropertyType)
+                            ?? keyProperty.PropertyType;
+                        keyProperty.SetValue(
+                            entity,
+                            Convert.ChangeType(entityId, keyType));
+                    }
+                }
+
                 if (saved && entity is Assessment assessment)
                 {
                     await _operationalReferenceService
@@ -627,7 +692,9 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
         if (scope is not null)
         {
             var businessId = ReadLongProperty(entity, "BusinessId");
-            if (businessId.HasValue)
+            if (businessId.HasValue
+                && !await IsTenantReferenceUnchangedAsync(
+                    connection, transaction, entity, "BusinessId", businessId.Value))
             {
                 await EnsureTenantReferenceAsync(
                     connection, transaction, "tblBusiness", "BusinessId",
@@ -635,7 +702,9 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
             }
 
             var clientId = ReadLongProperty(entity, "ClientId");
-            if (clientId.HasValue)
+            if (clientId.HasValue
+                && !await IsTenantReferenceUnchangedAsync(
+                    connection, transaction, entity, "ClientId", clientId.Value))
             {
                 await EnsureTenantReferenceAsync(
                     connection, transaction, "tblClient", "ClientId",
@@ -690,11 +759,52 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
             }
         }
 
+        if (entity is AssessmentSales sales)
+        {
+            await EnsureActiveAssessmentSalesCategoryAsync(
+                connection,
+                transaction,
+                sales.ProductCategoryId,
+                sales.AssessmentId);
+        }
+        else if (entity is AssessmentWorkingCapitalDetail workingCapital)
+        {
+            await EnsureActiveAssessmentSalesCategoryAsync(
+                connection,
+                transaction,
+                workingCapital.ProductCategoryId,
+                workingCapital.AssessmentId);
+        }
+        else if (entity is AssessmentManufacturingMaterial material
+                 && material.AssessmentSalesCategoryId.HasValue)
+        {
+            await EnsureActiveAssessmentSalesCategoryAsync(
+                connection,
+                transaction,
+                material.AssessmentSalesCategoryId.Value,
+                material.AssessmentId);
+        }
+        else if (entity is AssessmentManufacturingBalances balances
+                 && balances.AssessmentSalesCategoryId.HasValue)
+        {
+            await EnsureActiveAssessmentSalesCategoryAsync(
+                connection,
+                transaction,
+                balances.AssessmentSalesCategoryId.Value,
+                balances.AssessmentId);
+        }
+
         foreach (var reference in ActiveReferenceFields)
         {
             if (reference.Key.Equals(
                     GetKeyColumnName(),
                     StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (reference.Key == "ProductCategoryId"
+                && entity is AssessmentSales or AssessmentWorkingCapitalDetail)
             {
                 continue;
             }
@@ -722,6 +832,29 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
         }
     }
 
+    private static async Task EnsureActiveAssessmentSalesCategoryAsync(
+        IDbConnection connection,
+        IDbTransaction transaction,
+        long categoryId,
+        long assessmentId)
+    {
+        var count = await connection.ExecuteScalarAsync<long>(
+            """
+            SELECT COUNT_BIG(1)
+            FROM tblAssessmentSalesCategory
+            WHERE AssessmentSalesCategoryId = @CategoryId
+              AND AssessmentId = @AssessmentId
+              AND Active = 1;
+            """,
+            new { CategoryId = categoryId, AssessmentId = assessmentId },
+            transaction);
+        if (count == 0)
+        {
+            throw new InvalidOperationException(
+                "The selected ProductCategoryId is inactive or unavailable.");
+        }
+    }
+
     private async Task PrepareOperationalReferencesAsync(
         T entity,
         bool isCreate,
@@ -743,6 +876,31 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                     assessment, isCreate, connection, transaction);
                 break;
         }
+    }
+
+    private async Task<bool> IsTenantReferenceUnchangedAsync(
+        IDbConnection connection,
+        IDbTransaction transaction,
+        T entity,
+        string propertyName,
+        long referenceId)
+    {
+        if (entity is not IEntity identity || identity.Id <= 0)
+        {
+            return false;
+        }
+
+        ValidateSqlIdentifier(propertyName, nameof(propertyName));
+        var existingReferenceId = await connection.QuerySingleOrDefaultAsync<long?>(
+            $"""
+            SELECT [{propertyName}]
+            FROM {GetQuotedTableName()}
+            WHERE [{GetKeyColumnName()}] = @Id;
+            """,
+            new { Id = identity.Id },
+            transaction);
+
+        return existingReferenceId == referenceId;
     }
 
     private static async Task EnsureTenantReferenceAsync(

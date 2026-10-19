@@ -12,9 +12,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: .9rem 1rem;
-    background: linear-gradient(120deg, #173d59, #245a73);
-    color: #fff;
+    padding: .3rem 1rem;
+    border-bottom: 1px solid #cbdde0;
+    background: #e2ecf5;
+    color: #1a365d;
 }
 
 .dc-profile-title,
@@ -34,17 +35,17 @@
 }
 
 .dc-profile-icon {
-    width: 2.45rem;
-    height: 2.45rem;
-    border: 1px solid rgba(255,255,255,.24);
+    width: 1.8rem;
+    height: 1.8rem;
+    border: 1px solid #cbdde0;
     border-radius: .55rem;
-    background: rgba(255,255,255,.11);
-    color: #8ee4d4;
+    background: #d3e2ef;
+    color: #315f79;
     font-size: 1.05rem;
 }
 
 .dc-profile-title > div > span {
-    color: #9bd8de;
+    color: #526a7d;
     font-size: .65rem;
     font-weight: 800;
     letter-spacing: .08em;
@@ -53,13 +54,13 @@
 
 .dc-profile-title h2 {
     margin: .1rem 0;
-    color: #fff;
+    color: #1a365d;
     font-size: 1rem;
 }
 
 .dc-profile-title p {
     margin: 0;
-    color: #d2e1e8;
+    color: #526a7d;
     font-size: .72rem;
 }
 
@@ -228,12 +229,14 @@
 }
 
 .dc-table-heading {
-    padding: .45rem .65rem;
-    background: #f8fafc;
-    color: #7a8997;
-    font-size: .58rem;
+    padding: .18rem .65rem;
+    border-bottom: 1px solid #cbdde0;
+    background: #e2ecf5 !important;
+    color: #1a365d;
+    font-size: .68rem;
     font-weight: 800;
     letter-spacing: .04em;
+    line-height: 1.2;
     text-transform: uppercase;
 }
 

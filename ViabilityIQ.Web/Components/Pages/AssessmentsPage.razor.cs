@@ -65,6 +65,10 @@ namespace ViabilityIQ.Web.Components.Pages
                         builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => InitializeAndRedirectToSessionAsync(context)));
                         builder.AddContent(4, context.CaseNumber);
                         builder.CloseElement();
+                        builder.OpenElement(5, "span");
+                        builder.AddAttribute(6, "class", "d-block small text-muted");
+                        builder.AddContent(7, GetAssessmentModeName(context.AssessmentModeId));
+                        builder.CloseElement();
                     }
                 },
                 //new() {
@@ -148,7 +152,7 @@ namespace ViabilityIQ.Web.Components.Pages
             await Task.CompletedTask;
         }
 
-        private Task<DataTablePage<AssessmentDto>> LoadAssessmentPageAsync(
+        private async Task<DataTablePage<AssessmentDto>> LoadAssessmentPageAsync(
             DataTableQuery query,
             CancellationToken cancellationToken)
         {
@@ -158,7 +162,7 @@ namespace ViabilityIQ.Web.Components.Pages
             if (ReadinessFilter.HasValue)
                 filters[nameof(AssessmentDto.ProgressPercentage)] = ReadinessFilter.Value.ToString();
 
-            return assessmentDtoRepository.GetPageAsync(new DataTableQuery
+            var page = await assessmentDtoRepository.GetPageAsync(new DataTableQuery
             {
                 PageNumber = query.PageNumber,
                 PageSize = query.PageSize,
@@ -168,7 +172,39 @@ namespace ViabilityIQ.Web.Components.Pages
                 SortDescending = query.SortDescending,
                 Filters = filters
             }, cancellationToken);
+
+            using var assessmentLookupConcurrency = new SemaphoreSlim(8);
+            await Task.WhenAll(page.Items.Select(async assessment =>
+            {
+                await assessmentLookupConcurrency.WaitAsync(cancellationToken);
+                try
+                {
+                    var assessmentSettings = await coreAssessmentRepository.GetByIdAsync(
+                        assessment.AssessmentId)
+                        ?? throw new InvalidOperationException(
+                            $"Assessment {assessment.AssessmentId} could not be loaded.");
+                    assessment.AssessmentModeId = assessmentSettings.AssessmentModeId;
+                }
+                finally
+                {
+                    assessmentLookupConcurrency.Release();
+                }
+            }));
+
+            return page;
         }
+
+        private static string GetAssessmentModeName(int assessmentModeId) =>
+            Enum.IsDefined(typeof(AssessmentMode), assessmentModeId)
+                ? ((AssessmentMode)assessmentModeId) switch
+                {
+                    AssessmentMode.Trading => "Trading",
+                    AssessmentMode.Service => "Service",
+                    AssessmentMode.ManufacturingSimplified => "Manufacturing - Legacy",
+                    AssessmentMode.Manufacturing => "Manufacturing",
+                    _ => "Unknown mode"
+                }
+                : "Unknown mode";
 
         private Task HandleTableLoadError(Exception exception)
         {
@@ -208,6 +244,15 @@ namespace ViabilityIQ.Web.Components.Pages
                     HasDebtorsCreditorsData: dataStatus.HasDebtorsCreditors,  // ✅ FROM VALIDATION
                     HasLoansData: dataStatus.HasLoans                 // ✅ FROM VALIDATION
                 );
+                var assessmentSettings = await coreAssessmentRepository.GetByIdAsync(
+                    selectedRecord.AssessmentId);
+                if (assessmentSettings is not null)
+                {
+                    sessionService.SetAssessmentModeAndLocale(
+                        assessmentSettings.AssessmentModeId,
+                        assessmentSettings.CurrencyCode,
+                        assessmentSettings.CultureName);
+                }
 
                 // ✅ STEP 4: LOG VALIDATION RESULTS FOR DEBUGGING
                 System.Diagnostics.Debug.WriteLine($"[AssessmentsPage] {dataStatus.GetSummary()}");

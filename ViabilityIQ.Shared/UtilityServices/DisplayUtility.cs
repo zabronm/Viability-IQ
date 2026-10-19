@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +47,37 @@ namespace ViabilityIQ.Shared.UtilityServices
         public static string FormatCurrency(decimal value)
         {
             return value.ToString("N2");
+        }
+
+        public static string FormatCurrency(
+            decimal value,
+            string? currencyCode,
+            string? cultureName)
+        {
+            var culture = GetCulture(cultureName);
+            var currency = string.IsNullOrWhiteSpace(currencyCode)
+                ? "ZAR"
+                : currencyCode.Trim().ToUpperInvariant();
+            return $"{currency} {value.ToString("N2", culture)}";
+        }
+
+        public static string FormatNumber(decimal value, string? cultureName, string format = "N2") =>
+            value.ToString(format, GetCulture(cultureName));
+
+        public static string FormatDate(DateTime value, string? cultureName) =>
+            value.ToString("d", GetCulture(cultureName));
+
+        private static CultureInfo GetCulture(string? cultureName)
+        {
+            try
+            {
+                return CultureInfo.GetCultureInfo(
+                    string.IsNullOrWhiteSpace(cultureName) ? "en-ZA" : cultureName);
+            }
+            catch (CultureNotFoundException)
+            {
+                return CultureInfo.GetCultureInfo("en-ZA");
+            }
         }
 
         public static string FormatPercentage(decimal value)

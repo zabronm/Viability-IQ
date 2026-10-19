@@ -37,7 +37,7 @@
         Projection!.Summary.ClosingStock - Projection.Summary.OpeningStock;
 
     private string InventoryMovementNote =>
-        $"Opening R {Projection!.Summary.OpeningStock:N0} · Closing R {Projection.Summary.ClosingStock:N0}";
+        $"Opening {FormatCurrency(Projection!.Summary.OpeningStock)} · Closing {FormatCurrency(Projection.Summary.ClosingStock)}";
 
     private string VatNote =>
         Projection!.Summary.VatPayable >= 0m ? "Payable" : "Refund receivable";

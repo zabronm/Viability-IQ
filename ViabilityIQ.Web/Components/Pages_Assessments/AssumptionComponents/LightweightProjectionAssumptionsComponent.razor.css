@@ -11,14 +11,15 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.65rem 0.8rem;
-    background: linear-gradient(135deg, #344e65, #4f6c7f);
-    color: #fff;
+    padding: 0.45rem 0.8rem;
+    border-bottom: 1px solid #cbdde0;
+    background: #e2ecf5;
+    color: #1a365d;
 }
 
 .lpa-card header span:first-child {
     display: block;
-    color: #d5e3ec;
+    color: #526a7d;
     font-size: 0.55rem;
     font-weight: 800;
     letter-spacing: 0.07em;
@@ -27,6 +28,7 @@
 
 .lpa-card h3 {
     margin: 0.08rem 0 0;
+    color: #1a365d;
     font-size: 0.8rem;
 }
 

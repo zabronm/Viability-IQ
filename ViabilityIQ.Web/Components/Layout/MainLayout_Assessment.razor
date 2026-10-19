@@ -2,11 +2,15 @@
 @using ViabilityIQ.Web.Components.Shared
 @using ViabilityIQ.Web.Services
 @using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Shared.UtilityServices
 @inherits LayoutComponentBase
 @implements IDisposable
 
 @inject ISessionService SessionService
 @inject IAssessmentDataValidationService AssessmentDataValidationService
+@inject IGenericDataRepository<Assessment> AssessmentRepository
 @inject ZabOffCanvasService ZabOffCanvasService
 @inject ILogger<MainLayout_Assessment> Logger
 
@@ -44,7 +48,7 @@
                 <i class="bi bi-question-circle-fill"></i><span>Help</span>
             </a>
             <span class="marble-date-badge">
-                <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+                <i class="bi bi-calendar3 me-1"></i> @DisplayUtility.FormatDate(DateTime.Now, SessionService.CultureName)
             </span>
 
             <button class="action-icon-btn">
@@ -100,12 +104,15 @@
                     </NavLink>
                 }
 
+                @if (SessionService.AssessmentModeId != (int)AssessmentMode.Service)
+                {
                 <NavLink class="fa-nav-item py-0 my-0" href="@StockUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-boxes"></i></div>
-                    <span class="footer-main-text-sm">Stock</span>
+                    <span class="footer-main-text-sm">@(SessionService.AssessmentModeId is (int)AssessmentMode.ManufacturingSimplified or (int)AssessmentMode.Manufacturing ? "Manufacturing" : "Stock")</span>
                     <span class="ms-1 viq-indicator-dot @(HasStockData ? "status-success" : "status-warning")"
                           title="@(HasStockData ? "Client data entry verified" : "No client records populated yet")"></span>
                 </NavLink>
+                }
 
                 <NavLink class="fa-nav-item" href="@ExpensesUrl">
                     <div class="nav-icon-avatar-round"><i class="bi bi-wallet2 fs-xss"></i></div>
@@ -315,6 +322,14 @@
                 dataStatus.HasReviews,
                 dataStatus.HasDebtorsCreditors,
                 dataStatus.HasLoans);
+            var assessment = await AssessmentRepository.GetByIdAsync(assessmentId);
+            if (assessment is not null)
+            {
+                SessionService.SetAssessmentModeAndLocale(
+                    assessment.AssessmentModeId,
+                    assessment.CurrencyCode,
+                    assessment.CultureName);
+            }
         }
         catch (Exception exception)
         {

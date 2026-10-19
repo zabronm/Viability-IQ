@@ -321,6 +321,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
         <li>
             <a href="javascript:void(0);" onclick="toggleSubMenu(this)"><span>6. Assessment Lifecycle</span><i class="bi bi-chevron-right toggle-icon"></i></a>
             <ul class="sub-menu">
+                <li><a href="#assessment-mode">6.0 Mode and international settings</a></li>
                 <li><a href="#open-assessment">6.1 Open and navigate</a></li>
                 <li><a href="#lifecycle">6.2 Readiness, review and closing</a></li>
             </ul>
@@ -608,6 +609,16 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
         <p>Viability.IQ’s financial engine joins the information entered across the assessment into one month-by-month business picture. Sales influence cash receipts, debtors, stock, cost of Sales and VAT; expenses, assets, loans and creditor timing influence payments, profit, cash and the balance sheet. The engine then presents the same underlying projection through dashboards and formal reports. Sensitivity Analysis lets the user test “what if” changes without altering the approved source data, while Budgeting converts the projection into a separate management plan. Because the areas are connected, accurate source information and a readiness review are more important than manually adjusting a final report.</p>
     </div>
 
+    <h2 id="assessment-mode">6.0 Assessment mode and international settings</h2>
+    <p>Choose the assessment mode when registering the assessment. The selected mode determines how inventory and cost assumptions are interpreted, so it cannot be changed after the assessment is created.</p>
+    <ul>
+        <li><strong>Trading:</strong> use for businesses that buy and resell goods. Enter opening stock and monthly stock purchases/additions.</li>
+        <li><strong>Service:</strong> use for service businesses such as software development or consulting. Stock is not projected; record service delivery and operating costs in Expenses.</li>
+        <li><strong>Manufacturing — Simplified:</strong> enter planned units and a standard cost per unit for finished-goods inventory valuation. Record actual materials, labor and other production spending in Expenses; mark direct production costs so they appear as cost of goods sold, enable <strong>Post to cashbook</strong> for expected cash outflows and set VAT treatment there. Leave overhead unmarked. Expense entries do not create an automatic supplier-credit schedule. The mode does not model a bill of materials, work in progress or detailed production overhead.</li>
+        <li><strong>Manufacturing — Detailed:</strong> displayed as a future option and is not currently available.</li>
+    </ul>
+    <p>Choose the assessment's country/English locale and reporting currency at registration. The locale controls date, number and monetary formatting in assessment-aware displays; interface text remains English in this release. The currency is a display/reporting designation only. Viability.IQ does not convert amounts between currencies, so enter all monetary inputs in the one selected currency.</p>
+
     <h2 id="open-assessment">6.1 Opening and navigating an assessment</h2>
     <ol>
         <li>Open <strong>My Assessments</strong>.</li>
@@ -638,7 +649,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
     <p>Assumptions define the opening position and the expected behaviour that cannot be derived reliably from monthly records alone.</p>
     <table>
         <tr><th>Area</th><th>What to confirm</th></tr>
-        <tr><td>Opening position</td><td>Opening bank, stock, debtors, creditors, VAT, other current assets/liabilities and asset balances agree to supporting records.</td></tr>
+        <tr><td>Opening position</td><td>Opening bank, stock-item balances, debtors, creditors, VAT, other current assets/liabilities and asset balances agree to supporting records. Opening stock is calculated from the stock items you register.</td></tr>
         <tr><td>Sales</td><td>Growth rate/start month, cash Sales share, income classification and fallback cost of Sales are reasonable.</td></tr>
         <tr><td>Debtors and creditors</td><td>Ageing distribution, payment timing, bad debt and VAT inclusion reflect actual trading behaviour.</td></tr>
         <tr><td>Expenses and wages</td><td>Expense escalation, contingency, director numbers, wages and increase timing are supported.</td></tr>
@@ -675,7 +686,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
         <li>Create Sales Categories and link the correct income type and product/service category.</li>
         <li>Classify true Sales separately from grants, donations, sundry income and disposal proceeds.</li>
         <li>Enter monthly Sales/income for Months 1–12 and save before leaving the page.</li>
-        <li>Review category markup/cost basis, cash Sales percentage and opening stock relationship.</li>
+        <li>Review category markup/cost basis and cash Sales percentage. Register opening inventory separately for each item in Stock Management.</li>
     </ol>
     <div class="warning"><strong>Classification matters:</strong> only true Sales should drive gross profit, debtors, stock, cost of Sales and break-even calculations. Do not classify a grant or asset disposal as Sales merely to increase revenue.</div>
 
@@ -690,19 +701,24 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
     </ul>
 
     <h2 id="stock">9.4 Stock management</h2>
+    <p>Stock Management behaves according to the assessment mode. Trading assessments record inventory items and monthly purchases. Manufacturing — Simplified assessments record finished-goods opening values, standard unit costs and planned monthly production quantities. Service assessments do not use stock.</p>
     <ol>
-        <li>Capture opening stock by the relevant Sales/Product category rather than as an unsupported duplicate total.</li>
-        <li>Enter monthly stock movements or requirements using the available assessment form.</li>
-        <li>Maintain a reasonable minimum closing-stock level where the business carries inventory.</li>
-        <li>Review purchases, cost of Sales and closing stock together; unexplained stock growth can overstate assets and understate cost.</li>
+        <li>For Trading or Manufacturing — Simplified, open <strong>Stock Management</strong> and choose <strong>Add Stock Item</strong> (or <strong>Add Manufactured Product</strong>).</li>
+        <li>Enter a clear item/product name, select its Sales Category and record its opening balance at the assessment start date, supported by an opening stock count or accounting records.</li>
+        <li>For Trading, enter monthly purchases/additions. For Manufacturing — Simplified, enter standard production cost per unit and planned production units for Months 1–12.</li>
+        <li>Save one row per inventory item/product. The Opening Stock figure in Opening Balances is a read-only total from the active stock rows; do not enter it again.</li>
+        <li>Review the projected closing inventory and stock-shortfall alert with the Sales and cost assumptions. Correct the source item, production plan, purchase plan or opening balance rather than entering a duplicate total.</li>
     </ol>
+    <div class="note"><strong>Trading:</strong> closing inventory rolls forward from opening stock plus monthly purchases less estimated cost of Sales. Category markup is used where available, otherwise the configured fallback cost-of-sales assumption is used.</div>
+    <div class="note"><strong>Manufacturing — Simplified:</strong> planned production units multiplied by standard unit cost add to finished-goods inventory. Existing cost-of-sales assumptions estimate inventory consumed as products are sold; this estimate reduces stock but is not a second P&amp;L expense. Mark direct production costs on Expense lines to classify actual costs as cost of goods sold; leave overhead unmarked so it remains operating expense. Select <strong>Post to cashbook</strong> when an expense is expected to be paid during the projection, and configure its VAT treatment. Expense entries do not create an automatic supplier-credit schedule. If markup or fallback cost assumptions are missing, review the stock-shortfall warning and projections carefully.</div>
+    <div class="warning"><strong>Manufacturing limitation:</strong> this is not a detailed production costing model. It does not separately calculate raw materials, work in progress, bills of materials, labor allocation or production overhead.</div>
 
     <h2 id="expenses">9.5 Expense management</h2>
     <ol>
         <li>Select standard expense items or create authorised master data first.</li>
-        <li>Enter monthly amounts, VAT treatment, recurrence and applicable increase timing.</li>
+        <li>Enter monthly amounts, VAT treatment, recurrence and applicable increase timing. For Manufacturing — Simplified, record actual production spending here; the unit cost on the stock page is for inventory valuation only.</li>
         <li>Use bulk entry/import carefully and review every mapped item before saving.</li>
-        <li>Keep director wages and known recurring costs explicit; do not hide known expenses in contingency.</li>
+        <li>Mark the director-wages expense line as director wages. Keep known recurring costs explicit; do not hide them in contingency. Only one active expense line per assessment can carry this marker.</li>
     </ol>
     <p>Wait for the success Toast after saving. Reopen or refresh the page to confirm material entries persisted.</p>
 
@@ -715,7 +731,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
     </ol>
 
     <h2 id="vat">9.7 VAT management</h2>
-    <p>The VAT workspace combines taxable Sales, purchases/stock and VAT-bearing expenses to estimate output VAT, input VAT and settlement.</p>
+    <p>The VAT workspace combines taxable Sales, purchases/stock and VAT-bearing expenses to estimate output VAT, input VAT and settlement. In Manufacturing — Simplified, the standard unit cost is only an inventory valuation input; production input VAT must be recorded through VAT-bearing Expenses, not inferred from finished-goods value.</p>
     <ul>
         <li>Confirm the VAT rate and payment frequency in Assumptions.</li>
         <li>Review opening VAT payable or refundable and ensure only one opening position is used.</li>

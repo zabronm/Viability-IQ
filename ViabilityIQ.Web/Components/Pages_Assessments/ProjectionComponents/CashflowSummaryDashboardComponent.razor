@@ -52,8 +52,8 @@
 </section>
 
 @code {
-    private static string Amount(decimal value) => $"R {value:N0}";
+    private string Amount(decimal value) => FormatCurrency(value);
 
-    private static string VatAdjustment(decimal value) =>
-        value >= 0m ? $"(R {value:N0})" : $"R {Math.Abs(value):N0}";
+    private string VatAdjustment(decimal value) =>
+        value >= 0m ? $"({FormatCurrency(value)})" : FormatCurrency(Math.Abs(value));
 }

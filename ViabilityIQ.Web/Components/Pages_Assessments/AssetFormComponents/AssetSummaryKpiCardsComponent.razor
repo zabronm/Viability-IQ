@@ -1,4 +1,7 @@
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
+@using ViabilityIQ.Application.Interfaces
+@using ViabilityIQ.Shared.UtilityServices
+@inject ISessionService? sessionService
 
 <section class="asmkpi-shell" aria-labelledby="asmkpi-title">
     <header class="asmkpi-header">
@@ -39,10 +42,11 @@
         new("Closing gross value", Money(TotalGrossValue + TotalAdditions - TotalDisposals), "Before depreciation", "bi-graph-up-arrow", "asmkpi-cyan"),
         new("Accumulated depreciation", Money(TotalAccumulatedDepreciation), "Total wear & tear", "bi-file-earmark-bar-graph", "asmkpi-amber"),
         new("Net book value", Money(TotalNetValue), "Book carrying value", "bi-shield-check", "asmkpi-blue"),
-        new("Asset health rate", $"{HealthRate:F1}%", HealthRate >= 60m ? "Healthy carrying value" : "Review ageing assets", "bi-heart-pulse", HealthRate >= 60m ? "asmkpi-green" : "asmkpi-amber")
+        new("Asset health rate", $"{DisplayUtility.FormatNumber(HealthRate, sessionService?.CultureName, "N1")}%", HealthRate >= 60m ? "Healthy carrying value" : "Review ageing assets", "bi-heart-pulse", HealthRate >= 60m ? "asmkpi-green" : "asmkpi-amber")
     ];
 
-    private static string Money(decimal value) => $"R {value:N0}";
+    private string Money(decimal value) =>
+        DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
 
     private sealed record AssetMetric(
         string Label,

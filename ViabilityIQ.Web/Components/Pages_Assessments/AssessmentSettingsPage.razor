@@ -88,7 +88,7 @@
                                 </div>
                             </section>
 
-                            <div class="assumption-hover-card mb-3">
+                            <div class="assumption-hover-card mb-5">
                                 <SalesCategoryListComponent @ref="SalesCategoryListRef"
                                                             AssessmentId="@ActiveAssessmentId"
                                                             OnEditRequested='(id) => OpenConfigurationPanel("SALES-CATEGORY", id)' />
@@ -125,9 +125,13 @@
                             <div class="row g-3 mt-1">
                                 <div class="col-lg-5">
                                     <div class="assumption-hover-card h-100">
-                                        <DirectorWagesComponent @ref="DirectorWagesRef"
-                                                                directorWagesModel="@directorWagesModel"
-                                                                OnUpdate='(result) => RefreshAssumptionSource(result, "DIRECTOR-WAGES")' />
+                                        <div class="alert alert-info h-100 mb-0">
+                                            <h3 class="h6"><i class="bi bi-people me-1"></i> Director wages</h3>
+                                            <p class="mb-2">Enter combined director remuneration as an expense and mark the line as <strong>Director wages</strong>. This keeps payroll in the same monthly expense and cashflow workflow for every assessment mode.</p>
+                                            <NavLink class="btn btn-success btn-sm" href="@($"/assessment/expenses/{ActiveAssessmentId}")">
+                                                Open Expenses
+                                            </NavLink>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-7">

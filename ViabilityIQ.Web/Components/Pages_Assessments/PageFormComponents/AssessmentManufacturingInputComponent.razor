@@ -1,0 +1,139 @@
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.UtilityServices
+
+<div class="table-responsive shadow-sm avd-table-frame manufacturing-inventory-frame">
+    @if (IsLoading)
+    {
+        <div class="p-3 text-muted">Loading manufacturing inventory...</div>
+    }
+    else if (Categories.Count == 0)
+    {
+        <div class="alert alert-info m-3">
+            Create sales categories in the Sales module first. Each active category will appear here with Raw Materials, WIP and Finished Products inventory rows.
+        </div>
+    }
+    else
+    {
+        @if (UnassignedMaterialCount > 0 || HasUnassignedBalances)
+        {
+            <div class="alert alert-warning m-3 mb-2">
+                <strong>Unassigned legacy inventory:</strong>
+                @if (UnassignedMaterialCount > 0)
+                {
+                    <span>@UnassignedMaterialCount raw-material item(s)</span>
+                }
+                @if (UnassignedMaterialCount > 0 && HasUnassignedBalances)
+                {
+                    <span> and </span>
+                }
+                @if (HasUnassignedBalances)
+                {
+                    <span>opening WIP/finished-goods balances</span>
+                }
+                <span> are not linked to a sales category. Open a category's editor and review the legacy values before saving to assign them.</span>
+            </div>
+        }
+
+        <table class="table table-sm table-hover mb-0 manufacturing-inventory-table">
+            <colgroup>
+                <col class="manufacturing-category-column" />
+                <col class="manufacturing-metric-column" />
+                @for (var month = 1; month <= 12; month++)
+                {
+                    <col class="manufacturing-month-column" />
+                }
+                <col class="manufacturing-closing-column" />
+                <col class="manufacturing-action-column" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="manufacturing-category-heading">Sales category</th>
+                    <th class="manufacturing-metric-heading">Metric breakdown</th>
+                    @for (var month = 1; month <= 12; month++)
+                    {
+                        <th class="text-end">@($"M{month}")</th>
+                    }
+                    <th class="text-end manufacturing-total-heading">M12 closing value</th>
+                    <th class="text-center manufacturing-action-heading">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Categories)
+                {
+                    var inventory = GetInventory(category.AssessmentSalesCategoryId);
+                    <tr>
+                        <th rowspan="4" class="manufacturing-category-cell align-middle">
+                            <span>@category.AssessmentSalesCategoryName</span>
+                        </th>
+                        <th class="manufacturing-metric-cell">Raw Materials</th>
+                        @for (var month = 0; month < 12; month++)
+                        {
+                            <td class="text-end manufacturing-value">@Money(inventory.RawMaterials[month])</td>
+                        }
+                        <td class="text-end manufacturing-value manufacturing-total-cell">@Money(inventory.RawMaterials[^1])</td>
+                        <td class="text-center manufacturing-action-cell">
+                            <button type="button" class="manufacturing-action-button"
+                                    title="Edit @category.AssessmentSalesCategoryName raw materials"
+                                    @onclick="() => OpenEditorAsync(category, ManufacturingInventoryAspect.RawMaterials)">
+                                <i class="bi bi-vector-pen" aria-hidden="true"></i>
+                                <span class="visually-hidden">Edit raw materials</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="manufacturing-metric-cell">Work in Progress (WIP)</th>
+                        @for (var month = 0; month < 12; month++)
+                        {
+                            <td class="text-end manufacturing-value">@Money(inventory.WorkInProgress[month])</td>
+                        }
+                        <td class="text-end manufacturing-value manufacturing-total-cell">@Money(inventory.WorkInProgress[^1])</td>
+                        <td class="text-center manufacturing-action-cell">
+                            <button type="button" class="manufacturing-action-button"
+                                    title="Edit @category.AssessmentSalesCategoryName WIP"
+                                    @onclick="() => OpenEditorAsync(category, ManufacturingInventoryAspect.WorkInProgress)">
+                                <i class="bi bi-vector-pen" aria-hidden="true"></i>
+                                <span class="visually-hidden">Edit WIP</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="manufacturing-metric-cell">Finished Products</th>
+                        @for (var month = 0; month < 12; month++)
+                        {
+                            <td class="text-end manufacturing-value">@Money(inventory.FinishedProducts[month])</td>
+                        }
+                        <td class="text-end manufacturing-value manufacturing-total-cell">@Money(inventory.FinishedProducts[^1])</td>
+                        <td class="text-center manufacturing-action-cell">
+                            <button type="button" class="manufacturing-action-button"
+                                    title="Edit @category.AssessmentSalesCategoryName finished products"
+                                    @onclick="() => OpenEditorAsync(category, ManufacturingInventoryAspect.FinishedProducts)">
+                                <i class="bi bi-vector-pen" aria-hidden="true"></i>
+                                <span class="visually-hidden">Edit finished products</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="manufacturing-category-total">
+                        <th>Category total</th>
+                        @for (var month = 0; month < 12; month++)
+                        {
+                            <td class="text-end manufacturing-value">@Money(inventory.Total[month])</td>
+                        }
+                        <td class="text-end manufacturing-value fw-bold">@Money(inventory.Total[^1])</td>
+                        <td></td>
+                    </tr>
+                }
+                <tr class="manufacturing-grand-total">
+                    <th colspan="2">
+                        <i class="bi bi-calculator me-1" aria-hidden="true"></i>GRAND TOTAL INVENTORY
+                    </th>
+                    @for (var month = 0; month < 12; month++)
+                    {
+                        <td class="text-end manufacturing-value">@Money(GetGrandTotal(month))</td>
+                    }
+                    <td class="text-end manufacturing-value fw-bold">@Money(GetGrandTotal(11))</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    }
+</div>

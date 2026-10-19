@@ -13,6 +13,8 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
     private readonly IGenericDataRepository<AssessmentSales> _sales;
     private readonly IGenericDataRepository<IncomeType> _incomeTypes;
     private readonly IGenericDataRepository<AssessmentStock> _stock;
+    private readonly IGenericDataRepository<AssessmentManufacturingMaterial> _manufacturingMaterials;
+    private readonly IGenericDataRepository<AssessmentManufacturingBalances> _manufacturingBalances;
     private readonly IGenericDataRepository<AssessmentExpenses> _expenses;
     private readonly IAssessmentVatProjectionService _vatProjection;
     private readonly IGenericDataRepository<AssessmentLoan> _loans;
@@ -29,6 +31,8 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
         IGenericDataRepository<AssessmentSales> sales,
         IGenericDataRepository<IncomeType> incomeTypes,
         IGenericDataRepository<AssessmentStock> stock,
+        IGenericDataRepository<AssessmentManufacturingMaterial> manufacturingMaterials,
+        IGenericDataRepository<AssessmentManufacturingBalances> manufacturingBalances,
         IGenericDataRepository<AssessmentExpenses> expenses,
         IAssessmentVatProjectionService vatProjection,
         IGenericDataRepository<AssessmentLoan> loans,
@@ -44,6 +48,8 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
         _sales = sales;
         _incomeTypes = incomeTypes;
         _stock = stock;
+        _manufacturingMaterials = manufacturingMaterials;
+        _manufacturingBalances = manufacturingBalances;
         _expenses = expenses;
         _vatProjection = vatProjection;
         _loans = loans;
@@ -74,6 +80,10 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
             var incomeTypesTask = _incomeTypes.GetAllAsync();
             var stockTask = _stock.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
+            var manufacturingMaterialsTask = _manufacturingMaterials.GetAllAsync(x =>
+                x.AssessmentId == assessmentId && x.Active);
+            var manufacturingBalancesTask = _manufacturingBalances.GetAllAsync(x =>
+                x.AssessmentId == assessmentId && x.Active);
             var expensesTask = _expenses.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
             var vatTask = _vatProjection.CalculateAsync(assessmentId);
@@ -92,6 +102,8 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
                 salesTask,
                 incomeTypesTask,
                 stockTask,
+                manufacturingMaterialsTask,
+                manufacturingBalancesTask,
                 expensesTask,
                 vatTask,
                 loansTask,
@@ -109,6 +121,9 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
                 (await salesTask).ToList(),
                 (await incomeTypesTask).ToList(),
                 (await stockTask).ToList(),
+                (await manufacturingMaterialsTask).ToList(),
+                (await manufacturingBalancesTask)
+                    .ToList(),
                 (await expensesTask).ToList(),
                 await vatTask,
                 (await loansTask).ToList(),

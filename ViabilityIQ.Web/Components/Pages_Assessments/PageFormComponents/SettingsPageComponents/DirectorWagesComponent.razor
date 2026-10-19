@@ -1,4 +1,6 @@
 ﻿@using ViabilityIQ.Infrastructure.Repositories
+@using ViabilityIQ.Application.Interfaces
+@inject ISessionService? sessionService
 
 <div class="viq-form-shell">
     @if (loadingStateActive)
@@ -45,7 +47,7 @@
                 </div>
 
                 <div class="viq-form-field">
-                    <label for="directorWage">Monthly wage per director (R) <span class="viq-required">*</span></label>
+                    <label for="directorWage">Monthly wage per director (@(sessionService?.CurrencyCode ?? "ZAR")) <span class="viq-required">*</span></label>
                     <input id="directorWage" class="viq-form-control" type="number" step="0.01"
                            @bind-value="directorWagesModel.MonthlyDirectorWagesAmount" @bind-value:event="oninput" />
                     <ValidationMessage For="@(() => directorWagesModel.MonthlyDirectorWagesAmount)"
@@ -53,7 +55,7 @@
                 </div>
 
                 <div class="viq-form-field viq-form-span-2">
-                    <label for="directorWagesTotal">Combined monthly impact (R)</label>
+                    <label for="directorWagesTotal">Combined monthly impact (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                     <input id="directorWagesTotal" class="viq-form-control"
                            value="@TotalCalculatedDirectorWages.ToString("N2")" readonly disabled />
                     <span><i class="bi bi-calculator" aria-hidden="true"></i> Total is recalculated from directors × wage.</span>

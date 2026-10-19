@@ -17,6 +17,8 @@ namespace ViabilityIQ.Shared.DataModels
         public long AssessmentId { get; set; }
         public long ExpenseItemId { get; set; }
         public long ExpenseTypeId { get; set; }
+        public bool IsDirectorWages { get; set; }
+        public bool IsDirectProductionCost { get; set; }
         public string? Description { get; set; }
         public bool blSendToCashBook { get; set; }
         public bool blSameMonthlyAmountUsed {get;set;}

@@ -4,7 +4,13 @@
 
 <section class="scl-card">
     <header class="scl-header">
-        <div><span class="scl-icon"><i class="bi bi-tags"></i></span><div><span>Revenue structure</span><h3>Sales Categories</h3><p>Classify income streams and define markup and opening stock assumptions.</p></div></div>
+        <div><span class="scl-icon"><i class="bi bi-tags"></i></span>
+            <div>
+               @*  <span>Revenue structure</span> *@
+                <h3>Sales Categories</h3>
+                <p>Classify income streams and define markup and opening stock assumptions.</p>
+            </div>
+          </div>
         <button type="button" @onclick="() => OnEditRequested.InvokeAsync(0)"><i class="bi bi-plus-lg"></i> Add Sales Category</button>
     </header>
     <div class="scl-body">

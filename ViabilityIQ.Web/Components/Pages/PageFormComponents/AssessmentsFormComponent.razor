@@ -30,6 +30,10 @@
         </div>
  *@
         <ValidationSummary class="viq-form-validation-summary" />
+        @if (!string.IsNullOrWhiteSpace(formError))
+        {
+            <div class="alert alert-danger" role="alert">@formError</div>
+        }
 
         <section class="viq-form-section">
             <header class="viq-form-section-heading">
@@ -53,12 +57,119 @@
                                        @bind-Value="assessmentModel.BusinessId" />
                     <ValidationMessage For="() => assessmentModel.BusinessId" class="viq-form-validation" />
                 </div>
-                @* <div class="viq-form-field">
-                    <label>Assessment type <span class="viq-required">*</span></label>
-                    <DDLookupComponent SourceKey="DDLookupEnums.AssessmentTypes"
-                                       @bind-Value="assessmentModel.AssessmentTypeId" />
-                    <ValidationMessage For="() => assessmentModel.AssessmentTypeId" class="viq-form-validation" />
-                </div> *@
+                <div class="viq-form-field viq-form-span-2">
+                    <label for="assessmentMode">Assessment mode <span class="viq-required">*</span></label>
+                    <InputSelect id="assessmentMode" class="viq-form-control"
+                                 disabled="@(AssessmentId > 0)"
+                                 @bind-Value="assessmentModel.AssessmentModeId">
+                        <option value="@((int)AssessmentMode.Trading)">Trading</option>
+                        <option value="@((int)AssessmentMode.Service)">Service</option>
+                        <option value="@((int)AssessmentMode.Manufacturing)">Manufacturing</option>
+                        @if (AssessmentId > 0
+                            && assessmentModel.AssessmentModeId == (int)AssessmentMode.ManufacturingSimplified)
+                        {
+                            <option value="@((int)AssessmentMode.ManufacturingSimplified)">
+                                Manufacturing (legacy simplified)
+                            </option>
+                        }
+                    </InputSelect>
+                    <small class="assessment-field-annotation">
+                        Choose the operating model for this assessment.
+                        @(AssessmentId > 0 ? "The mode is fixed after creation to prevent existing data being reinterpreted." : string.Empty)
+                    </small>
+                </div>
+                @if (assessmentModel.AssessmentModeId == (int)AssessmentMode.Manufacturing)
+                {
+                    <div class="viq-form-field viq-form-span-2">
+                        <span>Production estimate method <span class="viq-required">*</span></span>
+                        <InputRadioGroup TValue="int" @bind-Value="assessmentModel.ManufacturingInputMethodId"
+                                        class="manufacturing-method-options">
+                            <label class="manufacturing-method-option">
+                                <InputRadio TValue="int" Value="@((int)ManufacturingInputMethod.MonthlyEstimates)" />
+                                <span>Monthly Estimates</span>
+                                <span class="manufacturing-help-tip" tabindex="0"
+                                      aria-label="Monthly Estimates: enter material purchases and closing raw-material quantities by month, plus month-end WIP and finished-goods values. Costs are derived through inventory roll-forwards; inconsistent balances are flagged.">
+                                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                    <span class="manufacturing-help-tooltip" role="tooltip">
+                                        Enter raw-material purchases and month-end quantities, plus WIP and finished-goods values. The projection derives material use, completed production cost and cost of sales, and flags inconsistent balances.
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="manufacturing-method-option is-unavailable">
+                                <input type="radio" disabled />
+                                <span>BOM-based <small>(planned)</small></span>
+                                <span class="manufacturing-help-tip" tabindex="0"
+                                      aria-label="BOM-based: define material quantities for repeatable products. The system would estimate material requirements from planned production. This option is planned and is not available yet.">
+                                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                    <span class="manufacturing-help-tooltip" role="tooltip">
+                                        Intended for repeatable products: define the materials and quantities used for each product, then estimate material requirements from planned production. This method is planned and is not available yet.
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="manufacturing-method-option is-unavailable">
+                                <input type="radio" disabled />
+                                <span>Job-based <small>(planned)</small></span>
+                                <span class="manufacturing-help-tip" tabindex="0"
+                                      aria-label="Job-based: estimate materials and production costs for custom jobs without defining a product recipe. This option is planned and is not available yet.">
+                                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                    <span class="manufacturing-help-tooltip" role="tooltip">
+                                        Intended for custom work: estimate materials and production costs by job or job category without maintaining a product recipe. This method is planned and is not available yet.
+                                    </span>
+                                </span>
+                            </label>
+                        </InputRadioGroup>
+                        <small class="assessment-field-annotation">
+                            Monthly Estimates is the current default. BOM-based and job-based workflows are planned and cannot yet be selected.
+                        </small>
+                    </div>
+                }
+                @if (assessmentModel.AssessmentModeId == (int)AssessmentMode.ManufacturingSimplified)
+                {
+                    <div class="alert alert-warning viq-form-span-2">
+                        This assessment uses the legacy simplified Manufacturing projection. Its existing inputs are preserved and are not reinterpreted by the new Manufacturing method.
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-globe2" aria-hidden="true"></i></span>
+                <div>
+                    <h3>International settings</h3>
+                    <p>Set the assessment's English locale and single reporting currency. No currency conversion is performed.</p>
+                </div>
+            </header>
+            <div class="viq-form-grid viq-form-grid-2">
+                <div class="viq-form-field">
+                    <label for="assessmentCulture">Country and format locale</label>
+                    <InputSelect TValue="string" id="assessmentCulture" class="viq-form-control"
+                                 Value="@assessmentModel.CultureName"
+                                 ValueChanged="@(cultureName => OnCultureChanged(cultureName))"
+                                 ValueExpression="() => assessmentModel.CultureName">
+                        @foreach (var locale in AssessmentLocaleOptions.EnglishCultures)
+                        {
+                            <option value="@locale.CultureName">@locale.DisplayName</option>
+                        }
+                    </InputSelect>
+                    <small class="assessment-field-annotation">Controls English date and number conventions for this assessment.</small>
+                </div>
+                <div class="viq-form-field">
+                    <label for="assessmentCurrency">Reporting currency</label>
+                    <InputSelect id="assessmentCurrency" class="viq-form-control"
+                                 @bind-Value="assessmentModel.CurrencyCode">
+                        @foreach (var currencyCode in AssessmentLocaleOptions.CurrencyCodes)
+                        {
+                            <option value="@currencyCode">@currencyCode</option>
+                        }
+                    </InputSelect>
+                    <small class="assessment-field-annotation">Amounts are entered and calculated in this currency; they are not converted.</small>
+                </div>
+                <div class="viq-form-field viq-form-span-2">
+                    <span class="text-muted">
+                        Preview: @LocaleDateSample · @LocaleNumberSample · @assessmentModel.CurrencyCode
+                    </span>
+                </div>
             </div>
         </section>
 

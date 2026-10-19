@@ -48,6 +48,40 @@
             </tbody>
         </table>
     </div>
+    @if (Projection.ManufacturingMonths.Count > 0)
+    {
+        <div class="card-header bg-light border-top"><strong>Manufacturing inventory and cost flow (VAT exclusive)</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0 detailed-cashflow-table">
+                <thead>
+                    <tr>
+                        <th>Manufacturing roll-forward</th>
+                        @foreach (var month in Projection.ManufacturingMonths)
+                        {
+                            <th class="text-end">M@month.MonthNumber</th>
+                        }
+                        <th class="text-end">TOTAL / END</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @ManufacturingRow("Opening raw materials", x => x.OpeningRawMaterials, balance: true, openingBalance: true)
+                    @ManufacturingRow("Raw-material purchases", x => x.RawMaterialPurchases, false)
+                    @ManufacturingRow("Raw materials consumed", x => x.RawMaterialConsumption, false)
+                    @ManufacturingRow("Closing raw materials", x => x.ClosingRawMaterials, true)
+                    @ManufacturingRow("Production labour / overhead", x => x.ProductionCosts, false)
+                    @ManufacturingRow("Opening WIP", x => x.OpeningWorkInProgress, balance: true, openingBalance: true)
+                    @ManufacturingRow("Closing WIP", x => x.ClosingWorkInProgress, true)
+                    @ManufacturingRow("Completed production cost", x => x.CompletedProductionCost, false)
+                    @ManufacturingRow("Opening finished goods", x => x.OpeningFinishedGoods, balance: true, openingBalance: true)
+                    @ManufacturingRow("Closing finished goods", x => x.ClosingFinishedGoods, true)
+                    @ManufacturingRow("Cost of sales", x => x.CostOfGoodsSold, true)
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted mb-0 mt-2">
+            Inventory balance entries are estimates and are valued excluding recoverable VAT. Review all manufacturing reconciliation alerts before relying on these figures.
+        </p>
+    }
 </div>
 
 @code {
@@ -81,4 +115,38 @@
         builder.CloseElement();
         builder.CloseElement();
     };
+
+    private Microsoft.AspNetCore.Components.RenderFragment ManufacturingRow(
+        string label,
+        Func<ViabilityIQ.Shared.FinancialModels.ManufacturingProjectionMonth, decimal> value,
+        bool balance = false,
+        bool openingBalance = false) => builder =>
+    {
+        var sequence = 0;
+        builder.OpenElement(sequence++, "tr");
+        if (balance)
+            builder.AddAttribute(sequence++, "class", "fw-bold table-light");
+
+        builder.OpenElement(sequence++, "td");
+        builder.AddContent(sequence++, label);
+        builder.CloseElement();
+
+        foreach (var month in Projection.ManufacturingMonths)
+        {
+            builder.OpenElement(sequence++, "td");
+            builder.AddAttribute(sequence++, "class", "text-end");
+            builder.AddContent(sequence++, value(month).ToString("N2"));
+            builder.CloseElement();
+        }
+
+        builder.OpenElement(sequence++, "td");
+        builder.AddAttribute(sequence++, "class", "text-end");
+        var total = balance
+            ? value(openingBalance ? Projection.ManufacturingMonths[0] : Projection.ManufacturingMonths[^1])
+            : Projection.ManufacturingMonths.Sum(value);
+        builder.AddContent(sequence++, total.ToString("N2"));
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
 }

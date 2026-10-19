@@ -10,6 +10,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.UtilityServices;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents;
 using ViabilityIQ.Web.Services;
@@ -644,17 +645,18 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
             _ => "—"
         };
 
-    private static string FormatAmount(decimal value) =>
-        value == 0 ? "0" : value.ToString("N0").Replace(",", " ");
+    private string FormatAmount(decimal value) =>
+        DisplayUtility.FormatNumber(value, sessionService?.CultureName, "N0");
 
-    private static string FormatSignedAmount(decimal value) =>
+    private string FormatSignedAmount(decimal value) =>
         value > 0
             ? $"+{FormatAmount(value)}"
             : value < 0
                 ? $"-{FormatAmount(Math.Abs(value))}"
                 : "0";
 
-    private static string FormatCurrency(decimal value) => $"R {FormatAmount(value)}";
+    private string FormatCurrency(decimal value) =>
+        DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
 
     public async ValueTask DisposeAsync()
     {

@@ -59,6 +59,9 @@ namespace ViabilityIQ.Application.Interfaces
         long? ClientId { get; }
         string ClientName { get; }
         string AssessmentType { get; }
+        int AssessmentModeId { get; }
+        string CurrencyCode { get; }
+        string CultureName { get; }
 
         // ====================================================
         // NAVIGATION
@@ -110,6 +113,10 @@ namespace ViabilityIQ.Application.Interfaces
 
 
         void ClearAssessment();
+        void SetAssessmentModeAndLocale(
+            int assessmentModeId,
+            string currencyCode,
+            string cultureName);
 
         // ====================================================
         // NAVIGATION

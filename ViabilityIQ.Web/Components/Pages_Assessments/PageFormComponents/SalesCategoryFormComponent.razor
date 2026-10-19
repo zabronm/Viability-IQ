@@ -75,13 +75,13 @@
 
                 <div class="viq-form-grid viq-form-grid-2">
                     <div class="viq-form-field">
-                        <label for="openingDebtors">Opening acc. receivable/debtors (R)</label>
+                        <label for="openingDebtors">Opening acc. receivable/debtors (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="openingDebtors" type="number" step="0.01" class="viq-form-control"
                                placeholder="0.00" @bind-value="Model.OpeningDebtorsAmount" />
                     </div>
 
                     <div class="viq-form-field">
-                        <label for="openingCreditors">Opening acc. payable/creditors (R)</label>
+                        <label for="openingCreditors">Opening acc. payable/creditors (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="openingCreditors" type="number" step="0.01" class="viq-form-control"
                                placeholder="0.00" @bind-value="Model.OpeningCreditorsAmount" />
                     </div>

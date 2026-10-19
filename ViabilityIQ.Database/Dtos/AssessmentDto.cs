@@ -13,6 +13,7 @@ namespace ViabilityIQ.Application.Dtos
     {
         [Key] public long AssessmentId { get; set; }
         public string? CaseNumber { get; set; }
+        public int AssessmentModeId { get; set; }
         public long BranchId { get; set; }
         public string? BranchCode { get; set; }
         public string? BranchName { get; set; }

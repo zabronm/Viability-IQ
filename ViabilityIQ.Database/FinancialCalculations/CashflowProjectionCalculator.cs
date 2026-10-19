@@ -1,5 +1,6 @@
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Application.FinancialCalculations;
 
@@ -10,6 +11,8 @@ public sealed record CashflowCalculationInput(
     IReadOnlyList<AssessmentSales> Sales,
     IReadOnlyList<IncomeType> IncomeTypes,
     IReadOnlyList<AssessmentStock> Stock,
+    IReadOnlyList<AssessmentManufacturingMaterial> ManufacturingMaterials,
+    IReadOnlyList<AssessmentManufacturingBalances> ManufacturingBalances,
     IReadOnlyList<AssessmentExpenses> Expenses,
     IReadOnlyList<MonthlyVatProjection> VatProjection,
     IReadOnlyList<AssessmentLoan> Loans,
@@ -40,11 +43,46 @@ public static class CashflowProjectionCalculator
 
         AddClassificationWarnings(classifiedSales, classifier, warnings);
 
+        if (!Enum.IsDefined(typeof(AssessmentMode), input.Assessment.AssessmentModeId))
+        {
+            throw new InvalidOperationException(
+                $"Assessment mode {input.Assessment.AssessmentModeId} is not available for projection.");
+        }
+
+        var mode = (AssessmentMode)input.Assessment.AssessmentModeId;
+        var isManufacturing = mode == AssessmentMode.Manufacturing;
+        var legacyManufacturing = mode == AssessmentMode.ManufacturingSimplified;
+        var manufacturingMonths = isManufacturing
+            ? ManufacturingProjectionCalculator.Calculate(
+                input.ManufacturingMaterials,
+                input.ManufacturingBalances,
+                input.Expenses,
+                input.Categories,
+                warnings)
+            : Array.Empty<ManufacturingProjectionMonth>();
+        IReadOnlyList<AssessmentExpenses> directProductionExpenses = mode is AssessmentMode.ManufacturingSimplified or AssessmentMode.Manufacturing
+            ? input.Expenses.Where(x => x.IsDirectProductionCost).ToList()
+            : Array.Empty<AssessmentExpenses>();
+        IReadOnlyList<AssessmentExpenses> operatingExpenseItems = mode is AssessmentMode.ManufacturingSimplified or AssessmentMode.Manufacturing
+            ? input.Expenses.Where(x => !x.IsDirectProductionCost).ToList()
+            : input.Expenses;
         var salesCategories = input.Categories
             .Where(x => classifier.Classify(x) == IncomeSourceKind.Sales)
             .ToList();
         var stockItems = input.Stock;
-        var openingStock = stockItems.Sum(x => x.OpeningBalance);
+        var openingStock = mode switch
+        {
+            AssessmentMode.Service => 0m,
+            AssessmentMode.Manufacturing => manufacturingMonths.Count == 0
+                ? 0m
+                : manufacturingMonths[0].OpeningRawMaterials
+                  + manufacturingMonths[0].OpeningWorkInProgress
+                  + manufacturingMonths[0].OpeningFinishedGoods,
+            _ => stockItems.Sum(x => x.OpeningBalance)
+        };
+        var legacyDirectorWages = input.Expenses.Any(x => x.IsDirectorWages)
+            ? 0m
+            : input.Assessment.MonthlyDirectorWagesAmountTotal;
         var openingLoan = input.Loans.Sum(x => x.LoanBalanceAtAssessmentDate);
         var debtorMonths = BuildSalesDebtorProjection(
             classifiedSales,
@@ -103,27 +141,46 @@ public static class CashflowProjectionCalculator
                 : MovementTotal(input.AssetMovements, month, "Disposal");
             var assetDisposalNet = classifiedDisposalNet + movementDisposal;
             var assetDisposalGross = classifiedDisposalGross + movementDisposal;
-            var stockPurchases = stockItems.Sum(x => Value(x.MonthlyValues, index));
-            var cogs = CalculateCogs(input, classifiedSales, index, warnings, false);
-            var cogsInclusive = CalculateCogs(input, classifiedSales, index, warnings, true);
-            var operatingExpenses = input.Expenses.Sum(x => Value(x.MonthlyValues, index))
-                                    + input.Assessment.MonthlyDirectorWagesAmountTotal;
-            var operatingExpensesInclusive = input.Expenses
+            var stockPurchases = InventoryAdditions(stockItems, mode, index);
+            var manufacturingMonth = isManufacturing ? manufacturingMonths[index] : null;
+            var inventoryConsumption = mode == AssessmentMode.Service
+                ? 0m
+                : isManufacturing
+                    ? manufacturingMonth!.CostOfGoodsSold
+                    : CalculateCogs(input, classifiedSales, mode, index, warnings, false);
+            var cogs = legacyManufacturing
+                ? directProductionExpenses.Sum(x => Value(x.MonthlyValues, index))
+                : inventoryConsumption;
+            var cogsInclusive = legacyManufacturing
+                ? directProductionExpenses.Sum(x => ExpenseAmount(x, index, true))
+                : isManufacturing
+                    ? manufacturingMonth!.CostOfGoodsSoldVatInclusive
+                : mode == AssessmentMode.Service
+                    ? 0m
+                    : CalculateCogs(input, classifiedSales, mode, index, warnings, true);
+            var operatingExpenses = operatingExpenseItems.Sum(x => Value(x.MonthlyValues, index))
+                                    + legacyDirectorWages;
+            var operatingExpensesInclusive = operatingExpenseItems
                 .Sum(x => ExpenseAmount(x, index, true))
-                + input.Assessment.MonthlyDirectorWagesAmountTotal;
+                + legacyDirectorWages;
             var cashOperatingExpenses = input.Expenses
                 .Where(x => x.blSendToCashBook)
                 .Sum(x => ExpenseAmount(x, index, true))
-                + input.Assessment.MonthlyDirectorWagesAmountTotal;
+                + legacyDirectorWages;
 
             var accountsMonth = input.Accounts.Months.FirstOrDefault(x => x.MonthNumber == month);
             var debtorMonth = debtorMonths[index];
             var salesReceipts = input.Assessment.blDebtorsCreditors == 1
                 ? debtorMonth.Collections
                 : salesGross;
-            var supplierPayments = input.Assessment.blDebtorsCreditors == 1
-                ? accountsMonth?.CreditorPayments ?? 0m
-                : stockItems.Sum(x => x.blIncludeVAT
+            var supplierPayments = mode == AssessmentMode.Service
+                || legacyManufacturing
+                ? 0m
+                : input.Assessment.blDebtorsCreditors == 1
+                ? (accountsMonth?.CreditorPayments ?? 0m)
+                : isManufacturing
+                    ? manufacturingMonth!.RawMaterialPurchasesVatInclusive
+                    : stockItems.Sum(x => x.blIncludeVAT
                     ? Gross(Value(x.MonthlyValues, index), x.TotalNoVAT, x.TotalWithVAT)
                     : Value(x.MonthlyValues, index));
 
@@ -146,17 +203,22 @@ public static class CashflowProjectionCalculator
             var closingFixedAssets = input.AssetMovements
                 .Sum(x => Math.Max(0m, x.GetNetBookValue(month) ?? 0m));
 
-            var projectedClosingStock = runningStock + stockPurchases - cogs;
-            if (projectedClosingStock < 0m
+            var projectedClosingStock = isManufacturing
+                ? manufacturingMonth!.ClosingRawMaterials
+                  + manufacturingMonth.ClosingWorkInProgress
+                  + manufacturingMonth.ClosingFinishedGoods
+                : runningStock + stockPurchases - inventoryConsumption;
+            if (!isManufacturing
+                && projectedClosingStock < 0m
                 && warnings.All(x => x.Code != "stock-shortfall"))
             {
                 warnings.Add(new(
                     "stock-shortfall",
                     CashflowAlertSeverity.Warning,
                     "Projected stock shortfall",
-                    $"Estimated cost of sales exceeds opening inventory plus purchases by R {Math.Abs(projectedClosingStock):N2} in Month {month}. Review purchases, sales, markup and opening stock."));
+                    $"Estimated cost of sales exceeds opening inventory plus stock additions by {Math.Abs(projectedClosingStock):N2} in Month {month}. Review production/purchases, sales, markup and opening stock."));
             }
-            runningStock = Math.Max(0m, projectedClosingStock);
+            runningStock = isManufacturing ? projectedClosingStock : Math.Max(0m, projectedClosingStock);
             runningLoan = Math.Max(0m, runningLoan - principal);
             var inflows = salesReceipts
                           + sundryGross
@@ -186,7 +248,14 @@ public static class CashflowProjectionCalculator
                 GrantsDonationsVatInclusive = grantsGross,
                 AssetDisposalIncomeVatInclusive = assetDisposalGross,
                 OtherIncomeVatInclusive = otherGross,
-                StockPurchases = stockPurchases,
+                StockPurchases = legacyManufacturing
+                    ? 0m
+                    : isManufacturing ? manufacturingMonth!.RawMaterialPurchases : stockPurchases,
+                RawMaterialPurchasesVatInclusive =
+                    manufacturingMonth?.RawMaterialPurchasesVatInclusive ?? 0m,
+                RawMaterialPurchases = manufacturingMonth?.RawMaterialPurchases ?? 0m,
+                RawMaterialConsumption = manufacturingMonth?.RawMaterialConsumption ?? 0m,
+                CompletedProductionCost = manufacturingMonth?.CompletedProductionCost ?? 0m,
                 CostOfGoodsSold = cogs,
                 CostOfGoodsSoldVatInclusive = cogsInclusive,
                 OperatingExpenses = operatingExpenses,
@@ -215,6 +284,9 @@ public static class CashflowProjectionCalculator
                 OpeningCreditors = accountsMonth?.OpeningCreditors ?? 0m,
                 ClosingCreditors = accountsMonth?.ClosingCreditors ?? 0m,
                 ClosingStock = runningStock,
+                ClosingRawMaterials = manufacturingMonth?.ClosingRawMaterials ?? 0m,
+                ClosingWorkInProgress = manufacturingMonth?.ClosingWorkInProgress ?? 0m,
+                ClosingFinishedGoods = manufacturingMonth?.ClosingFinishedGoods ?? 0m,
                 ClosingFixedAssets = closingFixedAssets,
                 ClosingLoanBalance = runningLoan,
                 OtherCurrentAssets = input.Assessment.OpeningOtherCurrentAssets,
@@ -241,6 +313,7 @@ public static class CashflowProjectionCalculator
             Months = months,
             Summary = summary,
             Viability = viability,
+            ManufacturingMonths = manufacturingMonths,
             Alerts = warnings
         };
     }
@@ -248,6 +321,7 @@ public static class CashflowProjectionCalculator
     private static decimal CalculateCogs(
         CashflowCalculationInput input,
         IReadOnlyList<ClassifiedSale> classifiedSales,
+        AssessmentMode mode,
         int index,
         ICollection<CashflowProjectionAlert> warnings,
         bool vatInclusive)
@@ -286,23 +360,48 @@ public static class CashflowProjectionCalculator
                 result += input.Stock
                     .Where(x =>
                         x.AssessmentSalesCategoryId == category.AssessmentSalesCategoryId)
-                    .Sum(x => vatInclusive && x.blIncludeVAT
-                        ? Gross(Value(x.MonthlyValues, index), x.TotalNoVAT, x.TotalWithVAT)
-                        : Value(x.MonthlyValues, index));
+                    .Sum(x => mode == AssessmentMode.ManufacturingSimplified
+                        ? InventoryAddition(x, mode, index)
+                        : vatInclusive && x.blIncludeVAT
+                            ? Gross(Value(x.MonthlyValues, index), x.TotalNoVAT, x.TotalWithVAT)
+                            : Value(x.MonthlyValues, index));
                 var code = $"markup-{category.AssessmentSalesCategoryId}";
                 if (warnings.All(x => x.Code != code))
                 {
+                    var fallbackSource = mode == AssessmentMode.ManufacturingSimplified
+                        ? "planned production value"
+                        : "monthly inventory additions";
                     warnings.Add(new(
                         code,
                         CashflowAlertSeverity.Warning,
                         "Missing cost-of-sales inputs",
-                        $"{category.AssessmentSalesCategoryName ?? "Unnamed category"} has no category markup or fallback cost-of-sales percentage; stock purchases are used as cost of sales."));
+                        $"{category.AssessmentSalesCategoryName ?? "Unnamed category"} has no category markup or fallback cost-of-sales percentage; {fallbackSource} is used as the estimated inventory consumption."));
                 }
             }
         }
 
         return result;
     }
+
+    private static decimal InventoryAdditions(
+        IEnumerable<AssessmentStock> stockItems,
+        AssessmentMode mode,
+        int monthIndex) =>
+        mode switch
+        {
+            AssessmentMode.Service => 0m,
+            AssessmentMode.ManufacturingSimplified => stockItems.Sum(item =>
+                InventoryAddition(item, mode, monthIndex)),
+            _ => stockItems.Sum(item => Value(item.MonthlyValues, monthIndex))
+        };
+
+    private static decimal InventoryAddition(
+        AssessmentStock item,
+        AssessmentMode mode,
+        int monthIndex) =>
+        mode == AssessmentMode.ManufacturingSimplified
+            ? Value(item.MonthlyProductionUnits, monthIndex) * item.StandardUnitCost
+            : Value(item.MonthlyValues, monthIndex);
 
     private static decimal StockVatFactor(
         IEnumerable<AssessmentStock> stock,
@@ -470,6 +569,9 @@ public static class CashflowProjectionCalculator
             EBITDAInclusive = months.Sum(x => x.EBITDAInclusive),
             ProfitBeforeTaxVatInclusive = months.Sum(x => x.ProfitBeforeTaxVatInclusive),
             StockPurchases = months.Sum(x => x.StockPurchases),
+            RawMaterialPurchases = months.Sum(x => x.RawMaterialPurchases),
+            RawMaterialConsumption = months.Sum(x => x.RawMaterialConsumption),
+            CompletedProductionCost = months.Sum(x => x.CompletedProductionCost),
             CostOfGoodsSold = months.Sum(x => x.CostOfGoodsSold),
             GrossProfit = months.Sum(x => x.GrossProfit),
             OperatingExpenses = months.Sum(x => x.OperatingExpenses),
@@ -485,6 +587,9 @@ public static class CashflowProjectionCalculator
             MinimumClosingBank = months.Min(x => x.ClosingBank),
             ClosingDebtors = last.ClosingDebtors,
             ClosingCreditors = last.ClosingCreditors,
+            ClosingRawMaterials = last.ClosingRawMaterials,
+            ClosingWorkInProgress = last.ClosingWorkInProgress,
+            ClosingFinishedGoods = last.ClosingFinishedGoods,
             ClosingFixedAssets = last.ClosingFixedAssets,
             ClosingLoanBalance = last.ClosingLoanBalance,
             CurrentAssets = last.CurrentAssets,

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.UtilityServices;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments;
 
@@ -13,6 +14,7 @@ public partial class AssessmentBalanceSheetPage : ComponentBase, IDisposable
     [Inject] private IProjectionStateManager ProjectionStateManager { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private ILogger<AssessmentBalanceSheetPage> Logger { get; set; } = default!;
+    [Inject] private ISessionService? SessionService { get; set; }
 
     [Parameter] public long AssessmentId { get; set; }
 
@@ -150,7 +152,7 @@ public partial class AssessmentBalanceSheetPage : ComponentBase, IDisposable
         return total;
     }
 
-    private static IEnumerable<BalanceSheetAlert> BuildAlerts(CashflowProjectionResult projection)
+    private IEnumerable<BalanceSheetAlert> BuildAlerts(CashflowProjectionResult projection)
     {
         var closing = projection.Months.OrderBy(month => month.MonthNumber).Last();
         var alerts = new List<BalanceSheetAlert>();
@@ -159,9 +161,9 @@ public partial class AssessmentBalanceSheetPage : ComponentBase, IDisposable
         var currentAssetBase = Math.Max(closing.CurrentAssets, 1m);
 
         if (equity < 0m)
-            alerts.Add(Critical("Negative projected net assets", $"Liabilities exceed assets by R {Math.Abs(equity):N0} at M12.", "Prepare a recapitalisation and debt-reduction plan; continued losses or drawings will deepen insolvency risk."));
+            alerts.Add(Critical("Negative projected net assets", $"Liabilities exceed assets by {DisplayUtility.FormatCurrency(Math.Abs(equity), SessionService?.CurrencyCode, SessionService?.CultureName)} at M12.", "Prepare a recapitalisation and debt-reduction plan; continued losses or drawings will deepen insolvency risk."));
         else
-            alerts.Add(Healthy("Positive net asset position", $"Projected net assets/equity close at R {equity:N0}.", "Protect this capital buffer by retaining sufficient profit and controlling additional borrowing."));
+            alerts.Add(Healthy("Positive net asset position", $"Projected net assets/equity close at {DisplayUtility.FormatCurrency(equity, SessionService?.CurrencyCode, SessionService?.CultureName)}.", "Protect this capital buffer by retaining sufficient profit and controlling additional borrowing."));
 
         if (closing.CurrentRatio is < 1m)
             alerts.Add(Critical("Current liabilities exceed current assets", $"The M12 current ratio is {closing.CurrentRatio.GetValueOrDefault():F2}x.", "Accelerate debtor collections, reduce excess stock and negotiate longer supplier terms."));

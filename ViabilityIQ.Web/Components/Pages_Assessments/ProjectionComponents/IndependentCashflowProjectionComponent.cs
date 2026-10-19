@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.UtilityServices;
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents;
 
@@ -9,12 +10,17 @@ public abstract class IndependentCashflowProjectionComponent : ComponentBase, ID
     [Inject] private ICashflowProjectionService ProjectionService { get; set; } = default!;
     [Inject] private IProjectionStateManager ProjectionStateManager { get; set; } = default!;
     [Inject] private ILoggerFactory LoggerFactory { get; set; } = default!;
+    [Inject] protected ISessionService? SessionService { get; set; }
 
     [Parameter] public long AssessmentId { get; set; }
     [Parameter] public CashflowProjectionResult? Projection { get; set; }
 
     protected bool IsLoading { get; private set; } = true;
     protected string? LoadError { get; private set; }
+    protected string FormatCurrency(decimal value) =>
+        DisplayUtility.FormatCurrency(value, SessionService?.CurrencyCode, SessionService?.CultureName);
+    protected string FormatNumber(decimal value, string format = "N2") =>
+        DisplayUtility.FormatNumber(value, SessionService?.CultureName, format);
 
     private long _loadedAssessmentId;
     private bool _subscribed;

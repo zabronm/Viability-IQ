@@ -31,6 +31,15 @@ public partial class CashflowMainPagesComponent : ComponentBase, IDisposable
 
     private async Task LoadAsync()
     {
+        if (AssessmentId <= 0)
+        {
+            Projection = null;
+            ErrorMessage = "A valid assessment is required to calculate cashflow.";
+            IsLoading = false;
+            _loadedAssessmentId = AssessmentId;
+            return;
+        }
+
         IsLoading = true;
         ErrorMessage = null;
         try

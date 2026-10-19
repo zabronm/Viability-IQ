@@ -124,7 +124,7 @@
                     </div>
 
                     <div class="viq-form-field">
-                        <label for="monthlyPayment">Monthly payment (R)</label>
+                        <label for="monthlyPayment">Monthly payment (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="monthlyPayment" type="number" step="0.01"
                                class="viq-form-control text-end" placeholder="0.00"
                                @bind-value="Model.ActualRepaymentAmount" />
