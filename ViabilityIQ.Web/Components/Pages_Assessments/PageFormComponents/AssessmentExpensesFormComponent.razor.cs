@@ -34,6 +34,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         private decimal[] MonthlyValues { get; set; } = new decimal[12];
         private decimal BulkAnnualValueTarget { get; set; }
         private bool IsSubmitting { get; set; } = false;
+        private bool IsManufacturingMode =>
+            sessionService.AssessmentModeId is (int)AssessmentMode.ManufacturingSimplified
+                or (int)AssessmentMode.Manufacturing;
+        private bool IsMonthlyEstimateManufacturingMode =>
+            sessionService.AssessmentModeId == (int)AssessmentMode.Manufacturing;
 
         #endregion
 
@@ -53,6 +58,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     Description = ExpenseContext.Description,
                     ExpenseTypeId = ExpenseContext.ExpenseTypeId,
                     ExpenseItemId = ExpenseContext.ExpenseItemId,
+                    IsDirectorWages = ExpenseContext.IsDirectorWages,
+                    IsDirectProductionCost = ExpenseContext.IsDirectProductionCost,
                     blSendToCashBook = ExpenseContext.blSendToCashBook,
                     blPercentageOfSalesUsed = ExpenseContext.blPercentageOfSalesUsed,
                     PercentageOfSalesRate = ExpenseContext.PercentageOfSalesRate,
@@ -114,6 +121,32 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 IsSubmitting = true;
                 var isNewRecord = FormModel.AssessmentExpenseId == 0;
                 FormModel.MonthlyValues = MonthlyValues;
+                if (!IsManufacturingMode)
+                {
+                    FormModel.IsDirectProductionCost = false;
+                }
+
+                if (FormModel.IsDirectorWages)
+                {
+                    if (FormModel.ExpenseItemId <= 0 || FormModel.ExpenseTypeId <= 0)
+                    {
+                        await zabCanvasService!.PublishResultAsync(
+                            new SaveResult { Success = false, Message = "Select an expense type and item for director wages." });
+                        return;
+                    }
+
+                    var existingWageRow = (await DataRepository.GetAllAsync(x =>
+                        x.AssessmentId == FormModel.AssessmentId
+                        && x.Active
+                        && x.IsDirectorWages
+                        && x.AssessmentExpenseId != FormModel.AssessmentExpenseId)).Any();
+                    if (existingWageRow)
+                    {
+                        await zabCanvasService!.PublishResultAsync(
+                            new SaveResult { Success = false, Message = "This assessment already has a director-wages expense. Edit that line instead of adding another." });
+                        return;
+                    }
+                }
 
                 Logger?.LogInformation(
                     "Saving expense for assessment {AssessmentId}",

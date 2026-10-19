@@ -1,0 +1,254 @@
+@using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Web.Components.CommonComponents
+
+<div class="viq-form-shell">
+    @if (IsLoading)
+    {
+        <div class="p-3 text-muted">Loading @AspectLabel.ToLowerInvariant()...</div>
+    }
+    else if (Aspect == ManufacturingInventoryAspect.RawMaterials)
+    {
+        <section class="viq-form-section">
+            <header class="viq-form-section-heading">
+                <span><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                <div>
+                    <h3>@CategoryName — Raw Materials</h3>
+                    <p>Enter materials used by this sales category. Monthly inventory values are valued using weighted-average cost.</p>
+                </div>
+            </header>
+            @if (UnassignedMaterialCount > 0)
+            {
+                <div class="alert alert-warning">
+                    @UnassignedMaterialCount legacy material item(s) are not linked to a sales category. Editing and saving one here will assign it to <strong>@CategoryName</strong>.
+                </div>
+            }
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-muted">@Materials.Count material item(s)</span>
+                <button type="button" class="viq-button viq-button-secondary my-2" @onclick="CreateMaterial">
+                    <i class="bi bi-plus-circle" aria-hidden="true"></i><span>Add raw material</span>
+                </button>
+            </div>
+            @if (Materials.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle raw-materials-summary-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Raw Material</th>
+                                <th>Unit</th>
+                                <th class="text-end">Opening Qty</th>
+                                <th class="text-end">Opening Value</th>
+                                <th class="text-end">Annual Purchases</th>
+                                <th class="text-end">M12 Closing Qty</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var material in Materials)
+                            {
+                                <tr>
+                                    <td>
+                                        @material.Description
+                                        @if (!material.AssessmentSalesCategoryId.HasValue)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-1">Unassigned</span>
+                                        }
+                                    </td>
+                                    <td>@material.UnitOfMeasure</td>
+                                    <td class="text-end">@material.OpeningQuantity.ToString("N2")</td>
+                                    <td class="text-end">@Money(material.OpeningValue)</td>
+                                    <td class="text-end">@Money(material.MonthlyPurchaseValues.Sum())</td>
+                                    <td class="text-end">@material.MonthlyClosingQuantities[^1].ToString("N2")</td>
+                                    <td class="text-center">
+                                        <!-- (Marked 1): Updated to btn-outline-success for distinct green styling -->
+                                        <button type="button" class="btn btn-sm btn-success me-1"
+                                                title="Edit material"
+                                                @onclick="() => EditMaterial(material)">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                title="Deactivate material"
+                                                @onclick="() => DeactivateMaterialAsync(material)">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No raw materials have been entered for this category yet.</div>
+            }
+        </section>
+
+        @if (CurrentMaterial is not null)
+        {
+            <EditForm Model="CurrentMaterial.Data" OnValidSubmit="SaveMaterialAsync">
+                <section class="viq-form-section border rounded p-3 mt-3">
+                    <header class="viq-form-section-heading">
+                        <span><i class="bi bi-pencil-square" aria-hidden="true"></i></span>
+                        <div><h3>@(CurrentMaterial.IsNew ? "Add raw material" : $"Edit {CurrentMaterial.Data.Description}")</h3></div>
+                    </header>
+                    <div class="viq-form-grid manufacturing-material-fields">
+                        <div class="viq-form-field manufacturing-material-name">
+                            <label for="materialDescription">Material name</label>
+                            <InputText id="materialDescription" class="viq-form-control"
+                                       @bind-Value="CurrentMaterial.Data.Description" />
+                        </div>
+                        <div class="viq-form-field manufacturing-material-unit">
+                            <label for="materialUnit">Unit of measure</label>
+                            <InputText id="materialUnit" class="viq-form-control"
+                                       placeholder="kg, metre, litre, item"
+                                       @bind-Value="CurrentMaterial.Data.UnitOfMeasure" />
+                        </div>
+                        <div class="viq-form-field manufacturing-material-opening-quantity">
+                            <label for="materialOpeningQuantity">Opening quantity</label>
+                            <InputNumber id="materialOpeningQuantity" class="viq-form-control" min="0" step="0.01"
+                                         @bind-Value="CurrentMaterial.Data.OpeningQuantity" />
+                        </div>
+                        <div class="viq-form-field manufacturing-material-opening-value">
+                            <label for="materialOpeningValue">Opening inventory value (@CurrencyCode)</label>
+                            <InputNumber id="materialOpeningValue" class="viq-form-control" min="0" step="0.01"
+                                         @bind-Value="CurrentMaterial.Data.OpeningValue" />
+                        </div>
+                        <label class="viq-toggle-card manufacturing-material-vat" for="materialIncludeVat">
+                            <span>
+                                <strong>VAT applies to purchases</strong>
+                                <small>Assessment VAT rate: @DefaultVatRate.ToString("0.##")%. Purchase values are entered excluding VAT.</small>
+                            </span>
+                            <InputCheckbox id="materialIncludeVat" class="viq-switch"
+                                           @bind-Value="CurrentMaterial.Data.IncludeVAT" />
+                        </label>
+                    </div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm align-middle manufacturing-material-flow-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Monthly Material Flow</th>
+                                    @for (var month = 1; month <= 12; month++)
+                                    {
+                                        <th class="text-end">@($"M{month}")</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- (Marked 2): Inputs formatted strictly to 2 decimal places using F2 string formatting -->
+                                <tr>
+                                    <th class="fw-semibold text-secondary">Purchase quantity (@CurrentMaterial.Data.UnitOfMeasure)</th>
+                                    @for (var index = 0; index < 12; index++)
+                                    {
+                                        var monthIndex = index;
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control text-end viq-micro-input"
+                                                   value="@CurrentMaterial.MonthlyPurchaseQuantities[monthIndex].ToString("F2")"
+                                                   @onchange="@(e => CurrentMaterial.MonthlyPurchaseQuantities[monthIndex] = decimal.TryParse(e.Value?.ToString(), out var v) ? Math.Round(v, 2) : 0m)" />
+                                        </td>
+                                    }
+                                </tr>
+                                <tr>
+                                    <th class="fw-semibold text-secondary">Purchase value (@CurrencyCode, excl. VAT)</th>
+                                    @for (var index = 0; index < 12; index++)
+                                    {
+                                        var monthIndex = index;
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control text-end viq-micro-input"
+                                                   value="@CurrentMaterial.MonthlyPurchaseValues[monthIndex].ToString("F2")"
+                                                   @onchange="@(e => CurrentMaterial.MonthlyPurchaseValues[monthIndex] = decimal.TryParse(e.Value?.ToString(), out var v) ? Math.Round(v, 2) : 0m)" />
+                                        </td>
+                                    }
+                                </tr>
+                                <tr>
+                                    <th class="fw-semibold text-secondary">Closing quantity (@CurrentMaterial.Data.UnitOfMeasure)</th>
+                                    @for (var index = 0; index < 12; index++)
+                                    {
+                                        var monthIndex = index;
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control text-end viq-micro-input"
+                                                   value="@CurrentMaterial.MonthlyClosingQuantities[monthIndex].ToString("F2")"
+                                                   @onchange="@(e => CurrentMaterial.MonthlyClosingQuantities[monthIndex] = decimal.TryParse(e.Value?.ToString(), out var v) ? Math.Round(v, 2) : 0m)" />
+                                        </td>
+                                    }
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3 manufacturing-material-actions">
+                        <button type="button" class="viq-button viq-button-secondary" @onclick="CancelMaterialEdit">Cancel</button>
+                        <button type="submit" class="viq-button viq-button-primary" disabled="@IsSaving">
+                            <i class="bi bi-check2-circle" aria-hidden="true"></i><span>Save raw material</span>
+                        </button>
+                    </div>
+                </section>
+            </EditForm>
+        }
+    }
+    else
+    {
+        <EditForm Model="Balances" OnValidSubmit="SaveBalancesAsync">
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi @(Aspect == ManufacturingInventoryAspect.WorkInProgress ? "bi-gear" : "bi-box")" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>@CategoryName — @AspectLabel</h3>
+                        <p>Enter opening and month-end inventory values for this sales category. These are valued in @CurrencyCode.</p>
+                    </div>
+                </header>
+                @if (IsLegacyBalances)
+                {
+                    <div class="alert alert-warning">
+                        Existing assessment-wide WIP and finished-goods balances are not assigned to a sales category. Saving these values will assign the legacy balances to <strong>@CategoryName</strong>; verify this is the correct category first.
+                    </div>
+                }
+                <div class="viq-form-field mb-3">
+                    <label for="openingInventory">Opening @AspectLabel value (@CurrencyCode)</label>
+                    <InputNumber id="openingInventory" class="viq-form-control" min="0" step="0.01"
+                                 @bind-Value="OpeningValue" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle manufacturing-material-flow-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Closing Balance (@CurrencyCode)</th>
+                                @for (var month = 1; month <= 12; month++)
+                                {
+                                    <th class="text-end">@($"M{month}")</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="fw-semibold text-secondary">@AspectLabel</th>
+                                @for (var index = 0; index < 12; index++)
+                                {
+                                    var monthIndex = index;
+                                    <td>
+                                        <input type="number" step="0.01" class="form-control text-end viq-micro-input"
+                                               value="@ClosingValues[monthIndex].ToString("F2")"
+                                               @onchange="@(e => ClosingValues[monthIndex] = decimal.TryParse(e.Value?.ToString(), out var v) ? Math.Round(v, 2) : 0m)" />
+                                    </td>
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mx-3">
+                <label class="viq-toggle-card my-3" for="inventoryEstimatesConfirmed">
+                    <span>
+                        <strong>Confirm inventory estimates</strong>
+                        <small>I reviewed the opening and monthly closing balances for WIP and finished products in this category, including intentional zero balances.</small>
+                    </span>
+                    <InputCheckbox id="inventoryEstimatesConfirmed" class="viq-switch"
+                                   @bind-Value="Balances.InventoryEstimatesConfirmed" />
+                </label>
+                <button type="submit" class="viq-button viq-button-primary" disabled="@IsSaving">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>Save @AspectLabel balances</span>
+                </button>
+                </div>
+            </section>
+        </EditForm>
+    }
+</div>

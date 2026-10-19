@@ -9,14 +9,15 @@ IF OBJECT_ID('dbo.tblAssessmentSalesCategory', 'U') IS NULL
     THROW 50042, 'dbo.tblAssessmentSalesCategory does not exist.', 1;
 GO
 
+IF COL_LENGTH('dbo.tblAssessmentStock', 'OpeningBalance') IS NULL
+    ALTER TABLE dbo.tblAssessmentStock
+        ADD OpeningBalance decimal(19, 4) NOT NULL
+            CONSTRAINT DF_tblAssessmentStock_OpeningBalance DEFAULT (0)
+            WITH VALUES;
+GO
+
 BEGIN TRY
     BEGIN TRANSACTION;
-
-    IF COL_LENGTH('dbo.tblAssessmentStock', 'OpeningBalance') IS NULL
-        ALTER TABLE dbo.tblAssessmentStock
-            ADD OpeningBalance decimal(19, 4) NOT NULL
-                CONSTRAINT DF_tblAssessmentStock_OpeningBalance DEFAULT (0)
-                WITH VALUES;
 
     UPDATE stock
     SET Description = COALESCE(

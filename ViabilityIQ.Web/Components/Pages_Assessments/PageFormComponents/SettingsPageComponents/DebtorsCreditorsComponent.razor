@@ -14,7 +14,7 @@ else if (debtorsCreditorsModel is not null)
                 <div class="dc-profile-title">
                     <span class="dc-profile-icon"><i class="bi bi-calendar3-range"></i></span>
                     <div>
-                        <span>Working capital assumptions</span>
+                        @* <span>Working capital assumptions</span> *@
                         <h2>Debtors &amp; Creditors Ageing Profiles</h2>
                         <p>Capture the ageing information you know. The saved projection profile is always stored as percentages.</p>
                     </div>
@@ -121,7 +121,7 @@ else if (debtorsCreditorsModel is not null)
                                     @if (debtorsCreditorsModel.EntryMode)
                                     {
                                         <div class="dc-input-with-prefix">
-                                            <span>R</span>
+                                            <span>@(sessionService?.CurrencyCode ?? "ZAR")</span>
                                             <input id="@($"creditor-{bucket.Index}")"
                                                    type="number"
                                                    min="0"
@@ -191,7 +191,7 @@ else if (debtorsCreditorsModel is not null)
                                     @if (debtorsCreditorsModel.EntryMode)
                                     {
                                         <div class="dc-input-with-prefix">
-                                            <span>R</span>
+                                            <span>@(sessionService?.CurrencyCode ?? "ZAR")</span>
                                             <input id="@($"debtor-{bucket.Index}")"
                                                    type="number"
                                                    min="0"

@@ -1,5 +1,7 @@
 ﻿@using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Application.Interfaces
+@inject ISessionService? sessionService
 
 <div class="viq-form-shell">
     @if (IsLoading)
@@ -97,7 +99,7 @@
 
                 <div class="viq-form-grid viq-form-grid-2">
                     <div class="viq-form-field">
-                        <label for="openingAssets">Opening balance: assets (R)</label>
+                        <label for="openingAssets">Opening balance: assets (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="openingAssets" type="number" step="0.01"
                                class="viq-form-control text-end"
                                @bind-value="Model.OpeningBalance_Assets" />
@@ -105,7 +107,7 @@
                     </div>
 
                     <div class="viq-form-field">
-                        <label for="openingBank">Opening balance: bank (R)</label>
+                        <label for="openingBank">Opening balance: bank (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="openingBank" type="number" step="0.01"
                                class="viq-form-control text-end"
                                @bind-value="Model.OpeningBalance_Bank" />
@@ -113,7 +115,7 @@
                     </div>
 
                     <div class="viq-form-field viq-form-span-2">
-                        <label for="projectedDepreciation">Depreciation projected amount (R)</label>
+                        <label for="projectedDepreciation">Depreciation projected amount (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="projectedDepreciation" type="number" step="0.01"
                                class="viq-form-control text-end"
                                @bind-value="Model.DepreciationProjectedAmount" />

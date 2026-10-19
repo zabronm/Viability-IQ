@@ -9,6 +9,7 @@ using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.DataModels.FinCalculations;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.UtilityServices;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.CommonComponents;
@@ -79,8 +80,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         // Sorting State
         private string currentSortColumn = "Description";
         private bool isAscending = true;
-        private long _lastLoadedAssessmentId;
-
 
         private IEnumerable<UnifiedIncomeViewModel> FilteredIncomeStreams
         {
@@ -104,66 +103,33 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         #endregion
 
         #region Lifecycle Methods
-        protected override void OnInitialized()
+
+        protected override async Task OnInitializedAsync()
         {
-            // Subscribe once for this component instance. Route parameters can
-            // change without recreating the component.
-            if (projectionStateManager != null)
-            {
-                projectionStateManager.ProjectionChanged += OnProjectionChanged;
-                Logger?.LogDebug("AssessmentSalesPage subscribed to ProjectionChanged events");
-            }
-        }
-
-        protected override async Task OnParametersSetAsync()
-        {
-            // The route parameter is authoritative. Session state is only a
-            // fallback for non-routed callers that did not supply an ID.
-            var effectiveAssessmentId = AssessmentId > 0
-                ? AssessmentId
-                : sessionService?.AssessmentId ?? 0;
-
-            if (effectiveAssessmentId <= 0)
-            {
-                IsLoading = false;
-                AlertHeading = "ASSESSMENT REQUIRED:";
-                AlertMessage = "Open this page from a valid assessment before loading sales data.";
-                blAlert = true;
-                Logger?.LogWarning("AssessmentSalesPage received no valid assessment ID.");
-                return;
-            }
-
-            if (_lastLoadedAssessmentId == effectiveAssessmentId)
-                return;
-
-            AssessmentId = effectiveAssessmentId;
-            IsLoading = true;
-
             try
             {
-                Logger?.LogInformation(
-                    "Loading AssessmentSalesPage for assessment {AssessmentId}",
+                AssessmentId = sessionService.AssessmentId ?? 0;
+
+                Logger.LogInformation(
+                    "AssessmentSalesPage initialized for assessment {AssessmentId}",
                     AssessmentId);
 
                 await LoadAndMapSalesData();
                 await LoadProjectionAssumptionsAsync();
                 await CreateSummaries();
-                _lastLoadedAssessmentId = effectiveAssessmentId;
+                IsLoading = false;
+
+                // Subscribe to projection changes
+                projectionStateManager.ProjectionChanged += OnProjectionChanged;
+
+                Logger.LogDebug("AssessmentSalesPage subscribed to ProjectionChanged events");
             }
             catch (Exception ex)
             {
-                Logger?.LogError(ex, "Error loading AssessmentSalesPage for assessment {AssessmentId}", AssessmentId);
-                _lastLoadedAssessmentId = 0;
-                AlertHeading = "SALES COULD NOT BE LOADED:";
-                AlertMessage = "The sales information could not be loaded. Please retry or return to the assessment.";
-                blAlert = true;
-            }
-            finally
-            {
+                Logger.LogError(ex, "Error initializing AssessmentSalesPage");
                 IsLoading = false;
             }
         }
-
 
         #endregion
 
@@ -240,7 +206,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 ?? new AssessmentProjectionAssumptions { AssessmentId = AssessmentId };
         }
 
-        private static string Money(decimal value) => $"R {value:N0}";
+        private string Money(decimal value) =>
+            DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
         private static string Percent(decimal value) => $"{value:N1}%";
 
         private async Task CreateSummaries()

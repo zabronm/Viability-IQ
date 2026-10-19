@@ -3,6 +3,7 @@
 @using ViabilityIQ.Application.Interfaces
 @using ViabilityIQ.Shared.FinancialModels
 @using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.UtilityServices
 @inject IGenericDataRepository<Assessment> AssessmentRepository
 @inject IGenericDataRepository<AssessmentProjectionAssumptions> AssumptionsRepository
 @inject IGenericDataRepository<AssessmentSalesCategory> CategoryRepository
@@ -11,6 +12,7 @@
 @inject IGenericDataRepository<AssessmentLoan> LoanRepository
 @inject IGenericDataRepository<DebtorsCreditorsProfile> ProfileRepository
 @inject IAssetDepreciationEngine DepreciationEngine
+@inject ISessionService? SessionService
 @inject IJSRuntime JS
 
 <main class="aar-page">
@@ -18,7 +20,7 @@
 @if(Loading){<div class="aar-state">Preparing report...</div>}
 else if(Assessment is null){<div class="aar-state">Assessment not found.</div>}
 else{
-<section class="aar-cover"><h1>Assessment Assumptions &amp; Baseline</h1><p>Case @Assessment.CaseNumber · Generated @DateTime.Now.ToString("dd MMMM yyyy HH:mm")</p></section>
+<section class="aar-cover"><h1>Assessment Assumptions &amp; Baseline</h1><p>Case @Assessment.CaseNumber · Generated @DisplayUtility.FormatDate(DateTime.Now, SessionService?.CultureName)</p></section>
 <section><h2>Opening financial position</h2><div class="aar-grid">
 @Metric("Bank balance",Assessment.OpeningBalance_Bank) @Metric("Opening stock",StockItems.Sum(x=>x.OpeningBalance))
 @Metric("Opening debtors",Categories.Sum(x=>x.OpeningDebtorsAmount)) @Metric("Opening creditors",Categories.Sum(x=>x.OpeningCreditorsAmount))
@@ -46,4 +48,4 @@ else{
 @code{
 [Parameter]public long AssessmentId{get;set;}private bool Loading=true;private Assessment? Assessment;private AssessmentProjectionAssumptions? Baseline;private DebtorsCreditorsProfile? Profile;private AssessmentSalesCategory[] Categories=[];private AssessmentStock[] StockItems=[];private AssessmentAsset[] Assets=[];private AssessmentLoan[] Loans=[];private decimal AnnualDepreciation;
 protected override async Task OnInitializedAsync(){var a=AssessmentRepository.GetByIdAsync(AssessmentId);var b=AssumptionsRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var c=CategoryRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var stock=StockRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var d=AssetRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var l=LoanRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var p=ProfileRepository.GetAllAsync(x=>x.AssessmentId==AssessmentId&&x.Active);var dep=DepreciationEngine.CalculateAnnualDepreciationAsync(AssessmentId);await Task.WhenAll(a,b,c,stock,d,l,p,dep);Assessment=await a;Baseline=(await b).OrderByDescending(x=>x.AssessmentProjectionAssumptionsId).FirstOrDefault();Categories=(await c).ToArray();StockItems=(await stock).ToArray();Assets=(await d).ToArray();Loans=(await l).ToArray();Profile=(await p).FirstOrDefault();AnnualDepreciation=(await dep).Values.Sum();Loading=false;}
-private RenderFragment Metric(string label,decimal value)=>@<div class="aar-metric"><span>@label</span><strong>@Money(value)</strong></div>;private RenderFragment TextMetric(string label,string value)=>@<div class="aar-metric"><span>@label</span><strong>@value</strong></div>;private static string Money(decimal value)=>$"R {value:N2}";private static string Buckets(params decimal[] values)=>string.Join(" / ",values.Select(x=>$"{x:N2}%"));private async Task Print()=>await JS.InvokeVoidAsync("print");}
+private RenderFragment Metric(string label,decimal value)=>@<div class="aar-metric"><span>@label</span><strong>@Money(value)</strong></div>;private RenderFragment TextMetric(string label,string value)=>@<div class="aar-metric"><span>@label</span><strong>@value</strong></div>;private string Money(decimal value)=>DisplayUtility.FormatCurrency(value,SessionService?.CurrencyCode,SessionService?.CultureName);private string Buckets(params decimal[] values)=>string.Join(" / ",values.Select(x=>$"{DisplayUtility.FormatNumber(x,SessionService?.CultureName,"N2")}%"));private async Task Print()=>await JS.InvokeVoidAsync("print");}

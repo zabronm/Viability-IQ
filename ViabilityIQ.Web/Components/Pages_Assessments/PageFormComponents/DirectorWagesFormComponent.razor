@@ -1,5 +1,7 @@
 ﻿@using ViabilityIQ.Shared.DataModels
 @using ViabilityIQ.Shared.SharedModels
+@using ViabilityIQ.Application.Interfaces
+@inject ISessionService? sessionService
 
 <div class="viq-form-shell">
     @if (IsLoading)
@@ -49,7 +51,7 @@
                     </div>
 
                     <div class="viq-form-field">
-                        <label for="monthlyDirectorWage">Monthly wage per director (R)</label>
+                        <label for="monthlyDirectorWage">Monthly wage per director (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="monthlyDirectorWage" type="number" step="0.01" class="viq-form-control"
                                @bind-value="Model.MonthlyDirectorWagesAmount"
                                @bind-value:event="oninput"
@@ -57,7 +59,7 @@
                     </div>
 
                     <div class="viq-form-field viq-form-span-2">
-                        <label for="combinedMonthlyImpact">Combined monthly impact (R)</label>
+                        <label for="combinedMonthlyImpact">Combined monthly impact (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                         <input id="combinedMonthlyImpact" type="text" class="viq-form-control"
                                value="@Model.MonthlyDirectorWagesAmountTotal.ToString("N2")" readonly disabled />
                     </div>

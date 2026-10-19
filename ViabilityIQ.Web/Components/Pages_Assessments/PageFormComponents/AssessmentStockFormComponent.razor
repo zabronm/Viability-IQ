@@ -1,4 +1,5 @@
 ﻿@using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Shared.UtilityServices
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
 <div class="viq-form-shell">
@@ -31,8 +32,10 @@
             <header class="viq-form-section-heading">
                 <span><i class="bi bi-tags" aria-hidden="true"></i></span>
                 <div>
-                    <h3>Stock settings</h3>
-                    <p>Select the reporting category and VAT treatment.</p>
+                    <h3>@(IsManufacturingMode ? "Manufactured product settings" : "Stock settings")</h3>
+                    <p>@(IsManufacturingMode
+                        ? "Standard unit cost values inventory only. Record actual production spending in Expenses; enable cashbook posting and set VAT treatment there."
+                        : "Select the reporting category and VAT treatment.")</p>
                 </div>
             </header>
             <div class="viq-form-grid">
@@ -49,76 +52,120 @@
                                        @bind-Value="FormModel.AssessmentSalesCategoryId"
                                        Placeholder="Select Sales Category" />
                 </div>
-                <div class="viq-form-field">
-                    <label for="openingStockBalance">Opening stock balance (R)</label>
+                @if (!IsServiceMode)
+                {
+                    <div class="viq-form-field">
+                    <label for="openingStockBalance">Opening stock balance (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                     <InputNumber id="openingStockBalance" class="viq-form-control"
                                  min="0" step="0.01" @bind-Value="FormModel.OpeningBalance" />
                     <ValidationMessage For="@(() => FormModel.OpeningBalance)" class="viq-form-validation" />
-                </div>
-                <label class="viq-toggle-card" for="vatSwitch">
-                    <span>
-                        <strong>Include VAT</strong>
-                        <small>Include VAT in the projected values.</small>
-                    </span>
-                    <input class="viq-switch" type="checkbox" id="vatSwitch" @bind="FormModel.blIncludeVAT">
-                </label>
-            </div>
-        </section>
-
-        <section class="viq-form-section">
-            <header class="viq-form-section-heading">
-                <span><i class="bi bi-distribute-horizontal" aria-hidden="true"></i></span>
-                <div>
-                    <h3>Quick even distribution</h3>
-                    <p>Apply one value evenly across the twelve-month horizon.</p>
-                </div>
-            </header>
-            <div class="viq-form-grid viq-form-grid-2">
-                <div class="viq-form-field">
-                    <label for="expenseBulkTarget">Distribution value</label>
-                    <input id="expenseBulkTarget" type="number" class="viq-form-control" @bind="BulkTargetValue" />
-                </div>
-                <div class="viq-form-field">
-                    <label>Distribution action</label>
-                    <button class="viq-button viq-button-secondary" type="button"
-                            @onclick="DistributeStockValuesEvenly">
-                        <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-                        <span>Apply</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <section class="viq-form-section">
-            <header class="viq-form-section-heading">
-                <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
-                <div>
-                    <h3>12-month horizon</h3>
-                    <p>Enter monthly purchases or stock additions for this item.</p>
-                </div>
-            </header>
-            <div class="viq-form-grid viq-form-grid-2">
-                @for (int i = 0; i < 12; i++)
-                {
-                    int idx = i;
-                    <div class="viq-form-field">
-                        <label for="@($"expenseMonth{idx + 1}")">Month @(idx + 1)</label>
-                        <input id="@($"expenseMonth{idx + 1}")" type="number" class="viq-form-control"
-                               @bind="MonthlyValues[idx]" @bind:event="oninput" />
                     </div>
+                    @if (IsManufacturingMode)
+                    {
+                        <div class="viq-form-field">
+                            <label for="standardUnitCost">Standard production cost per unit (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
+                            <InputNumber id="standardUnitCost" class="viq-form-control"
+                                         min="0" step="0.01" @bind-Value="FormModel.StandardUnitCost" />
+                            <ValidationMessage For="@(() => FormModel.StandardUnitCost)" class="viq-form-validation" />
+                        </div>
+                    }
+                    @if (IsManufacturingMode)
+                    {
+                        <div class="alert alert-info mb-0">
+                            Record actual materials, labor and other production spending in Expenses. Enable cashbook posting for expected cash outflows and set the appropriate VAT treatment there.
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="viq-toggle-card" for="vatSwitch">
+                            <span>
+                                <strong>Include VAT</strong>
+                                <small>Include VAT in projected stock purchases.</small>
+                            </span>
+                            <input class="viq-switch" type="checkbox" id="vatSwitch" @bind="FormModel.blIncludeVAT">
+                        </label>
+                    }
                 }
             </div>
         </section>
 
-        <section class="viq-form-section">
-            <header class="viq-form-section-heading">
-                <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
-                <div>
-                    <h3>Total stock value</h3>
-                    <p>@MonthlyValues.Sum().ToString("N2")</p>
+        @if (!IsServiceMode)
+        {
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-distribute-horizontal" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Distribute same monthly figure</h3>
+                        <p>Enter one monthly @(IsManufacturingMode ? "production unit" : "purchase/addition") figure and apply it to all twelve months.</p>
+                    </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    <div class="viq-form-field">
+                        <label for="monthlyDistributionValue">Monthly @(IsManufacturingMode ? "production units" : "figure")</label>
+                        <input id="monthlyDistributionValue" type="number" min="0" step="0.01"
+                               class="viq-form-control" @bind="BulkTargetValue" />
+                    </div>
+                    <div class="viq-form-field">
+                        <label>Distribution action</label>
+                        <button class="viq-button viq-button-secondary" type="button"
+                                @onclick="DistributeStockValuesEvenly">
+                            <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                            <span>Apply to all months</span>
+                        </button>
+                    </div>
                 </div>
-            </header>
-        </section>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>12-month horizon</h3>
+                        <p>@(IsManufacturingMode ? "Enter planned production units for each month." : "Enter monthly purchases or stock additions for this item.")</p>
+                    </div>
+                </header>
+                <div class="viq-form-grid viq-form-grid-2">
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        int idx = i;
+                        <div class="viq-form-field">
+                            <label for="@($"expenseMonth{idx + 1}")">Month @(idx + 1) @(IsManufacturingMode ? "production units" : string.Empty)</label>
+                            @if (IsManufacturingMode)
+                            {
+                                <InputNumber id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
+                                             @bind-Value="ProductionUnits[idx]" />
+                            }
+                            else
+                            {
+                                <InputNumber id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
+                                             @bind-Value="MonthlyValues[idx]" />
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="viq-form-section">
+                <header class="viq-form-section-heading">
+                    <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>@(IsManufacturingMode ? "Total planned production value" : "Total stock purchases")</h3>
+                        <p>@DisplayUtility.FormatCurrency(
+                            IsManufacturingMode
+                                ? ProductionUnits.Sum() * FormModel.StandardUnitCost
+                                : MonthlyValues.Sum(),
+                            sessionService?.CurrencyCode,
+                            sessionService?.CultureName)</p>
+                    </div>
+                </header>
+            </section>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                Service assessments do not use stock inputs. Direct and operating costs, including director wages, are entered through Expenses.
+            </div>
+        }
 
         <footer class="viq-form-actions">
             <button type="submit" class="viq-button viq-button-primary" disabled="@IsSubmitting">

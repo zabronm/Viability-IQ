@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
@@ -21,9 +22,13 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         private Assessment assessmentModel = new();
         private Dictionary<long, string> activeBusinessLookup = new();
         private bool isProcessingData = false;
+        private string? formError;
 
         private string formattedStartDate = DateTime.Today.ToString("yyyy-MM-dd");
         private string formattedEndDate = DateTime.Today.AddMonths(1).ToString("yyyy-MM-dd");
+        private string LocaleDateSample =>
+            DateTime.Today.ToString(GetCulture().DateTimeFormat.ShortDatePattern, GetCulture());
+        private string LocaleNumberSample => 1234567.89m.ToString("N2", GetCulture());
 
         private bool isRowActive = true;
         private bool boolStock { get; set; }
@@ -31,6 +36,30 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         private bool boolExpenses { get; set; }
         private bool boolSales { get; set; }
         private bool boolVat { get; set; }
+
+        private CultureInfo GetCulture()
+        {
+            try
+            {
+                return CultureInfo.GetCultureInfo(assessmentModel.CultureName);
+            }
+            catch (CultureNotFoundException)
+            {
+                return CultureInfo.GetCultureInfo("en-ZA");
+            }
+        }
+
+        private void OnCultureChanged(string? cultureName)
+        {
+            var locale = AssessmentLocaleOptions.EnglishCultures
+                .FirstOrDefault(item => item.CultureName == cultureName);
+            if (locale is null)
+                return;
+
+            assessmentModel.CultureName = locale.CultureName;
+            assessmentModel.CountryCode = locale.CountryCode;
+            assessmentModel.CurrencyCode = locale.DefaultCurrencyCode;
+        }
 
         protected override async Task OnInitializedAsync()
         {
@@ -48,6 +77,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
         protected override async Task OnParametersSetAsync()
         {
+            formError = null;
             if (AssessmentId != 0)
             {
                 isProcessingData = true;
@@ -64,7 +94,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                         boolDebtors = assessmentModel.blDebtorsCreditors == 1;
                         boolExpenses = assessmentModel.blExpenses == 1;
                         boolSales = assessmentModel.blSales == 1;
-                        boolVat = assessmentModel.blVat == 1;
+                        boolVat = assessmentModel.blVat == 1;                        
                     }
                 }
                 catch (Exception ex)
@@ -82,6 +112,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 {
                     StatusId = 1,
                     AssessmentTypeId = 1,
+                    AssessmentModeId = (int)AssessmentMode.Trading,
                     Active = true
                 };
 
@@ -112,7 +143,12 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 
         protected async Task HandleFormSubmissionAsync()
         {
-            if (assessmentModel.BusinessId == 0) return;
+            formError = null;
+            if (assessmentModel.BusinessId <= 0)
+            {
+                formError = "Select an active business before saving the assessment.";
+                return;
+            }
 
             isProcessingData = true;
             var finalResult = new SaveResult();
@@ -126,7 +162,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 assessmentModel.blExpenses = boolExpenses ? 1 : 0;
                 assessmentModel.blSales = boolSales ? 1 : 0;
                 assessmentModel.blVat = boolVat ? 1 : 0;
-                assessmentModel.AssessmentTypeId = 4;           //Logic changed to credit, User will specify Debtor/Creditor profiles iun the Assumptions
+                assessmentModel.AssessmentTypeId = 4;               //============  This field is redundant, value only for FK constraint compatibility ==============
 
                 bool operationSuccess = await assessmentRepository.SaveAsync(assessmentModel);
 
@@ -153,9 +189,11 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
             catch (Exception ex)
             {
+                var message = $"Unable to save the assessment: {ex.Message}";
+                formError = message;
                 finalResult.Success = false;
                 finalResult.ClosePanel = false;
-                finalResult.Message = $"Pipeline Intercepted Failure: {ex.Message}";
+                finalResult.Message = message;
 
                 await OffcanvasService!.PublishResultAsync(finalResult);
             }
@@ -170,7 +208,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             assessmentModel = new Assessment
             {
                 StatusId = 1,
-                AssessmentTypeId = 1,
+                AssessmentTypeId = 4,                           //============  This field is redundant, value only for FK constraint compatibility ==============
+                AssessmentModeId = (int)AssessmentMode.Trading,
                 Active = true
             };
             formattedStartDate = DateTime.Today.ToString("yyyy-MM-dd");

@@ -2,6 +2,8 @@
 @using ViabilityIQ.Shared.FinancialModels
 @using ViabilityIQ.Infrastructure.Repositories
 @using ViabilityIQ.Shared.DataModels
+@using ViabilityIQ.Shared.UtilityServices
+@inject ISessionService? SessionService
 @inject IGenericDataRepository<AssessmentSalesCategory> CategoryRepository
 @inject IGenericDataRepository<AssessmentStock> StockRepository
 @inject IGenericDataRepository<AssessmentAsset> AssetRepository
@@ -96,11 +98,11 @@ else
     }
 
     private RenderFragment ReadOnlyBalance(string label, string note, decimal value, string icon) => @<div class="ob-readonly">
-        <i class="bi @icon"></i><div><span>@label</span><small>@note</small></div><strong>R @value.ToString("N2")</strong>
+        <i class="bi @icon"></i><div><span>@label</span><small>@note</small></div><strong>@DisplayUtility.FormatCurrency(value, SessionService?.CurrencyCode, SessionService?.CultureName)</strong>
     </div>;
 
     private RenderFragment MoneyInput(string label, string note, decimal value, Action<decimal> setter, bool allowNegative = false) => @<label class="ob-field">
-        <span>@label</span><small>@note</small><div class="ob-input"><span>R</span><input type="number" min="@(allowNegative ? null : "0")" step="0.01" value="@FormatDecimal(value)" @onchange="e => setter(ParseDecimal(e.Value, allowNegative))" /></div>
+        <span>@label</span><small>@note</small><div class="ob-input"><span>@(SessionService?.CurrencyCode ?? "ZAR")</span><input type="number" min="@(allowNegative ? null : "0")" step="0.01" value="@FormatDecimal(value)" @onchange="e => setter(ParseDecimal(e.Value, allowNegative))" /></div>
     </label>;
 
     private RenderFragment PercentInput(string label, string note, decimal value, Action<decimal> setter) => @<label class="ob-field">

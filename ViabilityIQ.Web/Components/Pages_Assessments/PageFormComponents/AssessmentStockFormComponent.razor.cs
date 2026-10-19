@@ -27,6 +27,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public long AssessmentStockId { get; set; }
+        [Parameter] public int AssessmentModeId { get; set; } = (int)AssessmentMode.Trading;
 
         #endregion
 
@@ -34,8 +35,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         private AssessmentStock FormModel = new();
         private decimal[] MonthlyValues { get; set; } = new decimal[12];
+        private decimal[] ProductionUnits { get; set; } = new decimal[12];
         private decimal BulkTargetValue { get; set; }
         private bool IsSubmitting { get; set; }
+        private bool IsManufacturingMode =>
+            AssessmentModeId == (int)AssessmentMode.ManufacturingSimplified;
+        private bool IsServiceMode =>
+            AssessmentModeId == (int)AssessmentMode.Service;
 
         #endregion
 
@@ -69,11 +75,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     FormModel = await ViqCrudService!.GetSingleAsync<AssessmentStock>("tblAssessmentStock", new { AssessmentStockId })
                                 ?? new AssessmentStock { AssessmentId = AssessmentId };
                     MonthlyValues = FormModel.MonthlyValues;
+                    ProductionUnits = FormModel.MonthlyProductionUnits;
                 }
                 else
                 {
                     FormModel = new AssessmentStock { AssessmentId = AssessmentId, blIncludeVAT = true };
                     MonthlyValues = new decimal[12];
+                    ProductionUnits = new decimal[12];
                 }
 
                 Logger?.LogDebug("Stock loaded successfully for AssessmentStockId {AssessmentStockId}", AssessmentStockId);
@@ -87,8 +95,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         private void DistributeStockValuesEvenly()
         {
-            Logger?.LogDebug("Distributing stock values evenly: {Amount}", BulkTargetValue);
-            for (int i = 0; i < 12; i++) MonthlyValues[i] = BulkTargetValue;
+            Logger?.LogDebug(
+                "Distributing monthly {ValueType} evenly: {Amount}",
+                IsManufacturingMode ? "production units" : "stock values",
+                BulkTargetValue);
+
+            var monthlyValues = IsManufacturingMode ? ProductionUnits : MonthlyValues;
+            Array.Fill(monthlyValues, BulkTargetValue);
         }
 
 
@@ -101,7 +114,25 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             {
                 IsSubmitting = true;
                 var isNewRecord = FormModel.AssessmentStockId == 0;
-                FormModel.MonthlyValues = MonthlyValues;
+                if (IsServiceMode)
+                {
+                    await zabCanvasService!.PublishResultAsync(
+                        new SaveResult { Success = false, Message = "Service assessments do not use stock records. Enter costs through Expenses." });
+                    return;
+                }
+
+                if (IsManufacturingMode)
+                {
+                    FormModel.MonthlyProductionUnits = ProductionUnits;
+                    FormModel.MonthlyValues = new decimal[12];
+                    FormModel.blIncludeVAT = false;
+                }
+                else
+                {
+                    FormModel.MonthlyValues = MonthlyValues;
+                    FormModel.MonthlyProductionUnits = new decimal[12];
+                    FormModel.StandardUnitCost = 0m;
+                }
 
                 Logger?.LogInformation("Saving stock for assessment {AssessmentId}", FormModel.AssessmentId);
 
@@ -126,6 +157,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         blIncludeVAT = true
                     };
                     MonthlyValues = new decimal[12];
+                    ProductionUnits = new decimal[12];
                     BulkTargetValue = 0m;
                 }
             }

@@ -96,7 +96,7 @@
         return Task.CompletedTask;
     }
 
-    private static IEnumerable<PerformanceAlert> BuildAlerts(CashflowProjectionResult projection)
+    private IEnumerable<PerformanceAlert> BuildAlerts(CashflowProjectionResult projection)
     {
         var alerts = new List<PerformanceAlert>();
         var summary = projection.Summary;
@@ -105,12 +105,12 @@
         var lossMonths = projection.Months.Count(month => month.ProfitBeforeTax < 0m);
 
         if (summary.ProfitBeforeTax < 0m)
-            alerts.Add(Critical("Projected loss", $"The period projects a loss before tax of R {Math.Abs(summary.ProfitBeforeTax):N0}.", "Review pricing, gross margin and controllable operating expenses, starting with the largest monthly loss."));
+            alerts.Add(Critical("Projected loss", $"The period projects a loss before tax of {FormatCurrency(Math.Abs(summary.ProfitBeforeTax))}.", "Review pricing, gross margin and controllable operating expenses, starting with the largest monthly loss."));
         else
-            alerts.Add(Healthy("Profitable projection", $"Profit before tax is projected at R {summary.ProfitBeforeTax:N0}.", "Protect the margin by monitoring monthly costs and collection performance."));
+            alerts.Add(Healthy("Profitable projection", $"Profit before tax is projected at {FormatCurrency(summary.ProfitBeforeTax)}.", "Protect the margin by monitoring monthly costs and collection performance."));
 
         if (negativeCashMonths > 0)
-            alerts.Add(Critical("Cash shortfall risk", $"{negativeCashMonths} month(s) close with a negative bank balance; the minimum balance is R {summary.MinimumClosingBank:N0}.", "Accelerate debtor collections, defer discretionary spending or arrange sufficient working-capital funding before the first shortfall."));
+            alerts.Add(Critical("Cash shortfall risk", $"{negativeCashMonths} month(s) close with a negative bank balance; the minimum balance is {FormatCurrency(summary.MinimumClosingBank)}.", "Accelerate debtor collections, defer discretionary spending or arrange sufficient working-capital funding before the first shortfall."));
         else
             alerts.Add(Healthy("Positive cash runway", "All projected months close with a non-negative bank balance.", "Retain a suitable cash reserve and investigate productive uses for sustained surpluses."));
 
@@ -136,7 +136,7 @@
             alerts.Add(Warning("Recurring loss months", $"{lossMonths} months project a loss before tax.", "Use the P&L timeline to identify seasonal cost or sales gaps and prepare month-specific corrective actions."));
 
         if (summary.ClosingStock > 0m && summary.Revenue > 0m && summary.ClosingStock > summary.Revenue * 0.35m)
-            alerts.Add(Warning("High closing inventory", $"Closing inventory of R {summary.ClosingStock:N0} is high relative to annual sales.", "Review slow-moving lines and purchasing plans to release working capital."));
+            alerts.Add(Warning("High closing inventory", $"Closing inventory of {FormatCurrency(summary.ClosingStock)} is high relative to annual sales.", "Review slow-moving lines and purchasing plans to release working capital."));
 
         alerts.AddRange(projection.Alerts.Select(alert => new PerformanceAlert(
             alert.Severity == CashflowAlertSeverity.Critical ? 0 : alert.Severity == CashflowAlertSeverity.Warning ? 1 : 2,

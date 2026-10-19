@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
+using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Shared.DataModels.SecurityDataModels;
 
@@ -13,6 +14,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
     {
         private readonly MasterDataService _masterDataService;
         private readonly ITenantAuthorizationService _tenantAuthorizationService;
+        private readonly IGenericDataRepository<Assessment> _assessmentRepository;
 
 
         // ====================================================
@@ -36,10 +38,14 @@ namespace ViabilityIQ.Infrastructure.Repositories
         // ====================================================
         public AssessmentDataValidationService(
             MasterDataService masterDataService,
-            ITenantAuthorizationService tenantAuthorizationService)
+            ITenantAuthorizationService tenantAuthorizationService,
+            IGenericDataRepository<Assessment> assessmentRepository)
         {
             _masterDataService = masterDataService ?? throw new ArgumentNullException(nameof(masterDataService));
-            _tenantAuthorizationService = tenantAuthorizationService;
+            _tenantAuthorizationService = tenantAuthorizationService
+                ?? throw new ArgumentNullException(nameof(tenantAuthorizationService));
+            _assessmentRepository = assessmentRepository
+                ?? throw new ArgumentNullException(nameof(assessmentRepository));
         }
 
 
@@ -88,13 +94,26 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         public async Task<AssessmentDataStatus> ValidateAssessmentDataAsync(long assessmentId)
         {
+            var assessment = await _assessmentRepository.GetByIdAsync(assessmentId)
+                ?? throw new InvalidOperationException($"Assessment {assessmentId} was not found.");
+            var hasStock = assessment.AssessmentModeId == (int)AssessmentMode.Manufacturing
+                ? await _masterDataService.CountAsync(
+                    "tblAssessmentManufacturingMaterials",
+                    "AssessmentId",
+                    assessmentId) > 0
+                  || await _masterDataService.CountAsync(
+                    "tblAssessmentManufacturingBalances",
+                    "AssessmentId",
+                    assessmentId) > 0
+                : await DataTypeExistsAsync(assessmentId, "Stock");
+
             return new AssessmentDataStatus
             {
                 AssessmentId = assessmentId,
                 HasAssets = await DataTypeExistsAsync(assessmentId, "Assets"),
                 HasExpenses = await DataTypeExistsAsync(assessmentId, "Expenses"),
                 HasSales = await DataTypeExistsAsync(assessmentId, "Sales"),
-                HasStock = await DataTypeExistsAsync(assessmentId, "Stock"),
+                HasStock = hasStock,
                 HasReports = await DataTypeExistsAsync(assessmentId, "Reports"),
                 HasReviews = await DataTypeExistsAsync(assessmentId, "Reviews"),
                 HasDebtorsCreditors = await DataTypeExistsAsync(assessmentId, "DebtorsCreditors"),

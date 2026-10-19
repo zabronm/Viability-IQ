@@ -168,12 +168,12 @@
         return "cfbi-red";
     }
 
-    private static string Money(decimal? value) =>
-        value.HasValue ? $"R {value.Value:N0}" : "N/A";
+    private string Money(decimal? value) =>
+        value.HasValue ? FormatCurrency(value.Value) : "N/A";
 
-    private static string Percent(decimal? value) =>
-        value.HasValue ? $"{value.Value * 100m:F1}%" : "N/A";
+    private string Percent(decimal? value) =>
+        value.HasValue ? $"{FormatNumber(value.Value * 100m, "N1")}%" : "N/A";
 
-    private static string Ratio(decimal? value) =>
-        value.HasValue ? $"{value.Value:F2}x" : "N/A";
+    private string Ratio(decimal? value) =>
+        value.HasValue ? $"{FormatNumber(value.Value, "N2")}x" : "N/A";
 }

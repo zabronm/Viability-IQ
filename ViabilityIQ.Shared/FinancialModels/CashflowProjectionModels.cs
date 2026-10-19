@@ -4,6 +4,7 @@ public sealed class CashflowProjectionResult
 {
     public long AssessmentId { get; init; }
     public IReadOnlyList<CashflowProjectionMonth> Months { get; init; } = [];
+    public IReadOnlyList<ManufacturingProjectionMonth> ManufacturingMonths { get; init; } = [];
     public CashflowProjectionSummary Summary { get; init; } = new();
     public CashflowViabilityMetrics Viability { get; init; } = new();
     public IReadOnlyList<CashflowProjectionAlert> Alerts { get; init; } = [];
@@ -36,6 +37,10 @@ public sealed class CashflowProjectionMonth
         + OtherIncomeVatInclusive;
 
     public decimal StockPurchases { get; init; }
+    public decimal RawMaterialPurchases { get; init; }
+    public decimal RawMaterialPurchasesVatInclusive { get; init; }
+    public decimal RawMaterialConsumption { get; init; }
+    public decimal CompletedProductionCost { get; init; }
     public decimal CostOfGoodsSold { get; init; }
     public decimal CostOfGoodsSoldVatInclusive { get; init; }
     public decimal GrossProfit => Revenue - CostOfGoodsSold;
@@ -90,6 +95,9 @@ public sealed class CashflowProjectionMonth
     public decimal OpeningCreditors { get; init; }
     public decimal ClosingCreditors { get; init; }
     public decimal ClosingStock { get; init; }
+    public decimal ClosingRawMaterials { get; init; }
+    public decimal ClosingWorkInProgress { get; init; }
+    public decimal ClosingFinishedGoods { get; init; }
     public decimal ClosingFixedAssets { get; init; }
     public decimal ClosingLoanBalance { get; init; }
     public decimal OtherCurrentAssets { get; init; }
@@ -128,6 +136,9 @@ public sealed class CashflowProjectionSummary
     public decimal ProfitBeforeTaxVatInclusive { get; init; }
 
     public decimal StockPurchases { get; init; }
+    public decimal RawMaterialPurchases { get; init; }
+    public decimal RawMaterialConsumption { get; init; }
+    public decimal CompletedProductionCost { get; init; }
     public decimal CostOfGoodsSold { get; init; }
     public decimal GrossProfit { get; init; }
     public decimal OperatingExpenses { get; init; }
@@ -143,6 +154,9 @@ public sealed class CashflowProjectionSummary
     public decimal MinimumClosingBank { get; init; }
     public decimal ClosingDebtors { get; init; }
     public decimal ClosingCreditors { get; init; }
+    public decimal ClosingRawMaterials { get; init; }
+    public decimal ClosingWorkInProgress { get; init; }
+    public decimal ClosingFinishedGoods { get; init; }
     public decimal ClosingFixedAssets { get; init; }
     public decimal ClosingLoanBalance { get; init; }
     public decimal CurrentAssets { get; init; }
@@ -150,6 +164,22 @@ public sealed class CashflowProjectionSummary
     public decimal CurrentLiabilities { get; init; }
     public decimal? CurrentRatio { get; init; }
 }
+
+public sealed record ManufacturingProjectionMonth(
+    int MonthNumber,
+    decimal RawMaterialPurchases,
+    decimal RawMaterialPurchasesVatInclusive,
+    decimal OpeningRawMaterials,
+    decimal RawMaterialConsumption,
+    decimal ClosingRawMaterials,
+    decimal ProductionCosts,
+    decimal OpeningWorkInProgress,
+    decimal ClosingWorkInProgress,
+    decimal CompletedProductionCost,
+    decimal OpeningFinishedGoods,
+    decimal ClosingFinishedGoods,
+    decimal CostOfGoodsSold,
+    decimal CostOfGoodsSoldVatInclusive);
 
 public sealed class CashflowViabilityMetrics
 {

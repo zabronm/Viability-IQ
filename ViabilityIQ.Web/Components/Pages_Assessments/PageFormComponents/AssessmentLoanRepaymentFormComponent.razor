@@ -77,10 +77,10 @@
                     <thead>
                         <tr class="viq-repayment-row">
                             <th scope="col">Month</th>
-                            <th scope="col" class="text-end">Expected (R)</th>
-                            <th scope="col" class="text-end">Interest (R)</th>
-                            <th scope="col" class="text-end">Extra / balloon (R)</th>
-                            <th scope="col" class="text-end">Month total (R)</th>
+                            <th scope="col" class="text-end">Expected (@(sessionService?.CurrencyCode ?? "ZAR"))</th>
+                            <th scope="col" class="text-end">Interest (@(sessionService?.CurrencyCode ?? "ZAR"))</th>
+                            <th scope="col" class="text-end">Extra / balloon (@(sessionService?.CurrencyCode ?? "ZAR"))</th>
+                            <th scope="col" class="text-end">Month total (@(sessionService?.CurrencyCode ?? "ZAR"))</th>
                         </tr>
                     </thead>
                     <tbody>

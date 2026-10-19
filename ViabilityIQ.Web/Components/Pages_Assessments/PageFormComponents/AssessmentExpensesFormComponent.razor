@@ -36,6 +36,27 @@
                         <DDLookupComponent SourceKey="DDLookupEnums.ExpenseItems"
                                            @bind-Value="FormModel.ExpenseItemId" />
                     </div>
+                    <label class="viq-toggle-card" for="directorWagesSwitch">
+                        <span>
+                            <strong>Director wages</strong>
+                            <small>Mark this as the assessment's director-wage expense. Use one line for combined director remuneration.</small>
+                        </span>
+                        <InputCheckbox id="directorWagesSwitch" class="viq-switch"
+                                       @bind-Value="FormModel.IsDirectorWages" />
+                    </label>
+                    @if (IsManufacturingMode)
+                    {
+                        <label class="viq-toggle-card" for="directProductionCostSwitch">
+                            <span>
+                                <strong>@(IsMonthlyEstimateManufacturingMode ? "Production labour / overhead" : "Direct production cost")</strong>
+                                <small>@(IsMonthlyEstimateManufacturingMode
+                                    ? "Include eligible production labour and overhead in the production-cost flow. Enter raw-material purchases in Manufacturing, not here."
+                                    : "Classify direct production costs as cost of goods sold.")</small>
+                            </span>
+                            <InputCheckbox id="directProductionCostSwitch" class="viq-switch"
+                                           @bind-Value="FormModel.IsDirectProductionCost" />
+                        </label>
+                    }
                     <label class="viq-toggle-card" for="cashbookSwitch">
                         <span>
                             <strong>Post to cashbook?</strong>

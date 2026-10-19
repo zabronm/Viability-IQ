@@ -1,0 +1,148 @@
+/* Top Summary Table Adjustments */
+.raw-materials-summary-table {
+    font-size: 0.75rem;
+}
+
+    .raw-materials-summary-table thead th {
+        color: #566D7E;
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .raw-materials-summary-table th,
+    .raw-materials-summary-table td {
+        padding: 0.3rem 0.4rem;
+    }
+
+    .raw-materials-summary-table .btn-sm {
+        padding: 0.1rem 0.3rem;
+        font-size: 0.7rem;
+    }
+
+/* Monthly Material Flow Table Structure */
+.manufacturing-material-flow-table {
+    min-width: 1000px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 0.65rem;
+}
+
+    .manufacturing-material-flow-table thead th {
+        padding: 0.35rem 0.2rem;
+        border-bottom: 1px solid #dee2e6;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #566D7E;
+        white-space: nowrap;
+    }
+
+    .manufacturing-material-flow-table th:first-child {
+        width: 190px;
+        white-space: normal;
+        padding-left: 0.25rem;
+        padding-right: 0.5rem;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .manufacturing-material-flow-table th:not(:first-child),
+    .manufacturing-material-flow-table td {
+        width: 72px;
+    }
+
+    .manufacturing-material-flow-table td {
+        padding: 0.08rem 0.08rem;
+        border: none !important;
+    }
+
+    .manufacturing-material-flow-table tr {
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+/* Micro-Input Styling with Increased Height & Right-Aligned Numbers */
+::deep .viq-micro-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important; /* Increased height */
+    padding: 0.2rem 0.2rem !important;
+    font-size: 0.65rem !important;
+    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: right !important;
+    line-height: 1.2 !important;
+    border: 1px solid #ced4da !important;
+    background-color: #ffffff !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+    ::deep .viq-micro-input:hover {
+        border-color: #adb5bd !important;
+    }
+
+    ::deep .viq-micro-input:focus {
+        border-color: #4dabf7 !important;
+        box-shadow: 0 0 0 0.1rem rgba(77, 171, 247, 0.25) !important;
+    }
+
+.manufacturing-material-fields {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.75rem 0.5rem;
+}
+
+    .manufacturing-material-fields .manufacturing-material-name {
+        grid-column: span 4;
+    }
+
+    .manufacturing-material-fields .manufacturing-material-unit {
+        grid-column: span 2;
+    }
+
+    .manufacturing-material-fields .manufacturing-material-opening-quantity,
+    .manufacturing-material-fields .manufacturing-material-opening-value {
+        grid-column: span 3;
+    }
+
+    .manufacturing-material-fields .manufacturing-material-vat {
+        grid-column: span 6;
+    }
+
+.manufacturing-material-vat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+    .manufacturing-material-vat > span {
+        min-width: 0;
+    }
+
+    .manufacturing-material-vat small {
+        display: block;
+        line-height: 1.25;
+    }
+
+.manufacturing-material-actions .viq-button {
+    min-width: 8rem;
+}
+
+@media (max-width: 767px) {
+    .manufacturing-material-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+        .manufacturing-material-fields > * {
+            grid-column: span 1 !important;
+        }
+}

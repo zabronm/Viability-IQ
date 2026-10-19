@@ -26,5 +26,7 @@ namespace ViabilityIQ.Shared.SharedModels
         public long IncomeTypeId { get; set; }       
         public bool blIncludeVAT { get; set; }
         public decimal[] MonthlyValues { get; set; } = new decimal[12];
+        public decimal StandardUnitCost { get; set; }
+        public decimal[] MonthlyProductionUnits { get; set; } = new decimal[12];
     }
 }

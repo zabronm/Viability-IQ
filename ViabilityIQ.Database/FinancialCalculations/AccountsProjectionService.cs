@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Application.FinancialCalculations;
 
@@ -9,22 +10,28 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
 {
     private const int ProjectionMonths = 12;
 
+    private readonly IGenericDataRepository<Assessment> _assessmentRepository;
     private readonly IGenericDataRepository<AssessmentSalesCategory> _categoryRepository;
     private readonly IGenericDataRepository<AssessmentSales> _salesRepository;
     private readonly IGenericDataRepository<AssessmentStock> _stockRepository;
+    private readonly IGenericDataRepository<AssessmentManufacturingMaterial> _manufacturingMaterialRepository;
     private readonly IGenericDataRepository<DebtorsCreditorsProfile> _profileRepository;
     private readonly ILogger<AccountsProjectionService> _logger;
 
     public AccountsProjectionService(
+        IGenericDataRepository<Assessment> assessmentRepository,
         IGenericDataRepository<AssessmentSalesCategory> categoryRepository,
         IGenericDataRepository<AssessmentSales> salesRepository,
         IGenericDataRepository<AssessmentStock> stockRepository,
+        IGenericDataRepository<AssessmentManufacturingMaterial> manufacturingMaterialRepository,
         IGenericDataRepository<DebtorsCreditorsProfile> profileRepository,
         ILogger<AccountsProjectionService> logger)
     {
+        _assessmentRepository = assessmentRepository;
         _categoryRepository = categoryRepository;
         _salesRepository = salesRepository;
         _stockRepository = stockRepository;
+        _manufacturingMaterialRepository = manufacturingMaterialRepository;
         _profileRepository = profileRepository;
         _logger = logger;
     }
@@ -36,11 +43,19 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
             throw new ArgumentOutOfRangeException(nameof(assessmentId));
         }
 
+        var assessment = await _assessmentRepository.GetByIdAsync(assessmentId)
+            ?? throw new InvalidOperationException($"Assessment {assessmentId} was not found.");
+        if (!Enum.IsDefined(typeof(AssessmentMode), assessment.AssessmentModeId))
+            throw new InvalidOperationException($"Assessment mode {assessment.AssessmentModeId} is invalid.");
+        var mode = (AssessmentMode)assessment.AssessmentModeId;
+
         var categories = (await _categoryRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId && x.Active)).ToList();
         var sales = (await _salesRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId && x.Active)).ToList();
         var stock = (await _stockRepository.GetAllAsync(x =>
+            x.AssessmentId == assessmentId && x.Active)).ToList();
+        var manufacturingMaterials = (await _manufacturingMaterialRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId && x.Active)).ToList();
         var profile = (await _profileRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId))
@@ -58,10 +73,25 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
             sales,
             x => x.MonthlyValues,
             x => VatAdjustedMonthlyValues(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, profileSummary.IncludeVat));
-        var purchasesByMonth = SumMonthly(
-            stock,
-            x => x.MonthlyValues,
-            x => VatAdjustedMonthlyValues(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, profileSummary.IncludeVat));
+        var purchasesByMonth = mode switch
+        {
+            AssessmentMode.Service or AssessmentMode.ManufacturingSimplified =>
+                Enumerable.Repeat(0m, ProjectionMonths).ToArray(),
+            AssessmentMode.Manufacturing => SumMonthly(
+                manufacturingMaterials,
+                x => x.MonthlyPurchaseValues,
+                x => profileSummary.IncludeVat && x.IncludeVAT
+                    ? VatAdjustedMonthlyValues(
+                        x.MonthlyPurchaseValues,
+                        x.TotalNoVAT,
+                        x.TotalWithVAT,
+                        true)
+                    : x.MonthlyPurchaseValues),
+            _ => SumMonthly(
+                stock,
+                x => x.MonthlyValues,
+                x => VatAdjustedMonthlyValues(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, profileSummary.IncludeVat))
+        };
 
         var openingDebtors = categories.Sum(x => x.OpeningDebtorsAmount);
         var openingCreditors = categories.Sum(x => x.OpeningCreditorsAmount);
@@ -78,13 +108,16 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
             openingDebtors,
             openingCreditors,
             profileSummary.BadDebtPercentage);
-        var categoryResults = BuildCategoryResults(categories, sales, stock, profileSummary.IncludeVat);
+        var categoryResults = BuildCategoryResults(
+            categories, sales, stock, profileSummary.IncludeVat, mode);
 
         AddDataAlerts(
             alerts,
             categories.Count,
             sales.Count,
-            stock.Count,
+            mode == AssessmentMode.Trading
+                ? (stock.Any(item => item.MonthlyValues.Any(value => value > 0m)) ? 1 : 0)
+                : -1,
             profileSummary,
             monthlyResults);
 
@@ -206,7 +239,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
         IEnumerable<AssessmentSalesCategory> categories,
         IEnumerable<AssessmentSales> sales,
         IEnumerable<AssessmentStock> stock,
-        bool includeVat)
+        bool includeVat,
+        AssessmentMode mode)
     {
         var salesList = sales.ToList();
         var stockList = stock.ToList();
@@ -223,7 +257,11 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
                     .Sum(x => AnnualAmount(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, includeVat)),
                 AnnualPurchases = stockList
                     .Where(x => x.AssessmentSalesCategoryId == category.AssessmentSalesCategoryId)
-                    .Sum(x => AnnualAmount(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, includeVat))
+                    .Sum(x => mode switch
+                    {
+                        AssessmentMode.Service or AssessmentMode.ManufacturingSimplified or AssessmentMode.Manufacturing => 0m,
+                        _ => AnnualAmount(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, includeVat)
+                    })
             })
             .OrderByDescending(x => x.AnnualSales)
             .ThenBy(x => x.CategoryName)
@@ -258,8 +296,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
         {
             alerts.Add(new(
                 AccountsAlertSeverity.Warning,
-                "No monthly stock purchases",
-                "The creditor projection contains opening balances only."));
+                "No monthly stock purchase entries",
+                "The creditor projection contains opening balances only; enter monthly purchases if the business expects supplier credit."));
         }
 
         AddPercentageAlert(alerts, "Debtor", profile.DebtorPercentageTotal);

@@ -88,6 +88,9 @@ namespace ViabilityIQ.Web.Services
         private long? _clientId;
         private string _clientName = string.Empty;
         private string _assessmentType = string.Empty;
+        private int _assessmentModeId = (int)AssessmentMode.Trading;
+        private string _currencyCode = "ZAR";
+        private string _cultureName = "en-ZA";
 
         public long? AssessmentId => _assessmentId;
         public string CaseNumber => _caseNumber;
@@ -118,6 +121,9 @@ namespace ViabilityIQ.Web.Services
         public long? ClientId => _clientId;
         public string ClientName => _clientName;
         public string AssessmentType => _assessmentType;
+        public int AssessmentModeId => _assessmentModeId;
+        public string CurrencyCode => _currencyCode;
+        public string CultureName => _cultureName;
 
         // ====================================================
         // NAVIGATION
@@ -240,6 +246,9 @@ namespace ViabilityIQ.Web.Services
         {
             _assessmentId = null;
             _caseNumber = string.Empty;
+            _assessmentModeId = (int)AssessmentMode.Trading;
+            _currencyCode = "ZAR";
+            _cultureName = "en-ZA";
 
             _businessId = null;
             _businessName = string.Empty;
@@ -267,6 +276,17 @@ namespace ViabilityIQ.Web.Services
             _hasReviewsEntries = false;
             _hasReportsGenerated = false;
 
+            NotifyStateChanged();
+        }
+
+        public void SetAssessmentModeAndLocale(
+            int assessmentModeId,
+            string currencyCode,
+            string cultureName)
+        {
+            _assessmentModeId = assessmentModeId;
+            _currencyCode = currencyCode ?? "ZAR";
+            _cultureName = cultureName ?? "en-ZA";
             NotifyStateChanged();
         }
 

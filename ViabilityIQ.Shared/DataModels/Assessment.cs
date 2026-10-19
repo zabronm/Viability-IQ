@@ -26,7 +26,15 @@ namespace ViabilityIQ.Shared.DataModels
         [Required(ErrorMessage ="Assessment type is required")]
         public long AssessmentTypeId { get; set; }      //Either Cash Business OR Credit Business; Cash Business does not have Debtors/creditors        
 
+        public int AssessmentModeId { get; set; } = (int)AssessmentMode.Trading;
+        public int ManufacturingInputMethodId { get; set; } =
+            (int)ManufacturingInputMethod.MonthlyEstimates;
+        public string CountryCode { get; set; } = "ZA";
+        public string CurrencyCode { get; set; } = "ZAR";
+        public string CultureName { get; set; } = "en-ZA";
+
         [Required(ErrorMessage ="Business being assessed must be specified.")]
+        [Range(1, long.MaxValue, ErrorMessage = "Select an active business.")]
         public long BusinessId { get; set; }
 
         [Required(ErrorMessage ="Specify starting date")]

@@ -1,4 +1,6 @@
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.AssumptionComponents
+@using ViabilityIQ.Application.Interfaces
+@inject ISessionService? SessionService
 
 <section class="lpa-card" aria-labelledby="@($"lpa-title-{Section}")">
     <header>
@@ -126,7 +128,7 @@
                         <span>Minimum cash balance</span>
                         <small>Preferred minimum closing bank balance.</small>
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text">R</span>
+                            <span class="input-group-text">@(SessionService?.CurrencyCode ?? "ZAR")</span>
                             <input type="number" class="form-control" min="0" step="100" @bind="Model.MinimumCashBalance" />
                         </div>
                     </label>

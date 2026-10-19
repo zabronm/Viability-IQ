@@ -8,6 +8,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.UtilityServices;
 using ViabilityIQ.Web.Components.CommonComponents;
 using ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents;
 using ViabilityIQ.Web.Services;
@@ -42,7 +43,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private string StatusMessage { get; set; } = "";
 
         private string SearchQuery { get; set; } = string.Empty;
-        private long SelectedLoanTypeId { get; set; } = 0L;
+        private long SelectedLoanTypeId { get; set; } = 0;
         private bool IsLoading { get; set; } = false;
         private string ActivePanelTitle { get; set; } = "Loan Administration Module";
         private long LoadedAssessmentId { get; set; }
@@ -56,12 +57,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal ScheduledOutflow => ExpectedRepayments + InterestCost + ExtraRepayments;
         private IReadOnlyList<AssessmentKpiCardItem> LoanKpis =>
         [
-            new("Active Loans", LoanProfilesDataset.Count.ToString("N0"), "Active loan profiles", "bi bi-list-check", "kpi-slate"),
             new("Total Loan Value", Money(TotalLoanValue), "Original principal value", "bi bi-bank", "kpi-blue"),
-            new("Extra Repayments", Money(ExtraRepayments), "Additional repayments", "bi bi-plus-circle", "kpi-cyan"),
             new("Scheduled Outflow", Money(ScheduledOutflow), "Total projected repayments", "bi bi-cash-stack", "kpi-teal"),
             new("Expected Repayments", Money(ExpectedRepayments), "Scheduled principal repayments", "bi bi-calendar-check", "kpi-purple"),
-            new("Interest Cost", Money(InterestCost), "Projected finance cost", "bi bi-percent", "kpi-red"),                     
+            new("Interest Cost", Money(InterestCost), "Projected finance cost", "bi bi-percent", "kpi-red"),
+            new("Extra Repayments", Money(ExtraRepayments), "Additional repayments", "bi bi-plus-circle", "kpi-cyan"),
+            new("Active Loans", LoanProfilesDataset.Count.ToString("N0"), "Active loan profiles", "bi bi-list-check", "kpi-slate")
         ];
 
         // Sorting State for Loan Profile Type
@@ -231,9 +232,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             return name.Substring(0, 18) + "..";
         }
 
-        private void OnLoanTypeFilterChanged(long selectedValue)
+        private void OnLoanTypeFilterChanged(long? selectedValue)
         {
-            SelectedLoanTypeId = selectedValue;
+            SelectedLoanTypeId = selectedValue ?? 0;
             StateHasChanged();
         }
 
@@ -428,7 +429,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             return LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(x => x.Total));
         }
 
-        private static string Money(decimal value) => $"R {value:N0}";
+        private string Money(decimal value) =>
+            DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
 
         #endregion
 
