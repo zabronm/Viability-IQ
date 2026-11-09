@@ -26,4 +26,5 @@ public sealed class ActivityLogWriteRequest
     public object? Metadata { get; init; }
     public long? UserId { get; init; }
     public string? ActorName { get; init; }
+    public bool IncludeClientMetadata { get; init; } = true;
 }

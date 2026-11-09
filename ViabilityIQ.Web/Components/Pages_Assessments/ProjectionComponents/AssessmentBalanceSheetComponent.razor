@@ -62,8 +62,8 @@
     <footer class="absheet-note">
         <i class="bi bi-info-circle"></i>
         <span>
-            Projected net assets/equity is the balancing amount after recognised projected assets and liabilities.
-            It is not a substitute for a separately maintained share-capital or drawings ledger.
+            Equity shows opening share capital and opening retained earnings rolled forward by projected monthly profit before tax.
+            Tax, distributions/drawings, and new capital contributions are not included; use the balance check to identify incomplete opening balances.
         </span>
     </footer>
 </section>
@@ -82,7 +82,7 @@
         CurrentLiabilitiesExcludingLoans(month) + month.ClosingLoanBalance;
 
     private static decimal ProjectedEquity(CashflowProjectionMonth month) =>
-        month.TotalAssets - TotalLiabilities(month);
+        month.ShareCapital + month.RetainedEarningsBeforeTax;
 
     private IReadOnlyList<BalanceSheetLine> StatementLines =>
     [
@@ -107,8 +107,10 @@
         Line("Loans and borrowings", month => month.ClosingLoanBalance),
         Line("Total non-current liabilities", month => month.ClosingLoanBalance, "absheet-total-row"),
         Line("TOTAL LIABILITIES", TotalLiabilities, "absheet-grand-total"),
-        BalanceSheetLine.Heading("PROJECTED NET ASSETS / EQUITY", "absheet-section"),
-        Line("Projected net assets / equity", ProjectedEquity, "absheet-equity-row"),
+        BalanceSheetLine.Heading("EQUITY", "absheet-section"),
+        Line("Share capital", month => month.ShareCapital),
+        Line("Retained earnings (cumulative profit before tax)", month => month.RetainedEarningsBeforeTax),
+        Line("TOTAL EQUITY", ProjectedEquity, "absheet-equity-row"),
         Line("TOTAL LIABILITIES & EQUITY", month => TotalLiabilities(month) + ProjectedEquity(month), "absheet-grand-total")
     ];
 

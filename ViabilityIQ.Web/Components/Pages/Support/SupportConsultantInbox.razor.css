@@ -1,0 +1,175 @@
+.support-inbox-page {
+    display: grid;
+    gap: 1rem;
+}
+
+.support-inbox-heading,
+.support-inbox-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.support-inbox-heading h1 {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.support-inbox-heading p {
+    margin: 0.25rem 0 0;
+    color: #64748b;
+}
+
+.support-inbox-layout {
+    display: grid;
+    min-height: 70vh;
+    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid #dbe3eb;
+    border-radius: 0.85rem;
+    background: white;
+    box-shadow: 0 6px 20px rgb(15 23 42 / 7%);
+}
+
+.support-inbox-list {
+    overflow-y: auto;
+    border-right: 1px solid #e2e8f0;
+    padding: 0.85rem;
+}
+
+.support-inbox-list h2 {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+}
+
+.support-inbox-item {
+    display: grid;
+    width: 100%;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding: 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.6rem;
+    background: white;
+    color: #1e293b;
+    text-align: left;
+}
+
+.support-inbox-item.selected {
+    border-color: #60a5fa;
+    background: #eff6ff;
+}
+
+.support-inbox-item-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+}
+
+.support-inbox-item-preview {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.support-inbox-item small {
+    color: #94a3b8;
+    font-size: 0.65rem;
+}
+
+.support-inbox-chat {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.support-inbox-empty {
+    display: grid;
+    flex: 1;
+    place-content: center;
+    justify-items: center;
+    color: #94a3b8;
+}
+
+.support-inbox-empty i {
+    font-size: 2rem;
+}
+
+.support-inbox-chat-header {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.support-inbox-chat-header h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.support-inbox-chat-header span {
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+.support-inbox-messages {
+    display: flex;
+    min-height: 20rem;
+    max-height: 58vh;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.6rem;
+    overflow-y: auto;
+    padding: 0.8rem 0;
+}
+
+.support-inbox-message {
+    max-width: 86%;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.7rem;
+    background: #f1f5f9;
+}
+
+.support-inbox-message.user-message {
+    align-self: flex-start;
+}
+
+.support-inbox-message.consultant-message {
+    align-self: flex-end;
+    background: #e9f4ff;
+}
+
+.support-inbox-message-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.68rem;
+}
+
+.support-inbox-message p {
+    margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    font-size: 0.83rem;
+}
+
+.support-inbox-compose {
+    display: grid;
+    justify-items: end;
+    gap: 0.5rem;
+}
+
+@media (max-width: 700px) {
+    .support-inbox-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .support-inbox-list {
+        max-height: 32vh;
+        border-right: 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+}

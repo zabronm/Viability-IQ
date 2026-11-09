@@ -225,8 +225,37 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             await Task.CompletedTask;
         }
 
-        private async Task AddIncomeStream() =>
-            await OpenIncomeFormPanel(new UnifiedIncomeViewModel());
+        private async Task AddIncomeStream()
+        {
+            await zabCanvasService!.ShowAsync(new CanvasRequest
+            {
+                Title = "Add Sales Category",
+                Width = 400,
+                ComponentType = typeof(SalesCategoryFormComponent),
+                Parameters = new
+                {
+                    AssessmentId,
+                    AssessmentSalesCategoryId = 0L,
+                    AllowIncomeTypeSelection = true,
+                    OnSaveComplete = EventCallback.Factory.Create<SaveResult>(
+                        this,
+                        OnCategorySaveComplete)
+                }
+            });
+        }
+
+        private async Task OnCategorySaveComplete(SaveResult result)
+        {
+            if (result.Success)
+            {
+                _Toast!.ShowSuccess(result.Message, sessionService!.AppTitle);
+                await LoadAndMapSalesData();
+            }
+            else
+            {
+                _Toast!.ShowError(result.Message, sessionService!.AppTitle);
+            }
+        }
 
         private async Task OpenIncomeFormPanel(UnifiedIncomeViewModel stream)
         {

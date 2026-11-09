@@ -6,7 +6,8 @@
 @inject IDDLookupService LookupService
 
 <div class="form-group lookup-dropdown-group">
-    <select id="@InputId"
+    <select @key="_hasLoaded"
+            id="@InputId"
             class="form-select form-select-sm @CssClass @SelectedStyleClass"
             value="@CurrentValueAsString"
             @onchange="HandleChange"

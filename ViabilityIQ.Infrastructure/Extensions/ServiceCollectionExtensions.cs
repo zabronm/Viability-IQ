@@ -56,6 +56,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDashboardDataService, DashboardDataService>();
         services.AddScoped<INotificationItemRepository, NotificationItemRepository>();
 
+        //=========== USER SUPPORT ===========
+        services.AddScoped<ISupportService, SupportService>();
 
         //=========== LEAD SUBMISSION REPOSITORY ===========
         services.AddScoped<ILeadRepository, LeadRepository>();

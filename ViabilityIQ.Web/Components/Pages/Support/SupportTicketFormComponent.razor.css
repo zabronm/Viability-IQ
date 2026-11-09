@@ -1,0 +1,31 @@
+.support-ticket-form {
+    font-size: 0.9rem;
+}
+
+.support-ticket-form .form-label {
+    margin-bottom: 0.3rem;
+    color: #334155;
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.support-ticket-form .form-control,
+.support-ticket-form input[type="file"] {
+    font-size: 0.85rem;
+}
+
+.support-ticket-attachments {
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.support-ticket-attachments li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-wrap: anywhere;
+}

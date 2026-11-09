@@ -88,10 +88,12 @@ public sealed class ActivityLogWriter : IActivityLogWriter
             AssessmentName = Truncate(assessmentName, MaximumAssessmentNameLength),
             Module = Truncate(request.Module, MaximumModuleLength),
             Page = Truncate(request.Page ?? context?.Request.Path.Value, MaximumPageLength),
-            IpAddress = Truncate(context?.Connection.RemoteIpAddress?.ToString(), 100),
-            UserAgent = Truncate(
-                context?.Request.Headers["User-Agent"].ToString(),
-                MaximumUserAgentLength),
+            IpAddress = request.IncludeClientMetadata
+                ? Truncate(context?.Connection.RemoteIpAddress?.ToString(), 100)
+                : null,
+            UserAgent = request.IncludeClientMetadata
+                ? Truncate(context?.Request.Headers["User-Agent"].ToString(), MaximumUserAgentLength)
+                : null,
             CorrelationId = Truncate(context?.TraceIdentifier, 100),
             MetadataJson = SerializeMetadata(request.Metadata),
             Remarks = Truncate(request.Remarks, MaximumRemarksLength),

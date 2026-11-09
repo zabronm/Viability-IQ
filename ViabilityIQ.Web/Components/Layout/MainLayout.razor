@@ -1,5 +1,6 @@
 ﻿@using ViabilityIQ.Web.Components.Pages.Identity
 @using ViabilityIQ.Web.Components.Shared
+@using ViabilityIQ.Web.Components.Pages.Support
 @using ViabilityIQ.Web.Services
 @inherits LayoutComponentBase
 
@@ -23,14 +24,19 @@
                aria-label="Open assessment assumptions help">
                 <i class="bi bi-question-circle-fill"></i><span>Help</span>
             </a>
+            <button type="button" class="viq-help-link support-chat-link"
+                    @onclick="OpenInteractiveSupportAsync"
+                    aria-label="Chat with support">
+                <i class="bi bi-chat-dots-fill"></i><span>Chat with support</span>
+            </button>
             <span class="marble-date-badge">
                 <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
             </span>
 
-            <button class="action-icon-btn">
+            @* <button class="action-icon-btn">
                 <i class="bi bi-bell"></i>
                 <span class="notification-indicator"></span>
-            </button>
+            </button> *@
 
             <ProfileDropdownComponent />
         </div>
@@ -85,17 +91,26 @@
                     <div class="nav-icon-avatar-round"><i class="bi bi-gear"></i></div>
                     <span class="strong">Settings</span>&nbsp;<i class="bi bi-caret-right"></i>
                 </NavLink>
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <NavLink class="fa-nav-item bd-bottom" href="/admin/support-consultants">
+                            <div class="nav-icon-avatar-round"><i class="bi bi-person-lock"></i></div>
+                            <span class="strong">Support Access</span>
+                        </NavLink>
+                    </Authorized>
+                </AuthorizeView>
                 <hr style="width: 1px; border-color: #64748b;" />
             </div>
 
             <div class="sidebar-footer-static">
-                <NavLink class="fa-nav-item footer-item " href="global/support">
+                <button type="button" class="fa-nav-item footer-item border-0 w-100 bg-transparent text-start"
+                        @onclick="OpenSupportTicketAsync">
                     <div class="nav-icon-avatar-round"><i class="bi bi-question-circle-fill"></i></div>
                     <div class="footer-text-stack">
                         <span class="footer-main-text">Get Help</span>
                         <span class="footer-sub-text small">Log support ticket</span>
                     </div>
-                </NavLink>
+                </button>
 
                 @* <NavLink class="fa-nav-item footer-item border-top-thick" href="global/suggestions">
                     <div class="nav-icon-avatar-round"><i class="bi bi-person-raised-hand"></i></div>

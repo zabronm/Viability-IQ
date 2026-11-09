@@ -5,6 +5,7 @@ using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.Support;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Layout
@@ -106,6 +107,22 @@ namespace ViabilityIQ.Web.Components.Layout
             await LoadNavigationCountsAsync();
             await InvokeAsync(StateHasChanged);
         }
+
+        private Task OpenInteractiveSupportAsync() =>
+            OffCanvasService.ShowAsync(new CanvasRequest
+            {
+                Title = "Chat with Support",
+                Width = 480,
+                ComponentType = typeof(InteractiveSupportChatComponent)
+            });
+
+        private Task OpenSupportTicketAsync() =>
+            OffCanvasService.ShowAsync(new CanvasRequest
+            {
+                Title = "Get Help",
+                Width = 560,
+                ComponentType = typeof(SupportTicketFormComponent)
+            });
 
         private async Task LoadNavigationCountsAsync()
         {

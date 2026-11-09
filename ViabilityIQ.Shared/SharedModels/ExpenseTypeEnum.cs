@@ -27,6 +27,9 @@ namespace ViabilityIQ.Shared.SharedModels
         public bool blSendToCashBook { get; set; }
         public bool IsDirectorWages { get; set; }
         public bool IsDirectProductionCost { get; set; }
+        public bool blSameMonthlyAmountUsed { get; set; }
+        public decimal SameMonthlyAmount { get; set; }
+        public decimal PercentageOfSalesRate { get; set; }
         public decimal[] MonthlyValues { get; set; } = new decimal[12];
     }
 }

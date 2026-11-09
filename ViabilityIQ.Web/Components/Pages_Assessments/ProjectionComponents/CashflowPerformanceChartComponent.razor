@@ -1,30 +1,44 @@
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 @using ViabilityIQ.Shared.FinancialModels
+@inherits IndependentCashflowProjectionComponent
 
-<section class="performance-chart card border-0 shadow-sm h-100" aria-labelledby="cashflow-performance-title">
-    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+<section class="performance-chart dashboard-reveal" aria-labelledby="cashflow-performance-title">
+    <header class="performance-header">
         <div>
-            <strong id="cashflow-performance-title">Monthly Performance</strong>
-            <div class="chart-subtitle">Sales, stock, expenses, cashflow and profit</div>
+            <i class="bi bi-graph-up-arrow"></i>
+            <strong id="cashflow-performance-title">Cashflow Performance</strong>
         </div>
-        <i class="bi bi-graph-up-arrow"></i>
-    </div>
+        <span>12-month performance</span>
+    </header>
 
-    <div class="card-body">
-        <div class="chart-legend" aria-hidden="true">
-            <span class="legend-item"><span class="legend-box sales-colour"></span>Sales</span>
-            <span class="legend-item"><span class="legend-box stock-colour"></span>Stock</span>
-            <span class="legend-item"><span class="legend-box expenses-colour"></span>Expenses</span>
-            <span class="legend-item"><span class="legend-line cashflow-colour"></span>Net cashflow</span>
-            <span class="legend-item"><span class="legend-line profit-colour"></span>Net profit</span>
-        </div>
+    @if (IsLoading)
+    {
+        <div class="performance-state"><span class="spinner-border spinner-border-sm"></span> Loading cashflow performance...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <div class="performance-state performance-error"><i class="bi bi-exclamation-triangle"></i> Cashflow performance could not load: @LoadError</div>
+    }
+    else if (Projection is null)
+    {
+        <div class="performance-state performance-error">Cashflow projection data is unavailable.</div>
+    }
+    else if (Projection.Months.Count == 0)
+    {
+        <div class="performance-state">No monthly projection data is available.</div>
+    }
+    else
+    {
+        <div class="performance-body">
+            <div class="chart-description">Sales, stock, expenses, cashflow and profit</div>
+            <div class="chart-legend" aria-hidden="true">
+                <span class="legend-item"><span class="legend-box sales-colour"></span>Sales</span>
+                <span class="legend-item"><span class="legend-box stock-colour"></span>Stock</span>
+                <span class="legend-item"><span class="legend-box expenses-colour"></span>Expenses</span>
+                <span class="legend-item"><span class="legend-line cashflow-colour"></span>Net cashflow</span>
+                <span class="legend-item"><span class="legend-line profit-colour"></span>Net profit</span>
+            </div>
 
-        @if (Projection.Months.Count == 0)
-        {
-            <div class="empty-chart">No monthly projection data is available.</div>
-        }
-        else
-        {
             <div class="chart-scroll">
                 <svg class="cashflow-chart"
                      viewBox="0 0 960 370"
@@ -44,7 +58,7 @@
 
                     <line x1="@PlotLeft" y1="@ZeroY" x2="@PlotRight" y2="@ZeroY" class="zero-line" />
 
-                    @foreach (var month in Projection.Months.OrderBy(x => x.MonthNumber))
+                    @foreach (var month in CurrentProjection.Months.OrderBy(x => x.MonthNumber))
                     {
                         var x = X(month.MonthNumber);
                         var salesY = Math.Min(Y(month.Revenue), ZeroY);
@@ -54,13 +68,13 @@
                         var expensesY = Math.Min(Y(month.OperatingExpenses), ZeroY);
                         var expensesHeight = Math.Max(1m, Math.Abs(Y(month.OperatingExpenses) - ZeroY));
 
-                        <rect x="@(x - 15)" y="@salesY" width="@BarWidth" height="@salesHeight" rx="1.5" fill="#2563eb">
+                        <rect class="cashflow-bar sales-bar" x="@(x - 15)" y="@salesY" width="@BarWidth" height="@salesHeight" rx="1.5" fill="#2563eb">
                             <title>Sales @month.MonthLabel: @month.Revenue.ToString("N0")</title>
                         </rect>
-                        <rect x="@(x - 5)" y="@stockY" width="@BarWidth" height="@stockHeight" rx="1.5" fill="#f59e0b">
+                        <rect class="cashflow-bar stock-bar" x="@(x - 5)" y="@stockY" width="@BarWidth" height="@stockHeight" rx="1.5" fill="#f59e0b">
                             <title>Stock @month.MonthLabel: @month.StockPurchases.ToString("N0")</title>
                         </rect>
-                        <rect x="@(x + 5)" y="@expensesY" width="@BarWidth" height="@expensesHeight" rx="1.5" fill="#7c3aed">
+                        <rect class="cashflow-bar expenses-bar" x="@(x + 5)" y="@expensesY" width="@BarWidth" height="@expensesHeight" rx="1.5" fill="#FFFF00">
                             <title>Expenses @month.MonthLabel: @month.OperatingExpenses.ToString("N0")</title>
                         </rect>
                         <foreignObject x="@(x - 18)" y="334" width="36" height="20">
@@ -68,10 +82,10 @@
                         </foreignObject>
                     }
 
-                    <polyline points="@NetCashflowPoints" class="series-line cashflow-line" />
-                    <polyline points="@NetProfitPoints" class="series-line profit-line" />
+                    <polyline points="@NetCashflowPoints" class="series-line cashflow-line chart-line-draw" />
+                    <polyline points="@NetProfitPoints" class="series-line profit-line chart-line-draw" />
 
-                    @foreach (var month in Projection.Months.OrderBy(x => x.MonthNumber))
+                    @foreach (var month in CurrentProjection.Months.OrderBy(x => x.MonthNumber))
                     {
                         <circle cx="@X(month.MonthNumber)" cy="@Y(month.NetCashflow)" r="4" class="cashflow-point">
                             <title>Net cashflow @month.MonthLabel: @month.NetCashflow.ToString("N0")</title>
@@ -82,13 +96,13 @@
                     }
                 </svg>
             </div>
-        }
-    </div>
+        </div>
+    }
 </section>
 
 @code {
-    [Parameter, EditorRequired]
-    public CashflowProjectionResult Projection { get; set; } = default!;
+    private CashflowProjectionResult CurrentProjection =>
+        Projection ?? throw new InvalidOperationException("Cashflow projection data is not available.");
 
     private const decimal PlotTop = 20m;
     private const decimal PlotBottom = 320m;
@@ -100,7 +114,7 @@
     {
         get
         {
-            var values = Projection.Months.SelectMany(x => new[]
+            var values = CurrentProjection.Months.SelectMany(x => new[]
             {
                 x.Revenue,
                 x.StockPurchases,
@@ -116,7 +130,7 @@
     {
         get
         {
-            var values = Projection.Months.SelectMany(x => new[]
+            var values = CurrentProjection.Months.SelectMany(x => new[]
             {
                 x.Revenue,
                 x.StockPurchases,
@@ -146,7 +160,7 @@
         PlotTop + (MaximumValue - value) / Range * (PlotBottom - PlotTop);
 
     private string Points(Func<CashflowProjectionMonth, decimal> selector) =>
-        string.Join(" ", Projection.Months
+        string.Join(" ", CurrentProjection.Months
             .OrderBy(x => x.MonthNumber)
             .Select(x => $"{X(x.MonthNumber):F2},{Y(selector(x)):F2}"));
 

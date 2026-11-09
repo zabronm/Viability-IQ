@@ -21,6 +21,7 @@ public partial class AssessmentAssetDetailComponent : ComponentBase
 
     [Inject] private IGenericDataRepository<AssessmentAsset> AssetRepository { get; set; } = default!;
     [Inject] private IGenericDataRepository<AssessmentAssetMovement> MovementRepository { get; set; } = default!;
+    [Inject] private IAssetMovementCalculationService MovementCalculationService { get; set; } = default!;
     [Inject] private MasterDataService MasterDataService { get; set; } = default!;
     [Inject] private ISessionService? sessionService { get; set; }
     [Inject] private ZabOffCanvasService OffCanvasService { get; set; } = default!;
@@ -88,9 +89,15 @@ public partial class AssessmentAssetDetailComponent : ComponentBase
                 .FirstOrDefault();
             AssetDto = (await dtoTask).FirstOrDefault();
 
-            Months = Asset == null
-                ? new()
-                : BuildMonths(Asset, Movement);
+            if (Asset == null)
+            {
+                Months = new();
+                return;
+            }
+
+            Movement ??= await MovementCalculationService.InitializeMovementTemplateAsync(Asset);
+            Movement = await MovementCalculationService.RecalculateAllMonthsAsync(Movement, Asset);
+            Months = BuildMonths(Asset, Movement);
         }
         catch (Exception ex)
         {

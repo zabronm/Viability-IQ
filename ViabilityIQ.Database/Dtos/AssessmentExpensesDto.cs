@@ -14,6 +14,7 @@ namespace ViabilityIQ.Shared.DataModels
     public class AssessmentExpensesDto 
     {
         [Key] public int AssessmentExpensesId { get; set; }       
+        public long AssessmentExpenseId { get; set; }
         public decimal AssessmentId { get; set; }
         public decimal ProductCategoryId { get; set; }
         public long ExpenseTypeId { get; set; }

@@ -22,6 +22,7 @@ public partial class IncomeSalesFormComponent : ComponentBase
     private decimal BulkAnnualValueTarget { get; set; }
     private bool IsLoading { get; set; } = true;
     private bool IsSubmitting { get; set; }
+    private string? FormError { get; set; }
 
     private decimal BaseTotalSum => MonthlyValues.Sum();
     private decimal GrandCalculatedTotalSum =>
@@ -92,8 +93,15 @@ public partial class IncomeSalesFormComponent : ComponentBase
 
     private async Task ExecuteSaveWorkflowAsync()
     {
-        if (IsSubmitting || string.IsNullOrWhiteSpace(FormModel.Description))
+        FormError = null;
+        if (IsSubmitting)
         {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(FormModel.Description))
+        {
+            FormError = "The income stream must have a description. Close this form and re-open it from its sales category.";
             return;
         }
 
@@ -140,8 +148,9 @@ public partial class IncomeSalesFormComponent : ComponentBase
                 exception,
                 "Error saving revenue data for assessment {AssessmentId}",
                 AssessmentId);
+            FormError = $"Revenue details could not be saved: {exception.Message}";
             await ZabCanvasService.PublishResultAsync(
-                SaveResult.Failed($"Revenue details could not be saved: {exception.Message}"));
+                SaveResult.Failed(FormError));
         }
         finally
         {

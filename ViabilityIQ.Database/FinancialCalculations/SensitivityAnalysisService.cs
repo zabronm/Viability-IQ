@@ -149,6 +149,7 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
         var runningBank = source[0].OpeningBank;
         decimal runningDebtors = source[0].OpeningDebtors;
         decimal runningCreditors = source[0].OpeningCreditors;
+        var runningRetainedEarnings = source[0].RetainedEarningsBeforeTax - source[0].ProfitBeforeTax;
 
         for (var index = 0; index < source.Length; index++)
         {
@@ -198,6 +199,12 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
             var outflows = supplier + cashExpenses + original.VatPayment + original.LoanCashPayment
                 + original.OverdraftInterest + assetPurchases;
             var closingBank = runningBank + inflows - outflows;
+            runningRetainedEarnings += revenue
+                - cogs
+                + original.AdditionalIncome
+                - operatingExpenses
+                - original.Depreciation
+                - interest;
 
             months.Add(new CashflowProjectionMonth
             {
@@ -244,7 +251,9 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
                 ClosingFixedAssets = original.ClosingFixedAssets + (assetPurchases - original.AssetPurchases),
                 ClosingLoanBalance = original.ClosingLoanBalance,
                 OtherCurrentAssets = original.OtherCurrentAssets,
-                OtherCurrentLiabilities = original.OtherCurrentLiabilities
+                OtherCurrentLiabilities = original.OtherCurrentLiabilities,
+                ShareCapital = original.ShareCapital,
+                RetainedEarningsBeforeTax = runningRetainedEarnings
             });
             runningBank = closingBank;
         }
@@ -279,6 +288,8 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
         var operatingExpenses = months.Sum(x => x.OperatingExpenses);
         var depreciation = months.Sum(x => x.Depreciation);
         var interest = months.Sum(x => x.InterestExpense);
+        var assetMonths = months.Where(x => x.TotalAssets > 0m).ToArray();
+        var averageAssets = assetMonths.Length == 0 ? 0m : assetMonths.Average(x => x.TotalAssets);
         var summary = new CashflowProjectionSummary
         {
             OpeningBank = first.OpeningBank,
@@ -337,7 +348,11 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
             MarginOfSafety = marginSafety,
             InterestCover = interest == 0m ? null : (grossProfit - operatingExpenses - depreciation) / interest,
             DebtServiceCoverageRatio = months.Sum(x => x.LoanCashPayment) == 0m ? null : months.Sum(x => x.EBITDA) / months.Sum(x => x.LoanCashPayment),
-            CurrentRatio = last.CurrentRatio
+            CurrentRatio = last.CurrentRatio,
+            AssetTurnover = averageAssets == 0m ? null : revenue / averageAssets,
+            ReturnOnAssets = averageAssets == 0m
+                ? null
+                : months.Sum(x => x.ProfitBeforeTax) / averageAssets
         };
         return new()
         {
@@ -367,7 +382,9 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
             CurrentRatio = projection.Summary.CurrentRatio,
             InterestCover = projection.Viability.InterestCover,
             BreakEvenSales = projection.Viability.BreakEvenSales,
-            MarginOfSafety = projection.Viability.MarginOfSafety
+            MarginOfSafety = projection.Viability.MarginOfSafety,
+            AssetTurnover = projection.Viability.AssetTurnover,
+            ReturnOnAssets = projection.Viability.ReturnOnAssets
         };
     }
 

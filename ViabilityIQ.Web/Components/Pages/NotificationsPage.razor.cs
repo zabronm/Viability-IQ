@@ -18,11 +18,12 @@ namespace ViabilityIQ.Web.Components.Pages
         private string activeTab = "all";
         private bool isLoading = true;
         private int unreadCount = 0;
-        private long currentUserId = 1; // Replace with authenticated user claim parsing in production
+        private long currentUserId;
 
         protected override async Task OnInitializedAsync()
         {
             OffCanvasService!.OnShow += HandleCanvasShow;
+            currentUserId = sessionService?.UserId ?? 0;
             await LoadDataAsync();
         }
 
@@ -36,7 +37,9 @@ namespace ViabilityIQ.Web.Components.Pages
             isLoading = true;
             try
             {
-                notifications = await NotificationRepository.GetNotificationsAsync(currentUserId, activeTab);
+                notifications = activeTab == "support"
+                    ? new()
+                    : await NotificationRepository.GetNotificationsAsync(currentUserId, activeTab);
                 unreadCount = await NotificationRepository.GetUnreadCountAsync(currentUserId);
             }
             catch (Exception)

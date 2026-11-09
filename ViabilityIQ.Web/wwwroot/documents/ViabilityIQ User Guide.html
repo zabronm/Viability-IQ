@@ -649,7 +649,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
     <p>Assumptions define the opening position and the expected behaviour that cannot be derived reliably from monthly records alone.</p>
     <table>
         <tr><th>Area</th><th>What to confirm</th></tr>
-        <tr><td>Opening position</td><td>Opening bank, stock-item balances, debtors, creditors, VAT, other current assets/liabilities and asset balances agree to supporting records. Opening stock is calculated from the stock items you register.</td></tr>
+        <tr><td>Opening position</td><td>Opening bank, stock-item balances, debtors, creditors, VAT, other current assets/liabilities, asset balances, share capital and retained earnings agree to supporting records. Opening stock is calculated from the stock items you register.</td></tr>
         <tr><td>Sales</td><td>Growth rate/start month, cash Sales share, income classification and fallback cost of Sales are reasonable.</td></tr>
         <tr><td>Debtors and creditors</td><td>Ageing distribution, payment timing, bad debt and VAT inclusion reflect actual trading behaviour.</td></tr>
         <tr><td>Expenses and wages</td><td>Expense escalation, contingency, director numbers, wages and increase timing are supported.</td></tr>
@@ -680,6 +680,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
         <li>Deactivate an asset only when it should no longer participate in the active projection; retain records needed for history.</li>
     </ol>
     <p>Months before a planned acquisition do not carry the asset. The acquisition month introduces the value and depreciation follows the configured treatment.</p>
+    <div class="note"><strong>Monthly asset values:</strong> each month's opening net book value follows the previous month's closing value. Monthly movements update gross value, and depreciation accumulates month by month, reducing net book value. The asset details, movement editor and projected Balance Sheet use the recalculated monthly schedule. Save movement edits to persist the updated schedule.</div>
 
     <h2 id="sales">9.2 Sales and other income</h2>
     <ol>
@@ -746,9 +747,10 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
         <tr><td>Assessment Summary</td><td>A narrative planning and viability overview with deterministic financial findings.</td></tr>
         <tr><td>Profit &amp; Loss</td><td>Monthly Sales/revenue, cost of Sales, gross profit, expenses, depreciation, interest and projected result.</td></tr>
         <tr><td>Cashflow / Cashbook</td><td>Projected receipts, payments and bank position by month, including the timing effects of working capital.</td></tr>
-        <tr><td>Balance Sheet</td><td>Projected assets, liabilities and residual net assets by month.</td></tr>
+        <tr><td>Balance Sheet</td><td>Projected assets and liabilities, with equity split into share capital and retained earnings by month.</td></tr>
         <tr><td>VAT Report</td><td>Output VAT, input VAT and projected settlement/refund position.</td></tr>
     </table>
+    <p>Opening share capital and retained earnings are entered under <strong>Assumptions → Opening Balances</strong> using the opening statements or other supporting records. Projected retained earnings roll forward by cumulative monthly profit before tax. The forecast does not model income tax, drawings/distributions or new capital contributions, so equity is not plugged to force the Balance Sheet to balance. Review the balance check and investigate any difference between assets less liabilities and the modeled equity.</p>
     <p>Use Print/PDF, Excel or Email after verifying case, period and recipient. A report is only as reliable as the live source records; regenerate after changing assessment data.</p>
 
     <h2 id="sensitivity">11. Sensitivity Analysis and GroqCloud AI</h2>
@@ -856,7 +858,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
         <li>Mark Complete and verify the completion status.</li>
     </ol>
 
-    <footer>Viability.IQ — Complete User Guide — October 2026</footer>
+    <footer>Viability.IQ — Complete User Guide — November 2026</footer>
 </main>
 </div>
 

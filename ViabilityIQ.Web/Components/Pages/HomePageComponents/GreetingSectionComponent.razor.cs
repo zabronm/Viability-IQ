@@ -6,7 +6,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
     public partial class GreetingSectionComponent : ComponentBase
     {
         [Parameter] public ApplicationUser CurrentUser { get; set; }
-        [Parameter] public DateTime LastLoginDate { get; set; }
+        [Parameter] public DateTime? LastLoginDate { get; set; }
         [Parameter] public string CurrentBranch { get; set; }
 
 
@@ -26,10 +26,13 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         /// <param name="date">The last login date</param>
         /// <returns>Formatted date string</returns>
-        private string FormatLastLoginDate(DateTime date)
+        private string FormatLastLoginDate(DateTime? date)
         {
+            if (!date.HasValue)
+                return "First sign-in";
+
             var now = DateTime.UtcNow;
-            var diff = now - date;
+            var diff = now - date.Value;
 
             // Less than 1 hour: show minutes
             if (diff.TotalHours < 1)
@@ -45,8 +48,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
             // 1 week or more: show absolute date
             else
-                return date.ToString("MMM d, h:mm tt");
+                return date.Value.ToString("MMM d, h:mm tt");
         }
     }
 }
-

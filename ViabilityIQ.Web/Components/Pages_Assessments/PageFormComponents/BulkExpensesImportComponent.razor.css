@@ -1,0 +1,21 @@
+.bulk-expenses-import table {
+    min-width: 680px;
+}
+
+.bulk-expenses-import thead th {
+    font-size: 0.78rem;
+}
+
+.bulk-expenses-import tbody td:nth-child(2) {
+    font-size: 0.82rem;
+}
+
+.bulk-expenses-import tbody td:nth-child(5) {
+    min-width: 190px;
+}
+
+@media (max-width: 560px) {
+    .bulk-expenses-import tbody td:nth-child(2) {
+        font-size: 0.76rem;
+    }
+}

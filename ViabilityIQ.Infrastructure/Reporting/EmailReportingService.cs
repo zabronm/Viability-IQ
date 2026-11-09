@@ -56,6 +56,19 @@ public sealed class EmailReportingService : IEmailReportingService
                     payload.AttachmentContentType));
             }
 
+            foreach (var attachment in payload.Attachments)
+            {
+                if (attachment.Content.Length == 0
+                    || string.IsNullOrWhiteSpace(attachment.FileName)
+                    || string.IsNullOrWhiteSpace(attachment.ContentType))
+                    throw new ArgumentException("Each email attachment must include content, a filename, and a content type.");
+
+                message.Attachments.Add(new Attachment(
+                    new MemoryStream(attachment.Content, writable: false),
+                    Path.GetFileName(attachment.FileName),
+                    attachment.ContentType));
+            }
+
             using var client = new SmtpClient(host, port)
             {
                 Credentials = new NetworkCredential(senderAddress, senderPassword),

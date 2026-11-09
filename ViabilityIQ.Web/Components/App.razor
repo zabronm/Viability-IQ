@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" >
 
     <link rel="stylesheet" href="/css/viability-iq.css" />
+    <link rel="stylesheet" href="/css/assessment-dashboard-animations.css?v=20261108-1" />
     <link rel="stylesheet" href="/css/styles_m.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
@@ -30,18 +31,16 @@
     <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
 
     <!-- Apple Touch Icon (iOS) -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+    <link rel="apple-touch-icon" href="/favicon.png">
 
     <!-- Web App Manifest (PWA) -->
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials">
         
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-
-    @* <ApplicationShell @rendermode="new InteractiveServerRenderMode(prerender: false)" /> *@
-    <ApplicationShell @rendermode="InteractiveServer" />
+    <ApplicationShell @rendermode="new InteractiveServerRenderMode(prerender: false)" />
 
     <div id="components-reconnect-modal" class="components-reconnect-hide" role="status">
         <div class="viq-reconnect-card">
@@ -69,6 +68,7 @@
     <script src="scripts/assessmentAssetDetailsCharts.js"></script>
     <script src="scripts/assessmentPagePrint.js"></script>
     <script src="scripts/reportOutput.js"></script>
+    <script src="/js/assessment-dashboard-reveal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>

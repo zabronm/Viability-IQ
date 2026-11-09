@@ -571,6 +571,11 @@ case SensitivityTab.GroqAiAnalysis:
                 <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax)"><span>Profit before tax</span><strong>@CurrentResult.Metrics.ProfitBeforeTax.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ProfitBeforeTax, BaselineResult.Metrics.ProfitBeforeTax).ToString("+N0;-N0;0") vs baseline</small></article>
                 <article class="kpi-card @KpiPerformanceClass(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash)"><span>Closing cash</span><strong>@CurrentResult.Metrics.ClosingCash.ToString("N0")</strong><small>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0") vs baseline</small></article>
                 <article class="kpi-card @FundingShortfallKpiClass(CurrentResult.Metrics.FundingShortfall)"><span>Funding shortfall</span><strong>@CurrentResult.Metrics.FundingShortfall.ToString("N0")</strong><small>Minimum cash: @CurrentResult.Metrics.MinimumCash.ToString("N0") in M@(CurrentResult.Metrics.MinimumCashMonth)</small></article>
+                <article class="kpi-card @AssetTurnoverKpiClass(CurrentResult.Metrics.AssetTurnover)">
+                    <span>Asset turnover</span>
+                    <strong>@(CurrentResult.Metrics.AssetTurnover?.ToString("N2") ?? "n/a")@(CurrentResult.Metrics.AssetTurnover.HasValue ? "x" : string.Empty)</strong>
+                    <small>@AssetTurnoverStatus(CurrentResult.Metrics.AssetTurnover) · baseline @(BaselineResult.Metrics.AssetTurnover?.ToString("N2") is { } baselineTurnover ? $"{baselineTurnover}x" : "n/a")</small>
+                </article>
             </div>
 
             <div class="groq-chart-grid">
@@ -611,8 +616,20 @@ case SensitivityTab.GroqAiAnalysis:
                         <tr><th>Closing cash</th><td>@BaselineResult.Metrics.ClosingCash.ToString("N0")</td><td>@CurrentResult.Metrics.ClosingCash.ToString("N0")</td><td>@Variance(CurrentResult.Metrics.ClosingCash, BaselineResult.Metrics.ClosingCash).ToString("+N0;-N0;0")</td></tr>
                         <tr><th>Current ratio</th><td>@(BaselineResult.Metrics.CurrentRatio?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.CurrentRatio?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.CurrentRatio.HasValue && BaselineResult.Metrics.CurrentRatio.HasValue ? Variance(CurrentResult.Metrics.CurrentRatio.Value, BaselineResult.Metrics.CurrentRatio.Value).ToString("+N2;-N2;0") : "n/a")</td></tr>
                         <tr><th>Interest cover</th><td>@(BaselineResult.Metrics.InterestCover?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.InterestCover?.ToString("N2") ?? "n/a")</td><td>@(CurrentResult.Metrics.InterestCover.HasValue && BaselineResult.Metrics.InterestCover.HasValue ? Variance(CurrentResult.Metrics.InterestCover.Value, BaselineResult.Metrics.InterestCover.Value).ToString("+N2;-N2;0") : "n/a")</td></tr>
+                        <tr><th>Asset turnover</th><td>@(BaselineResult.Metrics.AssetTurnover?.ToString("N2") is { } baselineAssets ? $"{baselineAssets}x" : "n/a")</td><td>@(CurrentResult.Metrics.AssetTurnover?.ToString("N2") is { } currentAssets ? $"{currentAssets}x" : "n/a")</td><td>@(CurrentResult.Metrics.AssetTurnover.HasValue && BaselineResult.Metrics.AssetTurnover.HasValue ? Variance(CurrentResult.Metrics.AssetTurnover.Value, BaselineResult.Metrics.AssetTurnover.Value).ToString("+N2;-N2;0") + "x" : "n/a")</td></tr>
                     </tbody>
                 </table>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(GroqAiAnalysis?.AuditWarning))
+        {
+            <div class="sensitivity-alert amber" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    <strong>Audit record unavailable</strong>
+                    <span>@GroqAiAnalysis?.AuditWarning Reference: @GroqAiAnalysis?.CorrelationId</span>
+                </div>
             </div>
         }
 

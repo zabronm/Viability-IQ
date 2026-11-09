@@ -123,6 +123,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 DepreciationProjectedAmount = Model.DepreciationProjectedAmount,
                 OpeningOtherCurrentAssets = Model.OpeningOtherCurrentAssets,
                 OpeningOtherCurrentLiabilities = Model.OpeningOtherCurrentLiabilities,
+                OpeningShareCapital = Model.OpeningShareCapital,
+                OpeningRetainedEarnings = Model.OpeningRetainedEarnings,
                 OpeningVatPayable = Model.OpeningVatPayable,
                 OpeningVatRefundable = Model.OpeningVatRefundable
             };
@@ -256,6 +258,27 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                                                 ActiveAssessmentId, 
                                                 ActiveAssessmentId);
 
+                if (refName == "OPENING-BALANCES")
+                {
+                    try
+                    {
+                        var refreshedAssessment = await DataRepository.GetByIdAsync(ActiveAssessmentId);
+                        if (refreshedAssessment is null)
+                        {
+                            _Toast.ShowError("Opening balances were saved, but the updated assessment could not be reloaded.", sessionService!.AppTitle);
+                            return;
+                        }
+
+                        Model = refreshedAssessment;
+                        PopulateDataModels();
+                    }
+                    catch (Exception ex)
+                    {
+                        _Toast.ShowError($"Opening balances were saved, but the assessment could not be refreshed: {ex.Message}", sessionService!.AppTitle);
+                        return;
+                    }
+                }
+
                 _Toast.ShowSuccess(saveResult.Message, sessionService!.AppTitle);
 
                 // 1. Logic for specific component refresh
@@ -383,6 +406,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public decimal DepreciationProjectedAmount { get; set; } = 0;
         public decimal OpeningOtherCurrentAssets { get; set; }
         public decimal OpeningOtherCurrentLiabilities { get; set; }
+        public decimal OpeningShareCapital { get; set; }
+        public decimal OpeningRetainedEarnings { get; set; }
         public decimal OpeningVatPayable { get; set; }
         public decimal OpeningVatRefundable { get; set; }
     }

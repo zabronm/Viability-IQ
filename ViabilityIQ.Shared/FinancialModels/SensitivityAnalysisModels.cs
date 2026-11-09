@@ -59,6 +59,8 @@ public sealed class SensitivityMetrics
     public decimal? InterestCover { get; init; }
     public decimal? BreakEvenSales { get; init; }
     public decimal? MarginOfSafety { get; init; }
+    public decimal? AssetTurnover { get; init; }
+    public decimal? ReturnOnAssets { get; init; }
 }
 
 public sealed class ScenarioAnalysisResult

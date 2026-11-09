@@ -860,6 +860,10 @@
     .sensitivity-page * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        filter: none !important;
     }
 
     .sensitivity-page {
@@ -872,6 +876,7 @@
         margin: 0 !important;
         padding: 0 !important;
         overflow: visible !important;
+        transform: none !important;
     }
 
     .sensitivity-actions, .sensitivity-tabs, .btn, .preset-grid, .sweep-controls, .comparison-picker, .reserve-control, .ai-controls-panel, .ai-configuration-panel {

@@ -300,7 +300,7 @@ public sealed class AssessmentReportService : IAssessmentReportService
         decimal Liabilities(CashflowProjectionMonth x) =>
             Math.Max(-x.ClosingBank, 0m) + x.ClosingCreditors +
             x.OtherCurrentLiabilities + x.ClosingLoanBalance;
-        decimal Equity(CashflowProjectionMonth x) => x.TotalAssets - Liabilities(x);
+        decimal Equity(CashflowProjectionMonth x) => x.ShareCapital + x.RetainedEarningsBeforeTax;
 
         return new()
         {
@@ -322,8 +322,10 @@ public sealed class AssessmentReportService : IAssessmentReportService
                 Row("VAT / other current liabilities", months, x => x.OtherCurrentLiabilities),
                 Row("Loans and borrowings", months, x => x.ClosingLoanBalance),
                 Row("TOTAL LIABILITIES", months, Liabilities, total: true),
-                Heading("RESIDUAL EQUITY / NET ASSETS"),
-                Row("Residual equity / net assets", months, Equity, total: true),
+                Heading("EQUITY"),
+                Row("Share capital", months, x => x.ShareCapital),
+                Row("Retained earnings (cumulative profit before tax)", months, x => x.RetainedEarningsBeforeTax),
+                Row("TOTAL EQUITY", months, Equity, total: true),
                 Row("TOTAL LIABILITIES & EQUITY", months, x => Liabilities(x) + Equity(x), total: true),
                 PercentageRow("Current ratio", months, x => x.CurrentRatio)
             ])
@@ -480,7 +482,7 @@ public sealed class AssessmentReportService : IAssessmentReportService
             "Blank or unavailable ratios indicate that the denominator was zero or the source metric was not calculable."
         };
         if (type == ReportType.BalanceSheet)
-            notes.Add("Residual equity/net assets is the balancing amount after recognised projected assets and liabilities; it is not a maintained share-capital or drawings ledger.");
+            notes.Add("Equity is shown as opening share capital plus opening retained earnings rolled forward by cumulative projected profit before tax. Income tax, distributions/drawings, and new capital contributions are not modeled; a non-zero balance check indicates incomplete or inconsistent opening balances.");
         if (type == ReportType.Vat)
             notes.Add("VAT values are planning projections, not a VAT return. Confirm classifications, supporting documents and filing periods before submission to the revenue authority.");
         if (type == ReportType.AssessmentSummary && risks is null)

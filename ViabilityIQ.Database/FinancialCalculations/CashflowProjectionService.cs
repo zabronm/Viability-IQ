@@ -20,8 +20,9 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
     private readonly IGenericDataRepository<AssessmentLoan> _loans;
     private readonly IGenericDataRepository<AssessmentLoanRepayment> _repayments;
     private readonly IGenericDataRepository<AssessmentAssetMovement> _movements;
+    private readonly IGenericDataRepository<AssessmentAsset> _assets;
     private readonly IAccountsProjectionService _accounts;
-    private readonly IAssetDepreciationEngine _depreciation;
+    private readonly IAssetMovementCalculationService _assetMovementCalculation;
     private readonly ILogger<CashflowProjectionService> _logger;
 
     public CashflowProjectionService(
@@ -38,8 +39,9 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
         IGenericDataRepository<AssessmentLoan> loans,
         IGenericDataRepository<AssessmentLoanRepayment> repayments,
         IGenericDataRepository<AssessmentAssetMovement> movements,
+        IGenericDataRepository<AssessmentAsset> assets,
         IAccountsProjectionService accounts,
-        IAssetDepreciationEngine depreciation,
+        IAssetMovementCalculationService assetMovementCalculation,
         ILogger<CashflowProjectionService> logger)
     {
         _assessments = assessments;
@@ -55,8 +57,9 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
         _loans = loans;
         _repayments = repayments;
         _movements = movements;
+        _assets = assets;
         _accounts = accounts;
-        _depreciation = depreciation;
+        _assetMovementCalculation = assetMovementCalculation;
         _logger = logger;
     }
 
@@ -93,8 +96,9 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
                 x.AssessmentId == assessmentId && x.Active);
             var movementsTask = _movements.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
+            var assetsTask = _assets.GetAllAsync(x =>
+                x.AssessmentId == assessmentId && x.Active);
             var accountsTask = _accounts.CalculateAsync(assessmentId);
-            var depreciationTask = _depreciation.CalculateAnnualDepreciationAsync(assessmentId);
 
             await Task.WhenAll(
                 categoriesTask,
@@ -109,8 +113,27 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
                 loansTask,
                 repaymentsTask,
                 movementsTask,
-                accountsTask,
-                depreciationTask);
+                assetsTask,
+                accountsTask);
+
+            var assets = (await assetsTask).ToList();
+            var storedMovements = (await movementsTask)
+                .GroupBy(movement => movement.AssessmentAssetId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.OrderByDescending(movement => movement.ModifiedDate).First());
+            var assetMovements = new List<AssessmentAssetMovement>(assets.Count);
+            foreach (var asset in assets)
+            {
+                var movement = storedMovements.TryGetValue(asset.AssessmentAssetId, out var savedMovement)
+                    ? savedMovement
+                    : await _assetMovementCalculation.InitializeMovementTemplateAsync(asset);
+                assetMovements.Add(await _assetMovementCalculation.RecalculateAllMonthsAsync(movement, asset));
+            }
+
+            var depreciation = Enumerable.Range(1, 12).ToDictionary(
+                month => month,
+                month => assetMovements.Sum(movement => movement.GetDepreciation(month)));
 
             return CashflowProjectionCalculator.Calculate(new CashflowCalculationInput(
                 assessment,
@@ -128,8 +151,8 @@ public sealed class CashflowProjectionService : ICashflowProjectionService
                 await vatTask,
                 (await loansTask).ToList(),
                 (await repaymentsTask).ToList(),
-                (await movementsTask).ToList(),
-                await depreciationTask,
+                assetMovements,
+                depreciation,
                 await accountsTask));
         }
         catch (Exception exception)

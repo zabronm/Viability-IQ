@@ -1,0 +1,52 @@
+@page "/admin/support-consultants"
+@layout MainLayout
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using ViabilityIQ.Shared.DataModels.SecurityDataModels
+
+<PageTitle>Support consultant access</PageTitle>
+
+<div class="support-access-page">
+    <header>
+        <h1>Support consultant access</h1>
+        <p>Only assign this role to staff who are authorized to view and answer user support conversations.</p>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="alert @(_isError ? "alert-danger" : "alert-success")" role="status">@_message</div>
+    }
+
+    @if (_isLoading)
+    {
+        <div class="text-center p-4"><span class="spinner-border" role="status"></span></div>
+    }
+    else
+    {
+        <div class="table-responsive support-access-table">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr><th>Staff account</th><th>Email</th><th class="text-end">Support inbox access</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in _users)
+                    {
+                        <tr>
+                            <td>@($"{user.FirstName} {user.LastName}".Trim())</td>
+                            <td>@user.Email</td>
+                            <td class="text-end">
+                                <button type="button"
+                                        class="btn btn-sm @(user.IsConsultant ? "btn-outline-danger" : "btn-outline-primary")"
+                                        disabled="@(_updatingUserId == user.Id)"
+                                        @onclick="() => ToggleConsultantAsync(user)">
+                                    @(user.IsConsultant ? "Remove access" : "Grant access")
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

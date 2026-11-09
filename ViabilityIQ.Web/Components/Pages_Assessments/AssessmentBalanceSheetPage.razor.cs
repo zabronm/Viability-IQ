@@ -156,14 +156,18 @@ public partial class AssessmentBalanceSheetPage : ComponentBase, IDisposable
     {
         var closing = projection.Months.OrderBy(month => month.MonthNumber).Last();
         var alerts = new List<BalanceSheetAlert>();
-        var equity = closing.TotalAssets - closing.CurrentLiabilities;
+        var equity = closing.ShareCapital + closing.RetainedEarningsBeforeTax;
+        var netAssets = closing.TotalAssets - closing.CurrentLiabilities;
         var overdraftMonths = projection.Months.Count(month => month.ClosingBank < 0m);
         var currentAssetBase = Math.Max(closing.CurrentAssets, 1m);
 
-        if (equity < 0m)
-            alerts.Add(Critical("Negative projected net assets", $"Liabilities exceed assets by {DisplayUtility.FormatCurrency(Math.Abs(equity), SessionService?.CurrencyCode, SessionService?.CultureName)} at M12.", "Prepare a recapitalisation and debt-reduction plan; continued losses or drawings will deepen insolvency risk."));
+        if (netAssets < 0m)
+            alerts.Add(Critical("Negative projected net assets", $"Liabilities exceed assets by {DisplayUtility.FormatCurrency(Math.Abs(netAssets), SessionService?.CurrencyCode, SessionService?.CultureName)} at M12.", "Prepare a recapitalisation and debt-reduction plan; continued losses or drawings will deepen insolvency risk."));
         else
-            alerts.Add(Healthy("Positive net asset position", $"Projected net assets/equity close at {DisplayUtility.FormatCurrency(equity, SessionService?.CurrencyCode, SessionService?.CultureName)}.", "Protect this capital buffer by retaining sufficient profit and controlling additional borrowing."));
+            alerts.Add(Healthy("Positive net asset position", $"Projected net assets close at {DisplayUtility.FormatCurrency(netAssets, SessionService?.CurrencyCode, SessionService?.CultureName)}.", "Protect this capital buffer by retaining sufficient profit and controlling additional borrowing."));
+
+        if (Math.Abs(netAssets - equity) >= 0.01m)
+            alerts.Add(Warning("Balance sheet does not balance", $"Net assets differ from projected share capital and retained earnings by {DisplayUtility.FormatCurrency(Math.Abs(netAssets - equity), SessionService?.CurrencyCode, SessionService?.CultureName)} at M12.", "Verify opening share capital, retained earnings, assets and liabilities. The projection excludes tax, drawings/distributions and new capital contributions."));
 
         if (closing.CurrentRatio is < 1m)
             alerts.Add(Critical("Current liabilities exceed current assets", $"The M12 current ratio is {closing.CurrentRatio.GetValueOrDefault():F2}x.", "Accelerate debtor collections, reduce excess stock and negotiate longer supplier terms."));

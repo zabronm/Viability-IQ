@@ -86,8 +86,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     Active = true
                 };
 
-                // Initialize all 12 months
-                await InitializeDefaultMovementValuesAsync(movement, asset);
+                await RecalculateAllMonthsAsync(movement, asset);
 
                 _logger.LogInformation(
                     "Movement template initialized successfully for asset {AssetId}. " +
@@ -178,6 +177,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
 
                     // ✅ STEP 3: Calculate monthly depreciation
                     decimal monthlyDepreciation = CalculateMonthlyDepreciation(asset, endingGrossValue);
+                    monthlyDepreciation = Math.Min(
+                        monthlyDepreciation,
+                        Math.Max(0m, endingGrossValue - previousAccumulatedDepr));
                     movement.SetDepreciation(month, monthlyDepreciation);
 
                     // ✅ STEP 4: Calculate accumulated depreciation
@@ -297,6 +299,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     movement.SetGrossValue(month, endingGrossValue);
 
                     decimal monthlyDepreciation = CalculateMonthlyDepreciation(asset, endingGrossValue);
+                    monthlyDepreciation = Math.Min(
+                        monthlyDepreciation,
+                        Math.Max(0m, endingGrossValue - previousAccumulatedDepr));
                     movement.SetDepreciation(month, monthlyDepreciation);
 
                     decimal endingAccumulatedDepr = previousAccumulatedDepr + monthlyDepreciation;
@@ -466,68 +471,6 @@ namespace ViabilityIQ.Application.FinancialCalculations
         #endregion
 
         #region ===== PRIVATE HELPER METHODS =====
-
-        /// <summary>
-        /// Initializes default values for all 12 months
-        /// Sets opening values for acquisition month and carries forward for subsequent months
-        /// </summary>
-        private async Task InitializeDefaultMovementValuesAsync(
-            AssessmentAssetMovement movement,
-            AssessmentAsset asset)
-        {
-            try
-            {
-                for (int month = 1; month <= 12; month++)
-                {
-                    if (!IsAssetActiveInMonth(asset, month))
-                    {
-                        // Asset not yet acquired - clear all values
-                        ClearMonthData(movement, month);
-                    }
-                    else
-                    {
-                        // Asset is active in this month
-                        int acquisitionMonth = asset.AcquisitionStartMonth > 0 ? asset.AcquisitionStartMonth : 1;
-
-                        if (month == acquisitionMonth)
-                        {
-                            // Opening month - set opening values from asset master
-                            movement.SetMovementType(month, null);
-                            movement.SetMovementValue(month, 0);
-                            movement.SetGrossValue(month, asset.OpeningBalanceValue);
-                            movement.SetAccumulatedDepreciation(month, asset.OpeningAccumulatedDepreciation);
-                        }
-                        else if (month > 1)
-                        {
-                            // Subsequent months - carry forward previous month's values
-                            // ✅ Handle nullable decimals with null coalescing
-                            decimal previousGross = movement.GetGrossValue(month - 1) ?? 0;
-                            decimal previousAccum = movement.GetAccumulatedDepreciation(month - 1) ?? 0;
-
-                            movement.SetMovementType(month, null);
-                            movement.SetMovementValue(month, 0);
-                            movement.SetGrossValue(month, previousGross);
-                            movement.SetAccumulatedDepreciation(month, previousAccum);
-                        }
-
-                        // Calculate depreciation for this month
-                        decimal currentGrossValue = movement.GetGrossValue(month) ?? 0;
-                        decimal monthlyDepr = CalculateMonthlyDepreciation(asset, currentGrossValue);
-                        movement.SetDepreciation(month, monthlyDepr);
-
-                        // Calculate NBV
-                        decimal currentAccum = (movement.GetAccumulatedDepreciation(month) ?? 0) + monthlyDepr;
-                        decimal nbv = currentGrossValue - currentAccum;
-                        movement.SetNetBookValue(month, nbv);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error initializing default movement values");
-                throw;
-            }
-        }
 
         /// <summary>
         /// Checks if asset is active (owned) in a specific month

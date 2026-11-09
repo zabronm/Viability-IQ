@@ -2,6 +2,7 @@
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Web.Services;
 
 
 namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
@@ -11,8 +12,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         [Parameter] public long AssessmentId { get; set; }
         [Parameter] public long AssessmentSalesCategoryId { get; set; }
         [Parameter] public EventCallback<SaveResult> OnSaveComplete { get; set; }
+        [Parameter] public bool AllowIncomeTypeSelection { get; set; }
 
         [Inject] private ISessionService sessionService { get; set; } = default!;
+        [Inject] private ZabOffCanvasService ZabCanvasService { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentSalesCategory> DataRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentSales> salesRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<AssessmentStock> stockRepository { get; set; } = default!;
@@ -47,12 +50,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     }
                     else
                     {
-                        await OnSaveComplete.InvokeAsync(new SaveResult
-                        {
-                            Success = false,
-                            ClosePanel = false,
-                            Message = $"Error: Sales category targeting reference key #{AssessmentSalesCategoryId} missing."
-                        });
+                        await PublishResultAsync(SaveResult.Failed(
+                            $"Sales category #{AssessmentSalesCategoryId} could not be found."));
                     }
                 }
                 else
@@ -74,12 +73,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             }
             catch (Exception ex)
             {
-                await OnSaveComplete.InvokeAsync(new SaveResult
-                {
-                    Success = false,
-                    ClosePanel = false,
-                    Message = $"Initialization infrastructure error mapping context: {ex.Message}"
-                });
+                await PublishResultAsync(SaveResult.Failed(
+                    $"Unable to load the sales category: {ex.Message}"));
             }
             finally
             {
@@ -91,8 +86,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         {
             SaveResult executionFeedbackPackage;
 
-            if (Model == null || IsSubmitting) return;
-            if (string.IsNullOrWhiteSpace(Model.AssessmentSalesCategoryName))         //// Interface validation step guard check
+            if (Model == null || IsSubmitting)
             {
                 return;
             }
@@ -121,6 +115,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         };
 
                         isExecutionSuccess = await salesRepository.SaveAsync(SalesModel);
+                        if (!isExecutionSuccess)
+                        {
+                            throw new InvalidOperationException(
+                                "The sales category was created, but its income stream could not be initialized.");
+                        }
 
                         //Initialise Stock record for this category
                         StockModel = new()
@@ -134,8 +133,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                             CreatedBy = sessionService.UserId
                         };
                         isExecutionSuccess = await stockRepository.SaveAsync(StockModel);
+                        if (!isExecutionSuccess)
+                        {
+                            throw new InvalidOperationException(
+                                "The sales category and income stream were created, but its inventory record could not be initialized.");
+                        }
                     }
-
                 }
 
                 executionFeedbackPackage = new()
@@ -147,22 +150,35 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         : "Error encountered; sales category not saved."
                 };
 
-                await OnSaveComplete.InvokeAsync(executionFeedbackPackage);
+                await PublishResultAsync(executionFeedbackPackage);
 
             }
             catch (Exception ex)
             {
-                await OnSaveComplete.InvokeAsync(new SaveResult
-                {
-                    Success = false,
-                    ClosePanel = false,
-                    Message = $"Critical database interaction exception logging data payload streams: {ex.Message}"
-                });
+                await PublishResultAsync(SaveResult.Failed(
+                    $"Unable to save the sales category: {ex.Message}"));
             }
             finally
             {
 
                 IsSubmitting = false;
+            }
+        }
+
+        private async Task PublishResultAsync(SaveResult result)
+        {
+            if (OnSaveComplete.HasDelegate)
+            {
+                await OnSaveComplete.InvokeAsync(result);
+            }
+            else
+            {
+                await ZabCanvasService.PublishResultAsync(result);
+            }
+
+            if (result.ClosePanel)
+            {
+                await ZabCanvasService.CloseAsync();
             }
         }
     }

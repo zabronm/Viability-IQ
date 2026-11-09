@@ -7,7 +7,7 @@
 @using ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 
 <div class="p-0 position-relative dashboard-workspace container-fluid assessment-print-page">
-    <PageHeading_Assessment _pageTitle="Assessment Health Dashboard"
+    <PageHeading_Assessment _pageTitle="What-If Analysis"
                             PageTitle="Dashboards &amp; Scenarios"
                             CurrentPage="PageType.Dashboards" />
 
@@ -74,6 +74,28 @@
                         </ChildContent>
                         <ErrorContent Context="error">
                             <div class="dashboard-widget-error"><i class="bi bi-exclamation-triangle"></i> Business indicators failed to render: @error.Message</div>
+                        </ErrorContent>
+                    </ErrorBoundary>
+                </section>
+
+                <section class="dashboard-cashflow-row" aria-label="Cashflow performance chart">
+                    <ErrorBoundary>
+                        <ChildContent>
+                            <CashflowPerformanceChartComponent AssessmentId="@ActiveAssessmentId" />
+                        </ChildContent>
+                        <ErrorContent Context="error">
+                            <div class="dashboard-widget-error"><i class="bi bi-exclamation-triangle"></i> Cashflow performance failed to render: @error.Message</div>
+                        </ErrorContent>
+                    </ErrorBoundary>
+                </section>
+
+                <section class="dashboard-statements-row" aria-label="Assessment financial statements">
+                    <ErrorBoundary>
+                        <ChildContent>
+                            <CashflowStatementsDashboardComponent AssessmentId="@ActiveAssessmentId" />
+                        </ChildContent>
+                        <ErrorContent Context="error">
+                            <div class="dashboard-widget-error"><i class="bi bi-exclamation-triangle"></i> Assessment statements failed to render: @error.Message</div>
                         </ErrorContent>
                     </ErrorBoundary>
                 </section>
