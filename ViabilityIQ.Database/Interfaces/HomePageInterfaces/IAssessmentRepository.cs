@@ -25,6 +25,6 @@ namespace ViabilityIQ.Application.Interfaces.HomePageInterfaces
        
         /// Get assessment by ID
        
-        Task<AssessmentModel> GetAssessmentByIdAsync(long assessmentId);
+        Task<AssessmentModel?> GetAssessmentByIdAsync(long assessmentId);
     }
 }

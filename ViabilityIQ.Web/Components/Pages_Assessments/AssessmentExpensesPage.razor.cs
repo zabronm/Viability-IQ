@@ -221,7 +221,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             catch (Exception ex)
             {
                 Logger?.LogError(ex, "Error loading expenses data for assessment {AssessmentId}", AssessmentId);
-                _Toast?.ShowError(ex.Message, sessionService?.AppTitle);
+                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Viability IQ");
             }
         }
 
@@ -254,7 +254,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 Logger?.LogError(
                     "Cannot edit expense because its record ID could not be resolved for assessment {AssessmentId}",
                     AssessmentId);
-                _Toast?.ShowError("This expense could not be loaded for editing. Refresh the page and try again.", sessionService?.AppTitle);
+                _Toast?.ShowError("This expense could not be loaded for editing. Refresh the page and try again.", sessionService?.AppTitle ?? "Viability IQ");
                 return;
             }
 
@@ -303,7 +303,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
         }
 
-        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             if (e.AssessmentId == AssessmentId)
             {

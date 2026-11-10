@@ -84,9 +84,9 @@
         _ => "At risk"
     };
 
-    private string InterestCoverStatus => Projection.Viability.InterestCover switch
+    private string InterestCoverStatus => Projection!.Viability.InterestCover switch
     {
-        null when Projection.Summary.InterestExpense == 0m && Projection.Summary.EBIT > 0m => "No interest burden",
+        null when Projection!.Summary.InterestExpense == 0m && Projection.Summary.EBIT > 0m => "No interest burden",
         null => "Not available",
         >= 3m => "Excellent",
         >= 2m => "Good",
@@ -95,7 +95,7 @@
         _ => "Critical"
     };
 
-    private string AssetEfficiencyStatus => Projection.Viability.AssetTurnover switch
+    private string AssetEfficiencyStatus => Projection!.Viability.AssetTurnover switch
     {
         null => "Not available",
         >= 1.5m => "Strong",
@@ -104,13 +104,13 @@
         _ => "Low"
     };
 
-    private string MarginOfSafetyClass => StatusClass(Projection.Viability.MarginOfSafety, 0.20m, 0.10m);
-    private string InterestCoverClass => Projection.Viability.InterestCover is null
+    private string MarginOfSafetyClass => StatusClass(Projection!.Viability.MarginOfSafety, 0.20m, 0.10m);
+    private string InterestCoverClass => Projection!.Viability.InterestCover is null
         ? "status-neutral"
-        : StatusClass(Projection.Viability.InterestCover, 2m, 1.5m);
-    private string AssetEfficiencyClass => Projection.Viability.AssetTurnover is null
+        : StatusClass(Projection!.Viability.InterestCover, 2m, 1.5m);
+    private string AssetEfficiencyClass => Projection!.Viability.AssetTurnover is null
         ? "status-neutral"
-        : StatusClass(Projection.Viability.AssetTurnover, 1m, 0.5m);
+        : StatusClass(Projection!.Viability.AssetTurnover, 1m, 0.5m);
 
     private static RenderFragment Status(string label, string value, string cssClass) => builder =>
     {

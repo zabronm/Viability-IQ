@@ -27,7 +27,6 @@ namespace ViabilityIQ.Web.Components.Pages
 
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Loan Types";
         private string AlertMessage = "Register types of typical loans here. Each loan type will have different implications like interest rates and regulations.";

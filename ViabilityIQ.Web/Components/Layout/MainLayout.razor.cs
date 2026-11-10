@@ -27,7 +27,6 @@ namespace ViabilityIQ.Web.Components.Layout
         private bool isSidebarCollapsed = false;
         private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
 
-        private ZabOffCanvas? OffCanvasControlRef;
         private string currentTitle = string.Empty;
         private int currentWidth = 550;
         private Type? dynamicComponentType;
@@ -70,7 +69,7 @@ namespace ViabilityIQ.Web.Components.Layout
         {
             currentTitle = request.Title;
 
-            if (request.Width != null)
+            if (request.Width > 0)
             {
                 var widthStr = request.Width.ToString();
                 if (!string.IsNullOrEmpty(widthStr) && int.TryParse(widthStr.Replace("px", "").Trim(), out var parsedWidth))

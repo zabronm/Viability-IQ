@@ -35,7 +35,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => AssessmentSalesCategoryId;
-        string ISortableEntity.DisplayName => AssessmentSalesCategoryName;
+        string ISortableEntity.DisplayName => AssessmentSalesCategoryName ?? string.Empty;
 
     }
 }

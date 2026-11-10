@@ -512,7 +512,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         /// </summary>
         private decimal CalculateMonthlyDepreciation(AssessmentAsset asset, decimal grossValue)
         {
-            if (!asset.IsDepreciable || asset.DepreciationRate == null || asset.DepreciationRate <= 0)
+            if (!asset.IsDepreciable || asset.DepreciationRate <= 0)
                 return 0;
 
             if (string.IsNullOrEmpty(asset.DepreciationMethod))

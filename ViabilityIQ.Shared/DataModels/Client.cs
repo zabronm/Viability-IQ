@@ -43,7 +43,7 @@ namespace ViabilityIQ.Shared.DataModels
 
 
         long IEntity.Id => ClientId;
-        string ISortableEntity.DisplayName =>  FullName;
+        string ISortableEntity.DisplayName =>  FullName ?? string.Empty;
 
     }
 }

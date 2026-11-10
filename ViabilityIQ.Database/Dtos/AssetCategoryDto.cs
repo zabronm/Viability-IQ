@@ -9,7 +9,7 @@ namespace ViabilityIQ.Application.Dtos
     public class AssetCategoryDto
     {
         public long AssetCategoryId { get; set; }
-        public string CategoryName { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
         public bool IsCurrentAsset { get; set; }
         public string? BalanceSheetSection { get; set; }
 

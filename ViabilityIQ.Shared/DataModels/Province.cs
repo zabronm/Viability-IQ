@@ -35,6 +35,6 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => ProvinceId;
-        string ISortableEntity.DisplayName => ProvinceName;
+        string ISortableEntity.DisplayName => ProvinceName ?? string.Empty;
     }
 }

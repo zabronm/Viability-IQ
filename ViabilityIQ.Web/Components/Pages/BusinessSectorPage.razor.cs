@@ -25,7 +25,6 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
         // Alert
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Business Sectors";
         private string AlertMessage = "Setup all base GLOBAL business sectors that will be assumed and/or inherited by your assessments.";

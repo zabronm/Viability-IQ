@@ -83,7 +83,7 @@ namespace ViabilityIQ.Shared.SharedModels
         public long ModifiedBy { get; set; }
 
         public bool Active { get; set; }
-        public string Remarks { get; set; } = string.Empty;
+        public string? Remarks { get; set; } = string.Empty;
 
         // ====================================================
         // INTERFACE IMPLEMENTATION (IEntity)
@@ -131,4 +131,3 @@ namespace ViabilityIQ.Shared.SharedModels
         string ISortableEntity.DisplayName => IssueTitle ?? string.Empty;
     }
 }
-

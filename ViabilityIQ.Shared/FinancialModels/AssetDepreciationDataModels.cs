@@ -15,7 +15,7 @@ namespace ViabilityIQ.Shared.FinancialModels
 
 
         /// Asset name for display        
-        public string AssetName { get; set; }
+        public string? AssetName { get; set; }
 
 
         /// The month number (1-12)        
@@ -24,7 +24,7 @@ namespace ViabilityIQ.Shared.FinancialModels
 
         /// Depreciation method (Straight-Line, Declining-Balance, etc.)
 
-        public string DepreciationMethod { get; set; }
+        public string? DepreciationMethod { get; set; }
 
 
         /// Annual depreciation rate (%)        
@@ -96,7 +96,7 @@ namespace ViabilityIQ.Shared.FinancialModels
         {
             public long AssessmentId { get; set; }
             public string ReportTitle => $"Asset Depreciation Schedule - Assessment {AssessmentId}";
-            public AssetDepreciationSummaryDto Summary { get; set; }
+            public AssetDepreciationSummaryDto? Summary { get; set; }
 
 
             /// Detailed depreciation by asset by month
@@ -149,7 +149,7 @@ namespace ViabilityIQ.Shared.FinancialModels
         /// AssetDepreciationByMethodDto - Breakdown of depreciation by method    
         public class AssetDepreciationByMethodDto
         {
-            public string DepreciationMethod { get; set; }
+            public string? DepreciationMethod { get; set; }
 
             public int AssetCount { get; set; }
 

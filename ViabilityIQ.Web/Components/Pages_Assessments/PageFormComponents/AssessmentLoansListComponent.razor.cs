@@ -22,7 +22,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
 
         protected override async Task OnParametersSetAsync()
         {
-            AssessmentId = sessionService.AssessmentId.Value;
+            if (sessionService?.AssessmentId is not long assessmentId)
+                return;
+
+            AssessmentId = assessmentId;
             await LoadAssessmentLoanAsync();
         }
 

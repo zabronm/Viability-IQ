@@ -77,7 +77,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
     }
     private ZabConfirmDialogComponent? ConfirmDeactivateDialog { get; set; }
     private HashSet<long> ExpandedAssetIds { get; } = new();
-    private List<AssetDashboardRow> Assets { get; set; } = new();
+    private new List<AssetDashboardRow> Assets { get; set; } = new();
     private List<AssetAlertItem> AssetAlerts { get; set; } = new();
 
     private IEnumerable<AssetDashboardRow> FilteredAssets

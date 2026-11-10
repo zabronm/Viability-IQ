@@ -14,7 +14,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
         /// KPI metrics data to display
        
         [Parameter]
-        public KPIMetricsModel KPIMetrics { get; set; }
+        public KPIMetricsModel? KPIMetrics { get; set; }
 
        
         /// Callback when user clicks on a KPI card for drill-down

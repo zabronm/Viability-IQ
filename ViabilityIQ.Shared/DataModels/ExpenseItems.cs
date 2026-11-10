@@ -23,6 +23,6 @@ namespace ViabilityIQ.Shared.DataModels
         public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
 
         long IEntity.Id => ExpenseItemId;
-        string ISortableEntity.DisplayName => ExpenseItemName;
+        string ISortableEntity.DisplayName => ExpenseItemName ?? string.Empty;
     }
 }

@@ -15,10 +15,10 @@ namespace ViabilityIQ.Shared.DataModels
     {
         [Dapper.Contrib.Extensions.Key] public long LoanTypeId { get; set; }
         public string? ShortName { get; set; }
-        [Required] public string? LoanTypeName { get; set; }
+        [Required] public string? LoanTypeName { get; set; } = string.Empty;
 
 
-        public string? Remarks { get; set; }
+        public string? Remarks { get; set; } = string.Empty;
         public bool Active { get; set; } = true;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy    { get; set; }
@@ -26,6 +26,6 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => LoanTypeId;
-        string ISortableEntity.DisplayName => LoanTypeName;
+        string ISortableEntity.DisplayName => LoanTypeName ?? string.Empty;
     }
 }

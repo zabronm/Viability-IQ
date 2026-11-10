@@ -21,12 +21,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
     {
         #region Injected Services
 
-        [Inject] MasterDataService? ViqCrudService { get; set; }
-        [Inject] ISessionService? sessionService { get; set; }
-        [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
-        [Inject] ToastService? _Toast { get; set; }
-        [Inject] IProjectionStateManager? projectionStateManager { get; set; }
-        [Inject] ILogger<AssessmentSalesPage>? Logger { get; set; }
+        [Inject] MasterDataService ViqCrudService { get; set; } = default!;
+        [Inject] ISessionService sessionService { get; set; } = default!;
+        [Inject] ZabOffCanvasService zabCanvasService { get; set; } = default!;
+        [Inject] ToastService _Toast { get; set; } = default!;
+        [Inject] IProjectionStateManager projectionStateManager { get; set; } = default!;
+        [Inject] ILogger<AssessmentSalesPage> Logger { get; set; } = default!;
         [Inject] IGenericDataRepository<AssessmentProjectionAssumptions> AssumptionsRepository { get; set; } = default!;
 
         #endregion
@@ -283,7 +283,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
         }
 
-        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             if (e.AssessmentId == AssessmentId && e.DataType == "sales")
             {

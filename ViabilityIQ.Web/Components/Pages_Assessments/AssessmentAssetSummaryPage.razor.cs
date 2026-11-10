@@ -115,7 +115,7 @@ public partial class AssessmentAssetSummaryPage : ComponentBase, IAsyncDisposabl
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading summary assets for assessment {AssessmentId}", AssessmentId);
-            Toast.ShowError(ex.Message, SessionService?.AppTitle);
+            Toast.ShowError(ex.Message, SessionService?.AppTitle ?? "Viability IQ");
         }
         finally
         {
@@ -163,7 +163,7 @@ public partial class AssessmentAssetSummaryPage : ComponentBase, IAsyncDisposabl
         catch (JSException ex)
         {
             Logger.LogError(ex, "Could not print the asset summary page");
-            Toast.ShowError("The print preview could not be opened.", SessionService?.AppTitle);
+            Toast.ShowError("The print preview could not be opened.", SessionService?.AppTitle ?? "Viability IQ");
         }
         finally
         {
@@ -289,7 +289,7 @@ public partial class AssessmentAssetSummaryPage : ComponentBase, IAsyncDisposabl
         {
             if (result.Success)
             {
-                Toast.ShowSuccess(result.Message, SessionService?.AppTitle);
+                Toast.ShowSuccess(result.Message, SessionService?.AppTitle ?? "Viability IQ");
                 if (result.RefreshGrid)
                 {
                     await LoadAndMapAssetsData();
@@ -299,7 +299,7 @@ public partial class AssessmentAssetSummaryPage : ComponentBase, IAsyncDisposabl
             }
             else
             {
-                Toast.ShowError(result.Message, SessionService?.AppTitle);
+                Toast.ShowError(result.Message, SessionService?.AppTitle ?? "Viability IQ");
             }
         }
         catch (Exception ex)

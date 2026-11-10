@@ -29,7 +29,6 @@ namespace ViabilityIQ.Web.Components.Pages
         //---------------------------------------------------------
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Businesses";
         private string AlertMessage = "Register a business before it can be assessed. Supply all relevant details that will assist the assessment to be more accurate.";

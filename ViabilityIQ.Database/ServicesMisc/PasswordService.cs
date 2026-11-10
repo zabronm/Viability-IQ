@@ -197,7 +197,7 @@ namespace ViabilityIQ.Application.ServicesMisc
 
                 result.Success = true;
                 result.UserId = user.Id;
-                result.Email = user.Email;
+                result.Email = user.Email ?? string.Empty;
                 result.ConfirmationToken = token;
                 result.Messages.Add("Confirmation token generated successfully");
 
@@ -271,7 +271,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                 }
 
                 result.Success = true;
-                result.Email = user.Email;
+                result.Email = user.Email ?? string.Empty;
                 result.Messages.Add("Email confirmed successfully. You can now log in.");
 
                 _logger.LogInformation("Email confirmed successfully for user: {Email}", user.Email);

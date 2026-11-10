@@ -28,7 +28,7 @@ public sealed class AssessmentProjectionAssumptions : IEntity, IAuditableEntity
     public DateTime? ConfirmedDate { get; set; }
     public string? ConfirmedBy { get; set; }
     public bool Active { get; set; } = true;
-    public string Remarks { get; set; } = string.Empty;
+    public string? Remarks { get; set; } = string.Empty;
     public long CreatedBy { get; set; }
     public DateTime CreatedDate { get; set; }
     public long ModifiedBy { get; set; }

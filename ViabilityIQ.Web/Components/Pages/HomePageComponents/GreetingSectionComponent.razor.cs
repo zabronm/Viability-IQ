@@ -5,9 +5,9 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 {
     public partial class GreetingSectionComponent : ComponentBase
     {
-        [Parameter] public ApplicationUser CurrentUser { get; set; }
+        [Parameter, EditorRequired] public ApplicationUser? CurrentUser { get; set; }
         [Parameter] public DateTime? LastLoginDate { get; set; }
-        [Parameter] public string CurrentBranch { get; set; }
+        [Parameter] public string CurrentBranch { get; set; } = string.Empty;
 
 
         /// Get initials from user's first and last name for avatar        

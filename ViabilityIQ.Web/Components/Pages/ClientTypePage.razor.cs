@@ -25,7 +25,6 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] private IExcelEPPlusExportService ExcelService { get; set; } = default!;
 
         // Alert
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Client Types/Categories";
         private string AlertMessage = "Register all classifications of your clients, these will be assumed by your assessment reports and dashboards.";

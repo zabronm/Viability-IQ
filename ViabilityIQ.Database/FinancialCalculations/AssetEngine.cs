@@ -299,7 +299,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         /// <summary>
         /// Get movements for an asset
         /// </summary>
-        private async Task<AssessmentAssetMovement> GetAssetMovementsAsync(long assessmentAssetId)
+        private async Task<AssessmentAssetMovement?> GetAssetMovementsAsync(long assessmentAssetId)
         {
             try
             {
@@ -318,7 +318,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         /// <summary>
         /// Apply movement to gross value based on movement type
         /// </summary>
-        private decimal ApplyMovement(decimal currentGrossValue, string movementType, decimal movementValue)
+        private decimal ApplyMovement(decimal currentGrossValue, string? movementType, decimal movementValue)
         {
             if (string.IsNullOrEmpty(movementType))
                 return currentGrossValue;
@@ -355,13 +355,13 @@ namespace ViabilityIQ.Application.FinancialCalculations
     public class AssetProjectionDto
     {
         public long AssessmentAssetId { get; set; }
-        public string AssetName { get; set; }
+        public string? AssetName { get; set; }
         public long AssetTypeId { get; set; }
         public decimal OpeningBalanceValue { get; set; }
         public decimal DepreciationRate { get; set; }
         public int AcquisitionStartMonth { get; set; }
-        public Dictionary<int, decimal> MonthlyGrossValue { get; set; }
-        public Dictionary<int, decimal> MonthlyDepreciation { get; set; }
+        public Dictionary<int, decimal>? MonthlyGrossValue { get; set; }
+        public Dictionary<int, decimal> MonthlyDepreciation { get; set; } = new();
         public bool HasMovements { get; set; }
     }
 }

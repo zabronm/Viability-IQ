@@ -19,17 +19,17 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
         
         /// Title of the announcement
         
-        public string Title { get; set; }
+        public string? Title { get; set; } = string.Empty;
 
         
         /// Full message content
         
-        public string Message { get; set; }
+        public string? Message { get; set; } = string.Empty;
 
         
         /// Type of announcement (Info, Warning, Alert, Maintenance)
         
-        public string AnnouncementType { get; set; }
+        public string? AnnouncementType { get; set; } = string.Empty;
 
         
         /// When the announcement was created

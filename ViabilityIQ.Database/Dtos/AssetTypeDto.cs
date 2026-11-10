@@ -10,7 +10,7 @@ namespace ViabilityIQ.Application.Dtos
     {
         public long AssetTypeId { get; set; }
         public long AssetCategoryId { get; set; }
-        public string TypeName { get; set; }
+        public string TypeName { get; set; } = string.Empty;
         public string? AssetCategoryName { get; set; }  // For display
         public decimal DefaultDepreciationRate { get; set; }
         public int? DefaultUsefulLifeYears { get; set; }

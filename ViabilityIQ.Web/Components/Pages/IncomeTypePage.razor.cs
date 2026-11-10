@@ -26,7 +26,6 @@ namespace ViabilityIQ.Web.Components.Pages
 
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Revenue Streams";
         private string AlertMessage = "Register all revenue streams, these will be assumed by your assessment reports and dashboards.";

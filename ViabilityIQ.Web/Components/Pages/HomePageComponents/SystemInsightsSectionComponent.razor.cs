@@ -17,7 +17,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
 
         #region Injected Dependencies
 
-        [Inject] public ILogger<SystemInsightsSectionComponent> Logger { get; set; }
+        [Inject] public ILogger<SystemInsightsSectionComponent> Logger { get; set; } = default!;
 
         #endregion
 
@@ -27,7 +27,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
         /// The insights and analytics data to display
        
         [Parameter]
-        public InsightsModel Insights { get; set; }
+        public InsightsModel? Insights { get; set; }
 
        
         /// Callback when user clicks export button

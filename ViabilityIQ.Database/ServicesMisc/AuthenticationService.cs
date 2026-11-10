@@ -203,7 +203,7 @@ namespace ViabilityIQ.Application.ServicesMisc
                 result.Success = true;
                 result.UserId = user.Id;  // ✅ Direct assignment (user.Id is long)
                 result.TenantId = tenantResult.TenantId;
-                result.Email = user.Email;
+                result.Email = user.Email ?? string.Empty;
                 result.FirstName = user.FirstName;
                 result.Messages.Add("Registration successful. Please log in.");
 
@@ -384,7 +384,7 @@ namespace ViabilityIQ.Application.ServicesMisc
 
                     result.Success = true;
                     result.UserId = user.Id;
-                    result.Email = user.Email;
+                    result.Email = user.Email ?? string.Empty;
                     result.FirstName = user.FirstName;
                     result.Messages.Add("Login successful");
 
@@ -468,11 +468,11 @@ namespace ViabilityIQ.Application.ServicesMisc
        
         /// <param name="user">The user principal</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
-        public async Task<ApplicationUser> GetCurrentUserAsync(ClaimsPrincipal user)
+        public async Task<ApplicationUser?> GetCurrentUserAsync(ClaimsPrincipal user)
         {
             try
             {
-                if (user?.Identity?.IsAuthenticated == false)
+                if (user.Identity?.IsAuthenticated != true)
                 {
                     _logger.LogDebug("GetCurrentUserAsync: User is not authenticated");
                     return null;
@@ -546,11 +546,11 @@ namespace ViabilityIQ.Application.ServicesMisc
         /// <param name="user">The user principal</param>
         /// <param name="role">The role to check</param>
         /// <returns>True if user has the role, false otherwise</returns>
-        public async Task<bool> HasRoleAsync(ClaimsPrincipal user, string role)
+        public async Task<bool> HasRoleAsync(ClaimsPrincipal? user, string role)
         {
             try
             {
-                if (user?.Identity?.IsAuthenticated == false)
+                if (user?.Identity?.IsAuthenticated != true)
                 {
                     _logger.LogDebug("HasRoleAsync: User is not authenticated");
                     return false;
@@ -589,7 +589,7 @@ namespace ViabilityIQ.Application.ServicesMisc
        
         /// <param name="email">The email address</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
-        public async Task<ApplicationUser> GetUserByEmailAsync(string email)
+        public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
         {
             try
             {
@@ -618,7 +618,7 @@ namespace ViabilityIQ.Application.ServicesMisc
         /// Gets a user by email using Dapper (avoids DbContext concurrency)
         /// ✅ USE THIS METHOD INSTEAD OF GetUserByEmailAsync when you have DbContext conflicts
        
-        public async Task<ApplicationUser> GetUserByEmailDapperAsync(string email)
+        public async Task<ApplicationUser?> GetUserByEmailDapperAsync(string email)
         {
             try
             {
@@ -655,7 +655,7 @@ namespace ViabilityIQ.Application.ServicesMisc
         /// Gets a user by ID using Dapper (avoids DbContext concurrency)
         /// ✅ USE THIS METHOD INSTEAD OF GetUserByIdAsync when you have DbContext conflicts
        
-        public async Task<ApplicationUser> GetUserByIdDapperAsync(long userId)
+        public async Task<ApplicationUser?> GetUserByIdDapperAsync(long userId)
         {
             try
             {
@@ -698,7 +698,7 @@ namespace ViabilityIQ.Application.ServicesMisc
        
         /// <param name="userId">The user ID (long)</param>
         /// <returns>ApplicationUser if found, null otherwise</returns>
-        public async Task<ApplicationUser> GetUserByIdAsync(long userId)
+        public async Task<ApplicationUser?> GetUserByIdAsync(long userId)
         {
             try
             {

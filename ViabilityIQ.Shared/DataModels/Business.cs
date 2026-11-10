@@ -52,7 +52,7 @@ namespace ViabilityIQ.Shared.DataModels
 
 
         long IEntity.Id => BusinessId;
-        string ISortableEntity.DisplayName =>  BusinessName;
+        string ISortableEntity.DisplayName =>  BusinessName ?? string.Empty;
 
     }
 }

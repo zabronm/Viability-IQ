@@ -6,15 +6,13 @@ namespace ViabilityIQ.Web.Components.CommonComponents
 {
     public partial class ZabOffCanvasHost: ComponentBase, IDisposable
     {
-        private bool _isOpen = false;
-
         private string _title = "";
 
         private int _width = 350;
 
         private Type? _componentType;
 
-        private Dictionary<string, object>? _parameters;
+        private Dictionary<string, object?>? _parameters;
 
         protected override void OnInitialized()
         {
@@ -37,8 +35,6 @@ namespace ViabilityIQ.Web.Components.CommonComponents
             _componentType = request.ComponentType;
 
             _parameters = ConvertToDictionary(request.Parameters);
-
-            _isOpen = true;
 
             StateHasChanged();
 
@@ -74,8 +70,6 @@ namespace ViabilityIQ.Web.Components.CommonComponents
                 "zabOffCanvas.hide",
                 "zabCanvasHost");
 
-            _isOpen = false;
-
             _componentType = null;
 
             _parameters = null;
@@ -88,4 +82,3 @@ namespace ViabilityIQ.Web.Components.CommonComponents
 
     }
 }
-

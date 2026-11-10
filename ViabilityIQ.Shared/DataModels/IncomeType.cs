@@ -24,6 +24,6 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => IncomeTypeId;
-        string ISortableEntity.DisplayName => IncomeTypeName;
+        string ISortableEntity.DisplayName => IncomeTypeName ?? string.Empty;
     }
 }

@@ -13,9 +13,9 @@ namespace ViabilityIQ.Shared.DataModels
     public class ProductService: IEntity, ISortableEntity, IAuditableEntity
     {
         [Key] public long ProductId { get; set; }
-        public string? ProductName { get; set; }
-        public string? OtherName { get; set; }
-        public string? UOM { get; set; }
+        public string? ProductName { get; set; } = string.Empty;
+        public string? OtherName { get; set; } = string.Empty;
+        public string? UOM { get; set; } = string.Empty;
         public decimal? MarkupPercentage { get; set; }  //will check if charged per product or product category
         public long ProductCategoryId { get; set; }
         public bool ProductOrService { get; set; }=true;
@@ -27,7 +27,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => ProductId;
-        string ISortableEntity.DisplayName => ProductName;
+        string ISortableEntity.DisplayName => ProductName ?? string.Empty;
 
 
     }

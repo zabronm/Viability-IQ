@@ -41,7 +41,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => BranchId;
-        string ISortableEntity.DisplayName => BranchName;
+        string ISortableEntity.DisplayName => BranchName ?? string.Empty;
 
     }
 }
