@@ -566,7 +566,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         private decimal CalculateAssetDepreciationForMonth(AssessmentAsset asset, int month)
         {
             // Asset must be depreciable and have positive value
-            if (!asset.IsDepreciable || asset.OpeningBalanceValue <= 0 || asset.DepreciationRate == null)
+            if (!asset.IsDepreciable || asset.OpeningBalanceValue <= 0)
                 return 0;
 
             // Asset must be active in this month
@@ -592,7 +592,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         /// </summary>
         private decimal CalculateStraightLineDepreciation(AssessmentAsset asset)
         {
-            if (asset.OpeningBalanceValue <= 0 || asset.DepreciationRate == null)
+            if (asset.OpeningBalanceValue <= 0)
                 return 0;
 
             return (asset.OpeningBalanceValue * (asset.DepreciationRate / 100m)) / 12m;

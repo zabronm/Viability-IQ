@@ -164,6 +164,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     return;
                 }
 
+                if (sessionService?.AssessmentId is not long activeAssessmentId)
+                {
+                    _Toast?.ShowError("Assessment context is not available.", "Error");
+                    return;
+                }
+
                 // ✅ Show VAT Adjustment component using ZabOffCanvasService
                 await zabCanvasService.ShowAsync(new CanvasRequest
                 {
@@ -172,7 +178,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     ComponentType = typeof(VatAdjustmentComponent),
                     Parameters = new Dictionary<string, object>
                     {                        
-                        { "AssessmentId", sessionService.AssessmentId }
+                        { "AssessmentId", activeAssessmentId }
                     },                    
                     ResultCallback = async (result) => await ProcessVATAdjustmentResult(result)
                 });

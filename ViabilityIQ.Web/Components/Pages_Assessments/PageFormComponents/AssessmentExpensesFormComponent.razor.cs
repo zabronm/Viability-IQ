@@ -61,6 +61,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     IsDirectorWages = ExpenseContext.IsDirectorWages,
                     IsDirectProductionCost = ExpenseContext.IsDirectProductionCost,
                     blSendToCashBook = ExpenseContext.blSendToCashBook,
+                    blSameMonthlyAmountUsed = ExpenseContext.blSameMonthlyAmountUsed,
+                    SameMonthlyAmount = ExpenseContext.SameMonthlyAmount,
                     blPercentageOfSalesUsed = ExpenseContext.blPercentageOfSalesUsed,
                     PercentageOfSalesRate = ExpenseContext.PercentageOfSalesRate,
                     Month_1 = ExpenseContext.Month_1,

@@ -186,21 +186,28 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 {
                     ExpenseStreams = result.Select(s =>
                     {
-                        expenseRecords.TryGetValue(s.AssessmentExpensesId, out var expenseRecord);
+                        var expenseId = s.AssessmentExpenseId > 0
+                            ? s.AssessmentExpenseId
+                            : s.AssessmentExpensesId;
+                        expenseRecords.TryGetValue(expenseId, out var expenseRecord);
                         return new UnifiedExpenseViewModel
                         {
-                            Id = s.AssessmentExpensesId,
-                            Description = s.Description ?? "N/A",
-                            ExpenseItemId = s.ExpenseItemId,
+                            Id = expenseId,
+                            Description = expenseRecord?.Description ?? s.Description ?? "N/A",
+                            ExpenseItemId = expenseRecord?.ExpenseItemId ?? s.ExpenseItemId,
                             ExpenseItemName = s.ExpenseItemName ?? "N/A",
-                            TypeId = (long)s.ExpenseTypeId,
+                            TypeId = expenseRecord?.ExpenseTypeId ?? s.ExpenseTypeId,
                             TypeName = s.ExpenseTypeName ?? "N/A",
                             IsDirectorWages = expenseRecord?.IsDirectorWages ?? false,
                             IsDirectProductionCost = expenseRecord?.IsDirectProductionCost ?? false,
-                            blSendToCashBook = s.blSendToCashBook,
-                            blPercentageOfSalesUsed = s.blPercentageOfSalesUsed,
-                            MonthlyValues = new decimal[] { s.Month_1, s.Month_2, s.Month_3, s.Month_4, s.Month_5, s.Month_6,
-                                                        s.Month_7, s.Month_8, s.Month_9, s.Month_10, s.Month_11, s.Month_12 }
+                            blSameMonthlyAmountUsed = expenseRecord?.blSameMonthlyAmountUsed ?? false,
+                            SameMonthlyAmount = expenseRecord?.SameMonthlyAmount ?? s.SameMonthlyAmount,
+                            PercentageOfSalesRate = expenseRecord?.PercentageOfSalesRate ?? s.PercentageOfSalesRate,
+                            blSendToCashBook = expenseRecord?.blSendToCashBook ?? s.blSendToCashBook,
+                            blPercentageOfSalesUsed = expenseRecord?.blPercentageOfSalesUsed ?? s.blPercentageOfSalesUsed,
+                            MonthlyValues = expenseRecord?.MonthlyValues
+                                ?? new decimal[] { s.Month_1, s.Month_2, s.Month_3, s.Month_4, s.Month_5, s.Month_6,
+                                                   s.Month_7, s.Month_8, s.Month_9, s.Month_10, s.Month_11, s.Month_12 }
                         };
                     }).ToList();
 
@@ -214,7 +221,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             catch (Exception ex)
             {
                 Logger?.LogError(ex, "Error loading expenses data for assessment {AssessmentId}", AssessmentId);
-                _Toast?.ShowError(ex.Message, sessionService?.AppTitle);
+                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Viability IQ");
             }
         }
 
@@ -237,10 +244,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
         private static string Percent(decimal value) => $"{value:N1}%";
 
-        private async Task AddExpenseStream() => await OpenExpenseFormPanel(new UnifiedExpenseViewModel());
+        private async Task AddExpenseStream() =>
+            await OpenExpenseFormPanel(new UnifiedExpenseViewModel());
 
-        private async Task OpenExpenseFormPanel(UnifiedExpenseViewModel stream)
+        private async Task OpenExpenseFormPanel(UnifiedExpenseViewModel stream, bool isEdit = false)
         {
+            if (isEdit && stream.Id <= 0)
+            {
+                Logger?.LogError(
+                    "Cannot edit expense because its record ID could not be resolved for assessment {AssessmentId}",
+                    AssessmentId);
+                _Toast?.ShowError("This expense could not be loaded for editing. Refresh the page and try again.", sessionService?.AppTitle ?? "Viability IQ");
+                return;
+            }
+
             var expense = new AssessmentExpenses
             {
                 AssessmentExpenseId = stream.Id,
@@ -249,6 +266,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 ExpenseTypeId = stream.TypeId,
                 IsDirectorWages = stream.IsDirectorWages,
                 IsDirectProductionCost = stream.IsDirectProductionCost,
+                blSameMonthlyAmountUsed = stream.blSameMonthlyAmountUsed,
+                SameMonthlyAmount = stream.SameMonthlyAmount,
+                PercentageOfSalesRate = stream.PercentageOfSalesRate,
+                blPercentageOfSalesUsed = stream.blPercentageOfSalesUsed,
+                blSendToCashBook = stream.blSendToCashBook,
                 MonthlyValues = stream.MonthlyValues
             };
 
@@ -281,7 +303,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
         }
 
-        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             if (e.AssessmentId == AssessmentId)
             {
@@ -298,7 +320,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             await zabCanvasService!.ShowAsync(new CanvasRequest
             {
                 Title = "Bulk Expenses Import",
-                Width = 700,
+                Width = 750,
                 ComponentType = typeof(BulkExpensesImportComponent),
                 Parameters = new { AssessmentId },
                 ResultCallback = OnSaveComplete

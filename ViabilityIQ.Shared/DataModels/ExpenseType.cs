@@ -15,8 +15,8 @@ namespace ViabilityIQ.Shared.DataModels
         [Dapper.Contrib.Extensions.Key] public long ExpenseTypeId { get; set; }
 
         [Required(ErrorMessage = "Expense type name is required.")]
-        public string? ExpenseTypeName { get; set; }
-        public string? Remarks { get; set; }
+        public string? ExpenseTypeName { get; set; } = string.Empty;
+        public string? Remarks { get; set; } = string.Empty;
         public bool Active { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy { get; set; }
@@ -24,6 +24,6 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => ExpenseTypeId;
-        string ISortableEntity.DisplayName => ExpenseTypeName;
+        string ISortableEntity.DisplayName => ExpenseTypeName ?? string.Empty;
     }
 }

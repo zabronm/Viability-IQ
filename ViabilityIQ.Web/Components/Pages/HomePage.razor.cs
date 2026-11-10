@@ -17,22 +17,22 @@ namespace ViabilityIQ.Web.Components.Pages
         #region Injected Dependencies
 
         [Inject]
-        public CustomAuthenticationStateProvider AuthenticationStateProvider { get; set; }
+        public CustomAuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         [Inject]
-        public IAuthenticationService AuthService { get; set; }
+        public IAuthenticationService AuthService { get; set; } = default!;
 
         [Inject]
-        public IDashboardDataService DashboardDataService { get; set; }
+        public IDashboardDataService DashboardDataService { get; set; } = default!;
 
         [Inject]
-        public ITenantAuthorizationService TenantAuthorizationService { get; set; }
+        public ITenantAuthorizationService TenantAuthorizationService { get; set; } = default!;
 
         [Inject]
-        public NavigationManager NavigationManager { get; set; }
+        public NavigationManager NavigationManager { get; set; } = default!;
 
         [Inject]
-        public ILogger<HomePage> Logger { get; set; }
+        public ILogger<HomePage> Logger { get; set; } = default!;
 
         #endregion
 
@@ -41,7 +41,7 @@ namespace ViabilityIQ.Web.Components.Pages
        
         /// Currently authenticated user
        
-        public ApplicationUser CurrentUser { get; set; }
+        public ApplicationUser? CurrentUser { get; set; }
 
        
         /// Current branch name
@@ -66,7 +66,7 @@ namespace ViabilityIQ.Web.Components.Pages
        
         /// KPI metrics (Active, Completed, Pending, etc.)
        
-        public KPIMetricsModel KPIData { get; set; }
+        public KPIMetricsModel? KPIData { get; set; }
 
        
         /// Recent activities log
@@ -81,7 +81,7 @@ namespace ViabilityIQ.Web.Components.Pages
        
         /// Urgent and upcoming assessment alerts
        
-        public AlertsModel AlertsData { get; set; }
+        public AlertsModel AlertsData { get; set; } = new();
 
        
         /// System announcements
@@ -91,7 +91,7 @@ namespace ViabilityIQ.Web.Components.Pages
        
         /// Insights and analytics data
        
-        public InsightsModel InsightsData { get; set; }
+        public InsightsModel? InsightsData { get; set; }
 
         #endregion
 

@@ -26,7 +26,6 @@ namespace ViabilityIQ.Web.Components.Pages
 
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Expense Types";
         private string AlertMessage = "Register all expense types, these will be assumed by your assessment reports and dashboards.";

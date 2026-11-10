@@ -17,7 +17,7 @@ namespace ViabilityIQ.Shared.DataModels
         public decimal MonthlyDirectorWagesAmount { get; set; }
         public int NumberOfDirectors { get; set; }
         public bool Active { get; set; }
-        public String Remarks { get; set; }
+        public string? Remarks { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
         public long CreatedBy { get; set; }
         public DateTime ModifiedDate { get; set; }

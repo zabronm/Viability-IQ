@@ -1,0 +1,73 @@
+@namespace ViabilityIQ.Web.Components.Pages.Support
+@using Microsoft.AspNetCore.Components.Forms
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="support-ticket-form">
+    @if (_result is not null)
+    {
+        <div class="alert @(_result.EmailDelivered ? "alert-success" : "alert-warning")" role="status">
+            <strong>@(_result.EmailDelivered ? "Ticket submitted" : "Ticket saved; email delivery needs attention")</strong>
+            <p class="mb-1">@_result.UserMessage</p>
+            <small>Reference: @_result.Reference</small>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small">Send an issue to our support centre. Your account details will be included automatically.</p>
+        <EditForm Model="_request" OnValidSubmit="SubmitAsync">
+            <DataAnnotationsValidator />
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="alert alert-danger py-2" role="alert">@_error</div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label" for="support-ticket-title">Issue title</label>
+                <InputText id="support-ticket-title" class="form-control" maxlength="160"
+                           @bind-Value="_request.Title" />
+                <ValidationMessage For="() => _request.Title" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="support-ticket-message">Issue details</label>
+                <InputTextArea id="support-ticket-message" class="form-control" rows="7"
+                               maxlength="10000" @bind-Value="_request.Message" />
+                <ValidationMessage For="() => _request.Message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="support-ticket-files">Attachments (up to 5 files, 10 MB each)</label>
+                <InputFile id="support-ticket-files" OnChange="SelectFilesAsync" multiple
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.zip" />
+                <div class="form-text">Maximum combined size: 25 MB. Documents, images, text, and ZIP files are accepted.</div>
+                @if (_attachments.Count > 0)
+                {
+                    <ul class="support-ticket-attachments">
+                        @foreach (var attachment in _attachments)
+                        {
+                            <li>
+                                <span>@attachment.FileName</span>
+                                <button type="button" class="btn btn-link btn-sm" aria-label="@($"Remove {attachment.FileName}")"
+                                        @onclick="() => RemoveAttachment(attachment)">
+                                    Remove
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@_isSubmitting">
+                @if (_isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    <span>Sending ticket...</span>
+                }
+                else
+                {
+                    <i class="bi bi-send me-1"></i><span>Send to support</span>
+                }
+            </button>
+        </EditForm>
+    }
+</div>

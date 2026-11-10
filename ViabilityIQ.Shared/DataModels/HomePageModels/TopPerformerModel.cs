@@ -11,7 +11,7 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
     {        
           
         public long userId { get; set; }  /// User ID    
-        public string Name { get; set; }    /// Full name of the user       
+        public string? Name { get; set; } = string.Empty;    /// Full name of the user
         public int CompletedCount { get; set; } /// Number of assessments completed this month        
 
 

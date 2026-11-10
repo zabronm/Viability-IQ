@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using ViabilityIQ.Application.ExtensionServices;
 using ViabilityIQ.Application.Interfaces;
@@ -195,23 +196,22 @@ namespace ViabilityIQ.Web
                         Console.WriteLine("[STEP 9.5] Verifying dependency resolution...");
                         try
                         {
-                            // Create a scope to resolve scoped services properly
                             using (var scope = app.Services.CreateScope())
                             {
-                                var projectionManager = scope.ServiceProvider.GetRequiredService<IProjectionStateManager>();
-                                var assetMovementService = scope.ServiceProvider.GetRequiredService<IAssetMovementCalculationService>();
-                                var assetDepreciationEngine = scope.ServiceProvider.GetRequiredService<IAssetDepreciationEngine>();
-                                var assetEngine = scope.ServiceProvider.GetRequiredService<IAssetEngine>();
-                                var debtorsEngine = scope.ServiceProvider.GetRequiredService<IDebtorsCreditorsEngine>();
-                                var financialEngine = scope.ServiceProvider.GetRequiredService<IFinancialCalculationsEngine>();
-                                var cashflowEngine = scope.ServiceProvider.GetRequiredService<ICashflowEngine>();
+                                scope.ServiceProvider.GetRequiredService<IProjectionStateManager>();
+                                scope.ServiceProvider.GetRequiredService<IAssetMovementCalculationService>();
+                                scope.ServiceProvider.GetRequiredService<IAssetDepreciationEngine>();
+                                scope.ServiceProvider.GetRequiredService<IAssetEngine>();
+                                scope.ServiceProvider.GetRequiredService<IDebtorsCreditorsEngine>();
+                                scope.ServiceProvider.GetRequiredService<IFinancialCalculationsEngine>();
+                                scope.ServiceProvider.GetRequiredService<ICashflowEngine>();
 
                                 Console.WriteLine("[STEP 9.5] ✓ All services resolved successfully - NO circular dependencies!");
                             }
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"[STEP 9.5] ✗ FAILED - Circular dependency or missing service!");
+                            Console.WriteLine("[STEP 9.5] ✗ FAILED - Circular dependency or missing service!");
                             Console.WriteLine($"[STEP 9.5] Message: {ex.Message}");
                             throw;
                         }
@@ -223,11 +223,9 @@ namespace ViabilityIQ.Web
                         try
                         {
                             app.UseDatabaseStartupStatusPage();
-                            // Add global error handling middleware FIRST
                             app.UseGlobalErrorHandling();
                             Console.WriteLine("[STEP 10.1] ✓ Global error handling middleware added");
 
-                            // Configure exception handling
                             if (!app.Environment.IsDevelopment())
                             {
                                 app.UseExceptionHandler("/error");
@@ -265,7 +263,11 @@ namespace ViabilityIQ.Web
                         }
 
                         if (!await app.StartWithDatabaseAvailabilityAsync())
+                        {
                             return;
+                        }
+
+                        await SupportRoleSeeder.EnsureRoleExistsAsync(app.Services);
 
                         // ============================================================================
                         // CONFIGURE FOR DEPLOYMENT
@@ -323,14 +325,19 @@ namespace ViabilityIQ.Web
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"\n===== EXCEPTION DETAILS =====");
+                        if (ex is HostAbortedException)
+                        {
+                            throw;
+                        }
+
+                        Console.WriteLine("\n===== EXCEPTION DETAILS =====");
                         Console.WriteLine($"Type: {ex.GetType().FullName}");
                         Console.WriteLine($"Message: {ex.Message}");
                         Console.WriteLine($"\nStack Trace:\n{ex.StackTrace}");
 
                         if (ex.InnerException != null)
                         {
-                            Console.WriteLine($"\n===== INNER EXCEPTION =====");
+                            Console.WriteLine("\n===== INNER EXCEPTION =====");
                             Console.WriteLine($"Type: {ex.InnerException.GetType().FullName}");
                             Console.WriteLine($"Message: {ex.InnerException.Message}");
                             Console.WriteLine($"\nStack Trace:\n{ex.InnerException.StackTrace}");
@@ -342,7 +349,12 @@ namespace ViabilityIQ.Web
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"\n===== UNHANDLED FATAL ERROR =====");
+                    if (ex is HostAbortedException)
+                    {
+                        throw;
+                    }
+
+                    Console.WriteLine("\n===== UNHANDLED FATAL ERROR =====");
                     Console.WriteLine($"Type: {ex.GetType().FullName}");
                     Console.WriteLine($"Message: {ex.Message}");
                     Console.WriteLine($"Stack Trace: {ex.StackTrace}");
@@ -351,7 +363,10 @@ namespace ViabilityIQ.Web
                     {
                         Log.Fatal(ex, "Application crashed during startup");
                     }
-                    catch { }
+                    catch
+                    {
+                        // Logging failure should not hide the original startup exception.
+                    }
 
                     Environment.Exit(1);
                 }

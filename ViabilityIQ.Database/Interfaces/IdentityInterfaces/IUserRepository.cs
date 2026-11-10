@@ -12,12 +12,11 @@ namespace ViabilityIQ.Application.Interfaces.IdentityInterfaces
        
         /// Gets a user by email using Dapper (not EF Core)
        
-        Task<ApplicationUser> GetUserByEmailAsync(string email);
+        Task<ApplicationUser?> GetUserByEmailAsync(string email);
 
        
         /// Gets a user by ID using Dapper
        
-        Task<ApplicationUser> GetUserByIdAsync(long userId);
+        Task<ApplicationUser?> GetUserByIdAsync(long userId);
     }
 }
-

@@ -83,13 +83,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                 if (AssessmentAssetId > 0)
                 {
                     // ✅ LOAD EXISTING ASSET
-                    FormModel = await DataRepository.GetByIdAsync(AssessmentAssetId);
-
-                    if (FormModel == null)
+                    var existingAsset = await DataRepository.GetByIdAsync(AssessmentAssetId);
+                    if (existingAsset is null)
                     {
                         Logger?.LogWarning("Asset not found: {AssessmentAssetId}", AssessmentAssetId);
                         _Toast?.ShowError($"Asset not found", "Error");
                         FormModel = new AssessmentAsset { AssessmentId = AssessmentId };
+                    }
+                    else
+                    {
+                        FormModel = existingAsset;
                     }
 
                     Logger?.LogDebug(

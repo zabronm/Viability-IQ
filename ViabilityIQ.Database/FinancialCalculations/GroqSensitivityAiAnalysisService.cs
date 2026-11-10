@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
@@ -8,16 +9,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.FinancialModels;
+using ViabilityIQ.Shared.SharedModels;
 
 namespace ViabilityIQ.Application.FinancialCalculations;
 
 public sealed class GroqSensitivityAiAnalysisService(
     HttpClient httpClient,
     IOptions<GroqSensitivityAiOptions> options,
-    ILogger<GroqSensitivityAiAnalysisService> logger)
+    ILogger<GroqSensitivityAiAnalysisService> logger,
+    IActivityLogWriter activityLogWriter,
+    ISessionService sessionService)
     : IGroqSensitivityAiAnalysisService
 {
     private const string Provider = "GroqCloud";
+    private const string PromptVersion = "groq-sensitivity-asset-efficiency-v2";
+    private const string SchemaVersion = "sensitivity_analysis.v1";
     private static readonly HashSet<string> Severities =
         new(["Critical", "High", "Medium", "Low"], StringComparer.Ordinal);
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -47,6 +53,105 @@ public sealed class GroqSensitivityAiAnalysisService(
         ArgumentNullException.ThrowIfNull(request);
 
         var correlationId = Guid.NewGuid().ToString("N");
+        var startedAtUtc = DateTimeOffset.UtcNow;
+        var timer = Stopwatch.StartNew();
+        var telemetry = new ProviderAuditTelemetry();
+        SensitivityAiAnalysisResult result;
+        try
+        {
+            result = await AnalyseCoreAsync(
+                request,
+                consentGiven,
+                correlationId,
+                telemetry,
+                cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Unexpected Groq sensitivity failure, correlation {CorrelationId}",
+                correlationId);
+            result = Failure(
+                SensitivityAiAnalysisStatus.ServiceUnavailable,
+                "GroqCloud could not complete the analysis. Please try again later.",
+                correlationId);
+        }
+        timer.Stop();
+
+        try
+        {
+            var userId = sessionService.UserId > 0 ? sessionService.UserId : (long?)null;
+            var tenantId = sessionService.TenantId > 0 ? sessionService.TenantId : (long?)null;
+            var assessmentId = sessionService.AssessmentId;
+            await activityLogWriter.RecordAsync(
+                new ActivityLogWriteRequest
+                {
+                    Action = ActivityAction.Submit,
+                    EntityType = "GroqSensitivityAI",
+                    EntityId = assessmentId,
+                    EntityName = "Sensitivity AI analysis",
+                    AssessmentId = assessmentId,
+                    AssessmentName = sessionService.CaseNumber,
+                    Module = "Sensitivity Analysis",
+                    Page = assessmentId.HasValue
+                        ? $"/assessment/sensitivity/{assessmentId.Value}"
+                        : "/assessment/sensitivity",
+                    Remarks = $"GroqCloud analysis {result.Status}",
+                    UserId = userId,
+                    IncludeClientMetadata = false,
+                    Metadata = new
+                    {
+                        auditSchemaVersion = 1,
+                        provider = Provider,
+                        model = _options.Model,
+                        promptVersion = PromptVersion,
+                        responseSchemaVersion = SchemaVersion,
+                        caseType = request.CaseType,
+                        consentGiven,
+                        consentRecordedAtUtc = consentGiven ? startedAtUtc : (DateTimeOffset?)null,
+                        tenantId,
+                        outcome = result.Status.ToString(),
+                        correlationId,
+                        durationMilliseconds = timer.ElapsedMilliseconds,
+                        providerContacted = telemetry.HttpStatusCode.HasValue,
+                        providerHttpStatusCode = telemetry.HttpStatusCode,
+                        promptTokens = telemetry.PromptTokens,
+                        completionTokens = telemetry.CompletionTokens,
+                        totalTokens = telemetry.TotalTokens,
+                        dataCategories = new[]
+                        {
+                            "calculated financial metrics",
+                            "monthly projection metrics",
+                            "deterministic flags",
+                            "scenario adjustments"
+                        }
+                    }
+                },
+                cancellationToken: CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Failed to persist Groq sensitivity audit record for user {UserId}, assessment {AssessmentId}, correlation {CorrelationId}",
+                sessionService.UserId,
+                sessionService.AssessmentId,
+                correlationId);
+            result.AuditWarning =
+                "The Groq interaction finished, but its audit record could not be saved. Contact an administrator and provide the correlation reference.";
+        }
+
+        return result;
+    }
+
+    private async Task<SensitivityAiAnalysisResult> AnalyseCoreAsync(
+        SensitivityAiAnalysisRequest request,
+        bool consentGiven,
+        string correlationId,
+        ProviderAuditTelemetry telemetry,
+        CancellationToken cancellationToken)
+    {
         var configuration = GetConfiguration();
         if (!configuration.Enabled)
             return Failure(SensitivityAiAnalysisStatus.Disabled, "GroqCloud analysis is disabled.", correlationId);
@@ -72,13 +177,27 @@ public sealed class GroqSensitivityAiAnalysisService(
                 message,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken);
+            telemetry.HttpStatusCode = (int)response.StatusCode;
 
             if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 return LoggedFailure(SensitivityAiAnalysisStatus.Unauthorized, "GroqCloud rejected the configured API key.", correlationId, "authentication");
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 return LoggedFailure(SensitivityAiAnalysisStatus.RateLimited, "The GroqCloud rate limit was reached. Please try again later.", correlationId, "rate_limit");
             if (response.StatusCode == HttpStatusCode.BadRequest)
-                return LoggedFailure(SensitivityAiAnalysisStatus.InvalidResponse, "GroqCloud rejected the request. Verify that the configured model supports structured output.", correlationId, "bad_request");
+            {
+                var providerError = await ReadProviderErrorAsync(response, cancellationToken);
+                logger.LogWarning(
+                    "Sensitivity AI provider {Provider}, model {Model}, outcome {Outcome}, correlation {CorrelationId}, provider detail {ProviderDetail}",
+                    Provider,
+                    _options.Model,
+                    "bad_request",
+                    correlationId,
+                    providerError);
+                return Failure(
+                    SensitivityAiAnalysisStatus.InvalidResponse,
+                    "GroqCloud rejected the request. Check the configured model and structured-output request. See the server log for provider details.",
+                    correlationId);
+            }
             if (!response.IsSuccessStatusCode)
                 return LoggedFailure(SensitivityAiAnalysisStatus.ServiceUnavailable, "GroqCloud could not complete the analysis. Please try again later.", correlationId, $"http_{(int)response.StatusCode}");
 
@@ -86,6 +205,7 @@ public sealed class GroqSensitivityAiAnalysisService(
             using var responseJson = await JsonDocument.ParseAsync(
                 stream,
                 cancellationToken: cancellationToken);
+            ReadProviderUsage(responseJson.RootElement, telemetry);
             var modelJson = ExtractModelJson(responseJson.RootElement);
             if (modelJson is null)
                 return LoggedFailure(SensitivityAiAnalysisStatus.InvalidResponse, "GroqCloud returned an unreadable response.", correlationId, "response_shape");
@@ -158,6 +278,34 @@ public sealed class GroqSensitivityAiAnalysisService(
         }
     }
 
+    private static void ReadProviderUsage(JsonElement root, ProviderAuditTelemetry telemetry)
+    {
+        if (!root.TryGetProperty("usage", out var usage)
+            || usage.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        telemetry.PromptTokens = ReadTokenCount(usage, "prompt_tokens");
+        telemetry.CompletionTokens = ReadTokenCount(usage, "completion_tokens");
+        telemetry.TotalTokens = ReadTokenCount(usage, "total_tokens");
+    }
+
+    private static int? ReadTokenCount(JsonElement usage, string propertyName) =>
+        usage.TryGetProperty(propertyName, out var value)
+        && value.ValueKind == JsonValueKind.Number
+        && value.TryGetInt32(out var count)
+            ? count
+            : null;
+
+    private sealed class ProviderAuditTelemetry
+    {
+        public int? HttpStatusCode { get; set; }
+        public int? PromptTokens { get; set; }
+        public int? CompletionTokens { get; set; }
+        public int? TotalTokens { get; set; }
+    }
+
     private object BuildProviderRequest(
         SensitivityAiAnalysisRequest request,
         IEnumerable<string> evidenceKeys,
@@ -175,8 +323,6 @@ public sealed class GroqSensitivityAiAnalysisService(
                 findings = new
                 {
                     type = "array",
-                    minItems = 1,
-                    maxItems = maxFindings,
                     items = new
                     {
                         type = "object",
@@ -184,19 +330,17 @@ public sealed class GroqSensitivityAiAnalysisService(
                         required = new[] { "priority", "area", "severity", "finding", "evidenceKeys", "recommendation", "confidence" },
                         properties = new
                         {
-                            priority = new { type = "integer", minimum = 1, maximum = maxFindings },
+                            priority = new { type = "integer" },
                             area = new { type = "string" },
                             severity = new { type = "string", @enum = Severities.ToArray() },
                             finding = new { type = "string" },
                             evidenceKeys = new
                             {
                                 type = "array",
-                                minItems = 1,
-                                maxItems = 8,
                                 items = new { type = "string" }
                             },
                             recommendation = new { type = "string" },
-                            confidence = new { type = "integer", minimum = 0, maximum = 100 }
+                            confidence = new { type = "integer" }
                         }
                     }
                 }
@@ -205,7 +349,10 @@ public sealed class GroqSensitivityAiAnalysisService(
 
         var systemInstruction =
             $"You are an SME financial assessment and sensitivity analyst. Produce an executive interpretation and no more than {maxFindings} prioritized recommendations. " +
-            "Cover profitability, liquidity, working capital, debt capacity, break-even resilience and scenario concentration where supported. " +
+            "Cover profitability, liquidity, working capital, debt capacity, break-even resilience, asset efficiency and scenario concentration where supported. " +
+            "For asset efficiency, consider the supplied asset-turnover and return-on-assets metrics, comparing the current case with baseline when available. " +
+            "Interpret asset turnover as revenue generated per average asset and return on assets as profit before tax relative to average assets. " +
+            "Do not infer asset utilisation or recommend disposal based on these ratios alone; state when the available evidence is insufficient. " +
             "Use only supplied calculated metrics, deterministic flags and adjustments. Never invent facts, identities or figures and never recalculate values. " +
             "Narrative fields must contain no digits because numeric evidence must be referenced only through evidenceKeys. " +
             "Every evidence key must come from the allow-list. Return JSON only.";
@@ -297,6 +444,13 @@ public sealed class GroqSensitivityAiAnalysisService(
         AddOptional(evidence, $"{prefix}.interestCover", $"{Label(prefix)} interest cover", metrics.InterestCover);
         AddOptional(evidence, $"{prefix}.breakEvenSales", $"{Label(prefix)} break-even sales", metrics.BreakEvenSales, money: true);
         AddOptional(evidence, $"{prefix}.marginOfSafety", $"{Label(prefix)} margin of safety", metrics.MarginOfSafety, "%");
+        AddOptional(evidence, $"{prefix}.assetTurnover", $"{Label(prefix)} asset turnover", metrics.AssetTurnover, "x");
+        AddOptional(
+            evidence,
+            $"{prefix}.returnOnAssets",
+            $"{Label(prefix)} return on assets",
+            metrics.ReturnOnAssets * 100m,
+            "%");
     }
 
     private static void AddOptional(
@@ -370,6 +524,33 @@ public sealed class GroqSensitivityAiAnalysisService(
         }
 
         return null;
+    }
+
+    private async Task<string> ReadProviderErrorAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        string? detail = null;
+        try
+        {
+            using var errorJson = JsonDocument.Parse(body);
+            if (errorJson.RootElement.ValueKind == JsonValueKind.Object
+                && errorJson.RootElement.TryGetProperty("error", out var error)
+                && error.ValueKind == JsonValueKind.Object
+                && error.TryGetProperty("message", out var message)
+                && message.ValueKind == JsonValueKind.String)
+                detail = message.GetString();
+        }
+        catch (JsonException)
+        {
+            // Providers may return a non-JSON error body; log only a bounded summary.
+        }
+
+        detail = string.IsNullOrWhiteSpace(detail) ? $"HTTP {(int)response.StatusCode}" : detail;
+        if (!string.IsNullOrEmpty(_options.ApiKey))
+            detail = detail.Replace(_options.ApiKey, "[REDACTED]", StringComparison.Ordinal);
+        return detail.Length <= 1000 ? detail : detail[..1000];
     }
 
     private SensitivityAiAnalysisResult Failure(

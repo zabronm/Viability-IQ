@@ -15,10 +15,10 @@ namespace ViabilityIQ.Shared.DataModels
     {
         [Dapper.Contrib.Extensions.Key] public long BankId { get; set; }
         public string? ShortName { get; set; }
-        [Required] public string BankName { get; set; }
+        [Required] public string BankName { get; set; } = string.Empty;
 
 
-        public string? Remarks { get; set; }
+        public string? Remarks { get; set; } = string.Empty;
         public bool Active { get; set; } = true;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy    { get; set; }

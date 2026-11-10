@@ -9,7 +9,15 @@
     <div class="greeting-section my-0 py-1">
         <div class="greeting-content">
             <h1 class="greeting-title">
-                Welcome back, <span class="greeting-name">@CurrentUser?.FirstName</span>! 👋
+                @if (PreviousLoginDate.HasValue)
+                {
+                    <text>Welcome back, </text>
+                }
+                else
+                {
+                    <text>Welcome to Viability.IQ, </text>
+                }
+                <span class="greeting-name">@CurrentUser?.FirstName</span>! 👋
             </h1>
             <p class="greeting-subtitle">
                 <span class="last-seen-label">Previous sign-in:</span>

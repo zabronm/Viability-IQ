@@ -27,6 +27,6 @@ namespace ViabilityIQ.Application.Dtos
         public int FullyDepreciatedCount { get; set; }
         public decimal AverageDepreciationPercentage { get; set; }
         public decimal HealthScore { get; set; }  // 0-100%
-        public string HealthStatus { get; set; }  // "Excellent", "Good", "Fair", "Poor", "Critical"
+        public string? HealthStatus { get; set; }  // "Excellent", "Good", "Fair", "Poor", "Critical"
     }
 }

@@ -32,14 +32,14 @@
 </div>
 
 @code {
-    [Parameter] public string Label { get; set; }
+    [Parameter] public string? Label { get; set; }
     [Parameter] public int Value { get; set; }
-    [Parameter] public string Subtext { get; set; }
+    [Parameter] public string? Subtext { get; set; }
     [Parameter] public int TrendPercent { get; set; }
-    [Parameter] public string FooterText { get; set; } = "vs last month";
-    [Parameter] public string KPIType { get; set; }
-    [Parameter] public string IconClass { get; set; } = "";
-    [Parameter] public string ColorTheme { get; set; } = "blue";
+    [Parameter] public string? FooterText { get; set; } = "vs last month";
+    [Parameter] public string? KPIType { get; set; } = string.Empty;
+    [Parameter] public string? IconClass { get; set; } = "";
+    [Parameter] public string? ColorTheme { get; set; } = "blue";
     [Parameter] public EventCallback<string> OnClick { get; set; }
 
     private async Task HandleClick()

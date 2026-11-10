@@ -17,15 +17,15 @@ namespace ViabilityIQ.Application.Interfaces.IdentityInterfaces
         Task<AuthResult> LoginAsync(LoginRequest request);
         Task LogoutAsync(ClaimsPrincipal user);
         Task<bool> IsUserAuthenticatedAsync();
-        Task<ApplicationUser> GetCurrentUserAsync(ClaimsPrincipal user);
+        Task<ApplicationUser?> GetCurrentUserAsync(ClaimsPrincipal user);
         Task<string> GetUserClaimAsync(string claimType);
-        Task<ApplicationUser> GetUserByEmailAsync(string email);
-        Task<ApplicationUser> GetUserByEmailDapperAsync(string email);  //This uses Dapper to get the user by email, which is faster than EF Core for this specific query
+        Task<ApplicationUser?> GetUserByEmailAsync(string email);
+        Task<ApplicationUser?> GetUserByEmailDapperAsync(string email);  //This uses Dapper to get the user by email, which is faster than EF Core for this specific query
        
         /// Get user by ID (long)
        
-        Task<ApplicationUser> GetUserByIdAsync(long userId);
-        Task<bool> HasRoleAsync(ClaimsPrincipal user, string roleName);
+        Task<ApplicationUser?> GetUserByIdAsync(long userId);
+        Task<bool> HasRoleAsync(ClaimsPrincipal? user, string roleName);
 
     }
 }

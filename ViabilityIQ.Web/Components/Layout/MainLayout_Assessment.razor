@@ -1,5 +1,6 @@
 ﻿@using ViabilityIQ.Web.Components.Pages.Identity
 @using ViabilityIQ.Web.Components.Shared
+@using ViabilityIQ.Web.Components.Pages.Support
 @using ViabilityIQ.Web.Services
 @using ViabilityIQ.Application.Interfaces
 @using ViabilityIQ.Shared.DataModels
@@ -47,14 +48,19 @@
                aria-label="Open assessment assumptions help">
                 <i class="bi bi-question-circle-fill"></i><span>Help</span>
             </a>
+            <button type="button" class="viq-help-link support-chat-link"
+                    @onclick="OpenInteractiveSupportAsync"
+                    aria-label="Chat with support">
+                <i class="bi bi-chat-dots-fill"></i><span>Chat with support</span>
+            </button>
             <span class="marble-date-badge">
                 <i class="bi bi-calendar3 me-1"></i> @DisplayUtility.FormatDate(DateTime.Now, SessionService.CultureName)
             </span>
 
-            <button class="action-icon-btn">
+           @*  <button class="action-icon-btn">
                 <i class="bi bi-bell"></i>
                 <span class="notification-indicator"></span>
-            </button>
+            </button> *@
 
             @* User Profile Links and Signing out *@
             <ProfileDropdownComponent />
@@ -277,6 +283,14 @@
     private void ToggleProfileMenu() => isProfileOpen = !isProfileOpen;
     private void ToggleShortcutsMenu() => isShortcutsOpen = !isShortcutsOpen;
     private void CloseSetupMenu() => isSetupOpen = false;
+
+    private Task OpenInteractiveSupportAsync() =>
+        ZabOffCanvasService.ShowAsync(new CanvasRequest
+        {
+            Title = "Chat with Support",
+            Width = 480,
+            ComponentType = typeof(InteractiveSupportChatComponent)
+        });
 
     private async Task CloseProfileMenu()
     {

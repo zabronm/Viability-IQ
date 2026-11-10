@@ -94,7 +94,7 @@ namespace ViabilityIQ.Application.Interfaces
         /// </summary>
         /// <param name="assetId">The assessment asset ID</param>
         /// <returns>The movement record or null if not found</returns>
-        Task<AssessmentAssetMovement> GetAssetMovementsAsync(long assetId);
+        Task<AssessmentAssetMovement?> GetAssetMovementsAsync(long assetId);
 
         /// <summary>
         /// Gets movements for all assets in an assessment
@@ -289,13 +289,13 @@ namespace ViabilityIQ.Application.Interfaces
     public class AssetLineItem
     {
         public long AssetId { get; set; }
-        public string AssetName { get; set; }
-        public string AssetType { get; set; }
+        public string AssetName { get; set; } = string.Empty;
+        public string AssetType { get; set; } = string.Empty;
         public decimal OpeningGrossValue { get; set; }
         public decimal OpeningAccumulatedDepreciation { get; set; }
         public decimal OpeningNetValue { get; set; }
         public decimal MovementValue { get; set; }
-        public string MovementType { get; set; }
+        public string? MovementType { get; set; }
         public decimal ClosingGrossValue { get; set; }
         public decimal ClosingAccumulatedDepreciation { get; set; }
         public decimal ClosingNetValue { get; set; }
@@ -323,7 +323,7 @@ namespace ViabilityIQ.Application.Interfaces
     /// </summary>
     public class AssetMovementSummary
     {
-        public string MovementType { get; set; }
+        public string? MovementType { get; set; }
         public int Count { get; set; }
         public decimal TotalValue { get; set; }
         public List<long> AssetIds { get; set; } = new();
@@ -335,12 +335,12 @@ namespace ViabilityIQ.Application.Interfaces
     public class AssetOpeningBalance
     {
         public long AssetId { get; set; }
-        public string AssetName { get; set; }
+        public string? AssetName { get; set; }
         public decimal GrossValue { get; set; }
         public decimal AccumulatedDepreciation { get; set; }
         public decimal NetBookValue { get; set; }
         public decimal DepreciationRate { get; set; }
-        public string DepreciationMethod { get; set; }
+        public string? DepreciationMethod { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -349,13 +349,13 @@ namespace ViabilityIQ.Application.Interfaces
     public class AssetClosingBalance
     {
         public long AssetId { get; set; }
-        public string AssetName { get; set; }
+        public string? AssetName { get; set; }
         public int Month { get; set; }
         public decimal GrossValue { get; set; }
         public decimal AccumulatedDepreciation { get; set; }
         public decimal NetBookValue { get; set; }
         public decimal MonthDepreciation { get; set; }
-        public string LastMovementType { get; set; }
+        public string? LastMovementType { get; set; } = string.Empty;
     }
 
     #endregion

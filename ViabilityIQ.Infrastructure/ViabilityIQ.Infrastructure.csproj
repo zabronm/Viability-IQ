@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -11,15 +11,21 @@
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
     <PackageReference Include="EPPlus" Version="8.6.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.29" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.29" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.29">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.14">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+	  <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+	  <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.14" />
+	  <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.14" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.14" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.14" />
+	  
     <PackageReference Include="QuestPDF" Version="2026.5.0" />
   </ItemGroup>
 

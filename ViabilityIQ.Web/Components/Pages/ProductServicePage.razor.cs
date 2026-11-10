@@ -29,7 +29,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
+        //private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Products/Services";
         private string AlertMessage = "Register your main products/services here, which will be inherited by your assessments in sales.";

@@ -45,7 +45,9 @@ public sealed record SensitivityAiMetricSnapshot(
     decimal? CurrentRatio,
     decimal? InterestCover,
     decimal? BreakEvenSales,
-    decimal? MarginOfSafety);
+    decimal? MarginOfSafety,
+    decimal? AssetTurnover = null,
+    decimal? ReturnOnAssets = null);
 
 public sealed record SensitivityAiMonthSnapshot(
     int Month,
@@ -71,6 +73,7 @@ public sealed class SensitivityAiAnalysisResult
     public string CorrelationId { get; init; } = string.Empty;
     public DateTimeOffset? GeneratedAtUtc { get; init; }
     public string? ExecutiveSummary { get; init; }
+    public string? AuditWarning { get; set; }
     public IReadOnlyList<SensitivityAiFinding> Findings { get; init; } = [];
     public bool IsSuccess => Status == SensitivityAiAnalysisStatus.Success;
 }

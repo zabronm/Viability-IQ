@@ -18,7 +18,7 @@ namespace ViabilityIQ.Shared.FinancialModels
         [Required] public long AssessmentId { get; set; }
 
         [Dapper.Contrib.Extensions.Computed]
-        [ForeignKey("AssessmentId")] public virtual Assessment Assessment { get; set; }
+        [ForeignKey("AssessmentId")] public virtual Assessment? Assessment { get; set; }
 
         /// Month number (1-12)       
         [Required][Range(1, 12)] public int MonthNumber { get; set; }
@@ -81,7 +81,7 @@ namespace ViabilityIQ.Shared.FinancialModels
         [Required] public long AssessmentId { get; set; }
 
         [Dapper.Contrib.Extensions.Computed]
-        [ForeignKey("AssessmentId")] public virtual Assessment Assessment { get; set; }
+        [ForeignKey("AssessmentId")] public virtual Assessment? Assessment { get; set; }
 
         // ========== ANNUAL TOTALS ==========
 
@@ -128,7 +128,7 @@ namespace ViabilityIQ.Shared.FinancialModels
     public class CashflowMonthlyDto
     {
         public int MonthNumber { get; set; }
-        public string MonthName { get; set; }
+        public string? MonthName { get; set; }
         public decimal SalesRevenue { get; set; }
         public decimal OtherIncome { get; set; }
         public decimal TotalIncome { get; set; }

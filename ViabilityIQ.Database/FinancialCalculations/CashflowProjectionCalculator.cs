@@ -94,6 +94,7 @@ public static class CashflowProjectionCalculator
         var runningBank = input.Assessment.OpeningBalance_Bank;
         var runningStock = openingStock;
         var runningLoan = openingLoan;
+        var runningRetainedEarnings = input.Assessment.OpeningRetainedEarnings;
 
         if (input.Assessment.blDebtorsCreditors == 1 && !input.Accounts.Profile.IsConfigured)
         {
@@ -203,21 +204,25 @@ public static class CashflowProjectionCalculator
             var closingFixedAssets = input.AssetMovements
                 .Sum(x => Math.Max(0m, x.GetNetBookValue(month) ?? 0m));
 
-            var projectedClosingStock = isManufacturing
+            var calculatedClosingStock = isManufacturing
                 ? manufacturingMonth!.ClosingRawMaterials
                   + manufacturingMonth.ClosingWorkInProgress
                   + manufacturingMonth.ClosingFinishedGoods
                 : runningStock + stockPurchases - inventoryConsumption;
             if (!isManufacturing
-                && projectedClosingStock < 0m
+                && calculatedClosingStock < 0m
                 && warnings.All(x => x.Code != "stock-shortfall"))
             {
                 warnings.Add(new(
                     "stock-shortfall",
                     CashflowAlertSeverity.Warning,
                     "Projected stock shortfall",
-                    $"Estimated cost of sales exceeds opening inventory plus stock additions by {Math.Abs(projectedClosingStock):N2} in Month {month}. Review production/purchases, sales, markup and opening stock."));
+                    $"Estimated cost of sales exceeds opening inventory plus stock additions by {Math.Abs(calculatedClosingStock):N2} in Month {month}. Review production/purchases, sales, markup and opening stock."));
             }
+            var closingStockOverride = mode == AssessmentMode.Trading
+                ? input.Assessment.GetClosingStock(month)
+                : null;
+            var projectedClosingStock = closingStockOverride ?? calculatedClosingStock;
             runningStock = isManufacturing ? projectedClosingStock : Math.Max(0m, projectedClosingStock);
             runningLoan = Math.Max(0m, runningLoan - principal);
             var inflows = salesReceipts
@@ -234,6 +239,17 @@ public static class CashflowProjectionCalculator
                            + overdraftInterest
                            + additions;
             var closingBank = runningBank + inflows - outflows;
+            var monthlyProfitBeforeTax = salesNet
+                - cogs
+                + sundryNet
+                + grantsNet
+                + assetDisposalNet
+                + otherNet
+                - operatingExpenses
+                - depreciation
+                - loanInterest
+                - overdraftInterest;
+            runningRetainedEarnings += monthlyProfitBeforeTax;
 
             months.Add(new CashflowProjectionMonth
             {
@@ -290,7 +306,9 @@ public static class CashflowProjectionCalculator
                 ClosingFixedAssets = closingFixedAssets,
                 ClosingLoanBalance = runningLoan,
                 OtherCurrentAssets = input.Assessment.OpeningOtherCurrentAssets,
-                OtherCurrentLiabilities = input.Assessment.OpeningOtherCurrentLiabilities
+                OtherCurrentLiabilities = input.Assessment.OpeningOtherCurrentLiabilities,
+                ShareCapital = input.Assessment.OpeningShareCapital,
+                RetainedEarningsBeforeTax = runningRetainedEarnings
             });
             runningBank = closingBank;
         }

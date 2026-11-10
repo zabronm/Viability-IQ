@@ -13,7 +13,7 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
        
         /// Unique identifier for the alert
        
-        public string Id { get; set; }
+        public string? Id { get; set; } = string.Empty;
 
        
         /// The assessment ID (long/bigint)
@@ -23,7 +23,7 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
        
         /// Name of the assessment
        
-        public string AssessmentName { get; set; }
+        public string? AssessmentName { get; set; } = string.Empty;
 
        
         /// The business this assessment is for
@@ -33,7 +33,7 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
        
         /// Name of the business being assessed
        
-        public string BusinessName { get; set; }
+        public string? BusinessName { get; set; } = string.Empty;
 
        
         /// When the assessment is due
@@ -48,6 +48,6 @@ namespace ViabilityIQ.Shared.DataModels.HomePageModels
        
         /// Current status of the assessment
        
-        public string Status { get; set; }
+        public string? Status { get; set; } = string.Empty;
     }
 }

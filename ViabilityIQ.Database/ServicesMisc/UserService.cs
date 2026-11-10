@@ -22,12 +22,12 @@ namespace ViabilityIQ.Application.ServicesMisc
             _roleManager = roleManager;
         }
 
-        public async Task<ApplicationUser> GetUserByIdAsync(long userId)
+        public async Task<ApplicationUser?> GetUserByIdAsync(long userId)
         {
             return await _userManager.FindByIdAsync(userId.ToString());
         }
 
-        public async Task<ApplicationUser> GetUserByEmailAsync(string email)
+        public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
         {
             return await _userManager.FindByEmailAsync(email);
         }

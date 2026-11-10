@@ -1,0 +1,105 @@
+@implements IAsyncDisposable
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="support-inbox-page">
+    <header class="support-inbox-heading">
+        <div>
+            <h1>Support consultant inbox</h1>
+            <p>Claim waiting conversations and reply to users in real time.</p>
+        </div>
+        <span class="badge text-bg-primary">@_conversations.Count open</span>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="alert alert-danger" role="alert">@_error</div>
+    }
+
+    <div class="support-inbox-layout">
+        <section class="support-inbox-list" aria-label="Open conversations">
+            <h2>Conversations</h2>
+            @if (_isLoading)
+            {
+                <p class="text-muted"><span class="spinner-border spinner-border-sm me-1"></span>Loading...</p>
+            }
+            else if (_conversations.Count == 0)
+            {
+                <p class="text-muted">No waiting or assigned conversations.</p>
+            }
+            else
+            {
+                @foreach (var conversation in _conversations)
+                {
+                    <button type="button"
+                            class="support-inbox-item @(_selected?.SupportConversationId == conversation.SupportConversationId ? "selected" : "")"
+                            @onclick="() => SelectConversationAsync(conversation)">
+                        <span class="support-inbox-item-top">
+                            <strong>@conversation.UserName</strong>
+                            <span class="badge @(conversation.Status == "Waiting" ? "text-bg-warning" : "text-bg-success")">
+                                @conversation.Status
+                            </span>
+                        </span>
+                        <span class="support-inbox-item-preview">@(conversation.LastMessage ?? "No messages yet")</span>
+                        <small>@conversation.CreatedAtUtc.ToLocalTime().ToString("g")</small>
+                    </button>
+                }
+            }
+        </section>
+
+        <section class="support-inbox-chat" aria-label="Selected conversation">
+            @if (_selected is null)
+            {
+                <div class="support-inbox-empty">
+                    <i class="bi bi-chat-left-dots"></i>
+                    <p>Select a conversation to view it.</p>
+                </div>
+            }
+            else
+            {
+                <header class="support-inbox-chat-header">
+                    <div>
+                        <h2>@_selected.UserName</h2>
+                        <span>@_selected.UserEmail · @_selected.Status</span>
+                    </div>
+                    @if (_selected.Status == "Waiting")
+                    {
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="ClaimSelectedAsync" disabled="@_isSending">
+                            <i class="bi bi-person-check me-1"></i>Claim
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseSelectedAsync">
+                            Close chat
+                        </button>
+                    }
+                </header>
+
+                <div class="support-inbox-messages" aria-live="polite">
+                    @foreach (var message in _messages)
+                    {
+                        <article class="support-inbox-message @(message.IsConsultant ? "consultant-message" : "user-message")">
+                            <div class="support-inbox-message-meta">
+                                <strong>@message.SenderName</strong>
+                                <time datetime="@message.SentAtUtc.ToString("O")">@message.SentAtUtc.ToLocalTime().ToString("g")</time>
+                            </div>
+                            <p>@message.MessageText</p>
+                        </article>
+                    }
+                </div>
+
+                @if (_selected.Status == "Active")
+                {
+                    <EditForm Model="_draft" OnValidSubmit="SendReplyAsync" class="support-inbox-compose">
+                        <DataAnnotationsValidator />
+                        <InputTextArea @bind-Value="_draft.Message" class="form-control" rows="3"
+                                       maxlength="4000" placeholder="Reply to the user..." />
+                        <button type="submit" class="btn btn-primary btn-sm" disabled="@_isSending">
+                            <i class="bi bi-send me-1"></i>Send reply
+                        </button>
+                    </EditForm>
+                }
+            }
+        </section>
+    </div>
+</div>

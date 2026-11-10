@@ -18,7 +18,7 @@ namespace ViabilityIQ.Shared.DataModels
         [Dapper.Contrib.Extensions.Key] public long BusinessSectorId {get; set;}
 
         [Required(ErrorMessage ="Business sector name is required.")]
-        public string? BusinessSectorName {get; set;}
+        public string? BusinessSectorName {get; set;} = string.Empty;
         public string? Remarks {get; set;}
         public bool Active {get; set;}
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -27,7 +27,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy {get; set;}
 
         long IEntity.Id => BusinessSectorId;
-        string ISortableEntity.DisplayName => BusinessSectorName;
+        string ISortableEntity.DisplayName => BusinessSectorName ?? string.Empty;
 
     }
 }

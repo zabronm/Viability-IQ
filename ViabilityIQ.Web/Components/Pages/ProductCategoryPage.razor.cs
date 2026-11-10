@@ -18,7 +18,7 @@ namespace ViabilityIQ.Web.Components.Pages
     {
         [Inject] private IGenericDataRepository<ProductCategoryDto> productCategoryRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
-        [Inject] ToastService? _Toast { get; set; }
+        [Inject] ToastService _Toast { get; set; } = default!;
         [Inject] private OffCanvasStateService OffcanvasService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
@@ -27,7 +27,7 @@ namespace ViabilityIQ.Web.Components.Pages
 
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
+        //private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Product Categories";
         private string AlertMessage = "Register your all your company's product/service categories under which your sales revenue will be classified, for example Clothing, Groceries, Alcohol, etc";

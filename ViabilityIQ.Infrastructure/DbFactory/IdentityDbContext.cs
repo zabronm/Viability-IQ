@@ -104,7 +104,9 @@ namespace ViabilityIQ.Infrastructure.Data
                     Name = "Admin",
                     NormalizedName = "ADMIN",
                     Description = "Administrator role with full access",
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                    //ConcurrencyStamp = Guid.NewGuid().ToString()
+                    ConcurrencyStamp = "6a8c5567-154b-4cda-b22b-0beacf0a4084", // Admin
+                    CreatedAt = new DateTime(2026, 7, 27, 21, 0, 36, 138, DateTimeKind.Utc).AddTicks(9619)
                 },
                 new ApplicationRole
                 {
@@ -112,7 +114,9 @@ namespace ViabilityIQ.Infrastructure.Data
                     Name = "User",
                     NormalizedName = "USER",
                     Description = "Standard user role",
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                    //ConcurrencyStamp = Guid.NewGuid().ToString()
+                    ConcurrencyStamp = "6088cad9-7d8c-4679-a065-efdf8609058b", // User
+                    CreatedAt = new DateTime(2026, 7, 27, 21, 0, 36, 138, DateTimeKind.Utc).AddTicks(9704)
                 },
                 new ApplicationRole
                 {
@@ -120,7 +124,9 @@ namespace ViabilityIQ.Infrastructure.Data
                     Name = "Moderator",
                     NormalizedName = "MODERATOR",
                     Description = "Moderator role with limited admin access",
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                    //ConcurrencyStamp = Guid.NewGuid().ToString()
+                    ConcurrencyStamp = "519dfee4-73a6-422c-83ca-7b1499ed96b1", // Moderator
+                    CreatedAt = new DateTime(2026, 7, 27, 21, 0, 36, 138, DateTimeKind.Utc).AddTicks(9712)
                 }
             );
         }

@@ -106,7 +106,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             catch (Exception ex)
             {
                 Logger?.LogError(ex, "Error initializing AssessmentLoanRepaymentsPage");
-                _Toast?.ShowError(ex.Message, sessionService?.AppTitle);
+                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Viability IQ");
             }
         }
 
@@ -261,7 +261,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             return query;
         }
 
-        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             if (e.AssessmentId == AssessmentId)
             {

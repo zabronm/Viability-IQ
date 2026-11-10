@@ -19,7 +19,7 @@ namespace ViabilityIQ.Web.Components.Pages
         [Inject] OffCanvasStateService? OffCanvasService { get; set; } = default;
         [Inject] private IGenericDataRepository<Bank> BankRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
-        [Inject] ToastService? _Toast { get; set; }
+        [Inject] ToastService _Toast { get; set; } = default!;
         [Inject] MasterDataService? MasterData { get; set; }
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IPdfExportService PdfService { get; set; } = default!;
@@ -29,7 +29,6 @@ namespace ViabilityIQ.Web.Components.Pages
         //---------------------------------------------------------
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Banks/Funders";
         private string AlertMessage = "Setup all base GLOBAL banks master-data that will be assumed and/or inherited by your accounts/loans.";
@@ -39,8 +38,6 @@ namespace ViabilityIQ.Web.Components.Pages
         private List<ZabDataTableAdvanced<Bank>.ColumnDefinition<Bank>> tableColumns = new();
 
         // State Machine parameters for modal canvas controls
-        private ZabOffCanvas? canvasShell;
-        private bool canvasOpenStatus = false;
         private string formTitle = "Manage Bank Account Record";
         private long activeRecordId = 0;
         private bool loadingStateActive = false;
@@ -118,10 +115,6 @@ namespace ViabilityIQ.Web.Components.Pages
 
         private async Task RefreshWorkspaceGridData()
         {
-            if (canvasShell != null)
-            {
-                await canvasShell.CloseAsync();
-            }
             await LoadGridDatasetAsync();
         }
 
@@ -148,11 +141,6 @@ namespace ViabilityIQ.Web.Components.Pages
                 _Toast!.ShowError(_result.Message, "Error encountered while saving");
             }
 
-            if (_result.ClosePanel)
-            {
-                if (canvasShell != null) await canvasShell!.CloseAsync();
-            }
-                       
             StateHasChanged();
         }
 
@@ -292,4 +280,3 @@ namespace ViabilityIQ.Web.Components.Pages
        
     }
 }
-

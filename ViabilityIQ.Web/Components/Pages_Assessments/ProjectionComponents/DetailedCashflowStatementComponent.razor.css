@@ -9,14 +9,14 @@
 }
 
 .detailed-cashflow-table {
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     border-collapse: collapse;
     min-width: 100%;
 }
 
     .detailed-cashflow-table th {
         background-color: #f3f4f6;
-        font-weight: 600;
+        font-weight: 550;
         border-bottom: 2px solid #d1d5db;
         vertical-align: bottom;
         white-space: nowrap;
@@ -30,11 +30,11 @@
 
 /* Text Sizes */
 .text-xs {
-    font-size: 0.75rem !important;
+    font-size: 0.65rem !important;
 }
 
 .text-xxs {
-    font-size: 0.65rem !important;
+    font-size: 0.58rem !important;
 }
 
 /* Sticky Column */
@@ -89,8 +89,8 @@
 
 /* Section Divider */
 .section-divider {
-    font-weight: 700;
-    font-size: 0.8rem;
+    font-weight: 650;
+    font-size: 0.75rem;
 }
 
     .section-divider .sticky-col {
@@ -99,7 +99,7 @@
 
 /* EBITDA Row */
 .ebitda-row {
-    font-weight: 800;
+    font-weight: 700;
 }
 
     .ebitda-row .sticky-col {

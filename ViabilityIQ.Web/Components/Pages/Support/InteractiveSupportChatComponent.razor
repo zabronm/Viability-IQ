@@ -1,0 +1,93 @@
+@namespace ViabilityIQ.Web.Components.Pages.Support
+@implements IAsyncDisposable
+@using ViabilityIQ.Shared.SharedModels
+
+<div class="support-chat">
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="alert alert-danger py-2" role="alert">@_error</div>
+    }
+
+    @if (_isLoading)
+    {
+        <div class="support-state" role="status">
+            <span class="spinner-border spinner-border-sm"></span>
+            <span>Connecting to support...</span>
+        </div>
+    }
+    else if (_conversation is null)
+    {
+        <div class="support-state">
+            <p>Start a conversation with a support consultant. Your messages will appear here as soon as a consultant joins.</p>
+            <button type="button" class="btn btn-primary" @onclick="StartConversationAsync">
+                <i class="bi bi-chat-dots me-1"></i>Start chat
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="support-chat-status" role="status">
+            @if (_conversation.Status == "Waiting")
+            {
+                <span><i class="bi bi-hourglass-split me-1"></i>Waiting for a consultant</span>
+            }
+            else if (_conversation.Status == "Active")
+            {
+                <span><i class="bi bi-person-check me-1"></i>Chatting with @_conversation.ConsultantName</span>
+            }
+            else if (_conversation.Status == "Expired")
+            {
+                <span>This chat expired after 10 minutes without your activity.</span>
+            }
+            else
+            {
+                <span>This conversation is closed.</span>
+            }
+        </div>
+
+        <div class="support-chat-messages" aria-live="polite" aria-label="Support conversation">
+            @if (_messages.Count == 0)
+            {
+                <p class="support-chat-empty">Send a message to let our support team know how we can help.</p>
+            }
+            @foreach (var message in _messages)
+            {
+                <article class="support-chat-message @(message.IsConsultant ? "consultant-message" : "user-message")">
+                    <div class="support-chat-message-meta">
+                        <strong>@message.SenderName</strong>
+                        <time datetime="@message.SentAtUtc.ToString("O")">@message.SentAtUtc.ToLocalTime().ToString("g")</time>
+                    </div>
+                    <p>@message.MessageText</p>
+                </article>
+            }
+        </div>
+
+        @if (_conversation.Status is "Waiting" or "Active")
+        {
+            <EditForm Model="_draft" OnValidSubmit="SendMessageAsync" class="support-chat-compose">
+                <DataAnnotationsValidator />
+                <InputTextArea @bind-Value="_draft.Message"
+                               class="form-control"
+                               rows="3"
+                               maxlength="4000"
+                               placeholder="Write your message..." />
+                <div class="support-chat-compose-actions">
+                    <button type="button" class="btn btn-link btn-sm" @onclick="CloseConversationAsync">End chat</button>
+                    <button type="submit" class="btn btn-primary btn-sm" disabled="@_isSending">
+                        @if (_isSending)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bi bi-send me-1"></i>Send
+                    </button>
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" @onclick="StartConversationAsync">
+                Start a new chat
+            </button>
+        }
+    }
+</div>

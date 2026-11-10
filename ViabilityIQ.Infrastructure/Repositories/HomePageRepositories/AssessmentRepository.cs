@@ -140,7 +140,7 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
        
         /// Get a single assessment by ID
        
-        public async Task<AssessmentModel> GetAssessmentByIdAsync(long assessmentId)
+        public async Task<AssessmentModel?> GetAssessmentByIdAsync(long assessmentId)
         {
             try
             {
@@ -191,7 +191,7 @@ namespace ViabilityIQ.Infrastructure.Repositories.HomePageRepositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching assessment");
-                return null;
+                throw;
             }
         }
     }

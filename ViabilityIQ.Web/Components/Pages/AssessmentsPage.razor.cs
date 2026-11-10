@@ -227,13 +227,13 @@ namespace ViabilityIQ.Web.Components.Pages
                 var dataStatus = await dataValidationService.ValidateAssessmentDataAsync(selectedRecord.AssessmentId);
                 // Set the session with the ACTUAL data status (not hardcoded values)
                 sessionService.SetActiveAssessment(
-                    caseNumber: selectedRecord.CaseNumber,
+                    caseNumber: selectedRecord.CaseNumber ?? string.Empty,
                     assessmentId: selectedRecord.AssessmentId,
                     businessId: selectedRecord.BusinessId,
-                    businessName: selectedRecord.BusinessName,
+                    businessName: selectedRecord.BusinessName ?? string.Empty,
                     clientId: selectedRecord.ClientId,
-                    clientName: selectedRecord.BusinessOwner,
-                    assessmentType: selectedRecord.AssessmentTypeName,
+                    clientName: selectedRecord.BusinessOwner ?? string.Empty,
+                    assessmentType: selectedRecord.AssessmentTypeName ?? string.Empty,
                     HasAssetsData: dataStatus.HasAssets,              // ✅ FROM VALIDATION
                     HasExpensesData: dataStatus.HasExpenses,          // ✅ FROM VALIDATION
                     HasSalesData: dataStatus.HasSales,                // ✅ FROM VALIDATION

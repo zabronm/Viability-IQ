@@ -12,7 +12,7 @@ namespace ViabilityIQ.Application.Interfaces
         Task SaveMonthlyCashflowAsync(List<AssessmentCashflow> cashflows);
         Task SaveCashflowSummaryAsync(CashflowSummary summary);
         Task<List<AssessmentCashflow>> GetMonthlyCashflowAsync(long assessmentId);
-        Task<CashflowSummary> GetCashflowSummaryAsync(long assessmentId);
+        Task<CashflowSummary?> GetCashflowSummaryAsync(long assessmentId);
         Task ClearCashflowAsync(long assessmentId);
     }
 }

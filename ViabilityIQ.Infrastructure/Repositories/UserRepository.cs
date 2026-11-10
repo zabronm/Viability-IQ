@@ -25,7 +25,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
        
         /// Gets a user by email using Dapper
        
-        public async Task<ApplicationUser> GetUserByEmailAsync(string email)
+        public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
        
         /// Gets a user by ID using Dapper
        
-        public async Task<ApplicationUser> GetUserByIdAsync(long userId)
+        public async Task<ApplicationUser?> GetUserByIdAsync(long userId)
         {
             try
             {

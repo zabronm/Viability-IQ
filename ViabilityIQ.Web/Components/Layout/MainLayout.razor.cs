@@ -5,6 +5,7 @@ using ViabilityIQ.Application.Interfaces.IdentityInterfaces;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Web.Components.CommonComponents;
+using ViabilityIQ.Web.Components.Pages.Support;
 using ViabilityIQ.Web.Services;
 
 namespace ViabilityIQ.Web.Components.Layout
@@ -26,7 +27,6 @@ namespace ViabilityIQ.Web.Components.Layout
         private bool isSidebarCollapsed = false;
         private void ToggleSidebar() => isSidebarCollapsed = !isSidebarCollapsed;
 
-        private ZabOffCanvas? OffCanvasControlRef;
         private string currentTitle = string.Empty;
         private int currentWidth = 550;
         private Type? dynamicComponentType;
@@ -69,7 +69,7 @@ namespace ViabilityIQ.Web.Components.Layout
         {
             currentTitle = request.Title;
 
-            if (request.Width != null)
+            if (request.Width > 0)
             {
                 var widthStr = request.Width.ToString();
                 if (!string.IsNullOrEmpty(widthStr) && int.TryParse(widthStr.Replace("px", "").Trim(), out var parsedWidth))
@@ -106,6 +106,22 @@ namespace ViabilityIQ.Web.Components.Layout
             await LoadNavigationCountsAsync();
             await InvokeAsync(StateHasChanged);
         }
+
+        private Task OpenInteractiveSupportAsync() =>
+            OffCanvasService.ShowAsync(new CanvasRequest
+            {
+                Title = "Chat with Support",
+                Width = 480,
+                ComponentType = typeof(InteractiveSupportChatComponent)
+            });
+
+        private Task OpenSupportTicketAsync() =>
+            OffCanvasService.ShowAsync(new CanvasRequest
+            {
+                Title = "Get Help",
+                Width = 560,
+                ComponentType = typeof(SupportTicketFormComponent)
+            });
 
         private async Task LoadNavigationCountsAsync()
         {

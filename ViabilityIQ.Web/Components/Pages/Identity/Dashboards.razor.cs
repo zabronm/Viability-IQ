@@ -12,10 +12,11 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
 {
     public partial class Dashboards
     {
-        [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-        [Inject] private IAuthenticationService AuthService { get; set; } = null!;
-        [Inject] private IUserService UserService { get; set; } = null!;
-        [Inject] private NavigationManager Navigation { get; set; } = null!;
+        [Inject] private ILogger<Dashboards> Logger { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        [Inject] private IAuthenticationService AuthService { get; set; } = default!;
+        [Inject] private IUserService UserService { get; set; } = default!;
+        [Inject] private NavigationManager Navigation { get; set; } = default!;
 
 
         private ApplicationUser? CurrentUser;
@@ -39,7 +40,7 @@ namespace ViabilityIQ.Web.Components.Pages.Identity
             }
             catch (Exception ex)
             {
-                // Handle error
+                Logger.LogError(ex, "Failed to load the current user's dashboard.");
             }
         }
 

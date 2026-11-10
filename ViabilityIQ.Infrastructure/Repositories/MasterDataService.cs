@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -26,12 +27,13 @@ namespace ViabilityIQ.Infrastructure.Repositories
         private readonly ISessionService _sessionService;
         private readonly IActivityLogWriter _activityLogWriter;
         private readonly ITenantAuthorizationService _tenantAuthorizationService;
+        private readonly ILogger<MasterDataService> _logger;
 
 
         //private readonly ILogger<MasterDataService> _logger;
         //private readonly IMemoryCache _cache;
         private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(1); // Cache duration can be adjusted as needed
-        private readonly string _cacheKey = "MasterData";
+        //private readonly string _cacheKey = "MasterData";
         private readonly object _cacheLock = new();
         private readonly object _lock = new();
 
@@ -41,12 +43,14 @@ namespace ViabilityIQ.Infrastructure.Repositories
                                IDbConnectionFactory connectionFactory,
                                ISessionService sessionService,
                                IActivityLogWriter activityLogWriter,
-                               ITenantAuthorizationService tenantAuthorizationService)
+                               ITenantAuthorizationService tenantAuthorizationService,
+                               ILogger<MasterDataService> logger)
         {
             _dbConnectionFactory = connectionFactory;
             _sessionService = sessionService;
             _activityLogWriter = activityLogWriter;
             _tenantAuthorizationService = tenantAuthorizationService;
+            _logger = logger;
         }
 
 
@@ -86,8 +90,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Log the exception (ex) as needed
-                return null;
+                _logger.LogError(ex, "Failed to retrieve banks.");
+                throw;
             }
 
         }
@@ -214,8 +218,8 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Log the exception (ex) as needed
-                return null;
+                _logger.LogError(ex, "Failed to retrieve loan types.");
+                throw;
             }
         }
 
@@ -377,7 +381,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                     });
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -454,7 +458,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 using var connection = _dbConnectionFactory.CreateConnection();
                 return await connection.QuerySingleOrDefaultAsync<T>(sql, conditions);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -531,7 +535,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         // GENERIC RUN SQL METHODS 
         // Example usage: var count = await repo.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Farmers");
-        public async Task<T> ExecuteScalarAsync<T>(string sql, object parameters = null)
+        public async Task<T?> ExecuteScalarAsync<T>(string sql, object? parameters = null)
         {
             await AuthorizeAssessmentParametersAsync(
                 sql, parameters, TenantRecordAccess.Read);
@@ -540,16 +544,16 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 using var connection = _dbConnectionFactory.CreateConnection();
                 return await connection.ExecuteScalarAsync<T>(sql, parameters);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception(ex.Message);
+                throw;
             }
 
         }
 
         // Generic method to execute commands (INSERT/UPDATE/DELETE)
         // Example usage: await repo.ExecuteCommandAsync("UPDATE Farmers SET Name = @Name WHERE Id = @Id", new { Name = "John", Id = 1 });
-        public async Task<int> ExecuteCommandAsync(string sql, object parameters = null)
+        public async Task<int> ExecuteCommandAsync(string sql, object? parameters = null)
         {
             await AuthorizeAssessmentParametersAsync(
                 sql, parameters, TenantRecordAccess.Write);

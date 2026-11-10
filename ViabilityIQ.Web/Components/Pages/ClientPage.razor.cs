@@ -29,7 +29,6 @@ namespace ViabilityIQ.Web.Components.Pages
         //---------------------------------------------------------
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Client Register";
         private string AlertMessage = "Register clients who will own businesses in your assessments. Provide as accurate and detailed data as possible to ensure more accurate statistics and projections.";

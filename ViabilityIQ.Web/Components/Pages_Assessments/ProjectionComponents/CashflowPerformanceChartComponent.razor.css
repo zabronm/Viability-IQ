@@ -1,12 +1,58 @@
 .performance-chart {
-    min-height: 100%;
+    min-width: 0;
     overflow: hidden;
+    border: 1px solid #d7e0e8;
+    border-radius: 0.7rem;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
 }
 
-.chart-subtitle {
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 0.68rem;
-    font-weight: 400;
+.performance-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.9rem;
+    background: linear-gradient(135deg, #34495e, #50687a);
+    color: #fff;
+}
+
+.performance-header > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.performance-header span {
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #64748b;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+.performance-body {
+    padding: 0.8rem 1rem 1rem;
+}
+
+.chart-description {
+    margin-bottom: 0.65rem;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.performance-state {
+    display: flex;
+    min-height: 18rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.performance-error {
+    color: #b91c1c;
 }
 
 .chart-legend {
@@ -45,7 +91,7 @@
 }
 
 .expenses-colour {
-    background: #7c3aed;
+    background: #FF4500;
 }
 
 .cashflow-colour {

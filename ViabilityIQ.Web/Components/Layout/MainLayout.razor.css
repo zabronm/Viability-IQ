@@ -335,6 +335,11 @@
     background: #218f80;
 }
 
+.viq-help-link.support-chat-link {
+    font-family: inherit;
+    cursor: pointer;
+}
+
 .marble-date-badge {
     font-size: 0.8rem;
     font-weight: 600;

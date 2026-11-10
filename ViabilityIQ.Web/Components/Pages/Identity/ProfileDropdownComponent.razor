@@ -156,7 +156,7 @@
             IsAuthenticated = user?.Identity?.IsAuthenticated ?? false;
             Logger.LogInformation("[ProfileDropdownComponent] IsAuthenticated set to: {IsAuthenticated}", IsAuthenticated);
 
-            if (IsAuthenticated)
+            if (user?.Identity?.IsAuthenticated == true)
             {
                 Logger.LogInformation("[ProfileDropdownComponent] ✓ User is authenticated! Loading user details...");
 

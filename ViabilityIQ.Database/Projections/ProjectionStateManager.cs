@@ -27,7 +27,7 @@ namespace ViabilityIQ.Application.Projections
         private readonly Dictionary<string, HashSet<string>> _dependencyGraph = new();
 
         // Event publishers for reactive updates
-        private event EventHandler<ProjectionChangedEventArgs> _projectionChanged;
+        private event EventHandler<ProjectionChangedEventArgs>? _projectionChanged;
 
         #endregion
 
@@ -262,7 +262,7 @@ namespace ViabilityIQ.Application.Projections
         /// Represents a cached projection with metadata        
         public class CachedProjection
         {
-            public List<AssessmentLoanRepayment> RepaymentData { get; set; }
+            public List<AssessmentLoanRepayment> RepaymentData { get; set; } = new();
             public DateTime CachedAt { get; set; }
             public int CacheDurationSeconds { get; set; }
             public bool IsInvalidated { get; set; }

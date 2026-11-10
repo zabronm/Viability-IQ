@@ -56,7 +56,7 @@
                 {
                     <div class="viq-form-field">
                     <label for="openingStockBalance">Opening stock balance (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
-                    <InputNumber id="openingStockBalance" class="viq-form-control"
+                    <InputDecimal2 id="openingStockBalance" class="viq-form-control"
                                  min="0" step="0.01" @bind-Value="FormModel.OpeningBalance" />
                     <ValidationMessage For="@(() => FormModel.OpeningBalance)" class="viq-form-validation" />
                     </div>
@@ -64,7 +64,7 @@
                     {
                         <div class="viq-form-field">
                             <label for="standardUnitCost">Standard production cost per unit (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
-                            <InputNumber id="standardUnitCost" class="viq-form-control"
+                            <InputDecimal2 id="standardUnitCost" class="viq-form-control"
                                          min="0" step="0.01" @bind-Value="FormModel.StandardUnitCost" />
                             <ValidationMessage For="@(() => FormModel.StandardUnitCost)" class="viq-form-validation" />
                         </div>
@@ -132,12 +132,14 @@
                             <label for="@($"expenseMonth{idx + 1}")">Month @(idx + 1) @(IsManufacturingMode ? "production units" : string.Empty)</label>
                             @if (IsManufacturingMode)
                             {
-                                <InputNumber id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
+                                <InputDecimal2 id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
+                                             step="0.01"
                                              @bind-Value="ProductionUnits[idx]" />
                             }
                             else
                             {
-                                <InputNumber id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
+                                <InputDecimal2 id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
+                                             step="0.01"
                                              @bind-Value="MonthlyValues[idx]" />
                             }
                         </div>

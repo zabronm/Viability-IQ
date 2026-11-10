@@ -3,7 +3,7 @@
 @using ViabilityIQ.Application.Interfaces
 @inject ZabOffCanvasService zabCanvasService
 
-<div class="viq-form-shell">
+<div class="viq-form-shell bulk-expenses-import">
     <div class="viq-data-form" aria-label="Bulk expense import">
         @if (AvailableExpenses == null)
         {
@@ -31,20 +31,21 @@
         }
         else
         {
-            <div class="viq-form-intro">
+            @* <div class="viq-form-intro">
                 <span class="viq-form-intro-icon"><i class="bi bi-box-arrow-in-down" aria-hidden="true"></i></span>
                 <div>
                     <h2>Select expenses to import</h2>
                     <p>Choose expense items and configure their posting behavior. Total selected: @SelectedCount</p>
                 </div>
-            </div>
+            </div> *@
 
             <section class="viq-form-section">
                 <header class="viq-form-section-heading">
                     <span><i class="bi bi-list-check" aria-hidden="true"></i></span>
                     <div>
                         <h3>Available expenses</h3>
-                        <p>Select items, cashbook posting, percentage-of-sales treatment and expense type.</p>
+                        @* <p>Select items, cashbook posting, percentage-of-sales treatment and expense type.</p> *@
+                        <p>Choose expense items and configure their posting behavior. Total selected: @SelectedCount</p>
                     </div>
                 </header>
 

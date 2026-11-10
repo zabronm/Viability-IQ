@@ -10,8 +10,8 @@ namespace ViabilityIQ.Application.Interfaces.IdentityInterfaces
 {
     public  interface IUserService
     {
-        Task<ApplicationUser> GetUserByIdAsync(long userId);
-        Task<ApplicationUser> GetUserByEmailAsync(string email);
+        Task<ApplicationUser?> GetUserByIdAsync(long userId);
+        Task<ApplicationUser?> GetUserByEmailAsync(string email);
         Task<IEnumerable<ApplicationUser>> GetAllUsersAsync();
         Task<bool> UpdateUserAsync(ApplicationUser user);
         Task<bool> DeleteUserAsync(long userId);

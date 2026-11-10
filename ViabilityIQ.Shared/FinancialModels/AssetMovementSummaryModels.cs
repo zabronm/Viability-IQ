@@ -9,8 +9,8 @@ namespace ViabilityIQ.Shared.FinancialModels
     public class AssetMovementMonthlySummaryDto
     {
         public int Month { get; set; }
-        public string MonthName { get; set; }
-        public string MovementType { get; set; }
+        public string? MonthName { get; set; }
+        public string? MovementType { get; set; }
         public decimal MovementValue { get; set; }
         public decimal GrossValue { get; set; }
         public decimal Depreciation { get; set; }
@@ -33,7 +33,7 @@ namespace ViabilityIQ.Shared.FinancialModels
     public class AssetMovementAnnualSummaryDto
     {
         public long AssetId { get; set; }
-        public string AssetName { get; set; }
+        public string? AssetName { get; set; }
 
         // Opening values
         public decimal OpeningGrossValue { get; set; }

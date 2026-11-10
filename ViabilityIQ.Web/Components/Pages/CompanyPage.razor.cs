@@ -28,7 +28,6 @@ namespace ViabilityIQ.Web.Components.Pages
         //---------------------------------------------------------
         // Alert
         //---------------------------------------------------------
-        private bool blAlert = true;
         private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Info;
         private string AlertHeading = "Organisation Profile";
         private string AlertMessage = "This is the single Company represented by your tenant. Regions, Sites, users and subscriptions operate beneath this organisation.";

@@ -25,6 +25,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
 
     [Inject] private MasterDataService MasterDataService { get; set; } = default!;
     [Inject] private IAssetRepository AssetRepository { get; set; } = default!;
+    [Inject] private IAssetMovementCalculationService MovementCalculationService { get; set; } = default!;
     [Inject] private ISessionService? sessionService { get; set; }
     [Inject] private ZabOffCanvasService OffCanvasService { get; set; } = default!;
     [Inject] private ToastService Toast { get; set; } = default!;
@@ -76,7 +77,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
     }
     private ZabConfirmDialogComponent? ConfirmDeactivateDialog { get; set; }
     private HashSet<long> ExpandedAssetIds { get; } = new();
-    private List<AssetDashboardRow> Assets { get; set; } = new();
+    private new List<AssetDashboardRow> Assets { get; set; } = new();
     private List<AssetAlertItem> AssetAlerts { get; set; } = new();
 
     private IEnumerable<AssetDashboardRow> FilteredAssets
@@ -178,14 +179,17 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
                 .GroupBy(item => item.AssessmentAssetId)
                 .ToDictionary(group => group.Key, group => group.OrderByDescending(item => item.ModifiedDate).First());
 
-            Assets = assetMasters
-                .Where(asset => asset.Active)
-                .Select(asset =>
-                {
-                    assetDtos.TryGetValue(asset.AssessmentAssetId, out var dto);
-                    movementLookup.TryGetValue(asset.AssessmentAssetId, out var movement);
-                    return BuildDashboardRow(asset, dto, movement);
-                })
+            var dashboardRows = new List<AssetDashboardRow>();
+            foreach (var asset in assetMasters.Where(asset => asset.Active))
+            {
+                assetDtos.TryGetValue(asset.AssessmentAssetId, out var dto);
+                var hasSavedMovement = movementLookup.TryGetValue(asset.AssessmentAssetId, out var movement);
+                movement ??= await MovementCalculationService.InitializeMovementTemplateAsync(asset);
+                movement = await MovementCalculationService.RecalculateAllMonthsAsync(movement, asset);
+                dashboardRows.Add(BuildDashboardRow(asset, dto, movement, hasSavedMovement));
+            }
+
+            Assets = dashboardRows
                 .OrderBy(asset => asset.AssetName)
                 .ToList();
 
@@ -223,7 +227,8 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
     private static AssetDashboardRow BuildDashboardRow(
         AssessmentAsset asset,
         AssessmentAssetDto? dto,
-        AssessmentAssetMovement? movement)
+        AssessmentAssetMovement? movement,
+        bool hasSavedMovement)
     {
         var months = new List<AssetMonthValue>(12);
         decimal previousClosingNetBookValue = asset.OpeningNetBookValue;
@@ -280,7 +285,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
             months.LastOrDefault(month => month.IsActive)?.ClosingAccumulatedDepreciation(movement) ?? 0m,
             months.Where(month => month.MovementType == "Addition").Sum(month => Math.Abs(month.SignedMovementValue)),
             months.Where(month => month.MovementType == "Disposal").Sum(month => Math.Abs(month.SignedMovementValue)),
-            movement != null,
+            hasSavedMovement,
             months);
     }
 

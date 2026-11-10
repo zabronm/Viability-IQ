@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -13,6 +14,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
 {
     public partial class AssessmentsFormComponent
     {
+        [Inject] private ILogger<AssessmentsFormComponent> Logger { get; set; } = default!;
         [Inject] private IGenericDataRepository<Assessment> assessmentRepository { get; set; } = default!;
         [Inject] private IGenericDataRepository<BusinessDto> businessLookupRepository { get; set; } = default!;
         [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
@@ -72,7 +74,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 }
 
             }
-            catch { /* Graceful configuration fallback */ }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to load assessment business options.");
+            }
         }
 
         protected override async Task OnParametersSetAsync()
@@ -87,8 +92,8 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     if (record != null)
                     {
                         assessmentModel = record;
-                        formattedStartDate = assessmentModel!.AssessmentStartDate?.ToString("yyyy-MM-dd");
-                        formattedEndDate = assessmentModel.AssessmentFinishDate?.ToString("yyyy-MM-dd");
+                        formattedStartDate = assessmentModel.AssessmentStartDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+                        formattedEndDate = assessmentModel.AssessmentFinishDate?.ToString("yyyy-MM-dd") ?? string.Empty;
 
                         boolStock = assessmentModel.blStock == 1;
                         boolDebtors = assessmentModel.blDebtorsCreditors == 1;
@@ -99,7 +104,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                 }
                 catch (Exception ex)
                 {
-                    // Handle exception
+                    Logger.LogError(ex, "Failed to load assessment {AssessmentId}.", AssessmentId);
                 }
                 finally
                 {
@@ -189,6 +194,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Failed to save assessment {AssessmentId}.", AssessmentId);
                 var message = $"Unable to save the assessment: {ex.Message}";
                 formError = message;
                 finalResult.Success = false;

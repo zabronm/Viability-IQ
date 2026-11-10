@@ -21,12 +21,12 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
     {
         #region Injected Services
 
-        [Inject] MasterDataService? ViqCrudService { get; set; }
-        [Inject] ISessionService? sessionService { get; set; }
-        [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
-        [Inject] ToastService? _Toast { get; set; }
-        [Inject] IProjectionStateManager? projectionStateManager { get; set; }
-        [Inject] ILogger<AssessmentSalesPage>? Logger { get; set; }
+        [Inject] MasterDataService ViqCrudService { get; set; } = default!;
+        [Inject] ISessionService sessionService { get; set; } = default!;
+        [Inject] ZabOffCanvasService zabCanvasService { get; set; } = default!;
+        [Inject] ToastService _Toast { get; set; } = default!;
+        [Inject] IProjectionStateManager projectionStateManager { get; set; } = default!;
+        [Inject] ILogger<AssessmentSalesPage> Logger { get; set; } = default!;
         [Inject] IGenericDataRepository<AssessmentProjectionAssumptions> AssumptionsRepository { get; set; } = default!;
 
         #endregion
@@ -225,8 +225,37 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             await Task.CompletedTask;
         }
 
-        private async Task AddIncomeStream() =>
-            await OpenIncomeFormPanel(new UnifiedIncomeViewModel());
+        private async Task AddIncomeStream()
+        {
+            await zabCanvasService!.ShowAsync(new CanvasRequest
+            {
+                Title = "Add Sales Category",
+                Width = 400,
+                ComponentType = typeof(SalesCategoryFormComponent),
+                Parameters = new
+                {
+                    AssessmentId,
+                    AssessmentSalesCategoryId = 0L,
+                    AllowIncomeTypeSelection = true,
+                    OnSaveComplete = EventCallback.Factory.Create<SaveResult>(
+                        this,
+                        OnCategorySaveComplete)
+                }
+            });
+        }
+
+        private async Task OnCategorySaveComplete(SaveResult result)
+        {
+            if (result.Success)
+            {
+                _Toast!.ShowSuccess(result.Message, sessionService!.AppTitle);
+                await LoadAndMapSalesData();
+            }
+            else
+            {
+                _Toast!.ShowError(result.Message, sessionService!.AppTitle);
+            }
+        }
 
         private async Task OpenIncomeFormPanel(UnifiedIncomeViewModel stream)
         {
@@ -254,7 +283,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             }
         }
 
-        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             if (e.AssessmentId == AssessmentId && e.DataType == "sales")
             {

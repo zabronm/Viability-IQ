@@ -29,7 +29,7 @@ namespace ViabilityIQ.Shared.DataModels
         [Required(ErrorMessage ="First repayment month is required")]
         public int StartMonth { get; set; }
 
-        public string? Remarks { get; set; }
+        public string? Remarks { get; set; } = string.Empty;
         public bool Active { get; set; } = true;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy    { get; set; }
@@ -37,6 +37,6 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => AssessmentLoanId;
-        string ISortableEntity.DisplayName => Remarks;
+        string ISortableEntity.DisplayName => Remarks ?? string.Empty;
     }
 }

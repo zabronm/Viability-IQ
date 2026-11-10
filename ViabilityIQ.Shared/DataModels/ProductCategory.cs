@@ -15,12 +15,12 @@ namespace ViabilityIQ.Shared.DataModels
     public class ProductCategory: IEntity, ISortableEntity, IAuditableEntity
     {
         [Dapper.Contrib.Extensions.Key] public long ProductCategoryId { get; set; }
-        [Required] public string? ProductCategoryName { get; set; }
+        [Required] public string? ProductCategoryName { get; set; } = string.Empty;
         [Required] public long IncomeTypeId { get; set; }
-        public string? UOM { get; set; }
+        public string? UOM { get; set; } = string.Empty;
         public decimal? MarkupPercentage { get; set; }
     
-        public string? Remarks { get; set; }
+        public string? Remarks { get; set; } = string.Empty;
         public bool Active { get; set; } = false;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public long CreatedBy { get; set; }
@@ -28,7 +28,7 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => ProductCategoryId;
-        string ISortableEntity.DisplayName => ProductCategoryName;
+        string ISortableEntity.DisplayName => ProductCategoryName ?? string.Empty;
 
     }
 }

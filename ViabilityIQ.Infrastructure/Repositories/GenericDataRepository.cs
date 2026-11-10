@@ -149,6 +149,8 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
         return SortIfSupported(result);
     }
 
+
+    //================  SAVE RECORD METHOD ===================
     public async Task<bool> SaveAsync(T entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -296,13 +298,22 @@ public class GenericDataRepository<T> : IGenericDataRepository<T> where T : clas
                     var keyProperty = typeof(T).GetProperty(
                         GetKeyColumnName(),
                         BindingFlags.Instance | BindingFlags.Public);
-                    if (keyProperty?.CanWrite == true)
+                    if (keyProperty?.CanWrite != true)
                     {
-                        var keyType = Nullable.GetUnderlyingType(keyProperty.PropertyType)
-                            ?? keyProperty.PropertyType;
-                        keyProperty.SetValue(
-                            entity,
-                            Convert.ChangeType(entityId, keyType));
+                        throw new InvalidOperationException(
+                            $"The generated {GetKeyColumnName()} value could not be assigned to {typeof(T).Name}.");
+                    }
+
+                    var keyType = Nullable.GetUnderlyingType(keyProperty.PropertyType)
+                        ?? keyProperty.PropertyType;
+                    keyProperty.SetValue(
+                        entity,
+                        Convert.ChangeType(entityId, keyType));
+
+                    if (entity is IEntity insertedEntity && insertedEntity.Id != entityId)
+                    {
+                        throw new InvalidOperationException(
+                            $"The generated {GetKeyColumnName()} value was not retained by {typeof(T).Name}.");
                     }
                 }
 

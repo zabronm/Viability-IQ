@@ -22,6 +22,9 @@ namespace ViabilityIQ.Shared.DataModels
         public string Title { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;       
         public bool IsRead { get; set; }
+        public long? SupportConversationId { get; set; }
+        public string? SupportSenderName { get; set; }
+        public bool IsSupportMessage { get; set; }
 
         // Task Tracking Properties
         public bool IsTask { get; set; }

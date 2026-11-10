@@ -91,7 +91,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
             if (asset.OpeningBalanceValue <= 0)
                 return 0m;
 
-            if (asset.DepreciationRate == null || asset.DepreciationRate <= 0)
+            if (asset.DepreciationRate <= 0)
                 return 0m;
 
             // Calculate based on depreciation method

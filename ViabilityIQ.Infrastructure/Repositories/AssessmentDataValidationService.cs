@@ -69,7 +69,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
                 return count;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 throw;
             }

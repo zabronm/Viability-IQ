@@ -53,7 +53,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
             }
         }
 
-        public async Task<AssessmentAssetMovement> GetAssetMovementsAsync(long assessmentAssetId)
+        public async Task<AssessmentAssetMovement?> GetAssetMovementsAsync(long assessmentAssetId)
         {
             try
             {

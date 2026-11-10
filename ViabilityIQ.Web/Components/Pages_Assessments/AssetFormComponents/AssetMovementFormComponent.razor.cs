@@ -29,6 +29,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
         private IGenericDataRepository<AssessmentAssetMovement> MovementRepository { get; set; } = default!;
 
         [Inject]
+        private IAssetMovementCalculationService MovementCalculationService { get; set; } = default!;
+
+        [Inject]
         private IGenericDataRepository<AssetType> AssetClassRepository { get; set; } = default!;
 
         [Inject]
@@ -162,7 +165,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                     // ✅ Recalculate all months based on asset data
                     if (Asset != null)
                     {
-                        RecalculateAllMonths();
+                        await RecalculateAllMonthsAsync();
                     }
                 }
                 else
@@ -190,92 +193,19 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
         /// <summary>
         /// Recalculates all 12 months based on asset data and movements
         /// </summary>
-        private void RecalculateAllMonths()
+        private async Task RecalculateAllMonthsAsync()
         {
             if (Asset == null)
                 return;
 
-            MonthlySummary = new List<AssetMovementMonthlySummaryDto>();
-
-            Logger?.LogDebug("Recalculating all months for asset {AssetId}", AssessmentAssetId);
-
-            decimal grossValue = Asset.OpeningBalanceValue;
-            decimal accumulatedDepreciation = Asset.IsPreExisting ? Asset.OpeningAccumulatedDepreciation : 0;
-
-            for (int month = 1; month <= 12; month++)
-            {
-                // Get movement for this month
-                var movementType = MovementModel.GetMovementType(month);
-                var movementValue = MovementModel.GetMovementValue(month);
-
-                // ✅ Apply movement to gross value
-                if (!string.IsNullOrEmpty(movementType) && movementValue != 0)
-                {
-                    switch (movementType)
-                    {
-                        case "Addition":
-                            grossValue += movementValue;
-                            Logger?.LogDebug("Month {Month}: Addition of {Value}, Gross Value now: {GrossValue}",
-                                month, movementValue, grossValue);
-                            break;
-                        case "Disposal":
-                            grossValue -= movementValue;
-                            Logger?.LogDebug("Month {Month}: Disposal of {Value}, Gross Value now: {GrossValue}",
-                                month, movementValue, grossValue);
-                            break;
-                        case "Revaluation":
-                            grossValue += movementValue;
-                            Logger?.LogDebug("Month {Month}: Revaluation of {Value}, Gross Value now: {GrossValue}",
-                                month, movementValue, grossValue);
-                            break;
-                        case "Transfer":
-                            // Transfer doesn't affect gross value
-                            break;
-                    }
-                }
-
-                // ✅ Calculate depreciation for this month
-                decimal monthlyDepreciation = 0;
-                if (Asset.IsDepreciable && Asset.DepreciationRate != null && Asset.DepreciationRate > 0)
-                {
-                    // Check if asset is active in this month
-                    bool isActive = Asset.IsPreExisting || month >= Asset.AcquisitionStartMonth;
-
-                    if (isActive && grossValue > 0)
-                    {
-                        // Straight-line depreciation: (Gross Value × Annual Rate) / 12
-                        monthlyDepreciation = (grossValue * (Asset.DepreciationRate / 100m)) / 12m;
-                    }
-                }
-
-                // ✅ Update accumulated depreciation
-                accumulatedDepreciation += monthlyDepreciation;
-
-                // ✅ Calculate net book value
-                decimal netBookValue = grossValue - accumulatedDepreciation;
-                if (netBookValue < 0)
-                    netBookValue = 0;
-
-                // Add to summary
-                MonthlySummary.Add(new AssetMovementMonthlySummaryDto
-                {
-                    Month = month,
-                    GrossValue = grossValue,
-                    Depreciation = monthlyDepreciation,
-                    AccumulatedDepreciation = accumulatedDepreciation,
-                    NetBookValue = netBookValue
-                });
-
-                Logger?.LogDebug(
-                    "Month {Month}: Gross={Gross}, Depr={Depr}, AccumDepr={AccumDepr}, NBV={NBV}",
-                    month, grossValue, monthlyDepreciation, accumulatedDepreciation, netBookValue);
-            }
+            MovementModel = await MovementCalculationService.RecalculateAllMonthsAsync(MovementModel, Asset);
+            MonthlySummary = MovementCalculationService.GetMonthlySummary(MovementModel, Asset);
         }
 
         // ====================================================
         // EVENT HANDLERS & BINDING HELPERS
         // ====================================================
-        private void OnMovementTypeChanged(int month, string? value)
+        private async Task OnMovementTypeChanged(int month, string? value)
         {
             try
             {
@@ -284,7 +214,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                 MovementModel.SetMovementType(month, value);
 
                 // ✅ Recalculate all months
-                RecalculateAllMonths();
+                await RecalculateAllMonthsAsync();
 
                 StateHasChanged();
             }
@@ -295,7 +225,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
             }
         }
 
-        private void OnMovementValueChanged(int month, object? rawValue)
+        private async Task OnMovementValueChanged(int month, object? rawValue)
         {
             try
             {
@@ -306,7 +236,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                     MovementModel.SetMovementValue(month, val);
 
                     // ✅ Recalculate all months - this will cascade changes to net book value
-                    RecalculateAllMonths();
+                    await RecalculateAllMonthsAsync();
 
                     StateHasChanged();
                 }
@@ -340,6 +270,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                 MovementModel.AssessmentId = AssessmentId;
                 MovementModel.ModifiedDate = DateTime.UtcNow;
                 MovementModel.ModifiedBy = sessionService?.UserId ?? 0;
+                await RecalculateAllMonthsAsync();
 
                 Logger?.LogInformation("Saving asset movement records for AssessmentAssetId {AssessmentAssetId}", AssessmentAssetId);
 

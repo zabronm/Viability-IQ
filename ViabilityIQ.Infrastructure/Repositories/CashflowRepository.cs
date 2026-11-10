@@ -218,7 +218,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         /// Gets cashflow summary for an assessment
 
-        public async Task<CashflowSummary> GetCashflowSummaryAsync(long assessmentId)
+        public async Task<CashflowSummary?> GetCashflowSummaryAsync(long assessmentId)
         {
             await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
                 assessmentId, TenantRecordAccess.Read);
@@ -273,7 +273,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
 
         /// Gets a single month's cashflow data
 
-        public async Task<AssessmentCashflow> GetMonthCashflowAsync(long assessmentId, int month)
+        public async Task<AssessmentCashflow?> GetMonthCashflowAsync(long assessmentId, int month)
         {
             await _tenantAuthorizationService.EnsureCanAccessAssessmentAsync(
                 assessmentId, TenantRecordAccess.Read);

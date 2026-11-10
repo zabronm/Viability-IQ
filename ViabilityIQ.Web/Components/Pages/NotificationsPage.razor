@@ -1,5 +1,6 @@
 ﻿@page "/settings/notifications"
 @using ViabilityIQ.Web.Components.CommonComponents
+@using ViabilityIQ.Web.Components.Pages.Support
 @using ViabilityIQ.Shared.DataModels
 @inject NavigationManager Nav0
 
@@ -30,11 +31,28 @@
                         <i class="bi bi-chat-dots-fill me-1"></i> Direct Messages
                     </button>
                 </li>
+                <AuthorizeView Roles="Support Consultant">
+                    <Authorized>
+                        <li class="nav-item">
+                            <button class="nav-link @GetActiveTabClass("support")" @onclick='() => SetActiveTabAsync("support")'>
+                                <i class="bi bi-headset me-1"></i> Support Chats
+                            </button>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
             </ul>
 
             <!-- Tab Content Area -->
             <div class="tab-content p-2">
-                @if (isLoading)
+                @if (activeTab == "support")
+                {
+                    <AuthorizeView Roles="Support Consultant">
+                        <Authorized>
+                            <SupportConsultantInbox />
+                        </Authorized>
+                    </AuthorizeView>
+                }
+                else if (isLoading)
                 {
                     <div class="text-center py-5 text-muted">
                         <span class="spinner-border spinner-border-sm me-2" role="status"></span> Loading communications...

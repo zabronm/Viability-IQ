@@ -10,7 +10,7 @@ namespace ViabilityIQ.Application.Dtos
     {
         public long AssessmentId { get; set; }        
         public List<DebtorSalesRowDto> SalesRows { get; set; } = new();     // All sales rows (one per AssessmentSales record)        
-        public DebtorsConfigurationDto Configuration { get; set; }      // Configuration
+        public DebtorsConfigurationDto Configuration { get; set; } = new();      // Configuration
 
         // Summary metrics
         public decimal TotalInvoiced { get; set; }

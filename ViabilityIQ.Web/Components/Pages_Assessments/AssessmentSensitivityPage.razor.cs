@@ -334,7 +334,9 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
         metrics.CurrentRatio,
         metrics.InterestCover,
         metrics.BreakEvenSales,
-        metrics.MarginOfSafety);
+        metrics.MarginOfSafety,
+        metrics.AssetTurnover,
+        metrics.ReturnOnAssets);
 
     private IEnumerable<ScenarioAnalysisResult> SelectedComparisons =>
         _scenarios.Where(x => _comparisonSelection.Contains(x.Id))
@@ -424,6 +426,24 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
 
     private static string FundingShortfallKpiClass(decimal fundingShortfall) =>
         fundingShortfall > 0m ? "kpi-critical" : "kpi-very-good";
+
+    private static string AssetTurnoverStatus(decimal? assetTurnover) => assetTurnover switch
+    {
+        null => "Not available",
+        >= 1.5m => "Strong efficiency",
+        >= 1m => "Good efficiency",
+        >= 0.5m => "Fair efficiency",
+        _ => "Low efficiency"
+    };
+
+    private static string AssetTurnoverKpiClass(decimal? assetTurnover) => assetTurnover switch
+    {
+        null => "kpi-good",
+        < 0.5m => "kpi-critical",
+        < 1m => "kpi-average",
+        < 1.5m => "kpi-good",
+        _ => "kpi-very-good"
+    };
 
     private static decimal ChartWidth(decimal value, IEnumerable<decimal> values)
     {

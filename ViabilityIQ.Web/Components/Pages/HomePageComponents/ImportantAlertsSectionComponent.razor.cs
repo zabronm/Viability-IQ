@@ -12,7 +12,7 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
     {
         #region Injected Dependencies
 
-        [Inject] public ILogger<ImportantAlertsSectionComponent> Logger { get; set; }
+        [Inject] public ILogger<ImportantAlertsSectionComponent> Logger { get; set; } = default!;
 
         #endregion
 
@@ -21,14 +21,14 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
        
         /// Alert data containing urgent and upcoming assessments
        
-        [Parameter]
-        public AlertsModel Alerts { get; set; }
+        [Parameter, EditorRequired]
+        public AlertsModel Alerts { get; set; } = new();
 
        
         /// System announcements to display
        
         [Parameter]
-        public List<SystemAnnouncementModel> Announcements { get; set; }
+        public List<SystemAnnouncementModel> Announcements { get; set; } = new();
 
        
         /// Callback when user dismisses an alert
@@ -63,8 +63,11 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
         /// Handle marking an assessment as done
         /// actionTypeId: 1=Mark urgent assessment as done
        
-        public async Task HandleMarkDone(string alertId, int actionTypeId)
+        public async Task HandleMarkDone(string? alertId, int actionTypeId)
         {
+            if (string.IsNullOrWhiteSpace(alertId))
+                return;
+
             Logger.LogInformation("Mark done clicked: Alert ID {AlertId}, Action Type ID {ActionTypeId}",
                 alertId, actionTypeId);
 
@@ -85,8 +88,11 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
         /// Stores dismissal in database and removes from view
         /// actionTypeId: 1=UrgentAssessment, 2=Announcement
        
-        public async Task HandleDismissAlert(string alertId, int actionTypeId)
+        public async Task HandleDismissAlert(string? alertId, int actionTypeId)
         {
+            if (string.IsNullOrWhiteSpace(alertId))
+                return;
+
             Logger.LogInformation("Dismiss alert clicked: Alert ID {AlertId}, Action Type ID {ActionTypeId}",
                 alertId, actionTypeId);
 
@@ -99,4 +105,3 @@ namespace ViabilityIQ.Web.Components.Pages.HomePageComponents
         #endregion
     }
 }
-

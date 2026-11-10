@@ -29,12 +29,11 @@
         const printFrame = document.createElement("iframe");
         printFrame.setAttribute("aria-hidden", "true");
         printFrame.style.position = "fixed";
-        printFrame.style.right = "0";
-        printFrame.style.bottom = "0";
-        printFrame.style.width = "1px";
-        printFrame.style.height = "1px";
+        printFrame.style.left = "-10000px";
+        printFrame.style.top = "0";
+        printFrame.style.width = "100vw";
+        printFrame.style.height = "100vh";
         printFrame.style.border = "0";
-        printFrame.style.opacity = "0";
         document.body.appendChild(printFrame);
 
         const printDocument = printFrame.contentDocument;
@@ -57,7 +56,7 @@
     <title></title>
     ${styles}
     <style>
-        @page { size: landscape; margin: 8mm; }
+        @page { size: A4 landscape; margin: 8mm; }
         html, body {
             width: 100% !important;
             height: auto !important;

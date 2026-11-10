@@ -41,11 +41,11 @@ namespace ViabilityIQ.Shared.SharedModels
 
        
         /// Get list of loaded data types       
-        public List<string> LoadedDataTypes { get; }
+        public List<string>? LoadedDataTypes { get; }
 
        
         /// Get list of missing data types       
-        public List<string> MissingDataTypes { get; }
+        public List<string>? MissingDataTypes { get; }
 
        
         /// Get status summary string       

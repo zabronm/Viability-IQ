@@ -15,7 +15,7 @@ namespace ViabilityIQ.Shared.DataModels
         [Dapper.Contrib.Extensions.Key] public long ClientTypeId { get; set; }
 
         [Required(ErrorMessage = "Client category name is required.")]
-        public string? ClientTypeName { get; set; }
+        public string? ClientTypeName { get; set; } = string.Empty;
         public string? Remarks { get; set; }
         public bool Active { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -24,6 +24,6 @@ namespace ViabilityIQ.Shared.DataModels
         public long ModifiedBy { get; set; }
 
         long IEntity.Id => ClientTypeId;
-        string ISortableEntity.DisplayName => ClientTypeName;
+        string ISortableEntity.DisplayName => ClientTypeName ?? string.Empty;
     }
 }

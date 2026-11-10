@@ -8,8 +8,8 @@ namespace ViabilityIQ.Application.Dtos
 {
     public class BalanceSheetAssetDto
     {
-        public string AssetCategory { get; set; }
-        public List<BalanceSheetAssetLineDto> Assets { get; set; }
+        public string AssetCategory { get; set; } = string.Empty;
+        public List<BalanceSheetAssetLineDto> Assets { get; set; } = new();
 
         // Totals
         public decimal TotalGrossValue { get; set; }

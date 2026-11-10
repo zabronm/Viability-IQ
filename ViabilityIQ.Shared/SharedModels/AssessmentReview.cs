@@ -139,7 +139,7 @@ namespace ViabilityIQ.Shared.DataModels
         public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
         public long ModifiedBy { get; set; }
         public bool Active { get; set; } = true;
-        public string Remarks { get; set; } = string.Empty;
+        public string? Remarks { get; set; } = string.Empty;
 
         // ====================================================
         // INTERFACE IMPLEMENTATION (IEntity)

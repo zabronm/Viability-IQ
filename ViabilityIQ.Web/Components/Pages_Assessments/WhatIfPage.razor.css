@@ -25,6 +25,11 @@
     gap: 1rem;
 }
 
+.dashboard-cashflow-row,
+.dashboard-statements-row {
+    min-width: 0;
+}
+
 .dashboard-widget-error {
     display: flex;
     min-height: 7rem;

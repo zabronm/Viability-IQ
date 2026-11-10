@@ -1,0 +1,145 @@
+@namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
+@using ViabilityIQ.Shared.FinancialModels
+@inherits IndependentCashflowProjectionComponent
+
+<section class="dashboard-statements-card dashboard-reveal" aria-labelledby="statements-dashboard-title">
+    <header class="statements-card-header">
+        <div>
+            <i class="bi bi-file-earmark-spreadsheet"></i>
+            <strong id="statements-dashboard-title">Assessment Statements</strong>
+        </div>
+        <span>12-month assessment period</span>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="statements-state"><span class="spinner-border spinner-border-sm"></span> Loading assessment statements...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <div class="statements-state statements-error"><i class="bi bi-exclamation-triangle"></i> Statements could not load: @LoadError</div>
+    }
+    else if (Projection is null)
+    {
+        <div class="statements-state statements-error">Assessment projection data is unavailable.</div>
+    }
+    else
+    {
+        <div class="statement-tabs" role="tablist" aria-label="Assessment statements">
+            <button type="button"
+                    id="cashflow-tab"
+                    role="tab"
+                    aria-controls="cashflow-panel"
+                    aria-selected="@(ActiveTab == StatementTab.Cashflow)"
+                    class="statement-tab @(ActiveTab == StatementTab.Cashflow ? "active" : null)"
+                    @onclick="() => ActiveTab = StatementTab.Cashflow">
+                <i class="bi bi-cash-stack"></i><span>Detailed Cashflow Statement</span>
+            </button>
+            <button type="button"
+                    id="profit-loss-tab"
+                    role="tab"
+                    aria-controls="profit-loss-panel"
+                    aria-selected="@(ActiveTab == StatementTab.ProfitAndLoss)"
+                    class="statement-tab @(ActiveTab == StatementTab.ProfitAndLoss ? "active" : null)"
+                    @onclick="() => ActiveTab = StatementTab.ProfitAndLoss">
+                <i class="bi bi-graph-up"></i><span>Profit and Loss</span>
+            </button>
+            <button type="button"
+                    id="balance-sheet-tab"
+                    role="tab"
+                    aria-controls="balance-sheet-panel"
+                    aria-selected="@(ActiveTab == StatementTab.BalanceSheet)"
+                    class="statement-tab @(ActiveTab == StatementTab.BalanceSheet ? "active" : null)"
+                    @onclick="() => ActiveTab = StatementTab.BalanceSheet">
+                <i class="bi bi-bank"></i><span>Balance Sheet</span>
+            </button>
+        </div>
+
+        <div class="statement-tab-content" role="tabpanel" aria-labelledby="@ActiveTabId" @key="ActiveTab">
+            @switch (ActiveTab)
+            {
+                case StatementTab.Cashflow:
+                    <DetailedCashflowStatementComponent Projection="@Projection" />
+                    break;
+                case StatementTab.ProfitAndLoss:
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 statement-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Profit and loss</th>
+                                    @foreach (var month in Months)
+                                    {
+                                        <th scope="col" class="text-end">@month.MonthLabel</th>
+                                    }
+                                    <th scope="col" class="text-end">12-month total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var line in ProfitLossLines)
+                                {
+                                    <tr class="@(line.Emphasized ? "fw-bold table-light" : null)">
+                                        <th scope="row">@line.Label</th>
+                                        @foreach (var month in Months)
+                                        {
+                                            <td class="text-end">@Amount(line.Value(month))</td>
+                                        }
+                                        <td class="text-end fw-semibold">@Amount(Months.Sum(line.Value))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    break;
+                case StatementTab.BalanceSheet:
+                    <AssessmentBalanceSheetComponent Projection="@Projection" />
+                    break;
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private StatementTab ActiveTab { get; set; } = StatementTab.Cashflow;
+    private string ActiveTabId => ActiveTab switch
+    {
+        StatementTab.Cashflow => "cashflow-tab",
+        StatementTab.ProfitAndLoss => "profit-loss-tab",
+        _ => "balance-sheet-tab"
+    };
+
+    private IReadOnlyList<CashflowProjectionMonth> Months =>
+        Projection!.Months.OrderBy(month => month.MonthNumber).ToArray();
+
+    private IReadOnlyList<ProfitLossLine> ProfitLossLines =>
+    [
+        new("Sales revenue", month => month.Revenue),
+        new("Cost of goods sold", month => -month.CostOfGoodsSold),
+        new("Gross profit", month => month.GrossProfit, true),
+        new("Sundry income", month => month.SundryIncome),
+        new("Grants and donations", month => month.GrantsDonationsIncome),
+        new("Asset disposal income", month => month.ClassifiedAssetDisposalIncome),
+        new("Other income", month => month.OtherIncome),
+        new("Gross income", month => month.GrossIncome, true),
+        new("Operating expenses", month => -month.OperatingExpenses),
+        new("EBITDA", month => month.EBITDA, true),
+        new("Depreciation", month => -month.Depreciation),
+        new("EBIT", month => month.EBIT),
+        new("Interest expense", month => -month.InterestExpense),
+        new("Profit before tax", month => month.ProfitBeforeTax, true)
+    ];
+
+    private static string Amount(decimal value) =>
+        value < 0m ? $"({Math.Abs(value):N0})" : value.ToString("N0");
+
+    private enum StatementTab
+    {
+        Cashflow,
+        ProfitAndLoss,
+        BalanceSheet
+    }
+
+    private sealed record ProfitLossLine(
+        string Label,
+        Func<CashflowProjectionMonth, decimal> Value,
+        bool Emphasized = false);
+}

@@ -102,6 +102,8 @@ public sealed class CashflowProjectionMonth
     public decimal ClosingLoanBalance { get; init; }
     public decimal OtherCurrentAssets { get; init; }
     public decimal OtherCurrentLiabilities { get; init; }
+    public decimal ShareCapital { get; init; }
+    public decimal RetainedEarningsBeforeTax { get; init; }
     public decimal CurrentAssets => Math.Max(ClosingBank, 0m) + ClosingDebtors + ClosingStock + OtherCurrentAssets;
     public decimal TotalAssets => CurrentAssets + ClosingFixedAssets;
     public decimal CurrentLiabilities =>

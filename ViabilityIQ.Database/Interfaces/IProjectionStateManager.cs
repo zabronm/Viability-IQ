@@ -32,10 +32,10 @@ namespace ViabilityIQ.Application.Interfaces
     /// Event args for projection changes    
     public class ProjectionChangedEventArgs : EventArgs
     {
-        public string DataType { get; set; }
+        public string? DataType { get; set; }
         public long EntityId { get; set; }          // ✅ Changed from int to long
         public long AssessmentId { get; set; }      // ✅ Changed from int to long
-        public HashSet<string> AffectedProjections { get; set; }
+        public HashSet<string> AffectedProjections { get; set; } = new();
         public DateTime ChangedAt { get; set; }
     }
 

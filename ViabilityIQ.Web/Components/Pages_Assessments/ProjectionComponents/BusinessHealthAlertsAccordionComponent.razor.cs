@@ -17,7 +17,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
         [Inject] private IBusinessHealthAlertService? AlertService { get; set; }
         [Inject] private IProjectionStateManager? ProjectionStateManager { get; set; }
         [Inject] private ILogger<BusinessHealthAlertsAccordionComponent>? Logger { get; set; }
-        [Inject] private IJSRuntime? JS { get; set; }
+        [Inject] private IJSRuntime JS { get; set; } = default!;
         #endregion
 
         #region Parameters
@@ -108,7 +108,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
             }
         }
 
-        private void OnProjectionChanged(object sender, ProjectionChangedEventArgs e)
+        private void OnProjectionChanged(object? sender, ProjectionChangedEventArgs e)
         {
             // Reload alerts when any projection data changes for this assessment
             if (e.AssessmentId == AssessmentId)

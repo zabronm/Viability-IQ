@@ -29,16 +29,11 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         
         // Alert variables
         //---------------------------------------------------------
-        private bool blAlert = true;
-        private ViqAlertComponent.AlertSeverity AlertSeverity = ViqAlertComponent.AlertSeverity.Success;
-        private string AlertHeading = "Assessment Settings";
-        private string AlertMessage = "Specify ALL base parameters that the assessment will assume when it incorporates projection transactions.";
 
         // Added references for targeted refresh
         private VATEditComponent? VATEditRef;
         private OpeningBalancesComponent? OpeningBalancesRef;
         private DebtorsCreditorsComponent? DebtorsCreditorsRef;
-        private DirectorWagesComponent? DirectorWagesRef;
         private SalesCategoryListComponent? SalesCategoryListRef;
         private AssessmentLoansListComponent? AssessmentLoansListRef;
 
@@ -58,7 +53,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private Type? ActiveFormType { get; set; }
         private Dictionary<string, object> ActiveFormParameters { get; set; } = new();
 
-        private string? str_sql;                
 
         protected override async Task OnInitializedAsync()
         {
@@ -102,29 +96,34 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         void PopulateDataModels()
         {
+            var model = Model ?? throw new InvalidOperationException(
+                "The assessment must be loaded before populating its settings.");
+
             //============  VATRate model
             vatUpdateModel = new()                 
             {
-                AssessmentId = Model.AssessmentId,
-                CaseNumber = Model.CaseNumber,
-                BusinessId = Model.BusinessId,
-                AssessmentFinishDate = Model.AssessmentFinishDate,
-                AssessmentStartDate = Model.AssessmentStartDate,
-                VatRate =  Model.VATRate,
+                AssessmentId = model.AssessmentId,
+                CaseNumber = model.CaseNumber,
+                BusinessId = model.BusinessId,
+                AssessmentFinishDate = model.AssessmentFinishDate,
+                AssessmentStartDate = model.AssessmentStartDate,
+                VatRate = model.VATRate,
             };
 
             //==========   Opening Balances
             openingBalancesModel = new()
             {
-                AssessmentId = Model.AssessmentId,
-                OpeningBalance_Assets = Model.OpeningBalance_Assets,
-                OpeningBalance_Bank = Model.OpeningBalance_Bank,
-                InterestOnOverDraft = Model.InterestOnOverDraft,
-                DepreciationProjectedAmount = Model.DepreciationProjectedAmount,
-                OpeningOtherCurrentAssets = Model.OpeningOtherCurrentAssets,
-                OpeningOtherCurrentLiabilities = Model.OpeningOtherCurrentLiabilities,
-                OpeningVatPayable = Model.OpeningVatPayable,
-                OpeningVatRefundable = Model.OpeningVatRefundable
+                AssessmentId = model.AssessmentId,
+                OpeningBalance_Assets = model.OpeningBalance_Assets,
+                OpeningBalance_Bank = model.OpeningBalance_Bank,
+                InterestOnOverDraft = model.InterestOnOverDraft,
+                DepreciationProjectedAmount = model.DepreciationProjectedAmount,
+                OpeningOtherCurrentAssets = model.OpeningOtherCurrentAssets,
+                OpeningOtherCurrentLiabilities = model.OpeningOtherCurrentLiabilities,
+                OpeningShareCapital = model.OpeningShareCapital,
+                OpeningRetainedEarnings = model.OpeningRetainedEarnings,
+                OpeningVatPayable = model.OpeningVatPayable,
+                OpeningVatRefundable = model.OpeningVatRefundable
             };
                      
 
@@ -256,6 +255,27 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                                                 ActiveAssessmentId, 
                                                 ActiveAssessmentId);
 
+                if (refName == "OPENING-BALANCES")
+                {
+                    try
+                    {
+                        var refreshedAssessment = await DataRepository.GetByIdAsync(ActiveAssessmentId);
+                        if (refreshedAssessment is null)
+                        {
+                            _Toast.ShowError("Opening balances were saved, but the updated assessment could not be reloaded.", sessionService!.AppTitle);
+                            return;
+                        }
+
+                        Model = refreshedAssessment;
+                        PopulateDataModels();
+                    }
+                    catch (Exception ex)
+                    {
+                        _Toast.ShowError($"Opening balances were saved, but the assessment could not be refreshed: {ex.Message}", sessionService!.AppTitle);
+                        return;
+                    }
+                }
+
                 _Toast.ShowSuccess(saveResult.Message, sessionService!.AppTitle);
 
                 // 1. Logic for specific component refresh
@@ -303,7 +323,6 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     break;
 
                 case "DIRECTOR-WAGES":
-                    if (DirectorWagesRef != null) await DirectorWagesRef.RefreshAsync();
                     break;
 
                 case "LOANS":
@@ -383,6 +402,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public decimal DepreciationProjectedAmount { get; set; } = 0;
         public decimal OpeningOtherCurrentAssets { get; set; }
         public decimal OpeningOtherCurrentLiabilities { get; set; }
+        public decimal OpeningShareCapital { get; set; }
+        public decimal OpeningRetainedEarnings { get; set; }
         public decimal OpeningVatPayable { get; set; }
         public decimal OpeningVatRefundable { get; set; }
     }

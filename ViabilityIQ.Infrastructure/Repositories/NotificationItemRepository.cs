@@ -30,6 +30,7 @@ namespace ViabilityIQ.Infrastructure.Repositories
                 SELECT NotificationItemId, SenderId, RecipientId, Title, Message, CreatedDate, IsRead, IsTask, TaskStatus, DueDate, AssessmentNumber
                 FROM tblNotificationItem
                 WHERE RecipientId = @UserId
+                  AND ISNULL(IsSupportMessage, 0) = 0
                   AND (@Filter = 'all' 
                        OR (@Filter = 'tasks' AND IsTask = 1) 
                        OR (@Filter = 'messages' AND IsTask = 0))
