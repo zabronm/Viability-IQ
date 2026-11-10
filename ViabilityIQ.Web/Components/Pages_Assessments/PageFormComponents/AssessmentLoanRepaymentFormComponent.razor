@@ -55,9 +55,9 @@
             <div class="viq-repayment-tools">
                 <div class="viq-form-field">
                     <label for="bulkExtraAmount">Bulk extra amount</label>
-                    <input id="bulkExtraAmount" type="number" step="0.01"
+                    <InputDecimal2 id="bulkExtraAmount" type="number" step="0.01"
                            class="viq-form-control text-end" placeholder="0.00"
-                           @bind="BulkExtraAmount" />
+                           @bind-Value="BulkExtraAmount" />
                 </div>
                 <div class="viq-repayment-tool-actions">
                     <button type="button" class="viq-button viq-button-secondary"
@@ -106,10 +106,13 @@
                                                value="@ActiveRepaymentModel.MonthlyLines[idx].Interest.ToString("N2")" />
                                     </td>
                                     <td>
-                                        <input type="number"
-                                               class="viq-repayment-value viq-repayment-extra"
-                                               @bind="ActiveRepaymentModel.MonthlyLines[idx].Extra"
-                                               @bind:event="oninput" min="0" step="0.01" />
+                                        <InputDecimal2 type="number"
+                                                       class="viq-repayment-value viq-repayment-extra"
+                                                       @bind-Value="ActiveRepaymentModel.MonthlyLines[idx].Extra"
+                                                       @bind-Value:format="F2"
+                                                       min="0"
+                                                       step="0.01"
+                                                       UpdateOnInput="true" />
                                     </td>
                                     <td class="viq-repayment-total">
                                         @rowTotal.ToString("N2")

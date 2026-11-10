@@ -1,0 +1,130 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Forms
+@typeparam TValue
+@inherits InputBase<TValue>
+
+<input @attributes="AdditionalAttributes"
+       class="@CssClass"
+       type="number"
+       value="@_displayValue"
+       @onfocus="HandleFocus"
+       @oninput="HandleInput"
+       @onchange="HandleChange"
+       @onblur="HandleBlur" />
+
+@code {
+    [Parameter]
+    public bool UpdateOnInput { get; set; }
+
+    private string _displayValue = string.Empty;
+    private bool _isFocused;
+    private bool _isDirty;
+    private bool _hasInvalidInput;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (!_isFocused && !_hasInvalidInput)
+            _displayValue = FormatValueAsString(CurrentValue) ?? string.Empty;
+    }
+
+    private void HandleFocus(FocusEventArgs _)
+    {
+        _isFocused = true;
+        _displayValue = FormatValueAsString(CurrentValue) ?? string.Empty;
+    }
+
+    private void HandleInput(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? string.Empty;
+        _isDirty |= !string.Equals(value, _displayValue, StringComparison.Ordinal);
+        _displayValue = value;
+
+        if (UpdateOnInput && TryParseInputValue(value, out var parsedValue))
+        {
+            CurrentValue = parsedValue;
+            _hasInvalidInput = false;
+        }
+    }
+
+    private void HandleChange(ChangeEventArgs args)
+    {
+        _displayValue = args.Value?.ToString() ?? string.Empty;
+        if (!_isDirty)
+            return;
+
+        if (TryParseInputValue(_displayValue, out var parsedValue))
+        {
+            CurrentValue = parsedValue;
+            _hasInvalidInput = false;
+        }
+        else
+        {
+            CurrentValueAsString = _displayValue;
+            _hasInvalidInput = true;
+        }
+    }
+
+    private void HandleBlur(FocusEventArgs _)
+    {
+        _isFocused = false;
+
+        if (!_isDirty)
+        {
+            _displayValue = FormatValueAsString(CurrentValue) ?? string.Empty;
+            return;
+        }
+
+        CurrentValueAsString = _displayValue;
+        if (TryParseInputValue(_displayValue, out var parsedValue))
+        {
+            _displayValue = FormatValueAsString(parsedValue) ?? string.Empty;
+            _hasInvalidInput = false;
+        }
+        else
+        {
+            _hasInvalidInput = true;
+        }
+
+        _isDirty = false;
+    }
+
+    protected override bool TryParseValueFromString(
+        string? value,
+        out TValue result,
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        if (TryParseInputValue(value, out result))
+        {
+            validationErrorMessage = null;
+            return true;
+        }
+
+        validationErrorMessage = "Enter a valid amount.";
+        return false;
+    }
+
+    private static bool TryParseInputValue(string? value, out TValue result)
+    {
+        if (string.IsNullOrWhiteSpace(value) && Nullable.GetUnderlyingType(typeof(TValue)) == typeof(decimal))
+        {
+            result = default!;
+            return true;
+        }
+
+        if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedValue))
+        {
+            result = (TValue)(object)parsedValue;
+            return true;
+        }
+
+        result = default!;
+        return false;
+    }
+
+    protected override string? FormatValueAsString(TValue? value) =>
+        value is decimal decimalValue
+            ? decimalValue.ToString("F2", CultureInfo.InvariantCulture)
+            : string.Empty;
+}

@@ -96,8 +96,8 @@
                 <div class="viq-form-grid viq-form-grid-2">
                     <div class="viq-form-field">
                         <label for="monthlyAllocation">Monthly amount</label>
-                        <input id="monthlyAllocation" type="number" class="viq-form-control"
-                               @bind="FormModel.SameMonthlyAmount" />
+                        <InputDecimal2 id="monthlyAllocation" type="number" class="viq-form-control"
+                               step="0.01" @bind-Value="FormModel.SameMonthlyAmount" />
                     </div>
                     <div class="viq-form-field">
                         <label>Allocation action</label>
@@ -124,8 +124,9 @@
                         int index = i;
                         <div class="viq-form-field">
                             <label for="@($"expenseProjectionMonth{index + 1}")">Month @(index + 1)</label>
-                            <InputNumber id="@($"expenseProjectionMonth{index + 1}")"
+                            <InputDecimal2 id="@($"expenseProjectionMonth{index + 1}")"
                                          class="viq-form-control"
+                                         step="0.01"
                                          @bind-Value="MonthlyValues[index]" />
                         </div>
                     }

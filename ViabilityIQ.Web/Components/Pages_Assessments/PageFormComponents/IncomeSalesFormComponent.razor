@@ -65,8 +65,8 @@
                 <div class="viq-form-grid viq-form-grid-2">
                     <div class="viq-form-field">
                         <label for="salesAnnualTarget">Annual target amount</label>
-                        <input id="salesAnnualTarget" type="number" class="viq-form-control"
-                               step="0.01" @bind="BulkAnnualValueTarget" />
+                        <InputDecimal2 id="salesAnnualTarget" type="number" class="viq-form-control"
+                               step="0.01" @bind-Value="BulkAnnualValueTarget" />
                     </div>
                     <div class="viq-form-field">
                         <label>Distribution action</label>
@@ -93,7 +93,7 @@
                         int index = i;
                         <div class="viq-form-field">
                             <label for="@($"salesMonth{index + 1}")">Month @(index + 1)</label>
-                            <InputNumber id="@($"salesMonth{index + 1}")"
+                            <InputDecimal2 id="@($"salesMonth{index + 1}")"
                                          class="viq-form-control"
                                          step="0.01"
                                          @bind-Value="MonthlyValues[index]"
