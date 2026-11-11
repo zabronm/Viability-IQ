@@ -1,17 +1,20 @@
 @namespace ViabilityIQ.Web.Components.Pages_Assessments.ProjectionComponents
 
-<div class="detailed-cashflow-container card border-0 shadow-sm">
-    <div class="card-header bg-dark text-white"><strong>Detailed Cashflow Statement</strong></div>
-    <div class="table-responsive">
+<section class="detailed-cashflow-container absheet-card" aria-labelledby="detailed-cashflow-title">
+    <header class="statement-section-header">
+        <h2 id="detailed-cashflow-title">Detailed Cashflow Statement</h2>
+        <span>Monthly cash movements</span>
+    </header>
+    <div class="table-responsive statement-table-frame">
         <table class="table table-sm table-hover mb-0 detailed-cashflow-table">
             <thead>
                 <tr>
-                    <th>Line item</th>
+                    <th scope="col">Line item</th>
                     @foreach (var month in Projection.Months)
                     {
-                        <th class="text-end">@month.MonthLabel</th>
+                        <th scope="col" class="text-end">@month.MonthLabel</th>
                     }
-                    <th class="text-end">TOTAL</th>
+                    <th scope="col" class="text-end">TOTAL</th>
                 </tr>
             </thead>
             <tbody>
@@ -21,46 +24,46 @@
                 @Row("Asset disposal receipts", x => x.AssetDisposalReceipts)
                 @Row("Other income receipts", x => x.OtherIncomeReceipts)
                 @Row("VAT refunds", x => x.VatRefund)
-                @Row("Total inflows", x => x.TotalInflows, true)
+                @Row("Total inflows", x => x.TotalInflows, "statement-total-row")
                 @Row("Supplier payments", x => x.SupplierPayments)
                 @Row("Cash operating expenses", x => x.CashOperatingExpenses)
                 @Row("VAT payments", x => x.VatPayment)
                 @Row("Loan repayments", x => x.LoanCashPayment)
                 @Row("Overdraft interest", x => x.OverdraftInterest)
                 @Row("Asset purchases", x => x.AssetPurchases)
-                @Row("Total outflows", x => x.TotalOutflows, true)
-                @Row("Net cashflow", x => x.NetCashflow, true)
-                @Row("Opening bank", x => x.OpeningBank)
-                @Row("Closing bank", x => x.ClosingBank, true)
+                @Row("Total outflows", x => x.TotalOutflows, "statement-total-row")
+                @Row("Net cashflow", x => x.NetCashflow, "statement-grand-total")
+                @Row("Opening bank", x => x.OpeningBank, "statement-subsection-row")
+                @Row("Closing bank", x => x.ClosingBank, "statement-grand-total")
                 @Row("Sales (VAT exclusive)", x => x.Revenue)
                 @Row("COGS (VAT exclusive)", x => x.CostOfGoodsSold)
-                @Row("Gross profit", x => x.GrossProfit, true)
+                @Row("Gross profit", x => x.GrossProfit, "statement-total-row")
                 @Row("Sundry income (VAT exclusive)", x => x.SundryIncome)
                 @Row("Grants / donations (VAT exclusive)", x => x.GrantsDonationsIncome)
                 @Row("Asset disposal income (VAT exclusive)", x => x.ClassifiedAssetDisposalIncome)
                 @Row("Other income (VAT exclusive)", x => x.OtherIncome)
-                @Row("Gross income", x => x.GrossIncome, true)
+                @Row("Gross income", x => x.GrossIncome, "statement-total-row")
                 @Row("Operating expenses (VAT exclusive)", x => x.OperatingExpenses)
-                @Row("EBITDA", x => x.EBITDA)
+                @Row("EBITDA", x => x.EBITDA, "statement-total-row")
                 @Row("Depreciation", x => x.Depreciation)
                 @Row("Interest", x => x.InterestExpense)
-                @Row("Profit before tax", x => x.ProfitBeforeTax, true)
+                @Row("Profit before tax", x => x.ProfitBeforeTax, "statement-grand-total")
             </tbody>
         </table>
     </div>
     @if (Projection.ManufacturingMonths.Count > 0)
     {
-        <div class="card-header bg-light border-top"><strong>Manufacturing inventory and cost flow (VAT exclusive)</strong></div>
-        <div class="table-responsive">
+        <header class="statement-subsection-header">Manufacturing inventory and cost flow (VAT exclusive)</header>
+        <div class="table-responsive statement-table-frame">
             <table class="table table-sm table-hover mb-0 detailed-cashflow-table">
                 <thead>
                     <tr>
-                        <th>Manufacturing roll-forward</th>
+                        <th scope="col">Manufacturing roll-forward</th>
                         @foreach (var month in Projection.ManufacturingMonths)
                         {
-                            <th class="text-end">M@(month.MonthNumber)</th>
+                            <th scope="col" class="text-end">M@(month.MonthNumber)</th>
                         }
-                        <th class="text-end">TOTAL / END</th>
+                        <th scope="col" class="text-end">TOTAL / END</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,26 +81,25 @@
                 </tbody>
             </table>
         </div>
-        <p class="small text-muted mb-0 mt-2">
+        <p class="statement-note">
             Inventory balance entries are estimates and are valued excluding recoverable VAT. Review all manufacturing reconciliation alerts before relying on these figures.
         </p>
     }
-</div>
+</section>
 
 @code {
     private Microsoft.AspNetCore.Components.RenderFragment Row(
         string label,
         Func<ViabilityIQ.Shared.FinancialModels.CashflowProjectionMonth, decimal> value,
-        bool bold = false) => builder =>
+        string rowClass = "") => builder =>
     {
         var sequence = 0;
         builder.OpenElement(sequence++, "tr");
-        if (bold)
-        {
-            builder.AddAttribute(sequence++, "class", "fw-bold table-light");
-        }
+        if (!string.IsNullOrEmpty(rowClass))
+            builder.AddAttribute(sequence++, "class", rowClass);
 
-        builder.OpenElement(sequence++, "td");
+        builder.OpenElement(sequence++, "th");
+        builder.AddAttribute(sequence++, "scope", "row");
         builder.AddContent(sequence++, label);
         builder.CloseElement();
 
@@ -124,10 +126,13 @@
     {
         var sequence = 0;
         builder.OpenElement(sequence++, "tr");
-        if (balance)
-            builder.AddAttribute(sequence++, "class", "fw-bold table-light");
+        if (openingBalance)
+            builder.AddAttribute(sequence++, "class", "statement-subsection-row");
+        else if (balance)
+            builder.AddAttribute(sequence++, "class", "statement-total-row");
 
-        builder.OpenElement(sequence++, "td");
+        builder.OpenElement(sequence++, "th");
+        builder.AddAttribute(sequence++, "scope", "row");
         builder.AddContent(sequence++, label);
         builder.CloseElement();
 

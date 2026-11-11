@@ -45,7 +45,8 @@
 .absheet-table {
     min-width: 1180px;
     table-layout: fixed;
-    font-size: 0.66rem;
+    font-size: 0.68rem;
+    line-height: 1.35;
 }
 
 .absheet-table th,
@@ -59,7 +60,7 @@
     top: 0;
     z-index: 2;
     background: #eaf1f7;
-    color: #29445d;
+    color: #000;
     font-weight: 800;
     text-align: right;
 }
@@ -75,30 +76,38 @@
 
 .absheet-table tbody th {
     background: #fff;
-    color: #40566d;
+    color: #000;
     font-weight: 600;
 }
 
 .absheet-table tbody td {
-    color: #26384a;
+    color: #000;
     font-family: "SFMono-Regular", Consolas, monospace;
     text-align: right;
+}
+
+.absheet-table tbody tr:not(.absheet-section):not(.absheet-subsection):not(.absheet-total-row):not(.absheet-grand-total):not(.absheet-equity-row):not(.absheet-check-row):nth-child(even) > * {
+    background: #f8fafc;
+}
+
+.absheet-table tbody tr:not(.absheet-section):not(.absheet-subsection):not(.absheet-total-row):not(.absheet-grand-total):not(.absheet-equity-row):not(.absheet-check-row):hover > * {
+    background: #f1f5f9;
 }
 
 .absheet-section th {
     position: static !important;
     padding: 0.48rem 0.55rem;
     background: #d7e6f2 !important;
-    color: #173f5f !important;
-    font-size: 0.68rem;
+    color: #000 !important;
+    font-size: 0.7rem;
     letter-spacing: 0.055em;
 }
 
 .absheet-subsection th {
     position: static !important;
     background: #f0f6fa !important;
-    color: #486581 !important;
-    font-size: 0.63rem;
+    color: #000 !important;
+    font-size: 0.65rem;
     text-transform: uppercase;
 }
 
@@ -114,14 +123,14 @@
     border-top: 2px solid #486581;
     border-bottom: 3px double #486581;
     background: #eaf1f7 !important;
-    color: #173f5f !important;
+    color: #000 !important;
     font-weight: 900 !important;
 }
 
 .absheet-equity-row th,
 .absheet-equity-row td {
     background: #f0fdf4 !important;
-    color: #166534 !important;
+    color: #000 !important;
     font-weight: 800 !important;
 }
 

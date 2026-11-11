@@ -62,33 +62,45 @@
                     <DetailedCashflowStatementComponent Projection="@Projection" />
                     break;
                 case StatementTab.ProfitAndLoss:
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0 statement-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Profit and loss</th>
-                                    @foreach (var month in Months)
-                                    {
-                                        <th scope="col" class="text-end">@month.MonthLabel</th>
-                                    }
-                                    <th scope="col" class="text-end">12-month total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var line in ProfitLossLines)
-                                {
-                                    <tr class="@(line.Emphasized ? "fw-bold table-light" : null)">
-                                        <th scope="row">@line.Label</th>
+                    <section class="statement-results-card" aria-labelledby="profit-loss-title">
+                        <header class="statement-results-header">
+                            <div>
+                                <span>Projected performance</span>
+                                <h2 id="profit-loss-title">Profit and Loss</h2>
+                            </div>
+                            <div class="statement-results-meta">
+                                <span>12-month outlook</span>
+                                <strong>M1–M12</strong>
+                            </div>
+                        </header>
+                        <div class="table-responsive statement-results-frame">
+                            <table class="table table-sm table-hover mb-0 statement-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Profit and loss</th>
                                         @foreach (var month in Months)
                                         {
-                                            <td class="text-end">@Amount(line.Value(month))</td>
+                                            <th scope="col" class="text-end">@month.MonthLabel</th>
                                         }
-                                        <td class="text-end fw-semibold">@Amount(Months.Sum(line.Value))</td>
+                                        <th scope="col" class="text-end">12-month total</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach (var line in ProfitLossLines)
+                                    {
+                                        <tr class="@line.CssClass">
+                                            <th scope="row">@line.Label</th>
+                                            @foreach (var month in Months)
+                                            {
+                                                <td class="text-end">@Amount(line.Value(month))</td>
+                                            }
+                                            <td class="text-end fw-semibold">@Amount(Months.Sum(line.Value))</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                     break;
                 case StatementTab.BalanceSheet:
                     <AssessmentBalanceSheetComponent Projection="@Projection" />
@@ -114,18 +126,18 @@
     [
         new("Sales revenue", month => month.Revenue),
         new("Cost of goods sold", month => -month.CostOfGoodsSold),
-        new("Gross profit", month => month.GrossProfit, true),
+        new("Gross profit", month => month.GrossProfit, "statement-total-row"),
         new("Sundry income", month => month.SundryIncome),
         new("Grants and donations", month => month.GrantsDonationsIncome),
         new("Asset disposal income", month => month.ClassifiedAssetDisposalIncome),
         new("Other income", month => month.OtherIncome),
-        new("Gross income", month => month.GrossIncome, true),
+        new("Gross income", month => month.GrossIncome, "statement-total-row"),
         new("Operating expenses", month => -month.OperatingExpenses),
-        new("EBITDA", month => month.EBITDA, true),
+        new("EBITDA", month => month.EBITDA, "statement-total-row"),
         new("Depreciation", month => -month.Depreciation),
-        new("EBIT", month => month.EBIT),
+        new("EBIT", month => month.EBIT, "statement-total-row"),
         new("Interest expense", month => -month.InterestExpense),
-        new("Profit before tax", month => month.ProfitBeforeTax, true)
+        new("Profit before tax", month => month.ProfitBeforeTax, "statement-grand-total")
     ];
 
     private static string Amount(decimal value) =>
@@ -141,5 +153,5 @@
     private sealed record ProfitLossLine(
         string Label,
         Func<CashflowProjectionMonth, decimal> Value,
-        bool Emphasized = false);
+        string CssClass = "");
 }
