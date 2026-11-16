@@ -77,14 +77,14 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
     }
     private ZabConfirmDialogComponent? ConfirmDeactivateDialog { get; set; }
     private HashSet<long> ExpandedAssetIds { get; } = new();
-    private new List<AssetDashboardRow> Assets { get; set; } = new();
+    private List<AssetDashboardRow> AssetRows { get; set; } = new();
     private List<AssetAlertItem> AssetAlerts { get; set; } = new();
 
     private IEnumerable<AssetDashboardRow> FilteredAssets
     {
         get
         {
-            var query = Assets.AsEnumerable();
+            var query = AssetRows.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchQuery))
             {
@@ -129,7 +129,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
         if (AssessmentId <= 0)
         {
             LoadedAssessmentId = null;
-            Assets = new();
+            AssetRows = new();
             AssetAlerts = new();
             IsLoading = false;
             return;
@@ -189,22 +189,22 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
                 dashboardRows.Add(BuildDashboardRow(asset, dto, movement, hasSavedMovement));
             }
 
-            Assets = dashboardRows
+            AssetRows = dashboardRows
                 .OrderBy(asset => asset.AssetName)
                 .ToList();
 
-            AssetAlerts = BuildAlerts(Assets);
+            AssetAlerts = BuildAlerts(AssetRows);
             ShowAlertsContainer = true;
             LoadedAssessmentId = AssessmentId;
 
-            foreach (var assetId in ExpandedAssetIds.Where(id => Assets.All(asset => asset.AssessmentAssetId != id)).ToList())
+            foreach (var assetId in ExpandedAssetIds.Where(id => AssetRows.All(asset => asset.AssessmentAssetId != id)).ToList())
             {
                 ExpandedAssetIds.Remove(assetId);
             }
 
-            if (ExpandedAssetIds.Count == 0 && Assets.Count > 0)
+            if (ExpandedAssetIds.Count == 0 && AssetRows.Count > 0)
             {
-                ExpandedAssetIds.Add(Assets[0].AssessmentAssetId);
+                ExpandedAssetIds.Add(AssetRows[0].AssessmentAssetId);
             }
 
             RenderChartsAfterLoad = true;
@@ -213,7 +213,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
         {
             Logger.LogError(ex, "Error loading asset detail dashboard for assessment {AssessmentId}", AssessmentId);
             Toast.ShowError($"Could not load asset details: {ex.Message}", AppTitle);
-            Assets = new();
+            AssetRows = new();
             AssetAlerts = new();
             LoadedAssessmentId = null;
         }
@@ -431,7 +431,7 @@ public partial class AssessmentAssetDetailsPage : ComponentBase, IAsyncDisposabl
 
     private async Task OpenAssetDetailsAsync(long assessmentAssetId)
     {
-        var asset = Assets.First(item => item.AssessmentAssetId == assessmentAssetId);
+        var asset = AssetRows.First(item => item.AssessmentAssetId == assessmentAssetId);
 
         await OffCanvasService.ShowAsync(new CanvasRequest
         {

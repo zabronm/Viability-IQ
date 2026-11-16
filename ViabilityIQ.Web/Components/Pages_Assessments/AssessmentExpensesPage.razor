@@ -20,7 +20,7 @@
             <div class="px-0 mb-3">
                 <div class="row g-2 align-items-center assessment-page-toolbar expenses-page-toolbar">
                     <div class="col-xl-5 col-12 d-flex gap-2 expenses-toolbar-primary">
-                        <button class="zdt-add-button"
+                        <button class="btn btn-success btn-sm text-xs"
                                 @onclick="AddExpenseStream">
                             <i class="bi bi-plus-circle me-1"></i>
                             Add Expense Stream
@@ -58,7 +58,7 @@
                     <!-- Table Header -->
                     <thead class="py-1">
                         <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
-                            <th class="sticky-col ps-2 text-xxs text-uppercase">Expense Description <i class="bi bi-caret-down-fill text-secondary"></i></th>
+                            <th class="sticky-col ps-2 text-xxs text-uppercase">Expense name <i class="bi bi-caret-down-fill text-secondary"></i></th>
                             <th class="text-start td-header-ice text-uppercase px-1 text-xxs">Expense Type</th>
                             @for (int m = 1; m <= 12; m++)
                             {
@@ -85,8 +85,8 @@
                                 <tr class="hover-light-blue">
                                     <td class="ps-2 text-black">
                                         <span style="font-size:0.75rem !important;"
-                                              title="@item.ExpenseItemName">
-                                            @DisplayUtility.TruncateValue(item.ExpenseItemName, 20)
+                                              title="@item.DisplayName">
+                                            @DisplayUtility.TruncateValue(item.DisplayName, 20)
                                         </span>
                                         @if (item.blSendToCashBook)
                                         {

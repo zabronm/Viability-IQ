@@ -24,6 +24,8 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         [Inject] MasterDataService? ViqCrudService { get; set; }
         [Inject] IGenericDataRepository<AssessmentExpenses> ExpensesRepository { get; set; } = default!;
+        [Inject] IGenericDataRepository<ExpenseItems> ExpenseItemsRepository { get; set; } = default!;
+        [Inject] IGenericDataRepository<ExpenseType> ExpenseTypesRepository { get; set; } = default!;
         [Inject] ISessionService? sessionService { get; set; }
         [Inject] ZabOffCanvasService? zabCanvasService { get; set; }
         [Inject] ToastService? _Toast { get; set; }
@@ -97,7 +99,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 query = currentSortColumn switch
                 {
                     "ExpenseType" => isAscending ? query.OrderBy(x => x.TypeName) : query.OrderByDescending(x => x.TypeName),
-                    _ => isAscending ? query.OrderBy(x => x.ExpenseItemName) : query.OrderByDescending(x => x.ExpenseItemName)
+                    _ => isAscending ? query.OrderBy(x => x.DisplayName) : query.OrderByDescending(x => x.DisplayName)
                 };
 
                 return query;
@@ -177,9 +179,17 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     "AssessmentId");
                 var expenseRecordsTask = ExpensesRepository.GetAllAsync(x =>
                     x.AssessmentId == AssessmentId && x.Active);
-                await Task.WhenAll(resultTask, expenseRecordsTask);
+                var expenseItemsTask = ExpenseItemsRepository.GetAllAsync();
+                var expenseTypesTask = ExpenseTypesRepository.GetAllAsync();
+                await Task.WhenAll(resultTask, expenseRecordsTask, expenseItemsTask, expenseTypesTask);
                 var expenseRecords = (await expenseRecordsTask)
                     .ToDictionary(x => x.AssessmentExpenseId);
+                var expenseItemNames = (await expenseItemsTask)
+                    .Where(x => !string.IsNullOrWhiteSpace(x.ExpenseItemName))
+                    .ToDictionary(x => x.ExpenseItemId, x => x.ExpenseItemName!);
+                var expenseTypeNames = (await expenseTypesTask)
+                    .Where(x => !string.IsNullOrWhiteSpace(x.ExpenseTypeName))
+                    .ToDictionary(x => x.ExpenseTypeId, x => x.ExpenseTypeName!);
                 var result = await resultTask;
 
                 if (result != null)
@@ -190,14 +200,20 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                             ? s.AssessmentExpenseId
                             : s.AssessmentExpensesId;
                         expenseRecords.TryGetValue(expenseId, out var expenseRecord);
+                        var expenseItemId = expenseRecord?.ExpenseItemId ?? s.ExpenseItemId;
+                        var expenseTypeId = expenseRecord?.ExpenseTypeId ?? s.ExpenseTypeId;
                         return new UnifiedExpenseViewModel
                         {
                             Id = expenseId,
-                            Description = expenseRecord?.Description ?? s.Description ?? "N/A",
-                            ExpenseItemId = expenseRecord?.ExpenseItemId ?? s.ExpenseItemId,
-                            ExpenseItemName = s.ExpenseItemName ?? "N/A",
-                            TypeId = expenseRecord?.ExpenseTypeId ?? s.ExpenseTypeId,
-                            TypeName = s.ExpenseTypeName ?? "N/A",
+                            Description = expenseRecord?.Description ?? s.Description ?? string.Empty,
+                            ExpenseItemId = expenseItemId,
+                            ExpenseItemName = expenseItemNames.GetValueOrDefault(expenseItemId)
+                                ?? s.ExpenseItemName
+                                ?? "N/A",
+                            TypeId = expenseTypeId,
+                            TypeName = expenseTypeNames.GetValueOrDefault(expenseTypeId)
+                                ?? s.ExpenseTypeName
+                                ?? "N/A",
                             IsDirectorWages = expenseRecord?.IsDirectorWages ?? false,
                             IsDirectProductionCost = expenseRecord?.IsDirectProductionCost ?? false,
                             blSameMonthlyAmountUsed = expenseRecord?.blSameMonthlyAmountUsed ?? false,
@@ -221,7 +237,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             catch (Exception ex)
             {
                 Logger?.LogError(ex, "Error loading expenses data for assessment {AssessmentId}", AssessmentId);
-                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Viability IQ");
+                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Error");
             }
         }
 
@@ -254,7 +270,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 Logger?.LogError(
                     "Cannot edit expense because its record ID could not be resolved for assessment {AssessmentId}",
                     AssessmentId);
-                _Toast?.ShowError("This expense could not be loaded for editing. Refresh the page and try again.", sessionService?.AppTitle ?? "Viability IQ");
+                _Toast?.ShowError("This expense could not be loaded for editing. Refresh the page and try again.", sessionService?.AppTitle ?? "Error");
                 return;
             }
 
@@ -320,7 +336,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             await zabCanvasService!.ShowAsync(new CanvasRequest
             {
                 Title = "Bulk Expenses Import",
-                Width = 750,
+                Width = 700,
                 ComponentType = typeof(BulkExpensesImportComponent),
                 Parameters = new { AssessmentId },
                 ResultCallback = OnSaveComplete

@@ -14,17 +14,22 @@ namespace ViabilityIQ.Application.FinancialCalculations
    
     public class AssetDepreciationEngine : IAssetDepreciationEngine
     {
+        private const int ProjectionMonths = 12;
+
         private readonly IGenericDataRepository<AssessmentAsset> _assetRepository;
         private readonly IGenericDataRepository<AssessmentAssetMovement> _movementRepository;
+        private readonly IAssetMovementCalculationService _movementCalculationService;
         private readonly ILogger<AssetDepreciationEngine> _logger;
 
         public AssetDepreciationEngine(
             IGenericDataRepository<AssessmentAsset> assetRepository,
             IGenericDataRepository<AssessmentAssetMovement> movementRepository,
+            IAssetMovementCalculationService movementCalculationService,
             ILogger<AssetDepreciationEngine> logger)
         {
             _assetRepository = assetRepository ?? throw new ArgumentNullException(nameof(assetRepository));
             _movementRepository = movementRepository ?? throw new ArgumentNullException(nameof(movementRepository));
+            _movementCalculationService = movementCalculationService ?? throw new ArgumentNullException(nameof(movementCalculationService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -37,35 +42,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
             {
                 _logger.LogDebug("Calculating depreciation for assessment {AssessmentId}, month {Month}", assessmentId, month);
 
-                // Get all active assets for the assessment
-                var assets = (await _assetRepository.GetAllAsync(a =>
-                    a.AssessmentId == assessmentId && a.Active)).ToList();
-
-                if (assets == null || assets.Count == 0)
-                {
-                    _logger.LogDebug("No active assets found for assessment {AssessmentId}", assessmentId);
-                    return 0m;
-                }
-
-                decimal totalDepreciation = 0m;
-
-                foreach (var asset in assets)
-                {
-                    // Check if asset is active in this month
-                    if (!IsAssetActiveInMonth(asset, month))
-                    {
-                        _logger.LogDebug("Asset {AssetId} not active in month {Month}", asset.AssessmentAssetId, month);
-                        continue;
-                    }
-
-                    // Calculate depreciation for this asset
-                    decimal assetDepreciation = CalculateAssetMonthlyDepreciation(asset, month);
-                    totalDepreciation += assetDepreciation;
-
-                    _logger.LogDebug(
-                        "Asset {AssetId} ({AssetName}): Depreciation={Depreciation} for month {Month}",
-                        asset.AssessmentAssetId, asset.AssetName, assetDepreciation, month);
-                }
+                ValidateMonth(month);
+                var schedules = await GetCalculatedMovementSchedulesAsync(assessmentId);
+                var totalDepreciation = schedules.Sum(movement => movement.GetDepreciation(month));
 
                 _logger.LogInformation(
                     "Total depreciation for assessment {AssessmentId}, month {Month}: {TotalDepreciation}",
@@ -165,14 +144,11 @@ namespace ViabilityIQ.Application.FinancialCalculations
         /// Returns dictionary: month -> total depreciation       
         public async Task<Dictionary<int, decimal>> CalculateAnnualDepreciationAsync(long assessmentId)
         {
-            var result = new Dictionary<int, decimal>();
-
-            for (int month = 1; month <= 12; month++)
-            {
-                result[month] = await CalculateMonthDepreciationAsync(assessmentId, month);
-            }
-
-            return result;
+            var schedules = await GetCalculatedMovementSchedulesAsync(assessmentId);
+            return Enumerable.Range(1, ProjectionMonths)
+                .ToDictionary(
+                    month => month,
+                    month => schedules.Sum(movement => movement.GetDepreciation(month)));
         }
 
        
@@ -194,6 +170,50 @@ namespace ViabilityIQ.Application.FinancialCalculations
             {
                 _logger.LogError(ex, "Error getting stored depreciation for asset {AssetId}, month {Month}", assessmentAssetId, month);
                 return 0m;
+            }
+        }
+
+        private async Task<IReadOnlyList<AssessmentAssetMovement>> GetCalculatedMovementSchedulesAsync(
+            long assessmentId)
+        {
+            var assets = (await _assetRepository.GetAllAsync(asset =>
+                asset.AssessmentId == assessmentId && asset.Active)).ToList();
+            if (assets.Count == 0)
+            {
+                return Array.Empty<AssessmentAssetMovement>();
+            }
+
+            var assetIds = assets.Select(asset => asset.AssessmentAssetId).ToHashSet();
+            var storedMovements = (await _movementRepository.GetAllAsync(movement => movement.Active))
+                .Where(movement => assetIds.Contains(movement.AssessmentAssetId))
+                .GroupBy(movement => movement.AssessmentAssetId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.OrderByDescending(movement => movement.ModifiedDate).First());
+            var schedules = new List<AssessmentAssetMovement>(assets.Count);
+
+            foreach (var asset in assets)
+            {
+                var movement = storedMovements.TryGetValue(asset.AssessmentAssetId, out var savedMovement)
+                    ? savedMovement
+                    : new AssessmentAssetMovement
+                    {
+                        AssessmentAssetId = asset.AssessmentAssetId,
+                        DepreciationRate = asset.DepreciationRate,
+                        DepreciationMethod = asset.DepreciationMethod,
+                        Active = true
+                    };
+                schedules.Add(await _movementCalculationService.RecalculateAllMonthsAsync(movement, asset));
+            }
+
+            return schedules;
+        }
+
+        private static void ValidateMonth(int month)
+        {
+            if (month is < 1 or > ProjectionMonths)
+            {
+                throw new ArgumentOutOfRangeException(nameof(month), "Month must be between 1 and 12.");
             }
         }
     }

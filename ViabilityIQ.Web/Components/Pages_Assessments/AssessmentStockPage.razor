@@ -27,7 +27,7 @@
                 <div class="col-md-4">
                     @if (!IsServiceMode && !IsFullManufacturingMode)
                     {
-                        <button type="button" class="zdt-add-button" @onclick="() => OpenStockDataEntryPanel(0)">
+                        <button type="button" class="btn btn-success btn-sm" @onclick="() => OpenStockDataEntryPanel(0)">
                             <i class="bi bi-plus-circle me-1"></i> @(IsManufacturingMode ? "Add Manufactured Product" : "Add Stock Item")
                         </button>
                     }
@@ -80,25 +80,81 @@
                     }
                     else
                     {
-                        <span>Opening balances are entered per item. Monthly values are purchases/additions; closing inventory is calculated from opening stock, purchases and estimated cost of sales.</span>
+                        @if (UsesClosingStockProfile)
+                        {
+                            <span>Opening and month-end stock values at cost are recorded per item. Purchases are derived as cost of sales plus the change in stock; blank months carry the previous balance forward.</span>
+                        }
+                        else
+                        {
+                            <span>This assessment still uses the legacy monthly-purchase inputs. Enter month-end stock values at cost per item to activate CPE stock computation; purchases will then be derived from cost of sales and the change in stock.</span>
+                        }
                     }
                 </p>
-                <div class="table-responsive shadow-sm avd-table-frame " style="overflow: hidden; border: solid 1px #98AFC7; border-radius: 0.8rem !important">
+                @if (IsTradingMode && UsesClosingStockProfile)
+                {
+                    <div class="alert alert-info py-2">
+                        CPE stock computation is active. Monthly purchases are derived from cost of sales and the stock movement. Legacy purchase entries are retained but no longer drive this projection.
+                    </div>
+                }
+                @if (IsTradingMode && !UsesClosingStockProfile)
+                {
+                    <section class="border rounded bg-light p-2 mb-3" aria-labelledby="trading-closing-stock-heading">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h2 id="trading-closing-stock-heading" class="h6 mb-1">Legacy assessment-level closing estimates (@(sessionService?.CurrencyCode ?? "ZAR"))</h2>
+                                <p class="small text-muted mb-0">Enter closing balances per stock item to switch to CPE stock computation.</p>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm"
+                                    disabled="@IsSavingClosingStock"
+                                    @onclick="SaveClosingStockEstimatesAsync">
+                                @if (IsSavingClosingStock)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                                    <span>Saving...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+                                    <span>Save estimates</span>
+                                }
+                            </button>
+                        </div>
+                        <div class="row g-2">
+                            @for (var index = 0; index < 12; index++)
+                            {
+                                var monthIndex = index;
+                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                    <label class="form-label text-xxs mb-1" for="@($"closingStockMonth{monthIndex + 1}")">Month @(monthIndex + 1)</label>
+                                    <InputDecimal2 id="@($"closingStockMonth{monthIndex + 1}")"
+                                                   class="form-control form-control-sm text-end"
+                                                   min="0"
+                                                   step="0.01"
+                                                   @bind-Value="MonthlyClosingStockValues[monthIndex]" />
+                                </div>
+                            }
+                        </div>
+                    </section>
+                }
+                <div class="table-responsive shadow-sm avd-table-frame" style="overflow: hidden;">
                     <table class="table table-sm table-hover mb-0">
                         <thead class="py-1">
                             <tr class="bg-light text-muted fw-bold border-bottom align-bottom">
                                 <th class="sticky-col ps-2 text-xxs text-uppercase">Stock item</th>
                                 <th class="text-xxs text-uppercase">Sales category</th>
-                                <th class="text-end text-uppercase text-xxs">Opening balance</th>
+                                <th class="text-end text-uppercase text-xxs">Opening at cost</th>
                                 @if (IsManufacturingMode)
                                 {
                                     <th class="text-end text-uppercase text-xxs">Standard unit cost</th>
                                 }
                                 @for (int i = 1; i <= 12; i++)
                                 {
-                                    <th class="text-end td-header-ice text-uppercase text-xxs">@(IsManufacturingMode ? $"Units M{i}" : $"M{i}")</th>
+                                    <th class="text-end td-header-ice text-uppercase text-xxs">@(IsManufacturingMode
+                                        ? $"Units M{i}"
+                                        : UsesClosingStockProfile ? $"Close M{i}" : $"Buy M{i}")</th>
                                 }
-                                <th class="text-end text-uppercase text-xxs" style="background-color: #d1d5db; color: #000080;">@(IsManufacturingMode ? "Annual units" : "Annual Purchases")</th>
+                                <th class="text-end text-uppercase text-xxs" style="background-color: #d1d5db; color: #000080;">@(IsManufacturingMode
+                                    ? "Annual units"
+                                    : UsesClosingStockProfile ? "M12 Closing" : "Annual Purchases")</th>
                                 <th class="text-center td-header-ice text-xxs assessment-grid-actions">Action</th>
                             </tr>
                         </thead>
@@ -137,7 +193,7 @@
                                         <td class="text-end font-monospace fw-bold text-xxs" style="background-color: #d1d5db; color: #000080;">
                                             @(IsManufacturingMode
                                                 ? DisplayUtility.FormatNumber(item.MonthlyProductionUnits.Sum(), sessionService?.CultureName, "N2")
-                                                : Money(item.MonthlyValues.Sum()))
+                                                : UsesClosingStockProfile ? Money(GetMonthValue(item, 12)) : Money(item.MonthlyValues.Sum()))
                                         </td>
                                         <td class="text-center assessment-grid-actions">
                                             <button class="btn-action-operation btn-edit-accent" @onclick="() => OpenStockDataEntryPanel(item.Id)">
@@ -167,6 +223,27 @@
                                         : Money(GetGrandTotalStockValue()))</td>
                                     <td></td>
                                 </tr>
+                                @if (UsesClosingStockProfile)
+                                {
+                                    <tr class="table-info fw-semibold">
+                                        <td class="ps-2 text-xxs">Derived purchases</td>
+                                        <td class="text-xxs">All categories</td>
+                                        <td></td>
+                                        @if (IsManufacturingMode)
+                                        {
+                                            <td></td>
+                                        }
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            var purchase = GetDerivedPurchases(i);
+                                            <td class="text-end font-monospace text-xs">@(purchase.HasValue ? Money(purchase.Value) : "Unavailable")</td>
+                                        }
+                                        <td class="text-end font-monospace text-xs">@(CashflowProjection is null
+                                            ? "Unavailable"
+                                            : Money(CashflowProjection.Summary.StockPurchases))</td>
+                                        <td></td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>

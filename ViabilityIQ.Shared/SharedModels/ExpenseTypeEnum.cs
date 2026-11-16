@@ -19,6 +19,8 @@ namespace ViabilityIQ.Shared.SharedModels
     {
         public long Id { get; set; }           // Ensure this line exists
         public string Description { get; set; } = string.Empty;
+        public string DisplayName =>
+            string.IsNullOrWhiteSpace(Description) ? ExpenseItemName : Description;
         public string TypeName { get; set; } = string.Empty;
         public string ExpenseItemName { get; set; } = string.Empty;
         public long TypeId { get; set; }

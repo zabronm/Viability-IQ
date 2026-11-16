@@ -34,7 +34,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         #region Private Fields
 
         private AssessmentStock FormModel = new();
-        private decimal[] MonthlyValues { get; set; } = new decimal[12];
+        private decimal?[] ClosingStockValues { get; set; } = new decimal?[12];
         private decimal[] ProductionUnits { get; set; } = new decimal[12];
         private decimal BulkTargetValue { get; set; }
         private bool IsSubmitting { get; set; }
@@ -74,13 +74,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 {
                     FormModel = await ViqCrudService!.GetSingleAsync<AssessmentStock>("tblAssessmentStock", new { AssessmentStockId })
                                 ?? new AssessmentStock { AssessmentId = AssessmentId };
-                    MonthlyValues = FormModel.MonthlyValues;
+                    ClosingStockValues = FormModel.MonthlyClosingStockValues;
                     ProductionUnits = FormModel.MonthlyProductionUnits;
                 }
                 else
                 {
                     FormModel = new AssessmentStock { AssessmentId = AssessmentId, blIncludeVAT = true };
-                    MonthlyValues = new decimal[12];
+                    ClosingStockValues = new decimal?[12];
                     ProductionUnits = new decimal[12];
                 }
 
@@ -100,8 +100,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 IsManufacturingMode ? "production units" : "stock values",
                 BulkTargetValue);
 
-            var monthlyValues = IsManufacturingMode ? ProductionUnits : MonthlyValues;
-            Array.Fill(monthlyValues, BulkTargetValue);
+            if (IsManufacturingMode)
+            {
+                Array.Fill(ProductionUnits, BulkTargetValue);
+                return;
+            }
+
+            Array.Fill(ClosingStockValues, BulkTargetValue);
         }
 
 
@@ -129,9 +134,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 }
                 else
                 {
-                    FormModel.MonthlyValues = MonthlyValues;
                     FormModel.MonthlyProductionUnits = new decimal[12];
                     FormModel.StandardUnitCost = 0m;
+                    FormModel.MonthlyClosingStockValues = ClosingStockValues;
                 }
 
                 Logger?.LogInformation("Saving stock for assessment {AssessmentId}", FormModel.AssessmentId);
@@ -156,7 +161,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                         AssessmentId = AssessmentId,
                         blIncludeVAT = true
                     };
-                    MonthlyValues = new decimal[12];
+                    ClosingStockValues = new decimal?[12];
                     ProductionUnits = new decimal[12];
                     BulkTargetValue = 0m;
                 }

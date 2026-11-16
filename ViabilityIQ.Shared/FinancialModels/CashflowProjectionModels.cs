@@ -37,6 +37,7 @@ public sealed class CashflowProjectionMonth
         + OtherIncomeVatInclusive;
 
     public decimal StockPurchases { get; init; }
+    public decimal StockPurchasesVatInclusive { get; init; }
     public decimal RawMaterialPurchases { get; init; }
     public decimal RawMaterialPurchasesVatInclusive { get; init; }
     public decimal RawMaterialConsumption { get; init; }
@@ -48,9 +49,10 @@ public sealed class CashflowProjectionMonth
     public decimal GrossIncomeVatInclusive => GrossProfitVatInclusive + AdditionalIncomeVatInclusive;
     public decimal OperatingExpenses { get; init; }
     public decimal OperatingExpensesVatInclusive { get; init; }
-    public decimal EBITDA => GrossIncome - OperatingExpenses;
+    public decimal BadDebtExpense { get; init; }
+    public decimal EBITDA => GrossIncome - OperatingExpenses - BadDebtExpense;
     public decimal EBITDAInclusive =>
-        GrossIncomeVatInclusive - OperatingExpensesVatInclusive - VatPayable;
+        GrossIncomeVatInclusive - OperatingExpensesVatInclusive - VatPayable - BadDebtExpense;
     public decimal Depreciation { get; init; }
     public decimal EBIT => EBITDA - Depreciation;
     public decimal InterestExpense { get; init; }
@@ -107,7 +109,7 @@ public sealed class CashflowProjectionMonth
     public decimal CurrentAssets => Math.Max(ClosingBank, 0m) + ClosingDebtors + ClosingStock + OtherCurrentAssets;
     public decimal TotalAssets => CurrentAssets + ClosingFixedAssets;
     public decimal CurrentLiabilities =>
-        ClosingCreditors + ClosingLoanBalance + Math.Max(-ClosingBank, 0m) + OtherCurrentLiabilities;
+        ClosingCreditors + Math.Max(-ClosingBank, 0m) + OtherCurrentLiabilities;
     public decimal? CurrentRatio => CurrentLiabilities == 0m ? null : CurrentAssets / CurrentLiabilities;
 }
 
@@ -117,6 +119,7 @@ public sealed class CashflowProjectionSummary
     public decimal ClosingBank { get; init; }
     public decimal OpeningStock { get; init; }
     public decimal ClosingStock { get; init; }
+    public bool UsesClosingStockProfile { get; init; }
 
     public decimal Revenue { get; init; }
     public decimal SundryIncome { get; init; }
@@ -138,12 +141,14 @@ public sealed class CashflowProjectionSummary
     public decimal ProfitBeforeTaxVatInclusive { get; init; }
 
     public decimal StockPurchases { get; init; }
+    public decimal StockPurchasesVatInclusive { get; init; }
     public decimal RawMaterialPurchases { get; init; }
     public decimal RawMaterialConsumption { get; init; }
     public decimal CompletedProductionCost { get; init; }
     public decimal CostOfGoodsSold { get; init; }
     public decimal GrossProfit { get; init; }
     public decimal OperatingExpenses { get; init; }
+    public decimal BadDebtExpense { get; init; }
     public decimal EBITDA { get; init; }
     public decimal Depreciation { get; init; }
     public decimal EBIT { get; init; }

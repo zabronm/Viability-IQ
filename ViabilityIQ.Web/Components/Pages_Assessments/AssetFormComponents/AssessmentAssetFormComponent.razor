@@ -170,14 +170,13 @@
                 <div class="viq-form-field viq-form-span-2">
                     <label for="assetDepreciationRate">Annual depreciation rate (%)</label>
                     <div class="aaf-input-group aaf-input-group-suffix">
-                        <input id="assetDepreciationRate" type="number" min="0" max="100" step="0.01"
+                        <input id="assetDepreciationRate" type="number" min="0" max="100" step="0.0001"
                                class="viq-form-control text-end"
                                @bind="FormModel.DepreciationRate"
                                placeholder="10.00" />
                         <span>%</span>
                     </div>
                     <small class="aaf-field-note">
-                        @* Estimated monthly charge: @((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2") *@
                         Estimated monthly charge: @EstimatedMontlyDepreciation
                     </small>
                 </div>

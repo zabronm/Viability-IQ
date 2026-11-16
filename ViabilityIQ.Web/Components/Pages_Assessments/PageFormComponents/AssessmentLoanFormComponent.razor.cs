@@ -32,6 +32,23 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         private bool isNewLoan { get; set; }
         private bool IsLoading { get; set; } = true;
         private bool IsSubmitting { get; set; } = false;
+        private decimal CalculatedMonthlyRepayment
+        {
+            get
+            {
+                if (Model is null
+                    || Model.LoanBalanceAtAssessmentDate <= 0m
+                    || Model.RepaymentPeriodMonths <= 0
+                    || Model.InterestRatePerAnnum < 0m)
+                {
+                    return 0m;
+                }
+
+                return financialEngine!.CalculateLoan(
+                    Model,
+                    LoanCalculationMethodsEnums.ReducingBalance).MonthlyRepayment;
+            }
+        }
 
         protected override async Task OnInitializedAsync()
         {
@@ -100,6 +117,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
             {
                 IsSubmitting = true;
                 isNewLoan = Model.AssessmentLoanId == 0 ? true : false;
+                Model.ActualRepaymentAmount = CalculatedMonthlyRepayment;
 
                 isExecutionSuccess = await DataRepository.SaveAsync(Model);
 
@@ -109,7 +127,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                     {
                         //============== DELETE (SET ACTIVE =FALSE) ==== UPDATE existing loan record, no need to update repayments
                         var str_sql = "UPDATE tblAssessmentLoanRepayment SET [Active]=@parActive WHERE (AssessmentLoanId = @parAssessmentLoanId)";
-                        _ = masterDataService!.ExecuteCommandAsync(str_sql, new { parActive = false, parAssessmentLoanId = Model.AssessmentLoanId });
+                        await masterDataService!.ExecuteCommandAsync(str_sql, new { parActive = false, parAssessmentLoanId = Model.AssessmentLoanId });
                     }
 
 

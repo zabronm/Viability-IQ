@@ -107,7 +107,7 @@ namespace ViabilityIQ.Web.Extensions
                         out var configuredIdleTimeout)
                     && configuredIdleTimeout > 0
                         ? configuredIdleTimeout
-                        : 30;
+                        : 45;
 
                 options.LoginPath = "/login";
                 options.LogoutPath = "/logout";
@@ -137,6 +137,7 @@ namespace ViabilityIQ.Web.Extensions
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITenantUserManagementService, TenantUserManagementService>();
+            services.AddHostedService<SupportConversationExpiryService>();
 
             services.AddHttpContextAccessor();
 

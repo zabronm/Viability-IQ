@@ -6,6 +6,7 @@ using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Infrastructure.Repositories;
 using ViabilityIQ.Shared.DataModels;
 using ViabilityIQ.Shared.SharedModels;
+using ViabilityIQ.Shared.UtilityServices;
 using ViabilityIQ.Web.Services;
 
 
@@ -46,7 +47,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
         // PRIVATE FIELDS - FORM DATA
         // ====================================================
         private AssessmentAsset FormModel = new();
-        private string EstimatedMontlyDepreciation => ((FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m).ToString("C2");      
+        private string EstimatedMontlyDepreciation => DisplayUtility.FormatCurrency(
+            (FormModel.OpeningBalanceValue * FormModel.DepreciationRate / 100m) / 12m,
+            sessionService?.CurrencyCode,
+            sessionService?.CultureName);
         private bool IsSubmitting { get; set; }
 
         // ====================================================
@@ -84,7 +88,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                 {
                     // ✅ LOAD EXISTING ASSET
                     var existingAsset = await DataRepository.GetByIdAsync(AssessmentAssetId);
-                    if (existingAsset is null)
+                    if (existingAsset == null)
                     {
                         Logger?.LogWarning("Asset not found: {AssessmentAssetId}", AssessmentAssetId);
                         _Toast?.ShowError($"Asset not found", "Error");
@@ -352,7 +356,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.AssetFormComponents
                 // Validate depreciation rate if asset is depreciable
                 if (FormModel.IsDepreciable)
                 {
-                    if (FormModel.DepreciationRate <= 0 || FormModel.DepreciationRate > 100)
+                    if (FormModel.DepreciationRate < 0 || FormModel.DepreciationRate > 100)
                     {
                         _Toast?.ShowError("Depreciation rate must be between 0 and 100%", "Validation Error");
                         Logger?.LogWarning("Validation failed: Invalid depreciation rate {Rate}%", FormModel.DepreciationRate);

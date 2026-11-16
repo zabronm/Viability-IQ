@@ -258,6 +258,7 @@ public sealed class AssessmentReportService : IAssessmentReportService
                 Row("Gross profit", months, x => x.GrossProfit, total: true),
                 PercentageRow("Gross margin", months, x => x.Revenue == 0m ? null : x.GrossProfit / x.Revenue),
                 Row("Operating expenses", months, x => -x.OperatingExpenses),
+                Row("Bad debt expense", months, x => -x.BadDebtExpense),
                 Row("EBITDA", months, x => x.EBITDA, total: true),
                 Row("Depreciation", months, x => -x.Depreciation),
                 Row("EBIT", months, x => x.EBIT, total: true),
@@ -327,7 +328,7 @@ public sealed class AssessmentReportService : IAssessmentReportService
                 Row("Retained earnings (cumulative profit before tax)", months, x => x.RetainedEarningsBeforeTax),
                 Row("TOTAL EQUITY", months, Equity, total: true),
                 Row("TOTAL LIABILITIES & EQUITY", months, x => Liabilities(x) + Equity(x), total: true),
-                PercentageRow("Current ratio", months, x => x.CurrentRatio)
+                RatioRow("Current ratio", months, x => x.CurrentRatio)
             ])
         };
     }
@@ -398,6 +399,11 @@ public sealed class AssessmentReportService : IAssessmentReportService
         string label, IReadOnlyList<CashflowProjectionMonth> months,
         Func<CashflowProjectionMonth, decimal?> selector) =>
         new(label, [.. months.Select(selector), (decimal?)null], IsPercentage: true);
+
+    private static ReportTableRow RatioRow(
+        string label, IReadOnlyList<CashflowProjectionMonth> months,
+        Func<CashflowProjectionMonth, decimal?> selector) =>
+        new(label, [.. months.Select(selector), (decimal?)null], IsRatio: true);
 
     private static ReportTableRow Heading(string label) => new(label, [], IsHeading: true);
 

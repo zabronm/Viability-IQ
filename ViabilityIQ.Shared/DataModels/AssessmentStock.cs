@@ -51,6 +51,30 @@ namespace ViabilityIQ.Shared.DataModels
         public decimal Month_10 { get; set; }
         public decimal Month_11 { get; set; }
         public decimal Month_12 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_1 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_2 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_3 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_4 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_5 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_6 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_7 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_8 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_9 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_10 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_11 { get; set; }
+        [Range(typeof(decimal), "0", "79228162514264337593543950335")]
+        public decimal? ClosingStock_Month_12 { get; set; }
         public decimal TotalNoVAT { get; set; }
         public decimal TotalWithVAT { get; set; }
         public bool Active { get; set; }
@@ -77,6 +101,29 @@ namespace ViabilityIQ.Shared.DataModels
                 }
             }
         } 
+        [Write(false)] public decimal?[] MonthlyClosingStockValues
+        {
+            get =>
+            [
+                ClosingStock_Month_1, ClosingStock_Month_2, ClosingStock_Month_3,
+                ClosingStock_Month_4, ClosingStock_Month_5, ClosingStock_Month_6,
+                ClosingStock_Month_7, ClosingStock_Month_8, ClosingStock_Month_9,
+                ClosingStock_Month_10, ClosingStock_Month_11, ClosingStock_Month_12
+            ];
+            set
+            {
+                if (value is null || value.Length != 12)
+                    throw new ArgumentException("MonthlyClosingStockValues array must have exactly 12 elements.");
+
+                ClosingStock_Month_1 = value[0]; ClosingStock_Month_2 = value[1];
+                ClosingStock_Month_3 = value[2]; ClosingStock_Month_4 = value[3];
+                ClosingStock_Month_5 = value[4]; ClosingStock_Month_6 = value[5];
+                ClosingStock_Month_7 = value[6]; ClosingStock_Month_8 = value[7];
+                ClosingStock_Month_9 = value[8]; ClosingStock_Month_10 = value[9];
+                ClosingStock_Month_11 = value[10]; ClosingStock_Month_12 = value[11];
+            }
+        }
+
         [Write(false)] public decimal Month { get; set; }
         [Write(false)] public decimal[] MonthlyProductionUnits
         {
@@ -100,6 +147,11 @@ namespace ViabilityIQ.Shared.DataModels
                 ProductionUnits_Month_11 = value[10]; ProductionUnits_Month_12 = value[11];
             }
         }
+
+        public decimal? GetClosingStock(int month) =>
+            month is >= 1 and <= 12
+                ? MonthlyClosingStockValues[month - 1]
+                : throw new ArgumentOutOfRangeException(nameof(month));
 
 
         long IEntity.Id => AssessmentStockId;

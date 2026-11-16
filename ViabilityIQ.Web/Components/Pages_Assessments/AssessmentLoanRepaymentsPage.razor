@@ -16,26 +16,25 @@
     <div class="row bg-white g-3 mt-1 mb-1 py-2 px-2" style="border-radius: 6px;">
 
         <div class="col-12 mt-0 pt-0">
-            <AssessmentKpiCardsComponent Items="@LoanKpis" AriaLabel="Loan key performance indicators" HeaderTitle="Loans key indicators" HeaderSubtitle="Loans key performance indicators" />
+            <AssessmentKpiCardsComponent Items="@LoanKpis" AriaLabel="Loan key performance indicators" />
         </div>
 
         <!-- Top Action Row: Add Button, Loan Type Filter, and Search Box -->
         <div class="col-12">
             <div class="d-flex align-items-center justify-content-between mb-0 flex-wrap gap-2 assessment-page-toolbar">
                 <div>
-                    <button type="button" class="zdt-add-button" @onclick="() => OpenLoanFormAsync(0)">
+                    @* <button type="button" class="btn btn-success text-xs shadow-sm px-3" @onclick="() => OpenLoanFormAsync(0)">
                         <i class="bi bi-plus-lg me-1.5 fw-bold"></i>Add Loan
-                    </button>
+                    </button *@
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
                     <AssessmentPrintButton />
-                    <div class="assessment-page-filter">                       
+                    <div class="assessment-page-filter">
                         <DDLookupComponent SourceKey="DDLookupEnums.AssessmentLoans"
                                            FilterValue="@AssessmentId"
-                                           Value="SelectedLoanTypeId"
+                                           Value="SelectedLoanTypeId ?? 0L"
                                            ValueChanged="@(val => SelectedLoanTypeId = val)"
-                                           ValueExpression="@(() =>SelectedLoanTypeId)"
                                            Placeholder="Filter by loan" />
                     </div>
 
@@ -90,7 +89,7 @@
                                             @DisplayUtility.TruncateValue(loan.BankName, 20)
                                         </small>
                                     </td>
-                                    <td class="text-xxs text-muted fw-semibold py-1.5 bg-light-subtle ps-2">Expected Repayment</td>
+                                    <td class="text-xxs text-muted fw-semibold py-1.5 bg-light-subtle ps-2">Scheduled installment (principal + interest)</td>
                                     @for (int i = 0; i < 12; i++)
                                     {
                                         var monthIdx = i + 1;
@@ -121,8 +120,8 @@
                                         </div>
                                         <div class="py-1">
                                             <button type="button" class="btn-action-operation btn-delete-accent"
-                                                    @onclick="() => HandleDeleteLoanAndRepaymentsAsync(loan.LoanId)" title="Delete Loan">
-                                                <i class="bi bi-file-earmark-x"></i>
+                                                    @onclick="() => HandleDeleteLoanAndRepaymentsAsync(loan.LoanId)" title="Deactivate loan (preserves history)">
+                                                <i class="bi bi-archive"></i>
                                             </button>
                                         </div>
                                     </td>

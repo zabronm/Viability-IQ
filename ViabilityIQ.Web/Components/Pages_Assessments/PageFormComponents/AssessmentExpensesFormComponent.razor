@@ -36,6 +36,13 @@
                         <DDLookupComponent SourceKey="DDLookupEnums.ExpenseItems"
                                            @bind-Value="FormModel.ExpenseItemId" />
                     </div>
+                    <div class="viq-form-field viq-form-span-2">
+                        <label for="expenseDescription">Expense name / description (optional)</label>
+                        <input id="expenseDescription" class="viq-form-control"
+                               @bind="FormModel.Description"
+                               placeholder="Add a business-specific name or detail" />
+                        <small>When provided, this label appears in the expense grid; the selected expense item remains the reporting classification.</small>
+                    </div>
                     <label class="viq-toggle-card" for="directorWagesSwitch">
                         <span>
                             <strong>Director wages</strong>
@@ -44,14 +51,12 @@
                         <InputCheckbox id="directorWagesSwitch" class="viq-switch"
                                        @bind-Value="FormModel.IsDirectorWages" />
                     </label>
-                    @if (IsManufacturingMode)
+                    @if (CanClassifyDirectCosts)
                     {
                         <label class="viq-toggle-card" for="directProductionCostSwitch">
                             <span>
-                                <strong>@(IsMonthlyEstimateManufacturingMode ? "Production labour / overhead" : "Direct production cost")</strong>
-                                <small>@(IsMonthlyEstimateManufacturingMode
-                                    ? "Include eligible production labour and overhead in the production-cost flow. Enter raw-material purchases in Manufacturing, not here."
-                                    : "Classify direct production costs as cost of goods sold.")</small>
+                                <strong>@DirectCostLabel</strong>
+                                <small>@DirectCostDescription</small>
                             </span>
                             <InputCheckbox id="directProductionCostSwitch" class="viq-switch"
                                            @bind-Value="FormModel.IsDirectProductionCost" />
@@ -96,8 +101,8 @@
                 <div class="viq-form-grid viq-form-grid-2">
                     <div class="viq-form-field">
                         <label for="monthlyAllocation">Monthly amount</label>
-                        <InputDecimal2 id="monthlyAllocation" type="number" class="viq-form-control"
-                               step="0.01" @bind-Value="FormModel.SameMonthlyAmount" />
+                        <InputDecimal2 id="monthlyAllocation" class="viq-form-control"
+                                       step="0.01" @bind-Value="FormModel.SameMonthlyAmount" />
                     </div>
                     <div class="viq-form-field">
                         <label>Allocation action</label>
@@ -125,9 +130,9 @@
                         <div class="viq-form-field">
                             <label for="@($"expenseProjectionMonth{index + 1}")">Month @(index + 1)</label>
                             <InputDecimal2 id="@($"expenseProjectionMonth{index + 1}")"
-                                         class="viq-form-control"
-                                         step="0.01"
-                                         @bind-Value="MonthlyValues[index]" />
+                                           class="viq-form-control"
+                                           step="0.01"
+                                           @bind-Value="MonthlyValues[index]" />
                         </div>
                     }
                 </div>

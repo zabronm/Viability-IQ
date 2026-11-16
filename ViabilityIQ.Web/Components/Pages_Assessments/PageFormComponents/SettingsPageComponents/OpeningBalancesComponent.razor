@@ -53,7 +53,7 @@ else
                 @MoneyInput("Opening VAT refundable", "VAT refund already receivable; collected in Month 1.", openingBalancesModel.OpeningVatRefundable, value => openingBalancesModel.OpeningVatRefundable = value)
             </div>
             <footer class="ob-footer">
-                <span><i class="bi bi-info-circle"></i> Equity rolls forward from these opening balances using projected monthly profit before tax. Tax, drawings/distributions, and new capital are not modeled.</span>
+                <span><i class="bi bi-info-circle"></i> Reconcile opening assets and liabilities to share capital plus retained earnings using the opening trial balance; no balancing equity plug is inserted. Equity then rolls forward by projected monthly profit before tax. Tax, drawings/distributions, and new capital are not modeled.</span>
                 <button class="btn btn-success" type="submit" disabled="@IsSubmitting"><i class="bi bi-check2-circle"></i> Update Opening Balances</button>
             </footer>
         </section>

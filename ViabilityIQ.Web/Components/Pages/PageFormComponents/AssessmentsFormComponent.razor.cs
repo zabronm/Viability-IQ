@@ -20,6 +20,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         [Inject] private OffCanvasStateService? OffcanvasService { get; set; } = default!;  // ✅ ADD THIS
 
         [Parameter] public long AssessmentId { get; set; } = 0;
+        [Parameter] public long InitialBusinessId { get; set; }
 
         private Assessment assessmentModel = new();
         private Dictionary<long, string> activeBusinessLookup = new();
@@ -118,6 +119,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
                     StatusId = 1,
                     AssessmentTypeId = 1,
                     AssessmentModeId = (int)AssessmentMode.Trading,
+                    BusinessId = InitialBusinessId,
                     Active = true
                 };
 

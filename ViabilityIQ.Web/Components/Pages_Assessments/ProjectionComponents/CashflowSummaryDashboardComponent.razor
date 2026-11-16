@@ -31,6 +31,7 @@
                 <tr><td>(add) Other income</td><td>@Amount(Projection.Summary.OtherIncomeVatInclusive)</td></tr>
                 <tr class="summary-total"><td>Gross income</td><td>@Amount(Projection.Summary.GrossIncomeVatInclusive)</td></tr>
                 <tr><td>(less) Operating expenses</td><td class="text-danger">(@Amount(Projection.Summary.OperatingExpensesVatInclusive))</td></tr>
+                <tr><td>(less) Bad debt expense</td><td class="text-danger">(@Amount(Projection.Summary.BadDebtExpense))</td></tr>
                 <tr><td>Net VAT payable / (refund)</td><td>@VatAdjustment(Projection.Summary.VatPayable)</td></tr>
                 <tr class="summary-total"><td>EBITDA</td><td>@Amount(Projection.Summary.EBITDAInclusive)</td></tr>
                 <tr><td>(less) Depreciation</td><td class="text-danger">(@Amount(Projection.Summary.Depreciation))</td></tr>
