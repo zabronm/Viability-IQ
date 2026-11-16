@@ -14,6 +14,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
     private readonly IGenericDataRepository<AssessmentSalesCategory> _categoryRepository;
     private readonly IGenericDataRepository<AssessmentSales> _salesRepository;
     private readonly IGenericDataRepository<AssessmentStock> _stockRepository;
+    private readonly IGenericDataRepository<IncomeType> _incomeTypeRepository;
+    private readonly IGenericDataRepository<AssessmentProjectionAssumptions> _assumptionsRepository;
     private readonly IGenericDataRepository<AssessmentManufacturingMaterial> _manufacturingMaterialRepository;
     private readonly IGenericDataRepository<DebtorsCreditorsProfile> _profileRepository;
     private readonly ILogger<AccountsProjectionService> _logger;
@@ -23,6 +25,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
         IGenericDataRepository<AssessmentSalesCategory> categoryRepository,
         IGenericDataRepository<AssessmentSales> salesRepository,
         IGenericDataRepository<AssessmentStock> stockRepository,
+        IGenericDataRepository<IncomeType> incomeTypeRepository,
+        IGenericDataRepository<AssessmentProjectionAssumptions> assumptionsRepository,
         IGenericDataRepository<AssessmentManufacturingMaterial> manufacturingMaterialRepository,
         IGenericDataRepository<DebtorsCreditorsProfile> profileRepository,
         ILogger<AccountsProjectionService> logger)
@@ -31,6 +35,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
         _categoryRepository = categoryRepository;
         _salesRepository = salesRepository;
         _stockRepository = stockRepository;
+        _incomeTypeRepository = incomeTypeRepository;
+        _assumptionsRepository = assumptionsRepository;
         _manufacturingMaterialRepository = manufacturingMaterialRepository;
         _profileRepository = profileRepository;
         _logger = logger;
@@ -55,8 +61,23 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
             x.AssessmentId == assessmentId && x.Active)).ToList();
         var stock = (await _stockRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId && x.Active)).ToList();
+        var incomeTypesTask = _incomeTypeRepository.GetAllAsync();
+        var assumptionsTask = _assumptionsRepository.GetAllAsync(x =>
+            x.AssessmentId == assessmentId && x.Active);
         var manufacturingMaterials = (await _manufacturingMaterialRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId && x.Active)).ToList();
+        await Task.WhenAll(incomeTypesTask, assumptionsTask);
+        var costOfSalesPercentage = (await assumptionsTask)
+            .OrderByDescending(x => x.AssessmentProjectionAssumptionsId)
+            .FirstOrDefault()?.CostOfSalesPercentage;
+        var tradingStockProjection = mode == AssessmentMode.Trading
+            ? TradingStockProjectionCalculator.Calculate(
+                categories,
+                sales,
+                (await incomeTypesTask).ToList(),
+                stock,
+                costOfSalesPercentage)
+            : null;
         var profile = (await _profileRepository.GetAllAsync(x =>
             x.AssessmentId == assessmentId))
             .OrderByDescending(x => x.Active)
@@ -92,6 +113,14 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
                 x => x.MonthlyValues,
                 x => VatAdjustedMonthlyValues(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, profileSummary.IncludeVat))
         };
+        if (tradingStockProjection?.UsesClosingStockProfile == true)
+        {
+            purchasesByMonth = tradingStockProjection.Months
+                .Select(month => profileSummary.IncludeVat
+                    ? month.PurchasesVatInclusive
+                    : month.Purchases)
+                .ToArray();
+        }
 
         var openingDebtors = categories.Sum(x => x.OpeningDebtorsAmount);
         var openingCreditors = categories.Sum(x => x.OpeningCreditorsAmount);
@@ -109,14 +138,20 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
             openingCreditors,
             profileSummary.BadDebtPercentage);
         var categoryResults = BuildCategoryResults(
-            categories, sales, stock, profileSummary.IncludeVat, mode);
+            categories,
+            sales,
+            stock,
+            profileSummary.IncludeVat,
+            mode,
+            tradingStockProjection);
 
         AddDataAlerts(
             alerts,
             categories.Count,
             sales.Count,
             mode == AssessmentMode.Trading
-                ? (stock.Any(item => item.MonthlyValues.Any(value => value > 0m)) ? 1 : 0)
+                ? (tradingStockProjection?.UsesClosingStockProfile == true
+                    || stock.Any(item => item.MonthlyValues.Any(value => value > 0m)) ? 1 : 0)
                 : -1,
             profileSummary,
             monthlyResults);
@@ -150,8 +185,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
 
             return new AccountsProfileSummary
             {
-                DebtorBuckets = EmptyBuckets(),
-                CreditorBuckets = EmptyBuckets()
+                DebtorBuckets = CreateBuckets(100m, 0m, 0m, 0m, 0m),
+                CreditorBuckets = CreateBuckets(100m, 0m, 0m, 0m, 0m)
             };
         }
 
@@ -240,7 +275,8 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
         IEnumerable<AssessmentSales> sales,
         IEnumerable<AssessmentStock> stock,
         bool includeVat,
-        AssessmentMode mode)
+        AssessmentMode mode,
+        TradingStockProjection? tradingStockProjection)
     {
         var salesList = sales.ToList();
         var stockList = stock.ToList();
@@ -255,13 +291,17 @@ public sealed class AccountsProjectionService : IAccountsProjectionService
                 AnnualSales = salesList
                     .Where(x => x.ProductCategoryId == category.AssessmentSalesCategoryId)
                     .Sum(x => AnnualAmount(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, includeVat)),
-                AnnualPurchases = stockList
-                    .Where(x => x.AssessmentSalesCategoryId == category.AssessmentSalesCategoryId)
-                    .Sum(x => mode switch
-                    {
-                        AssessmentMode.Service or AssessmentMode.ManufacturingSimplified or AssessmentMode.Manufacturing => 0m,
-                        _ => AnnualAmount(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, includeVat)
-                    })
+                AnnualPurchases = tradingStockProjection?.UsesClosingStockProfile == true
+                    ? tradingStockProjection.Months.Sum(month => includeVat
+                        ? month.PurchasesVatInclusiveByCategory.GetValueOrDefault(category.AssessmentSalesCategoryId)
+                        : month.PurchasesByCategory.GetValueOrDefault(category.AssessmentSalesCategoryId))
+                    : stockList
+                        .Where(x => x.AssessmentSalesCategoryId == category.AssessmentSalesCategoryId)
+                        .Sum(x => mode switch
+                        {
+                            AssessmentMode.Service or AssessmentMode.ManufacturingSimplified or AssessmentMode.Manufacturing => 0m,
+                            _ => AnnualAmount(x.MonthlyValues, x.TotalNoVAT, x.TotalWithVAT, includeVat)
+                        })
             })
             .OrderByDescending(x => x.AnnualSales)
             .ThenBy(x => x.CategoryName)

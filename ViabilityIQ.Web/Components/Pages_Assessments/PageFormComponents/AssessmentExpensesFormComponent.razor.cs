@@ -34,9 +34,23 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         private decimal[] MonthlyValues { get; set; } = new decimal[12];
         private decimal BulkAnnualValueTarget { get; set; }
         private bool IsSubmitting { get; set; } = false;
+        private bool HasInitializedContext { get; set; }
+        private long InitializedExpenseId { get; set; }
+        private long InitializedAssessmentId { get; set; }
         private bool IsManufacturingMode =>
             sessionService.AssessmentModeId is (int)AssessmentMode.ManufacturingSimplified
                 or (int)AssessmentMode.Manufacturing;
+        private bool CanClassifyDirectCosts =>
+            IsManufacturingMode
+            || sessionService.AssessmentModeId == (int)AssessmentMode.Service;
+        private string DirectCostLabel => sessionService.AssessmentModeId == (int)AssessmentMode.Service
+            ? "Direct service cost"
+            : IsMonthlyEstimateManufacturingMode ? "Production labour / overhead" : "Direct production cost";
+        private string DirectCostDescription => sessionService.AssessmentModeId == (int)AssessmentMode.Service
+            ? "Classify costs directly required to deliver the service as cost of sales."
+            : IsMonthlyEstimateManufacturingMode
+                ? "Include eligible production labour and overhead in the production-cost flow. Enter raw-material purchases in Manufacturing, not here."
+                : "Classify direct production costs as cost of goods sold.";
         private bool IsMonthlyEstimateManufacturingMode =>
             sessionService.AssessmentModeId == (int)AssessmentMode.Manufacturing;
 
@@ -47,6 +61,17 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
         protected override void OnParametersSet()
         {
             long assessmentId = sessionService.AssessmentId ?? 0;
+            var expenseId = ExpenseContext?.AssessmentExpenseId ?? 0;
+            if (HasInitializedContext
+                && InitializedExpenseId == expenseId
+                && InitializedAssessmentId == assessmentId)
+            {
+                return;
+            }
+
+            HasInitializedContext = true;
+            InitializedExpenseId = expenseId;
+            InitializedAssessmentId = assessmentId;
 
             if (ExpenseContext != null && ExpenseContext.AssessmentExpenseId > 0)
             {
@@ -123,7 +148,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments.PageFormComponents
                 IsSubmitting = true;
                 var isNewRecord = FormModel.AssessmentExpenseId == 0;
                 FormModel.MonthlyValues = MonthlyValues;
-                if (!IsManufacturingMode)
+                if (!CanClassifyDirectCosts)
                 {
                     FormModel.IsDirectProductionCost = false;
                 }

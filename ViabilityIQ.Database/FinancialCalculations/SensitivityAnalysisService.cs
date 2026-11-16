@@ -173,11 +173,28 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
                     : original.CostOfGoodsSoldVatInclusive * (cogs / original.CostOfGoodsSold);
             }
 
+            var usesClosingStockProfile = baseline.Summary.UsesClosingStockProfile;
+            var stockPurchases = usesClosingStockProfile
+                ? original.StockPurchases + cogs - original.CostOfGoodsSold
+                : original.StockPurchases;
+            var stockPurchasesVatInclusive = usesClosingStockProfile
+                ? original.StockPurchasesVatInclusive
+                  + cogsVat
+                  - original.CostOfGoodsSoldVatInclusive
+                : original.StockPurchasesVatInclusive;
+            var purchaseFactor = original.StockPurchasesVatInclusive == 0m
+                ? original.StockPurchases == 0m ? 1m : stockPurchases / original.StockPurchases
+                : stockPurchasesVatInclusive / original.StockPurchasesVatInclusive;
+
             var badDebt = scenario.Adjustments
                 .Where(x => x.Driver == SensitivityDriver.BadDebtPercentagePoints && x.AppliesTo(month))
                 .Sum(x => x.Value) / 100m;
             var receipt = salesReceipts[index] * revenueFactor * Math.Clamp(1m - badDebt, 0m, 1m);
-            var supplier = supplierPayments[index] * (original.CostOfGoodsSold == 0m ? cogsFactor : cogs / original.CostOfGoodsSold);
+            var supplier = supplierPayments[index] * (usesClosingStockProfile
+                ? purchaseFactor
+                : original.CostOfGoodsSold == 0m
+                    ? cogsFactor
+                    : cogs / original.CostOfGoodsSold);
             var cashExpenses = original.CashOperatingExpenses * expenseFactor;
             var badDebtExpense = revenue * Math.Max(0m, badDebt);
             var operatingExpenses = original.OperatingExpenses * expenseFactor + badDebtExpense;
@@ -190,7 +207,11 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
             var accruedSales = salesVatInclusive;
             var baselinePurchases = original.ClosingCreditors + original.SupplierPayments - original.OpeningCreditors;
             var accruedPurchases = baselinePurchases
-                * (original.CostOfGoodsSold == 0m ? cogsFactor : cogs / original.CostOfGoodsSold);
+                * (usesClosingStockProfile
+                    ? purchaseFactor
+                    : original.CostOfGoodsSold == 0m
+                        ? cogsFactor
+                        : cogs / original.CostOfGoodsSold);
             runningDebtors = Math.Max(0m, runningDebtors + accruedSales - receipt - badDebtExpense);
             runningCreditors = Math.Max(0m, runningCreditors + accruedPurchases - supplier);
 
@@ -219,7 +240,8 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
                 GrantsDonationsVatInclusive = original.GrantsDonationsVatInclusive,
                 AssetDisposalIncomeVatInclusive = original.AssetDisposalIncomeVatInclusive,
                 OtherIncomeVatInclusive = original.OtherIncomeVatInclusive,
-                StockPurchases = original.StockPurchases,
+                StockPurchases = stockPurchases,
+                StockPurchasesVatInclusive = stockPurchasesVatInclusive,
                 CostOfGoodsSold = cogs,
                 CostOfGoodsSoldVatInclusive = cogsVat,
                 OperatingExpenses = operatingExpenses,
@@ -296,6 +318,7 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
             ClosingBank = last.ClosingBank,
             OpeningStock = baseline.Summary.OpeningStock,
             ClosingStock = last.ClosingStock,
+            UsesClosingStockProfile = baseline.Summary.UsesClosingStockProfile,
             Revenue = revenue,
             SundryIncome = months.Sum(x => x.SundryIncome),
             GrantsDonationsIncome = months.Sum(x => x.GrantsDonationsIncome),
@@ -312,6 +335,7 @@ public sealed class SensitivityAnalysisService : ISensitivityAnalysisService
             EBITDAInclusive = months.Sum(x => x.EBITDAInclusive),
             ProfitBeforeTaxVatInclusive = months.Sum(x => x.ProfitBeforeTaxVatInclusive),
             StockPurchases = months.Sum(x => x.StockPurchases),
+            StockPurchasesVatInclusive = months.Sum(x => x.StockPurchasesVatInclusive),
             CostOfGoodsSold = months.Sum(x => x.CostOfGoodsSold),
             GrossProfit = grossProfit,
             OperatingExpenses = operatingExpenses,

@@ -21,6 +21,32 @@
     gap: 16px;
 }
 
+.assessment-business-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: min(36vw, 420px);
+    padding-left: 10px;
+    border-left: 1px solid #e2e8f0;
+    color: #566D7E;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.assessment-business-name span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .assessment-business-name {
+        max-width: 42vw;
+        font-size: 0.72rem;
+    }
+}
+
 .fa-workspace-container {
     display: flex;
     flex: 1;

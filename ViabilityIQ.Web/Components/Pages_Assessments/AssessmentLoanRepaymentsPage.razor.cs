@@ -43,7 +43,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private string StatusMessage { get; set; } = "";
 
         private string SearchQuery { get; set; } = string.Empty;
-        private long SelectedLoanTypeId { get; set; } = 0;
+        private long? SelectedLoanTypeId { get; set; } = null;
         private bool IsLoading { get; set; } = false;
         private string ActivePanelTitle { get; set; } = "Loan Administration Module";
         private long LoadedAssessmentId { get; set; }
@@ -54,13 +54,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal ExpectedRepayments => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Expected));
         private decimal InterestCost => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Interest));
         private decimal ExtraRepayments => LoanProfilesDataset.Sum(loan => loan.MonthlyData.Sum(month => month.Extra));
-        private decimal ScheduledOutflow => ExpectedRepayments + InterestCost + ExtraRepayments;
+        private decimal ScheduledOutflow => ExpectedRepayments + ExtraRepayments;
         private IReadOnlyList<AssessmentKpiCardItem> LoanKpis =>
         [
             new("Total Loan Value", Money(TotalLoanValue), "Original principal value", "bi bi-bank", "kpi-blue"),
-            new("Scheduled Outflow", Money(ScheduledOutflow), "Total projected repayments", "bi bi-cash-stack", "kpi-teal"),
-            new("Expected Repayments", Money(ExpectedRepayments), "Scheduled principal repayments", "bi bi-calendar-check", "kpi-purple"),
-            new("Interest Cost", Money(InterestCost), "Projected finance cost", "bi bi-percent", "kpi-red"),
+            new("Scheduled Outflow", Money(ScheduledOutflow), "Installments plus extra repayments", "bi bi-cash-stack", "kpi-teal"),
+            new("Expected Repayments", Money(ExpectedRepayments), "Scheduled installments (principal and interest)", "bi bi-calendar-check", "kpi-purple"),
+            new("Interest Cost", Money(InterestCost), "Interest included in scheduled installments", "bi bi-percent", "kpi-red"),
             new("Extra Repayments", Money(ExtraRepayments), "Additional repayments", "bi bi-plus-circle", "kpi-cyan"),
             new("Active Loans", LoanProfilesDataset.Count.ToString("N0"), "Active loan profiles", "bi bi-list-check", "kpi-slate")
         ];
@@ -106,7 +106,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
             catch (Exception ex)
             {
                 Logger?.LogError(ex, "Error initializing AssessmentLoanRepaymentsPage");
-                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Viability IQ");
+                _Toast?.ShowError(ex.Message, sessionService?.AppTitle ?? "Error");
             }
         }
 
@@ -234,7 +234,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         private void OnLoanTypeFilterChanged(long? selectedValue)
         {
-            SelectedLoanTypeId = selectedValue ?? 0;
+            SelectedLoanTypeId = selectedValue;
             StateHasChanged();
         }
 
@@ -242,9 +242,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         {
             var query = LoanProfilesDataset.AsEnumerable();
 
-            if (SelectedLoanTypeId > 0)
+            if (SelectedLoanTypeId.HasValue && SelectedLoanTypeId.Value > 0)
             {
-                query = query.Where(x => x.LoanId == SelectedLoanTypeId);
+                query = query.Where(x => x.LoanId == SelectedLoanTypeId.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(SearchQuery))
@@ -341,9 +341,9 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 Logger?.LogDebug("Requesting confirmation to delete loan {LoanId}", loanRepaymentId);
 
                 bool isConfirmed = await ConfirmDeleteDialog!.ShowAsync(
-                    title: "Delete Loan Permanently?",
-                    message: "Confirm you want to delete this loan and its schedules?",
-                    confirmText: "Yes Delete",
+                    title: "Deactivate Loan?",
+                    message: "The loan and its repayment schedules will be excluded from active projections, but their history will be preserved.",
+                    confirmText: "Deactivate loan",
                     cancelText: " No, Keep it"
                 );
 
@@ -475,7 +475,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         public decimal Expected { get; set; }
         public decimal Interest { get; set; }
         public decimal Extra { get; set; }
-        public decimal Total => Expected + Interest + Extra;
+        public decimal Total => Expected + Extra;
     }
 
     #endregion

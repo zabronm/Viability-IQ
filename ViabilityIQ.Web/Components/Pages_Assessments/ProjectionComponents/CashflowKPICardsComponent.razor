@@ -51,7 +51,7 @@
     {
         new KpiItem("Total Sales", Projection!.Summary.Revenue, "bi-graph-up-arrow", "Sales revenue", "sales"),
         new KpiItem("Inventory Movement", InventoryMovement, "bi-boxes", InventoryMovementNote, InventoryMovement >= 0m ? "inventory-up" : "inventory-down"),
-        new KpiItem("Operating Expenses", Projection!.Summary.OperatingExpenses, "bi-wallet2", "Projected period", "expenses"),
+        new KpiItem("Operating Expenses", Projection!.Summary.OperatingExpenses, "bi-wallet2", "Excludes non-cash bad debt expense", "expenses"),
         new KpiItem("Net VAT", Projection!.Summary.VatPayable, "bi-receipt", VatNote, "vat"),
         new KpiItem("Gross Profit", Projection!.Summary.GrossProfit, "bi-bar-chart-line", Margin(Projection!.Summary.GrossProfit), "gross-profit"),
         new KpiItem("EBITDA", Projection!.Summary.EBITDA, "bi-speedometer2", Margin(Projection!.Summary.EBITDA), "ebitda"),

@@ -19,7 +19,17 @@
 @inject ILogger<SessionLifecycleManager> Logger
 @inject ToastService ToastService
 
-@ChildContent
+@if (initialized)
+{
+    @ChildContent
+}
+else
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100" role="status" aria-live="polite">
+        <span class="spinner-border spinner-border-sm text-primary me-2" aria-hidden="true"></span>
+        <span>Restoring your secure session...</span>
+    </div>
+}
 
 @code {
     private const string StorageKey = "ViabilityIQ.SessionContext";
@@ -40,16 +50,27 @@
         componentReference = DotNetObjectReference.Create(this);
 
         await RestoreContextAsync();
-
-        var idleMinutes = ReadPositiveInt("SessionManagement:IdleTimeoutMinutes", 30);
-        var warningMinutes = ReadPositiveInt("SessionManagement:IdleWarningMinutes", 5);
-        await JSRuntime.InvokeVoidAsync(
-            "viabilitySession.initialize",
-            componentReference,
-            TimeSpan.FromMinutes(idleMinutes).TotalMilliseconds,
-            TimeSpan.FromMinutes(warningMinutes).TotalMilliseconds);
-
         initialized = true;
+        await InvokeAsync(StateHasChanged);
+
+        var idleMinutes = ReadPositiveInt("SessionManagement:IdleTimeoutMinutes", 45);
+        var warningMinutes = ReadPositiveInt("SessionManagement:IdleWarningMinutes", 5);
+        try
+        {
+            await JSRuntime.InvokeVoidAsync(
+                "viabilitySession.initialize",
+                componentReference,
+                TimeSpan.FromMinutes(idleMinutes).TotalMilliseconds,
+                TimeSpan.FromMinutes(warningMinutes).TotalMilliseconds);
+        }
+        catch (Exception exception) when (
+            exception is JSException
+            or JSDisconnectedException
+            or InvalidOperationException)
+        {
+            Logger.LogWarning(exception, "Idle-session monitoring could not be initialized.");
+        }
+
         await PersistContextAsync();
     }
 
@@ -249,7 +270,6 @@
         {
             Logger.LogDebug(exception, "Session lifecycle JavaScript was already unavailable.");
         }
-        componentReference?.Dispose();
         componentReference?.Dispose();
     }
 }

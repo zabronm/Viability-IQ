@@ -45,6 +45,6 @@ public sealed class ReportTable
 }
 public sealed record ReportTableRow(
     string Label, IReadOnlyList<decimal?> Values, bool IsHeading = false,
-    bool IsTotal = false, bool IsPercentage = false);
+    bool IsTotal = false, bool IsPercentage = false, bool IsRatio = false);
 public sealed record ReportFinding(
     int Priority, string Severity, string Title, string Evidence, string Recommendation);

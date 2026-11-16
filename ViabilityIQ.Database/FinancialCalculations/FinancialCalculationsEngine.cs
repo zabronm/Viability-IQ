@@ -36,6 +36,7 @@ namespace ViabilityIQ.Application.FinancialCalculations
         private readonly IGenericDataRepository<Assessment> _assessmentRepository;
         private readonly IGenericDataRepository<AssessmentAsset> _assetRepository;
         private readonly IGenericDataRepository<AssessmentAssetMovement> _movementRepository;
+        private readonly IAssetMovementCalculationService _assetMovementCalculationService;
         private readonly ILogger<FinancialCalculationsEngine> _logger;
 
         #endregion
@@ -46,11 +47,14 @@ namespace ViabilityIQ.Application.FinancialCalculations
             IGenericDataRepository<Assessment> assessmentRepository,
             IGenericDataRepository<AssessmentAsset> assetRepository,
             IGenericDataRepository<AssessmentAssetMovement> movementRepository,
+            IAssetMovementCalculationService assetMovementCalculationService,
             ILogger<FinancialCalculationsEngine> logger)
         {
             _assessmentRepository = assessmentRepository ?? throw new ArgumentNullException(nameof(assessmentRepository));
             _assetRepository = assetRepository ?? throw new ArgumentNullException(nameof(assetRepository));
             _movementRepository = movementRepository ?? throw new ArgumentNullException(nameof(movementRepository));
+            _assetMovementCalculationService = assetMovementCalculationService
+                ?? throw new ArgumentNullException(nameof(assetMovementCalculationService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -153,6 +157,10 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     assessmentId,
                     month);
 
+                if (month is < 1 or > 12)
+                    throw new ArgumentOutOfRangeException(nameof(month), "Month must be between 1 and 12.");
+
+                var movementSchedules = await CalculateAssetMovementSchedulesAsync(assessmentId);
                 // Get all active assets for this assessment
                 var assets = (await _assetRepository.GetAllAsync(a =>
                     a.AssessmentId == assessmentId && a.Active)).ToList();
@@ -179,7 +187,9 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     }
 
                     // Calculate depreciation for this asset
-                    decimal assetDepreciation = CalculateAssetDepreciationForMonth(asset, month);
+                    var movement = movementSchedules.FirstOrDefault(
+                        item => item.AssessmentAssetId == asset.AssessmentAssetId);
+                    decimal assetDepreciation = movement?.GetDepreciation(month) ?? 0m;
                     totalDepreciation += assetDepreciation;
 
                     _logger.LogDebug(
@@ -222,10 +232,11 @@ namespace ViabilityIQ.Application.FinancialCalculations
 
                 var depreciationSchedule = new decimal[12];
 
-                // Calculate for each month
+                var movementSchedules = await CalculateAssetMovementSchedulesAsync(assessmentId);
                 for (int month = 1; month <= 12; month++)
                 {
-                    depreciationSchedule[month - 1] = await CalculateMonthlyDepreciationAsync(assessmentId, month);
+                    depreciationSchedule[month - 1] = movementSchedules
+                        .Sum(movement => movement.GetDepreciation(month));
                 }
 
                 decimal totalAnnual = depreciationSchedule.Sum();
@@ -267,24 +278,30 @@ namespace ViabilityIQ.Application.FinancialCalculations
                     a.AssessmentId == assessmentId && a.Active)).ToList();
 
                 var details = new List<AssetDepreciationMonthlyDto>();
+                var movementSchedules = await CalculateAssetMovementSchedulesAsync(assessmentId);
 
                 foreach (var asset in assets)
                 {
                     if (!IsAssetActiveInMonth(asset, month))
                         continue;
 
-                    var movement = await GetAssetMovementAsync(asset.AssessmentAssetId);
-                    var depreciation = CalculateAssetDepreciationForMonth(asset, month);
-                    var grossValue = GetAssetGrossValueForMonth(asset, movement, month);
-                    var accumulatedDepreciation = GetAssetAccumulatedDepreciationForMonth(asset, movement, month);
-                    var netBookValue = grossValue - accumulatedDepreciation;
+                    var movement = movementSchedules.FirstOrDefault(
+                        item => item.AssessmentAssetId == asset.AssessmentAssetId)
+                        ?? await GetAssetMovementAsync(asset.AssessmentAssetId);
+                    var depreciation = movement?.GetDepreciation(month) ?? 0m;
+                    var grossValue = movement?.GetGrossValue(month)
+                        ?? GetAssetGrossValueForMonth(asset, movement, month);
+                    var accumulatedDepreciation = movement?.GetAccumulatedDepreciation(month)
+                        ?? GetAssetAccumulatedDepreciationForMonth(asset, movement, month);
+                    var netBookValue = movement?.GetNetBookValue(month)
+                        ?? (grossValue - accumulatedDepreciation);
 
                     details.Add(new AssetDepreciationMonthlyDto
                     {
                         AssessmentAssetId = asset.AssessmentAssetId,
-                        AssetName = asset.AssetName,
+                        AssetName = asset.AssetName ?? string.Empty,
                         Month = month,
-                        DepreciationMethod = asset.DepreciationMethod,
+                        DepreciationMethod = asset.DepreciationMethod ?? string.Empty,
                         DepreciationRate = asset.DepreciationRate,
                         MonthlyDepreciation = depreciation,
                         GrossValue = grossValue,
@@ -671,6 +688,42 @@ namespace ViabilityIQ.Application.FinancialCalculations
             }
 
             return accumulated;
+        }
+
+        private async Task<IReadOnlyList<AssessmentAssetMovement>> CalculateAssetMovementSchedulesAsync(
+            long assessmentId)
+        {
+            var assets = (await _assetRepository.GetAllAsync(asset =>
+                asset.AssessmentId == assessmentId && asset.Active)).ToList();
+            if (assets.Count == 0)
+            {
+                return Array.Empty<AssessmentAssetMovement>();
+            }
+
+            var assetIds = assets.Select(asset => asset.AssessmentAssetId).ToHashSet();
+            var storedMovements = (await _movementRepository.GetAllAsync(movement => movement.Active))
+                .Where(movement => assetIds.Contains(movement.AssessmentAssetId))
+                .GroupBy(movement => movement.AssessmentAssetId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.OrderByDescending(movement => movement.ModifiedDate).First());
+            var schedules = new List<AssessmentAssetMovement>(assets.Count);
+
+            foreach (var asset in assets)
+            {
+                var movement = storedMovements.TryGetValue(asset.AssessmentAssetId, out var savedMovement)
+                    ? savedMovement
+                    : new AssessmentAssetMovement
+                    {
+                        AssessmentAssetId = asset.AssessmentAssetId,
+                        DepreciationRate = asset.DepreciationRate,
+                        DepreciationMethod = asset.DepreciationMethod,
+                        Active = true
+                    };
+                schedules.Add(await _assetMovementCalculationService.RecalculateAllMonthsAsync(movement, asset));
+            }
+
+            return schedules;
         }
 
         /// <summary>

@@ -55,9 +55,9 @@
                 @if (!IsServiceMode)
                 {
                     <div class="viq-form-field">
-                    <label for="openingStockBalance">Opening stock balance (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
+                    <label for="openingStockBalance">Opening stock at cost (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                     <InputDecimal2 id="openingStockBalance" class="viq-form-control"
-                                 min="0" step="0.01" @bind-Value="FormModel.OpeningBalance" />
+                                   min="0" step="0.01" @bind-Value="FormModel.OpeningBalance" />
                     <ValidationMessage For="@(() => FormModel.OpeningBalance)" class="viq-form-validation" />
                     </div>
                     @if (IsManufacturingMode)
@@ -65,7 +65,7 @@
                         <div class="viq-form-field">
                             <label for="standardUnitCost">Standard production cost per unit (@(sessionService?.CurrencyCode ?? "ZAR"))</label>
                             <InputDecimal2 id="standardUnitCost" class="viq-form-control"
-                                         min="0" step="0.01" @bind-Value="FormModel.StandardUnitCost" />
+                                           min="0" step="0.01" @bind-Value="FormModel.StandardUnitCost" />
                             <ValidationMessage For="@(() => FormModel.StandardUnitCost)" class="viq-form-validation" />
                         </div>
                     }
@@ -96,14 +96,14 @@
                     <span><i class="bi bi-distribute-horizontal" aria-hidden="true"></i></span>
                     <div>
                         <h3>Distribute same monthly figure</h3>
-                        <p>Enter one monthly @(IsManufacturingMode ? "production unit" : "purchase/addition") figure and apply it to all twelve months.</p>
+                        <p>Enter one monthly @(IsManufacturingMode ? "production unit" : "closing stock balance") and apply it to all twelve months.</p>
                     </div>
                 </header>
                 <div class="viq-form-grid viq-form-grid-2">
                     <div class="viq-form-field">
-                        <label for="monthlyDistributionValue">Monthly @(IsManufacturingMode ? "production units" : "figure")</label>
-                        <input id="monthlyDistributionValue" type="number" min="0" step="0.01"
-                               class="viq-form-control" @bind="BulkTargetValue" />
+                        <label for="monthlyDistributionValue">Monthly @(IsManufacturingMode ? "production units" : "closing balance")</label>
+                        <InputDecimal2 id="monthlyDistributionValue" min="0" step="0.01"
+                                       class="viq-form-control" @bind-Value="BulkTargetValue" />
                     </div>
                     <div class="viq-form-field">
                         <label>Distribution action</label>
@@ -121,7 +121,9 @@
                     <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
                     <div>
                         <h3>12-month horizon</h3>
-                        <p>@(IsManufacturingMode ? "Enter planned production units for each month." : "Enter monthly purchases or stock additions for this item.")</p>
+                        <p>@(IsManufacturingMode
+                            ? "Enter planned production units for each month."
+                            : "Enter this item's month-end stock value at cost. Leave a month blank to carry forward the previous balance; purchases are derived from cost of sales and the stock movement.")</p>
                     </div>
                 </header>
                 <div class="viq-form-grid viq-form-grid-2">
@@ -133,14 +135,12 @@
                             @if (IsManufacturingMode)
                             {
                                 <InputDecimal2 id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
-                                             step="0.01"
-                                             @bind-Value="ProductionUnits[idx]" />
+                                               step="0.01" @bind-Value="ProductionUnits[idx]" />
                             }
                             else
                             {
                                 <InputDecimal2 id="@($"expenseMonth{idx + 1}")" class="viq-form-control"
-                                             step="0.01"
-                                             @bind-Value="MonthlyValues[idx]" />
+                                               min="0" step="0.01" @bind-Value="ClosingStockValues[idx]" />
                             }
                         </div>
                     }
@@ -151,11 +151,11 @@
                 <header class="viq-form-section-heading">
                     <span><i class="bi bi-calculator" aria-hidden="true"></i></span>
                     <div>
-                        <h3>@(IsManufacturingMode ? "Total planned production value" : "Total stock purchases")</h3>
+                        <h3>@(IsManufacturingMode ? "Total planned production value" : "Entered closing stock balances")</h3>
                         <p>@DisplayUtility.FormatCurrency(
                             IsManufacturingMode
                                 ? ProductionUnits.Sum() * FormModel.StandardUnitCost
-                                : MonthlyValues.Sum(),
+                                : ClosingStockValues.Sum(value => value ?? 0m),
                             sessionService?.CurrencyCode,
                             sessionService?.CultureName)</p>
                     </div>

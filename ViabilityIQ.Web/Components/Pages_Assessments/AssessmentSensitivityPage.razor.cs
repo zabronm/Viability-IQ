@@ -393,6 +393,9 @@ public partial class AssessmentSensitivityPage : ComponentBase, IDisposable
     private static string Csv(decimal? value) =>
         value?.ToString("0.####", CultureInfo.InvariantCulture) ?? string.Empty;
 
+    private static string FormatRatio(decimal? value) =>
+        value.HasValue ? $"{value.Value:N2}x" : "n/a";
+
     private static string Quote(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
 
     private static decimal Variance(decimal scenario, decimal baseline) => scenario - baseline;

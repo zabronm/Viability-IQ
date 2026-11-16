@@ -38,6 +38,13 @@
                     </div>
                 </div>
             </div>
+            @if (!string.IsNullOrWhiteSpace(SessionService.BusinessName))
+            {
+                <div class="assessment-business-name" title="@SessionService.BusinessName">
+                    <i class="bi bi-building" aria-hidden="true"></i>
+                    <span>@SessionService.BusinessName</span>
+                </div>
+            }
         </div>
 
         <div class="fa-top-bar-right">
@@ -57,10 +64,10 @@
                 <i class="bi bi-calendar3 me-1"></i> @DisplayUtility.FormatDate(DateTime.Now, SessionService.CultureName)
             </span>
 
-           @*  <button class="action-icon-btn">
+            <button class="action-icon-btn">
                 <i class="bi bi-bell"></i>
                 <span class="notification-indicator"></span>
-            </button> *@
+            </button>
 
             @* User Profile Links and Signing out *@
             <ProfileDropdownComponent />

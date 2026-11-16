@@ -67,7 +67,7 @@
                                     <th>@row.Label</th>
                                     @foreach (var value in row.Values)
                                     {
-                                        <td>@Display(value, row.IsPercentage)</td>
+                                        <td>@Display(value, row.IsPercentage, row.IsRatio)</td>
                                     }
                                 </tr>
                             }
@@ -103,8 +103,9 @@
 
 @code {
     [Parameter, EditorRequired] public ReportDocument Document { get; set; } = default!;
-    private static string Display(decimal? value, bool percentage) =>
+    private static string Display(decimal? value, bool percentage, bool ratio) =>
         !value.HasValue ? "—" :
+        ratio ? $"{value.Value:N2}x" :
         percentage ? value.Value.ToString("P1") :
         value.Value < 0m ? $"({Math.Abs(value.Value):N0})" : value.Value.ToString("N0");
 }

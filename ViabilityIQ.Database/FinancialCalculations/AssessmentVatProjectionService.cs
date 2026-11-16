@@ -10,7 +10,10 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
 {
     private readonly IGenericDataRepository<AssessmentSales> _salesRepository;
     private readonly IGenericDataRepository<Assessment> _assessmentRepository;
+    private readonly IGenericDataRepository<AssessmentSalesCategory> _categoryRepository;
     private readonly IGenericDataRepository<AssessmentStock> _stockRepository;
+    private readonly IGenericDataRepository<AssessmentProjectionAssumptions> _assumptionsRepository;
+    private readonly IGenericDataRepository<IncomeType> _incomeTypeRepository;
     private readonly IGenericDataRepository<AssessmentManufacturingMaterial> _manufacturingMaterialRepository;
     private readonly IGenericDataRepository<AssessmentExpenses> _expenseRepository;
     private readonly IGenericDataRepository<AssessmentVATTransactions> _adjustmentRepository;
@@ -19,7 +22,10 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
     public AssessmentVatProjectionService(
         IGenericDataRepository<Assessment> assessmentRepository,
         IGenericDataRepository<AssessmentSales> salesRepository,
+        IGenericDataRepository<AssessmentSalesCategory> categoryRepository,
         IGenericDataRepository<AssessmentStock> stockRepository,
+        IGenericDataRepository<AssessmentProjectionAssumptions> assumptionsRepository,
+        IGenericDataRepository<IncomeType> incomeTypeRepository,
         IGenericDataRepository<AssessmentManufacturingMaterial> manufacturingMaterialRepository,
         IGenericDataRepository<AssessmentExpenses> expenseRepository,
         IGenericDataRepository<AssessmentVATTransactions> adjustmentRepository,
@@ -27,7 +33,10 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
     {
         _assessmentRepository = assessmentRepository;
         _salesRepository = salesRepository;
+        _categoryRepository = categoryRepository;
         _stockRepository = stockRepository;
+        _assumptionsRepository = assumptionsRepository;
+        _incomeTypeRepository = incomeTypeRepository;
         _manufacturingMaterialRepository = manufacturingMaterialRepository;
         _expenseRepository = expenseRepository;
         _adjustmentRepository = adjustmentRepository;
@@ -51,8 +60,13 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
 
             var salesTask = _salesRepository.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
+            var categoriesTask = _categoryRepository.GetAllAsync(x =>
+                x.AssessmentId == assessmentId && x.Active);
             var stockTask = _stockRepository.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
+            var assumptionsTask = _assumptionsRepository.GetAllAsync(x =>
+                x.AssessmentId == assessmentId && x.Active);
+            var incomeTypesTask = _incomeTypeRepository.GetAllAsync();
             var manufacturingMaterialsTask = _manufacturingMaterialRepository.GetAllAsync(x =>
                 x.AssessmentId == assessmentId && x.Active);
             var expensesTask = _expenseRepository.GetAllAsync(x =>
@@ -63,10 +77,30 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
                 && (x.SourceType.Equals("Adjustment", StringComparison.OrdinalIgnoreCase)
                     || x.SourceType.Equals("Manual", StringComparison.OrdinalIgnoreCase)));
 
-            await Task.WhenAll(salesTask, stockTask, manufacturingMaterialsTask, expensesTask, adjustmentsTask);
+            await Task.WhenAll(
+                salesTask,
+                categoriesTask,
+                stockTask,
+                assumptionsTask,
+                incomeTypesTask,
+                manufacturingMaterialsTask,
+                expensesTask,
+                adjustmentsTask);
 
             var sales = (await salesTask).ToList();
+            var categories = (await categoriesTask).ToList();
             var stock = (await stockTask).ToList();
+            var costOfSalesPercentage = (await assumptionsTask)
+                .OrderByDescending(x => x.AssessmentProjectionAssumptionsId)
+                .FirstOrDefault()?.CostOfSalesPercentage;
+            var tradingStockProjection = mode == AssessmentMode.Trading
+                ? TradingStockProjectionCalculator.Calculate(
+                    categories,
+                    sales,
+                    (await incomeTypesTask).ToList(),
+                    stock,
+                    costOfSalesPercentage)
+                : null;
             var manufacturingMaterials = (await manufacturingMaterialsTask).ToList();
             var expenses = (await expensesTask).ToList();
             var adjustments = (await adjustmentsTask).ToList();
@@ -84,6 +118,8 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
                     AssessmentMode.Manufacturing => manufacturingMaterials
                         .Where(x => x.IncludeVAT)
                         .Sum(x => MonthValue(x.MonthlyPurchaseValues, index)),
+                    AssessmentMode.Trading when tradingStockProjection?.UsesClosingStockProfile == true =>
+                        tradingStockProjection.Months[index].TaxablePurchases,
                     _ => stock.Where(x => x.blIncludeVAT).Sum(x => StockValue(x, mode, index))
                 };
                 var taxableExpenses = expenses
@@ -103,7 +139,9 @@ public sealed class AssessmentVatProjectionService : IAssessmentVatProjectionSer
                             x.TotalNoVAT,
                             x.TotalWithVAT,
                             x.VATRate)),
-                    StockInputVat = stock
+                    StockInputVat = tradingStockProjection?.UsesClosingStockProfile == true
+                        ? tradingStockProjection.Months[index].StockInputVat
+                        : stock
                         .Where(x =>
                             x.blIncludeVAT
                             && mode is not AssessmentMode.Service and not AssessmentMode.ManufacturingSimplified and not AssessmentMode.Manufacturing)

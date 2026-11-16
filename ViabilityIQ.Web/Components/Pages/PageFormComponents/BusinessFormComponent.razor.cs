@@ -15,6 +15,7 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
         [Inject] private ILogger<BusinessFormComponent> Logger { get; set; } = default!;
 
         [Parameter] public long BusinessId { get; set; } = 0;
+        [Parameter] public long? InitialClientId { get; set; }
 
         private Business businessModel = new();
         private bool isProcessingData = false;
@@ -30,6 +31,10 @@ namespace ViabilityIQ.Web.Components.Pages.PageFormComponents
             if (BusinessId == 0)
             {
                 ResetForm();
+                if (InitialClientId is > 0)
+                {
+                    businessModel.ClientId = InitialClientId.Value;
+                }
             }
             else
             {

@@ -58,16 +58,10 @@
                     <span class="viq-nav-count" aria-label="@($"{AssessmentCount} assessments")">@FormatCount(AssessmentCount)</span>
                 </NavLink>
 
-                <NavLink class="fa-nav-item bd-bottom" href="/settings/businesses">
+                <NavLink class="fa-nav-item bd-bottom" href="/settings/clients-businesses">
                     <div class="nav-icon-avatar-round"><i class="bi bi-buildings"></i></div>
-                    <span class="strong">Businesses</span>
-                    <span class="viq-nav-count" aria-label="@($"{BusinessCount} businesses")">@FormatCount(BusinessCount)</span>
-                </NavLink>
-
-                <NavLink class="fa-nav-item bd-bottom" href="/settings/client-contacts">
-                    <div class="nav-icon-avatar-round"><i class="bi bi-people"></i></div>
-                    <span class="strong">Client Contacts</span>
-                    <span class="viq-nav-count" aria-label="@($"{ClientCount} client contacts")">@FormatCount(ClientCount)</span>
+                    <span class="strong">Clients &amp; Businesses</span>
+                    <span class="viq-nav-count" aria-label="@($"{ClientCount} clients and {BusinessCount} businesses")">@FormatCount(ClientCount + BusinessCount)</span>
                 </NavLink>
 
                 <NavLink class="fa-nav-item bd-bottom" href="/settings/notifications">
@@ -95,7 +89,7 @@
                     <Authorized>
                         <NavLink class="fa-nav-item bd-bottom" href="/admin/support-consultants">
                             <div class="nav-icon-avatar-round"><i class="bi bi-person-lock"></i></div>
-                            <span class="strong">Support Access</span>
+                            <span class="strong">Consultant Access</span>
                         </NavLink>
                     </Authorized>
                 </AuthorizeView>

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ViabilityIQ.Application.Interfaces;
 using ViabilityIQ.Shared.DataModels;
+using ViabilityIQ.Shared.FinancialModels;
 using ViabilityIQ.Shared.SharedModels;
 using ViabilityIQ.Shared.UtilityServices;
 using ViabilityIQ.Web.Services;
@@ -43,6 +44,10 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private List<AssessmentStock> StockDataList = new();
         private List<AssessmentSalesCategory> CategoryDataList = new();
         private List<UnifiedStockViewModel> FilteredStockList = new();
+        private Assessment? AssessmentModel;
+        private decimal?[] MonthlyClosingStockValues { get; set; } = new decimal?[12];
+        private bool IsSavingClosingStock { get; set; }
+        private CashflowProjectionResult? CashflowProjection { get; set; }
         private decimal? ProjectedClosingStock;
         private int AssessmentModeId = (int)AssessmentMode.Trading;
         private bool IsLoading = true;
@@ -67,27 +72,32 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
 
         #region Properties
 
-        private decimal GrandTotalStockValue => FilteredStockList?.Sum(x => x.MonthlyValues.Sum()) ?? 0;
-        private decimal[] StockMonthlyTotals => Enumerable.Range(1, 12)
-            .Select(month => StockDataList.Sum(item => GetStockMonthValue(item, month)))
-            .ToArray();
-        private decimal TotalStockValue => StockMonthlyTotals.Sum();
-        private decimal AverageMonthlyStock => TotalStockValue / 12m;
         private decimal OpeningStock => StockDataList.Sum(item => item.OpeningBalance);
-        private decimal PeakStock => StockMonthlyTotals.Max();
-        private int PeakStockMonth => Array.IndexOf(StockMonthlyTotals, PeakStock) + 1;
-        private decimal VatInclusiveStock => StockDataList
-            .Where(item => item.blIncludeVAT)
-            .Sum(item => Enumerable.Range(1, 12).Sum(month => GetStockMonthValue(item, month)));
+        private bool UsesClosingStockProfile => IsTradingMode
+            && StockDataList.Any(item => item.MonthlyClosingStockValues.Any(value => value.HasValue));
+        private decimal AnnualPurchases => CashflowProjection?.Summary.StockPurchases
+            ?? StockDataList.Sum(item => item.MonthlyValues.Sum());
+        private decimal AnnualPurchasesVatInclusive => CashflowProjection?.Summary.StockPurchasesVatInclusive
+            ?? StockDataList
+                .Where(item => item.blIncludeVAT)
+                .Sum(item => Enumerable.Range(1, 12).Sum(month => GetStockMonthValue(item, month)));
+        private decimal AverageStockValue => CashflowProjection is null
+            ? 0m
+            : (CashflowProjection.Summary.OpeningStock
+               + CashflowProjection.Months.Sum(month => month.ClosingStock)) / 13m;
+        private decimal StockTurnover => AverageStockValue == 0m || CashflowProjection is null
+            ? 0m
+            : CashflowProjection.Summary.CostOfGoodsSold / AverageStockValue;
+        private decimal StockDays => StockTurnover == 0m ? 0m : 365m / StockTurnover;
         private bool IsManufacturingMode =>
             AssessmentModeId is (int)AssessmentMode.ManufacturingSimplified
                 or (int)AssessmentMode.Manufacturing;
         private bool IsFullManufacturingMode =>
             AssessmentModeId == (int)AssessmentMode.Manufacturing;
-        private bool IsLegacyManufacturingMode =>
-            AssessmentModeId == (int)AssessmentMode.ManufacturingSimplified;
         private bool IsServiceMode =>
             AssessmentModeId == (int)AssessmentMode.Service;
+        private bool IsTradingMode =>
+            AssessmentModeId == (int)AssessmentMode.Trading;
         private IReadOnlyList<AssessmentKpiCardItem> StockKpis =>
             IsServiceMode
                 ? []
@@ -101,12 +111,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     ]
                     :
                     [
-                        new("Annual Stock Purchases", Money(TotalStockValue), "Projected purchases/additions over 12 months", "bi bi-boxes", "kpi-blue"),
-                        new("Average Monthly Purchases", Money(AverageMonthlyStock), "Average monthly purchases", "bi bi-calendar3", "kpi-teal"),
+                        new(UsesClosingStockProfile ? "Annual Derived Purchases" : "Annual Stock Purchases", Money(AnnualPurchases), UsesClosingStockProfile ? "Cost of sales plus the change in stock" : "Projected purchases/additions over 12 months", "bi bi-boxes", "kpi-blue"),
+                        new("Average Stock", Money(AverageStockValue), "Average of opening and 12 month-end balances", "bi bi-calendar3", "kpi-teal"),
                         new("Opening Stock", Money(OpeningStock), "Sum of active stock item opening balances", "bi bi-box-arrow-in-right", "kpi-purple"),
-                        new("Closing Stock", ProjectedClosingStock.HasValue ? Money(ProjectedClosingStock.Value) : "Unavailable", "Calculated Month 12 inventory", "bi bi-box-arrow-right", "kpi-slate"),
-                        new("Peak Purchase Month", Money(PeakStock), $"Highest purchases in Month {PeakStockMonth}", "bi bi-graph-up", "kpi-cyan"),
-                        new("VAT-inclusive Purchases", Money(VatInclusiveStock), "Purchases marked VAT inclusive", "bi bi-percent", "kpi-red")
+                        new("Closing Stock", ProjectedClosingStock.HasValue ? Money(ProjectedClosingStock.Value) : "Unavailable", UsesClosingStockProfile ? "Month 12 stock profile total" : AssessmentModel?.GetClosingStock(12).HasValue == true ? "Month 12 user-entered estimate" : "Calculated Month 12 inventory", "bi bi-box-arrow-right", "kpi-slate"),
+                        new("Stock Turnover", $"{StockTurnover:N2}x", "Annual cost of sales / average stock", "bi bi-arrow-repeat", "kpi-cyan"),
+                        new("Stock Days", $"{StockDays:N1} days", "365 / stock turnover", "bi bi-calendar2-week", "kpi-purple"),
+                        new("VAT-inclusive Purchases", Money(AnnualPurchasesVatInclusive), UsesClosingStockProfile ? "Derived purchases including VAT" : "Purchases marked VAT inclusive", "bi bi-percent", "kpi-red")
                     ];
 
         #endregion
@@ -127,15 +138,16 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     return;
                 }
 
-                var assessment = await AssessmentRepository.GetByIdAsync(AssessmentId);
-                if (assessment is null)
+                AssessmentModel = await AssessmentRepository.GetByIdAsync(AssessmentId);
+                if (AssessmentModel is null)
                 {
                     LoadErrorMessage = "The selected assessment could not be found.";
                     return;
                 }
 
-                AssessmentModeId = assessment.AssessmentModeId is >= 1 and <= 4
-                    ? assessment.AssessmentModeId
+                MonthlyClosingStockValues = AssessmentModel.MonthlyClosingStockValues;
+                AssessmentModeId = AssessmentModel.AssessmentModeId is >= 1 and <= 4
+                    ? AssessmentModel.AssessmentModeId
                     : (int)AssessmentMode.Trading;
 
                 Logger?.LogInformation(
@@ -188,12 +200,13 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 CategoryDataList = (await categoriesTask).ToList();
                 try
                 {
-                    ProjectedClosingStock =
-                        (await ProjectionService.CalculateAsync(AssessmentId)).Summary.ClosingStock;
+                    CashflowProjection = await ProjectionService.CalculateAsync(AssessmentId);
+                    ProjectedClosingStock = CashflowProjection.Summary.ClosingStock;
                 }
                 catch (Exception exception)
                 {
                     ProjectedClosingStock = null;
+                    CashflowProjection = null;
                     Logger?.LogWarning(
                         exception,
                         "Could not calculate closing stock for assessment {AssessmentId}",
@@ -241,6 +254,7 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                 OpeningBalance = item.OpeningBalance,
                 blIncludeVAT = item.blIncludeVAT,
                 MonthlyValues = item.MonthlyValues,
+                MonthlyClosingStockValues = item.MonthlyClosingStockValues,
                 StandardUnitCost = item.StandardUnitCost,
                 MonthlyProductionUnits = item.MonthlyProductionUnits
             }).ToList();
@@ -249,25 +263,51 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
         private decimal GetMonthValue(UnifiedStockViewModel item, int month) =>
             IsManufacturingMode
                 ? item.MonthlyProductionUnits[month - 1]
-                : item.MonthlyValues[month - 1];
+                : UsesClosingStockProfile
+                    ? GetClosingStockValue(item.OpeningBalance, item.MonthlyClosingStockValues, month)
+                    : item.MonthlyValues[month - 1];
 
-        private decimal GetTotalForMonth(int month) => FilteredStockList.Sum(x =>
-            IsManufacturingMode
-                ? x.MonthlyProductionUnits[month - 1]
-                : x.MonthlyValues[month - 1]);
+        private decimal GetTotalForMonth(int month) =>
+            FilteredStockList.Sum(item => GetMonthValue(item, month));
+
+        private decimal? GetDerivedPurchases(int month) =>
+            CashflowProjection?.Months.FirstOrDefault(projectionMonth =>
+                projectionMonth.MonthNumber == month)?.StockPurchases;
 
         private decimal GetGrandTotalStockValue() => FilteredStockList.Sum(x =>
             IsManufacturingMode
                 ? x.MonthlyProductionUnits.Sum()
-                : x.MonthlyValues.Sum());
+                : UsesClosingStockProfile
+                    ? GetMonthValue(x, 12)
+                    : x.MonthlyValues.Sum());
 
-        private static decimal GetStockMonthValue(AssessmentStock item, int month) => month switch
+        private decimal GetStockMonthValue(AssessmentStock item, int month) =>
+            UsesClosingStockProfile
+                ? GetClosingStockValue(item, month)
+                : month switch
         {
             1 => item.Month_1, 2 => item.Month_2, 3 => item.Month_3, 4 => item.Month_4,
             5 => item.Month_5, 6 => item.Month_6, 7 => item.Month_7, 8 => item.Month_8,
             9 => item.Month_9, 10 => item.Month_10, 11 => item.Month_11, 12 => item.Month_12,
             _ => 0m
         };
+
+        private static decimal GetClosingStockValue(AssessmentStock item, int month) =>
+            GetClosingStockValue(item.OpeningBalance, item.MonthlyClosingStockValues, month);
+
+        private static decimal GetClosingStockValue(
+            decimal openingBalance,
+            decimal?[] monthlyClosingStockValues,
+            int month)
+        {
+            var closingBalance = openingBalance;
+            for (var index = 0; index < month && index < monthlyClosingStockValues.Length; index++)
+            {
+                closingBalance = monthlyClosingStockValues[index] ?? closingBalance;
+            }
+
+            return closingBalance;
+        }
 
         private string Money(decimal value) =>
             DisplayUtility.FormatCurrency(value, sessionService?.CurrencyCode, sessionService?.CultureName);
@@ -315,10 +355,52 @@ namespace ViabilityIQ.Web.Components.Pages_Assessments
                     Logger?.LogInformation("Triggering cashflow recalculation after stock save for assessment {AssessmentId}", AssessmentId);
                     await projectionStateManager!.InvalidateDataAsync("stock", AssessmentId, AssessmentId);
                 }
+
             }
             else
             {
                 _Toast!.ShowError(result.Message, sessionService!.AppTitle);
+            }
+        }
+
+        private async Task SaveClosingStockEstimatesAsync()
+        {
+            if (AssessmentModel is null || IsSavingClosingStock)
+            {
+                return;
+            }
+
+            if (MonthlyClosingStockValues.Any(value => value < 0m))
+            {
+                _Toast?.ShowError("Closing stock values cannot be negative.", sessionService?.AppTitle ?? "Stock");
+                return;
+            }
+
+            try
+            {
+                IsSavingClosingStock = true;
+                AssessmentModel.MonthlyClosingStockValues = MonthlyClosingStockValues;
+                AssessmentModel.ModifiedDate = DateTime.UtcNow;
+                AssessmentModel.ModifiedBy = sessionService?.UserId ?? 0;
+                var saved = await AssessmentRepository.SaveAsync(AssessmentModel);
+                if (!saved)
+                {
+                    _Toast?.ShowError("The monthly closing stock estimates could not be saved.", sessionService?.AppTitle ?? "Stock");
+                    return;
+                }
+
+                await projectionStateManager!.InvalidateDataAsync("stock", AssessmentId, AssessmentId);
+                _Toast?.ShowSuccess("Monthly closing stock estimates saved.", sessionService?.AppTitle ?? "Stock");
+                await LoadStockData();
+            }
+            catch (Exception exception)
+            {
+                Logger?.LogError(exception, "Could not save closing stock estimates for assessment {AssessmentId}", AssessmentId);
+                _Toast?.ShowError($"Could not save closing stock estimates: {exception.Message}", sessionService?.AppTitle ?? "Stock");
+            }
+            finally
+            {
+                IsSavingClosingStock = false;
             }
         }
 
